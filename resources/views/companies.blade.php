@@ -38,6 +38,49 @@
             { id:3, name:'Goodness Uganda Ltd', country:'Uganda', revenue:450000, status:'Inactive' }
         ];
         function formatTZS(n){ return 'TZS ' + n.toLocaleString(); }
+        function openAddCompanyModal() {
+            const body = `
+                <div class="space-y-4">
+                    <label class="block text-sm text-slate-600">Company Name<input id="company_name" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    <label class="block text-sm text-slate-600">Country<input id="company_country" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="block text-sm text-slate-600">Revenue (TZS)<input id="company_revenue" type="number" min="0" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                        <label class="block text-sm text-slate-600">Status
+                            <select id="company_status" class="mt-1 block w-full border border-slate-200 rounded p-2">
+                                <option>Active</option>
+                                <option>Inactive</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            window.openModal('Add Company', body, () => {
+                const name = document.getElementById('company_name').value.trim();
+                if (!name) {
+                    window.showAlert('error', 'Company name is required');
+                    return false;
+                }
+
+                const country = document.getElementById('company_country').value.trim();
+                const revenue = Number(document.getElementById('company_revenue').value) || 0;
+                const status = document.getElementById('company_status').value;
+
+                companiesData.push({
+                    id: Date.now(),
+                    name,
+                    country,
+                    revenue,
+                    status
+                });
+
+                renderCompanies(document.getElementById('search').value);
+                window.closeModal();
+                window.showAlert('success', 'Company added');
+                return true;
+            });
+        }
+
         function renderCompanies(filter=''){
             const tbody = document.getElementById('companiesTbody');
             tbody.innerHTML = '';
@@ -49,6 +92,7 @@
             });
         }
         document.getElementById('search').addEventListener('input', e => renderCompanies(e.target.value));
+        document.getElementById('addCompanyBtn').addEventListener('click', openAddCompanyModal);
         renderCompanies();
     </script>
 
