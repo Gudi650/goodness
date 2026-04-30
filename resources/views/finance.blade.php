@@ -31,12 +31,9 @@
         <div class="min-h-screen md:flex">
             <aside class="hidden md:block w-64 bg-white border-r border-slate-200 p-6">
                 <div class="text-sm font-semibold">Goodness Group</div>
-                <nav class="mt-6 space-y-1"><a href="/dashboard" class="block px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-md">Dashboard</a><a href="/finance" class="block px-3 py-2 text-sm bg-green-50 text-green-700 rounded-l-md">Finance</a></nav>
-            </aside>
-
-            <main class="flex-1 p-6">
-                <div class="mb-6">
-                    <h1 class="text-2xl font-semibold">Finance</h1>
+      @include('components.topbar')
+      @include('components.sidebar')
+      <main class="flex-1 p-6">
                     <p class="text-sm text-slate-500">Invoices, expenses and payments</p>
                 </div>
 
@@ -84,6 +81,9 @@
             // init
             document.getElementById('tabInvoices').click();
         </script>
+  @include('components.modal')
+  @include('components.alert')
+  @include('components.confirm')
     </body>
     </html>
                             <p class="font-medium text-sm">John Doe</p>

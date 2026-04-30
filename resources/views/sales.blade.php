@@ -51,37 +51,9 @@
       </button>
     </div>
   </div>
+  @include('components.topbar')
 
-  <div id="sidebar" class="fixed left-0 top-16 w-64 h-screen bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 z-40 lg:translate-x-0 -translate-x-full lg:top-0 overflow-y-auto">
-    <div class="p-4 border-b border-slate-200">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-brand-600 rounded-md flex items-center justify-center text-white font-bold text-sm font-display">GG</div>
-        <div>
-          <p class="font-semibold text-slate-800 font-display text-sm">Goodness Group</p>
-          <p class="text-xs text-slate-500">Enterprise</p>
-        </div>
-      </div>
-    </div>
-    <nav class="flex-1 px-2 py-4 space-y-1">
-      <a href="/dashboard" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Dashboard</a>
-      <a href="/companies" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Companies</a>
-      <a href="/users" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Users</a>
-      <a href="/finance" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Finance</a>
-      <a href="/hrm" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">HRM</a>
-      <a href="/sales" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium bg-green-50 text-green-700 border-l-4 border-green-600 rounded-r-md">Sales</a>
-      <a href="/inventory" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Inventory</a>
-      <a href="/reports" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Reports</a>
-    </nav>
-    <div class="p-4 border-t border-slate-200">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center text-white font-bold text-xs font-display">JD</div>
-        <div>
-          <p class="text-sm font-medium text-slate-800">John Doe</p>
-          <p class="text-xs text-slate-500">Administrator</p>
-        </div>
-      </div>
-    </div>
-  </div>
+  @include('components.sidebar')
 
   <main class="ml-0 lg:ml-64 pt-16 p-6">
     <div class="bg-white border-b border-slate-200 -mx-6 -mt-6 px-6 mb-6">
@@ -528,5 +500,8 @@
         renderOrders();
         renderContracts();
     </script>
+@include('components.modal')
+@include('components.alert')
+@include('components.confirm')
 </body>
 </html>

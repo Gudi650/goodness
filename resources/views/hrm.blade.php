@@ -51,6 +51,7 @@
       </button>
     </div>
   </div>
+  @include('components.topbar')
 
   <div id="sidebar" class="fixed left-0 top-16 w-64 h-screen bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 z-40 lg:translate-x-0 -translate-x-full lg:top-0 overflow-y-auto">
     <div class="p-4 border-b border-slate-200">
@@ -82,6 +83,7 @@
       </div>
     </div>
   </div>
+  @include('components.sidebar')
 
   <main class="ml-0 lg:ml-64 pt-16 p-6">
     <div class="bg-white border-b border-slate-200 -mx-6 -mt-6 px-6 mb-6">
@@ -702,5 +704,8 @@
         renderLeave();
         renderPayroll();
     </script>
+@include('components.modal')
+@include('components.alert')
+@include('components.confirm')
 </body>
 </html>

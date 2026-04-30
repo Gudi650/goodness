@@ -20,7 +20,9 @@
     </aside>
 
     <main class="flex-1 p-6">
-      <div class="mb-6"><h1 class="text-2xl font-semibold">Reports & Analytics</h1><p class="text-sm text-slate-500">Generate and analyze comprehensive business reports</p></div>
+    @include('components.topbar')
+    @include('components.sidebar')
+    <main class="ml-0 lg:ml-64 pt-16 p-6">
 
       <div class="bg-white border border-slate-200 rounded-lg p-4 mb-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
@@ -79,6 +81,9 @@
     </main>
   </div>
 
+  @include('components.modal')
+  @include('components.alert')
+  @include('components.confirm')
   <script>
     const reportData = {
       financial: { title:'Financial Summary Report', headers:['Company','Total Revenue','Total Expenses','Net Profit','Profit Margin'], rows:[ {company:'Goodness Tanzania Ltd',revenue:'TZS 5,250,000',expenses:'TZS 1,200,000',profit:'TZS 4,050,000',margin:'77.1%'}, {company:'Goodness Kenya Ltd',revenue:'TZS 3,850,000',expenses:'TZS 850,000',profit:'TZS 3,000,000',margin:'77.9%'}, {company:'Goodness Uganda Ltd',revenue:'TZS 2,450,000',expenses:'TZS 550,000',profit:'TZS 1,900,000',margin:'77.6%'} ] },

@@ -66,12 +66,9 @@
                                         </thead>
                                         <tbody id="usersTbody" class="bg-white divide-y divide-slate-100"></tbody>
                                     </table>
-                                </div>
-
-                                <!-- Modal -->
-                                <div id="userModal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4">
-                                    <div class="bg-white border border-slate-200 rounded-lg p-6 w-full max-w-lg">
-                                        <h3 class="text-lg font-semibold mb-4">Add User</h3>
+                                  @include('components.topbar')
+                                  @include('components.sidebar')
+                                  <main class="ml-0 lg:ml-64 pt-16 p-6">
                                         <div class="space-y-3">
                                             <input id="userName" placeholder="Full name" class="w-full px-4 py-2 border border-slate-200 rounded-md" />
                                             <input id="userEmail" placeholder="Email" class="w-full px-4 py-2 border border-slate-200 rounded-md" />
@@ -109,6 +106,9 @@
                         Add User
                     </button>
                 </div>
+                                  @include('components.modal')
+                                  @include('components.alert')
+                                  @include('components.confirm')
 
                 <!-- Search Bar -->
                 <div class="bg-surface border border-slate-700 rounded-md p-4 mb-6">

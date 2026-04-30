@@ -21,7 +21,9 @@
 
     <main class="flex-1 p-6">
       <div class="mb-6"><h1 class="text-2xl font-semibold">Inventory & Procurement</h1><p class="text-sm text-slate-500">Products, suppliers and purchase orders</p></div>
-
+      @include('components.topbar')
+      @include('components.sidebar')
+      <main class="ml-0 lg:ml-64 pt-16 p-6">
       <div class="bg-white border border-slate-200 rounded-lg p-4">
         <div class="flex gap-2 mb-4"><button id="tabProducts" class="px-3 py-2 bg-green-50 text-green-700 rounded-md">Products</button><button id="tabSuppliers" class="px-3 py-2 text-slate-600 rounded-md">Suppliers</button><button id="tabPO" class="px-3 py-2 text-slate-600 rounded-md">Purchase Orders</button></div>
         <div id="invContent"></div>
@@ -56,3 +58,6 @@
   </script>
 </body>
 </html>
+    @include('components.modal')
+    @include('components.alert')
+    @include('components.confirm')

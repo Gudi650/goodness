@@ -111,13 +111,9 @@
                                 function saveCompany(){ const name = document.getElementById('companyName').value.trim(); const country = document.getElementById('companyCountry').value.trim(); const revenue = Number(document.getElementById('companyRevenue').value)||0; if(!name||!country){alert('Please fill required fields'); return}; companiesData.push({ id:companiesData.length+1, name, country, revenue, status:'Active' }); renderCompanies(); closeCompanyModal(); }
 
                                 renderCompanies();
-                            </script>
-                        </body>
-                        </html>
-                                    <th class="text-left py-4 px-6 font-medium">Type</th>
-                                    <th class="text-left py-4 px-6 font-medium">Industry</th>
-                                    <th class="text-center py-4 px-6 font-medium">Status</th>
-                                    <th class="text-center py-4 px-6 font-medium">Actions</th>
+                                        @include('components.topbar')
+                                        @include('components.sidebar')
+                                        <main class="ml-0 lg:ml-64 pt-16 p-6">
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
@@ -139,6 +135,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
+                                        @include('components.modal')
+                                        @include('components.alert')
+                                        @include('components.confirm')
             </div>
 
             <form id="addCompanyForm" onsubmit="handleAddCompany(event)" class="space-y-4">

@@ -13,51 +13,9 @@
     <style>body{font-family:Inter, sans-serif}h1,h2,nav,button{font-family:Outfit, sans-serif}.mono{font-family:ui-monospace,monospace}</style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-    <div class="flex">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 h-screen fixed bg-white border-r border-slate-200 hidden md:block">
-            <div class="p-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-brand-600"></div>
-                    <div>
-                        <div class="text-sm font-semibold text-slate-800">Goodness Group</div>
-                        <div class="text-xs text-slate-500">Enterprise</div>
-                    </div>
-                </div>
-            </div>
-            <nav class="px-3 py-4 space-y-1">
-                <a href="/dashboard" class="block px-4 py-2 rounded-l-md text-sm font-medium bg-green-50 text-green-700 border-l-4 border-green-600">Dashboard</a>
-                <a href="/companies" class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Companies</a>
-                <a href="/users" class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Users</a>
-                <a href="/finance" class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Finance</a>
-                <a href="/hrm" class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">HRM</a>
-                <a href="/sales" class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Sales</a>
-                <a href="/inventory" class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Inventory</a>
-                <a href="/reports" class="block px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Reports</a>
-            </nav>
-        </aside>
-
-        <!-- Main area -->
-        <div class="flex-1 ml-0 md:ml-64">
-            <!-- Header -->
-            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
-                <div class="flex items-center gap-4">
-                    <button id="mobileToggle" class="md:hidden p-2" aria-label="Toggle sidebar">
-                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    </button>
-                    <h1 class="text-2xl font-semibold text-slate-800">Dashboard</h1>
-                </div>
-                <div class="flex items-center gap-4 text-sm">
-                    <select class="border border-slate-200 rounded-md px-3 py-1 text-slate-700">
-                        <option>Goodness Group HQ</option>
-                    </select>
-                    <div class="relative">
-                        <button class="p-2 text-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L3 17h5"/></svg></button>
-                        <span class="absolute top-0 right-0 -mt-1 -mr-1 inline-block w-2 h-2 bg-green-600 rounded-full"></span>
-                    </div>
-                    <div class="text-sm text-slate-700">John Doe <span class="ml-2 px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-xs">Admin</span></div>
-                </div>
-            </header>
+    @include('components.topbar')
+    @include('components.sidebar')
+    <div class="flex-1 ml-0 lg:ml-64 pt-16 p-6">
 
             <main class="p-6 bg-slate-50 min-h-screen">
                 <!-- Stats -->
@@ -150,5 +108,8 @@
         // Logout placeholder
         function logout(){ if(confirm('Logout?')) location.href='/login' }
     </script>
+    @include('components.modal')
+    @include('components.alert')
+    @include('components.confirm')
 </body>
 </html>
