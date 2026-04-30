@@ -334,15 +334,70 @@
         }
 
         function openAddCustomerModal() {
-            alert('Add Customer modal');
+            const body = `
+                <div class="space-y-4">
+                    <label class="block text-sm text-slate-600">Name<input id="customer_name" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    <label class="block text-sm text-slate-600">Company<input id="customer_company" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="block text-sm text-slate-600">Phone<input id="customer_phone" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                        <label class="block text-sm text-slate-600">Email<input id="customer_email" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    </div>
+                </div>
+            `;
+            window.openModal('Add Customer', body, () => {
+                const name = document.getElementById('customer_name').value.trim();
+                if (!name) { window.showAlert('error', 'Name is required'); return false; }
+                const company = document.getElementById('customer_company').value.trim();
+                const phone = document.getElementById('customer_phone').value.trim();
+                const email = document.getElementById('customer_email').value.trim();
+                customers.push({ id: Date.now(), name, company, phone, email, assignedTo: 'Unassigned', status: 'Active' });
+                renderCustomers();
+                window.closeModal();
+                window.showAlert('success', 'Customer added');
+                return true;
+            });
         }
 
         function openAddOrderModal() {
-            alert('Add Order modal');
+            const body = `
+                <div class="space-y-4">
+                    <label class="block text-sm text-slate-600">Order No.<input id="order_no" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    <label class="block text-sm text-slate-600">Customer<input id="order_customer" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    <label class="block text-sm text-slate-600">Total<input id="order_total" type="number" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                </div>
+            `;
+            window.openModal('Add Order', body, () => {
+                const orderNo = document.getElementById('order_no').value.trim();
+                if (!orderNo) { window.showAlert('error', 'Order number is required'); return false; }
+                const customer = document.getElementById('order_customer').value.trim();
+                const total = Number(document.getElementById('order_total').value) || 0;
+                orders.push({ id: Date.now(), orderNo, customer, description: '', total, date: new Date().toISOString().slice(0,10), status: 'Pending' });
+                renderOrders();
+                window.closeModal();
+                window.showAlert('success', 'Order added');
+                return true;
+            });
         }
 
         function openAddContractModal() {
-            alert('Add Contract modal');
+            const body = `
+                <div class="space-y-4">
+                    <label class="block text-sm text-slate-600">Contract No.<input id="contract_no" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    <label class="block text-sm text-slate-600">Client<input id="contract_client" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                    <label class="block text-sm text-slate-600">Value<input id="contract_value" type="number" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
+                </div>
+            `;
+            window.openModal('Add Contract', body, () => {
+                const contractNo = document.getElementById('contract_no').value.trim();
+                if (!contractNo) { window.showAlert('error', 'Contract number is required'); return false; }
+                const client = document.getElementById('contract_client').value.trim();
+                const value = Number(document.getElementById('contract_value').value) || 0;
+                contracts.push({ id: Date.now(), contractNo, client, value, startDate: new Date().toISOString().slice(0,10), endDate: '', status: 'Active' });
+                renderContracts();
+                window.closeModal();
+                window.showAlert('success', 'Contract added');
+                return true;
+            });
         }
 
         function toggleSidebar() {
