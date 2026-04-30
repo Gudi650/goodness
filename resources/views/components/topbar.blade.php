@@ -1,4 +1,4 @@
-<div id="topbar" class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-6">
+<div id="topbar" class="fixed top-0 left-0 right-0 lg:left-64 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-6">
   <!-- Left Side -->
   <div class="flex items-center gap-4">
     <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-slate-100 rounded-md text-slate-600">
