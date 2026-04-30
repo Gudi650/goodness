@@ -1,67 +1,76 @@
-<div id="topbar" class="fixed top-0 left-0 right-0 lg:left-64 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-6">
-  <!-- Left Side -->
-  <div class="flex items-center gap-4">
-    <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-slate-100 rounded-md text-slate-600">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
-    <h1 id="pageTitle" class="text-base font-semibold text-slate-800 font-display">Dashboard</h1>
-  </div>
-
-  <!-- Right Side -->
-  <div class="flex items-center gap-4">
-    <!-- Company Selector -->
-    <select class="border border-slate-300 rounded-md text-sm px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-green-500 focus:outline-none">
-      <option>Goodness Tanzania Ltd</option>
-      <option>Goodness Kenya Ltd</option>
-      <option>Goodness Uganda Ltd</option>
-    </select>
-
-    <!-- Notification Bell -->
-    <div class="relative">
-      <button class="p-2 hover:bg-slate-100 rounded-md text-slate-500 hover:text-slate-800 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0018 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-      </button>
-      <span class="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
+<div id="topbar"
+    class="fixed top-0 left-0 right-0 lg:left-64 h-16 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-6">
+    <!-- Left Side -->
+    <div class="flex items-center gap-4">
+        <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-slate-100 rounded-md text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <h1 id="pageTitle" class="text-base font-semibold text-slate-800 font-display">Dashboard</h1>
     </div>
 
-    <!-- User Info -->
-    <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
-      <div class="text-right hidden sm:block">
-        <p class="text-sm font-medium text-slate-700">John Doe</p>
-        <p class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">Administrator</p>
-      </div>
+    <!-- Right Side -->
+    <div class="flex items-center gap-4">
+        <!-- Company Selector -->
+        <select
+            class="border border-slate-300 rounded-md text-sm px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-green-500 focus:outline-none">
+            <option>Goodness Tanzania Ltd</option>
+            <option>Goodness Kenya Ltd</option>
+            <option>Goodness Uganda Ltd</option>
+        </select>
 
-      <!-- Logout Button -->
-      <button onclick="logout()" class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-red-600 transition-colors pl-4 border-l border-slate-200">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-        <span class="hidden sm:inline">Logout</span>
-      </button>
+        <!-- Notification Bell -->
+        <div class="relative">
+            <button class="p-2 hover:bg-slate-100 rounded-md text-slate-500 hover:text-slate-800 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0018 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            </button>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
+        </div>
+
+        <!-- User Info -->
+        <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
+            <div class="text-right hidden sm:block">
+                <p class="text-sm font-medium text-slate-700">John Doe</p>
+                <p class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">Administrator</p>
+            </div>
+
+            <!-- Logout Button -->
+            <button onclick="logout()"
+                class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-red-600 transition-colors pl-4 border-l border-slate-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span class="hidden sm:inline">Logout</span>
+            </button>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-  function updatePageTitle() {
-    const titles = {
-      '/dashboard': 'Dashboard',
-      '/companies': 'Companies',
-      '/users': 'Users',
-      '/finance': 'Finance',
-      '/hrm': 'Human Resources',
-      '/sales': 'Sales & CRM',
-      '/inventory': 'Inventory',
-      '/reports': 'Reports & Analytics',
-      '/login': 'Login'
-    };
-    const path = window.location.pathname;
-    document.getElementById('pageTitle').textContent = titles[path] || 'Dashboard';
-  }
-
-  function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-      window.location.href = '/login';
+    function updatePageTitle() {
+        const titles = {
+            '/dashboard': 'Dashboard',
+            '/companies': 'Companies',
+            '/users': 'Users',
+            '/finance': 'Finance',
+            '/hrm': 'Human Resources',
+            '/sales': 'Sales & CRM',
+            '/inventory': 'Inventory',
+            '/reports': 'Reports & Analytics',
+            '/login': 'Login'
+        };
+        const path = window.location.pathname;
+        document.getElementById('pageTitle').textContent = titles[path] || 'Dashboard';
     }
-  }
 
-  document.addEventListener('DOMContentLoaded', updatePageTitle);
+    function logout() {
+        window.location.href = '/login';
+    }
+
+    document.addEventListener('DOMContentLoaded', updatePageTitle);
 </script>
