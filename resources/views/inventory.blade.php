@@ -49,19 +49,19 @@
     @include('components.topbar')
     @include('components.sidebar')
 
-    <main class="ml-0 lg:ml-64 pt-20 p-6 min-h-screen">
+    <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6 min-h-screen">
         <div class="mb-6">
             <h1 class="text-2xl font-semibold">Inventory & Procurement</h1>
             <p class="text-sm text-slate-500">Products, suppliers and purchase orders</p>
         </div>
         <div class="bg-white border border-slate-200 rounded-lg p-4">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex gap-2">
+            <div class="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex flex-wrap gap-2">
                     <button id="tabProducts" class="px-3 py-2 text-green-700 border-b-2 border-brand-600">Products</button>
                     <button id="tabSuppliers" class="px-3 py-2 text-slate-600">Suppliers</button>
                     <button id="tabPO" class="px-3 py-2 text-slate-600">Purchase Orders</button>
                 </div>
-                <div id="actionButton"></div>
+                <div id="actionButton" class="w-full lg:w-auto"></div>
             </div>
             <div id="invContent"></div>
         </div>
@@ -98,7 +98,7 @@
         }
 
         function renderButton(label, onclick) {
-            return `<button onclick="${onclick}" class="px-4 py-2 bg-brand-600 text-white rounded-md hover:bg-brand-700">${label}</button>`;
+            return `<button onclick="${onclick}" class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">${label}</button>`;
         }
 
         function openAddProductModal() {

@@ -16,11 +16,11 @@
     @include('components.topbar')
     @include('components.sidebar')
 
-    <main class="ml-0 lg:ml-64 pt-20 p-6 min-h-screen">
+    <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6 min-h-screen">
         <div class="mb-6"><h1 class="text-2xl font-semibold">Companies</h1><p class="text-sm text-slate-500">Manage your subsidiaries and branches</p></div>
-        <div class="flex items-center gap-3 mb-4">
-            <input id="search" type="text" placeholder="Search companies..." class="flex-1 px-4 py-2 border border-slate-200 rounded-md bg-white" />
-            <button id="addCompanyBtn" class="px-4 py-2 bg-brand-600 text-white rounded-md">Add Company</button>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+            <input id="search" type="text" placeholder="Search companies..." class="w-full sm:flex-1 px-4 py-2 border border-slate-200 rounded-md bg-white" />
+            <button id="addCompanyBtn" class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add Company</button>
         </div>
 
         <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto">

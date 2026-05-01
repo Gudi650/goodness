@@ -53,7 +53,7 @@
     @include('components.topbar')
     @include('components.sidebar')
 
-    <main class="ml-0 lg:ml-64 pt-20 p-6 min-h-screen">
+    <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6 min-h-screen">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-green-600">
                 <div class="text-sm text-slate-500">Total Companies</div>

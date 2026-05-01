@@ -1,4 +1,6 @@
-<div id="sidebar" class="fixed left-0 top-16 w-64 h-screen bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 z-40 lg:translate-x-0 -translate-x-full lg:top-0">
+<div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+<div id="sidebar" class="fixed left-0 top-16 lg:top-0 w-64 h-screen bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 z-40 lg:translate-x-0 -translate-x-full overflow-y-auto">
   <!-- Logo Section -->
   <div class="p-4 border-b border-slate-200">
     <div class="flex items-center gap-3">
@@ -83,7 +85,15 @@
 
   function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('-translate-x-full');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const isHidden = sidebar.classList.toggle('-translate-x-full');
+    if (backdrop) {
+      if (isHidden) {
+        backdrop.classList.add('hidden');
+      } else {
+        backdrop.classList.remove('hidden');
+      }
+    }
   }
 
   document.addEventListener('DOMContentLoaded', setActiveNavLink);

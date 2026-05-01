@@ -54,7 +54,7 @@
     @include('components.topbar')
     @include('components.sidebar')
 
-    <main class="ml-0 lg:ml-64 pt-20 p-6">
+    <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6">
         <div class="bg-white border-b border-slate-200 -mx-6 px-6 mb-6">
             <div class="flex gap-8">
                 <button onclick="switchTab('customers', this)"
@@ -67,12 +67,12 @@
         </div>
 
         <div id="tab-customers" class="tab-content">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col gap-3 mb-6 lg:flex-row lg:items-center lg:justify-between">
                 <h2 class="text-lg font-semibold font-display">Customers</h2>
-                <div class="flex items-center gap-3">
-                    <input id="searchCustomers" oninput="renderCustomers(this.value)" placeholder="Search customers..." class="px-3 py-2 border border-slate-200 rounded-md text-sm" />
+                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto lg:items-center">
+                    <input id="searchCustomers" oninput="renderCustomers(this.value)" placeholder="Search customers..." class="w-full sm:flex-1 lg:w-64 px-3 py-2 border border-slate-200 rounded-md text-sm" />
                     <button onclick="openAddCustomerModal()"
-                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                        class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
                         Customer</button>
                 </div>
             </div>
@@ -108,12 +108,12 @@
         </div>
 
         <div id="tab-orders" class="tab-content hidden">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col gap-3 mb-6 lg:flex-row lg:items-center lg:justify-between">
                 <h2 class="text-lg font-semibold font-display">Orders</h2>
-                <div class="flex items-center gap-3">
-                    <input id="searchOrders" oninput="renderOrders(this.value)" placeholder="Search orders..." class="px-3 py-2 border border-slate-200 rounded-md text-sm" />
+                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto lg:items-center">
+                    <input id="searchOrders" oninput="renderOrders(this.value)" placeholder="Search orders..." class="w-full sm:flex-1 lg:w-64 px-3 py-2 border border-slate-200 rounded-md text-sm" />
                     <button onclick="openAddOrderModal()"
-                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                        class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
                         Order</button>
                 </div>
             </div>
@@ -149,12 +149,12 @@
         </div>
         
         <div id="tab-contracts" class="tab-content hidden">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col gap-3 mb-6 lg:flex-row lg:items-center lg:justify-between">
                 <h2 class="text-lg font-semibold font-display">Contracts</h2>
-                <div class="flex items-center gap-3">
-                    <input id="searchContracts" oninput="renderContracts(this.value)" placeholder="Search contracts..." class="px-3 py-2 border border-slate-200 rounded-md text-sm" />
+                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto lg:items-center">
+                    <input id="searchContracts" oninput="renderContracts(this.value)" placeholder="Search contracts..." class="w-full sm:flex-1 lg:w-64 px-3 py-2 border border-slate-200 rounded-md text-sm" />
                     <button onclick="openAddContractModal()"
-                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                        class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
                         Contract</button>
                 </div>
             </div>

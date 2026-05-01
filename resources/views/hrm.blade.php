@@ -69,10 +69,10 @@
         </div>
 
         <div id="tab-employees" class="tab-content">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                 <h2 class="text-lg font-semibold font-display">Employees</h2>
                 <button onclick="openAddEmployeeModal()"
-                    class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                    class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
                     Employee</button>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -144,10 +144,10 @@
         </div>
 
         <div id="tab-leave" class="tab-content hidden">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                 <h2 class="text-lg font-semibold font-display">Leave Requests</h2>
                 <button onclick="openAddLeaveModal()"
-                    class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                    class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
                     Leave</button>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
