@@ -48,8 +48,8 @@
     </a>
   </nav>
 
-  <!-- User Section & Logout -->
-  <div class="p-4 border-t border-slate-200">
+  <!-- User Section & Logout (sticky and visible) -->
+  <div class="p-4 border-t border-slate-200 bg-white sticky bottom-0">
     <div class="flex items-center gap-3 mb-4">
       <div class="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center text-white font-bold text-xs font-display">JD</div>
       <div>
@@ -57,7 +57,7 @@
         <p class="text-xs text-slate-500">Administrator</p>
       </div>
     </div>
-    <button onclick="logout()" class="w-full text-sm text-slate-500 hover:text-red-600 flex items-center gap-2 px-3 py-2 rounded-md hover:bg-slate-50 transition-colors">
+    <button onclick="logout()" class="w-full text-sm text-red-700 bg-red-50 flex items-center gap-2 px-3 py-2 rounded-md hover:bg-red-100 transition-colors border-t border-slate-100">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
       Logout
     </button>
