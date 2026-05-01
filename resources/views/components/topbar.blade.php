@@ -12,9 +12,9 @@
 
     <!-- Right Side -->
     <div class="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-        <!-- Company Selector -->
+        <!-- Company Selector (visible on all screens) -->
         <select
-            class="hidden md:block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-green-500 focus:outline-none max-w-xs">
+            class="block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-green-500 focus:outline-none max-w-xs truncate">
             <option>Goodness Tanzania Ltd</option>
             <option>Goodness Kenya Ltd</option>
             <option>Goodness Uganda Ltd</option>
