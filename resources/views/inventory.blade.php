@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -57,9 +57,9 @@
         <div class="bg-white border border-slate-200 rounded-lg p-4">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex gap-2">
-                    <button id="tabProducts" class="px-3 py-2 bg-green-50 text-green-700 rounded-md">Products</button>
-                    <button id="tabSuppliers" class="px-3 py-2 text-slate-600 rounded-md">Suppliers</button>
-                    <button id="tabPO" class="px-3 py-2 text-slate-600 rounded-md">Purchase Orders</button>
+                    <button id="tabProducts" class="px-3 py-2 text-green-700 border-b-2 border-brand-600">Products</button>
+                    <button id="tabSuppliers" class="px-3 py-2 text-slate-600">Suppliers</button>
+                    <button id="tabPO" class="px-3 py-2 text-slate-600">Purchase Orders</button>
                 </div>
                 <div id="actionButton"></div>
             </div>
@@ -213,9 +213,9 @@
                 if (!el) return;
                 if (id === activeId) {
                     el.classList.remove('text-slate-600');
-                    el.classList.add('bg-green-50', 'text-green-700');
+                    el.classList.add('text-black', 'border-b-2', 'border-brand-600','font-bold');
                 } else {
-                    el.classList.remove('bg-green-50', 'text-green-700');
+                    el.classList.remove('border-b-2', 'border-brand-600','font-bold');
                     el.classList.add('text-slate-600');
                 }
             });
@@ -257,3 +257,5 @@
 </body>
 
 </html>
+
+

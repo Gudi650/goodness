@@ -69,9 +69,12 @@
         <div id="tab-customers" class="tab-content">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-lg font-semibold font-display">Customers</h2>
-                <button onclick="openAddCustomerModal()"
-                    class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
-                    Customer</button>
+                <div class="flex items-center gap-3">
+                    <input id="searchCustomers" oninput="renderCustomers(this.value)" placeholder="Search customers..." class="px-3 py-2 border border-slate-200 rounded-md text-sm" />
+                    <button onclick="openAddCustomerModal()"
+                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                        Customer</button>
+                </div>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -107,9 +110,12 @@
         <div id="tab-orders" class="tab-content hidden">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-lg font-semibold font-display">Orders</h2>
-                <button onclick="openAddOrderModal()"
-                    class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
-                    Order</button>
+                <div class="flex items-center gap-3">
+                    <input id="searchOrders" oninput="renderOrders(this.value)" placeholder="Search orders..." class="px-3 py-2 border border-slate-200 rounded-md text-sm" />
+                    <button onclick="openAddOrderModal()"
+                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                        Order</button>
+                </div>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -141,13 +147,16 @@
                 </div>
             </div>
         </div>
-
+        
         <div id="tab-contracts" class="tab-content hidden">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-lg font-semibold font-display">Contracts</h2>
-                <button onclick="openAddContractModal()"
-                    class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
-                    Contract</button>
+                <div class="flex items-center gap-3">
+                    <input id="searchContracts" oninput="renderContracts(this.value)" placeholder="Search contracts..." class="px-3 py-2 border border-slate-200 rounded-md text-sm" />
+                    <button onclick="openAddContractModal()"
+                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                        Contract</button>
+                </div>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -291,47 +300,53 @@
             if (tab === 'contracts') renderContracts();
         }
 
-        function renderCustomers() {
-            const tbody = document.getElementById('customersTable');
-            tbody.innerHTML = customers.map(c => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-4 py-3 text-sm">${c.name}</td>
-          <td class="px-4 py-3 text-sm">${c.company}</td>
-          <td class="px-4 py-3 text-sm">${c.phone}</td>
-          <td class="px-4 py-3 text-sm">${c.email}</td>
-          <td class="px-4 py-3 text-sm">${c.assignedTo}</td>
-          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${c.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'} text-xs font-medium">${c.status}</span></td>
-        </tr>
-      `).join('');
-        }
+                function renderCustomers(q = '') {
+                        const tbody = document.getElementById('customersTable');
+                        const query = (q || '').trim().toLowerCase();
+                        const data = query ? customers.filter(c => [c.name, c.company, c.phone, c.email, c.assignedTo, c.status].some(v => String(v || '').toLowerCase().includes(query))) : customers;
+                        tbody.innerHTML = data.map(c => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 text-sm">${c.name}</td>
+                    <td class="px-4 py-3 text-sm">${c.company}</td>
+                    <td class="px-4 py-3 text-sm">${c.phone}</td>
+                    <td class="px-4 py-3 text-sm">${c.email}</td>
+                    <td class="px-4 py-3 text-sm">${c.assignedTo}</td>
+                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${c.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'} text-xs font-medium">${c.status}</span></td>
+                </tr>
+            `).join('');
+                }
 
-        function renderOrders() {
-            const tbody = document.getElementById('ordersTable');
-            tbody.innerHTML = orders.map(o => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-4 py-3 text-sm">${o.orderNo}</td>
-          <td class="px-4 py-3 text-sm">${o.customer}</td>
-          <td class="px-4 py-3 text-sm">${o.description}</td>
-          <td class="px-4 py-3 text-sm">TZS ${o.total.toLocaleString()}</td>
-          <td class="px-4 py-3 text-sm">${o.date}</td>
-          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${o.status === 'Completed' ? 'bg-green-50 text-green-700' : o.status === 'In Progress' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'} text-xs font-medium">${o.status}</span></td>
-        </tr>
-      `).join('');
-        }
+                function renderOrders(q = '') {
+                        const tbody = document.getElementById('ordersTable');
+                        const query = (q || '').trim().toLowerCase();
+                        const data = query ? orders.filter(o => [o.orderNo, o.customer, o.description, o.status].some(v => String(v || '').toLowerCase().includes(query))) : orders;
+                        tbody.innerHTML = data.map(o => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 text-sm">${o.orderNo}</td>
+                    <td class="px-4 py-3 text-sm">${o.customer}</td>
+                    <td class="px-4 py-3 text-sm">${o.description}</td>
+                    <td class="px-4 py-3 text-sm">TZS ${o.total.toLocaleString()}</td>
+                    <td class="px-4 py-3 text-sm">${o.date}</td>
+                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${o.status === 'Completed' ? 'bg-green-50 text-green-700' : o.status === 'In Progress' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'} text-xs font-medium">${o.status}</span></td>
+                </tr>
+            `).join('');
+                }
 
-        function renderContracts() {
-            const tbody = document.getElementById('contractsTable');
-            tbody.innerHTML = contracts.map(c => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-4 py-3 text-sm">${c.contractNo}</td>
-          <td class="px-4 py-3 text-sm">${c.client}</td>
-          <td class="px-4 py-3 text-sm">TZS ${c.value.toLocaleString()}</td>
-          <td class="px-4 py-3 text-sm">${c.startDate}</td>
-          <td class="px-4 py-3 text-sm">${c.endDate}</td>
-          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${c.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'} text-xs font-medium">${c.status}</span></td>
-        </tr>
-      `).join('');
-        }
+                function renderContracts(q = '') {
+                        const tbody = document.getElementById('contractsTable');
+                        const query = (q || '').trim().toLowerCase();
+                        const data = query ? contracts.filter(c => [c.contractNo, c.client, c.status].some(v => String(v || '').toLowerCase().includes(query))) : contracts;
+                        tbody.innerHTML = data.map(c => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 text-sm">${c.contractNo}</td>
+                    <td class="px-4 py-3 text-sm">${c.client}</td>
+                    <td class="px-4 py-3 text-sm">TZS ${c.value.toLocaleString()}</td>
+                    <td class="px-4 py-3 text-sm">${c.startDate}</td>
+                    <td class="px-4 py-3 text-sm">${c.endDate}</td>
+                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${c.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'} text-xs font-medium">${c.status}</span></td>
+                </tr>
+            `).join('');
+                }
 
         function openAddCustomerModal() {
             const body = `
