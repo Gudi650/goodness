@@ -52,6 +52,11 @@
                 <div id="loginWarning" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2"></div>
                 <div id="loginSuccess" class="hidden text-sm text-green-600">Signed in — redirecting…</div>
             </div>
+
+            <p class="text-sm text-slate-500 mt-6 text-center">
+                Need an account?
+                <a href="/signup" class="text-brand-700 hover:text-brand-600 font-medium">Create one</a>
+            </p>
         </div>
         <p class="text-center text-sm text-slate-500 mt-4">Goodness Group — Multi-company ERP</p>
     </div>
