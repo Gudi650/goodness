@@ -91,6 +91,9 @@
             }
         ];
 
+        const expenses = [];
+        const payments = [];
+
         function formatTZS(n) {
             return 'TZS ' + n.toLocaleString();
         }
@@ -121,10 +124,184 @@
                     </div>`;
         }
 
-        function renderButton(label) {
-            return `<button class="px-4 py-2 bg-brand-600 text-white rounded-md hover:bg-brand-700">
+        function renderButton(label, onclick) {
+            return `<button onclick="${onclick}" class="px-4 py-2 bg-brand-600 text-white rounded-md hover:bg-brand-700">
                         ${label}
                     </button>`;
+        }
+
+        function openAddInvoiceModal() {
+            const body = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Invoice ID</label>
+                        <input type="text" id="invoiceId" placeholder="INV-003" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Company</label>
+                        <input type="text" id="invoiceCompany" placeholder="Company name" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Amount (TZS)</label>
+                        <input type="number" id="invoiceAmount" placeholder="0" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                        <select id="invoiceStatus" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                            <option value="Paid">Paid</option>
+                            <option value="Unpaid">Unpaid</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            window.openModal('Add Invoice', body, () => {
+                const id = document.getElementById('invoiceId').value.trim();
+                const company = document.getElementById('invoiceCompany').value.trim();
+                const amount = parseFloat(document.getElementById('invoiceAmount').value);
+                const status = document.getElementById('invoiceStatus').value;
+
+                if (!id) { window.showAlert('error', 'Invoice ID is required'); return false; }
+                if (!company) { window.showAlert('error', 'Company is required'); return false; }
+                if (!amount || amount <= 0) { window.showAlert('error', 'Amount must be greater than 0'); return false; }
+
+                invoices.push({ id, company, amount, status });
+                setActiveTab('invoices', document.getElementById('tabInvoices'));
+                window.closeModal();
+                window.showAlert('success', 'Invoice added successfully');
+                return true;
+            });
+        }
+
+        function openAddExpenseModal() {
+            const body = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Expense ID</label>
+                        <input type="text" id="expenseId" placeholder="EXP-001" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                        <input type="text" id="expenseCategory" placeholder="Travel, Office, etc" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Amount (TZS)</label>
+                        <input type="number" id="expenseAmount" placeholder="0" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <input type="text" id="expenseDesc" placeholder="Description" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                </div>
+            `;
+            window.openModal('Add Expense', body, () => {
+                const id = document.getElementById('expenseId').value.trim();
+                const category = document.getElementById('expenseCategory').value.trim();
+                const amount = parseFloat(document.getElementById('expenseAmount').value);
+                const description = document.getElementById('expenseDesc').value.trim();
+
+                if (!id) { window.showAlert('error', 'Expense ID is required'); return false; }
+                if (!category) { window.showAlert('error', 'Category is required'); return false; }
+                if (!amount || amount <= 0) { window.showAlert('error', 'Amount must be greater than 0'); return false; }
+
+                expenses.push({ id, category, amount, description });
+                setActiveTab('expenses', document.getElementById('tabExpenses'));
+                window.closeModal();
+                window.showAlert('success', 'Expense added successfully');
+                return true;
+            });
+        }
+
+        function openAddPaymentModal() {
+            const body = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Payment ID</label>
+                        <input type="text" id="paymentId" placeholder="PAY-001" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Company</label>
+                        <input type="text" id="paymentCompany" placeholder="Company name" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Amount (TZS)</label>
+                        <input type="number" id="paymentAmount" placeholder="0" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Payment Method</label>
+                        <select id="paymentMethod" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Check">Check</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            window.openModal('Add Payment', body, () => {
+                const id = document.getElementById('paymentId').value.trim();
+                const company = document.getElementById('paymentCompany').value.trim();
+                const amount = parseFloat(document.getElementById('paymentAmount').value);
+                const method = document.getElementById('paymentMethod').value;
+
+                if (!id) { window.showAlert('error', 'Payment ID is required'); return false; }
+                if (!company) { window.showAlert('error', 'Company is required'); return false; }
+                if (!amount || amount <= 0) { window.showAlert('error', 'Amount must be greater than 0'); return false; }
+
+                payments.push({ id, company, amount, method });
+                setActiveTab('payments', document.getElementById('tabPayments'));
+                window.closeModal();
+                window.showAlert('success', 'Payment added successfully');
+                return true;
+            });
+        }
+
+        function renderExpenses() {
+            if (expenses.length === 0) return '<p class="text-sm text-slate-500">No expenses yet.</p>';
+            return `<div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">ID</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Category</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Amount</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${expenses.map(e => `
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">${e.id}</td>
+                                            <td class="px-4 py-3 text-sm">${e.category}</td>
+                                            <td class="px-4 py-3 text-sm text-right mono">${formatTZS(e.amount)}</td>
+                                            <td class="px-4 py-3 text-sm">${e.description}</td>
+                                        </tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>`;
+        }
+
+        function renderPayments() {
+            if (payments.length === 0) return '<p class="text-sm text-slate-500">No payments yet.</p>';
+            return `<div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">ID</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Company</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Amount</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Method</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${payments.map(p => `
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">${p.id}</td>
+                                            <td class="px-4 py-3 text-sm">${p.company}</td>
+                                            <td class="px-4 py-3 text-sm text-right mono">${formatTZS(p.amount)}</td>
+                                            <td class="px-4 py-3 text-sm">${p.method}</td>
+                                        </tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>`;
         }
 
         function setActiveTab(tab, btnEl) {
@@ -146,15 +323,15 @@
 
             if (tab === 'invoices') {
                 content.innerHTML = renderInvoices();
-                actionButton.innerHTML = renderButton('Add Invoice');
+                actionButton.innerHTML = renderButton('Add Invoice', 'openAddInvoiceModal()');
             }
             if (tab === 'expenses') {
-                content.innerHTML = '<p class="text-sm text-slate-500">No expenses yet.</p>';
-                actionButton.innerHTML = renderButton('Add Expense');
+                content.innerHTML = renderExpenses();
+                actionButton.innerHTML = renderButton('Add Expense', 'openAddExpenseModal()');
             }
             if (tab === 'payments') {
-                content.innerHTML = '<p class="text-sm text-slate-500">No payments yet.</p>';
-                actionButton.innerHTML = renderButton('Add Payment');
+                content.innerHTML = renderPayments();
+                actionButton.innerHTML = renderButton('Add Payment', 'openAddPaymentModal()');
             }
         }
 
