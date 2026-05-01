@@ -49,6 +49,7 @@
                 <div>
                     <button id="signInBtn" class="w-full px-4 py-2 bg-brand-600 text-white rounded-md font-medium">Sign In</button>
                 </div>
+                <div id="loginWarning" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2"></div>
                 <div id="loginSuccess" class="hidden text-sm text-green-600">Signed in — redirecting…</div>
             </div>
         </div>
@@ -65,7 +66,14 @@
         document.getElementById('signInBtn').addEventListener('click', ()=>{
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
-            if(!email || !password){alert('Please provide email and password'); return}
+            const warning = document.getElementById('loginWarning');
+            warning.classList.add('hidden');
+            warning.textContent = '';
+            if(!email || !password){
+                warning.textContent = 'Please provide email and password.';
+                warning.classList.remove('hidden');
+                return;
+            }
             document.getElementById('loginSuccess').classList.remove('hidden');
             setTimeout(()=> location.href='/dashboard', 900);
         });
