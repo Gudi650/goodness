@@ -59,13 +59,18 @@
             <p class="text-sm text-slate-500">Invoices, expenses and payments</p>
         </div>
         <div class="bg-white border border-slate-200 rounded-lg p-4">
-            <div class="flex gap-2 mb-4">
-                <button id="tabInvoices" onclick="setActiveTab('invoices', this)"
-                    class="px-3 py-2 bg-green-50 text-green-700  border-b-2 border-brand-600">Invoices</button>
-                <button id="tabExpenses" onclick="setActiveTab('expenses', this)"
-                    class="px-3 py-2 text-slate-600 ">Expenses</button>
-                <button id="tabPayments" onclick="setActiveTab('payments', this)"
-                    class="px-3 py-2 text-slate-600 ">Payments</button>
+            <!-- Tabs + Action Button Row -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex gap-2">
+                    <button id="tabInvoices" onclick="setActiveTab('invoices', this)"
+                        class="px-3 py-2 bg-green-50 text-green-700 border-b-2 border-brand-600">Invoices</button>
+                    <button id="tabExpenses" onclick="setActiveTab('expenses', this)"
+                        class="px-3 py-2 text-slate-600">Expenses</button>
+                    <button id="tabPayments" onclick="setActiveTab('payments', this)"
+                        class="px-3 py-2 text-slate-600">Payments</button>
+                </div>
+                <!-- Dynamic Add Button -->
+                <div id="actionButton"></div>
             </div>
             <div id="tabContent"></div>
         </div>
@@ -73,23 +78,53 @@
 
     <script>
         const invoices = [{
-            id: 'INV-001',
-            company: 'Goodness Tanzania Ltd',
-            amount: 1250000,
-            status: 'Paid'
-        }, {
-            id: 'INV-002',
-            company: 'Goodness Kenya Ltd',
-            amount: 850000,
-            status: 'Unpaid'
-        }];
+                id: 'INV-001',
+                company: 'Goodness Tanzania Ltd',
+                amount: 1250000,
+                status: 'Paid'
+            },
+            {
+                id: 'INV-002',
+                company: 'Goodness Kenya Ltd',
+                amount: 850000,
+                status: 'Unpaid'
+            }
+        ];
 
         function formatTZS(n) {
             return 'TZS ' + n.toLocaleString();
         }
 
         function renderInvoices() {
-            return `<div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-slate-50"><tr><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Invoice</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Company</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Amount</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Status</th></tr></thead><tbody class="divide-y divide-slate-100">${invoices.map(i=>`<tr><td class="px-4 py-3 text-sm">${i.id}</td><td class="px-4 py-3 text-sm">${i.company}</td><td class="px-4 py-3 text-sm text-right mono">${formatTZS(i.amount)}</td><td class="px-4 py-3 text-sm text-center"><span class="inline-block px-2 py-1 ${i.status==='Paid'?'bg-green-50 text-green-700':'bg-slate-50 text-slate-700'} rounded-md text-xs">${i.status}</span></td></tr>`).join('')}</tbody></table></div>`;
+            return `<div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Invoice</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Company</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Amount</th>
+                                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${invoices.map(i => `
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">${i.id}</td>
+                                            <td class="px-4 py-3 text-sm">${i.company}</td>
+                                            <td class="px-4 py-3 text-sm text-right mono">${formatTZS(i.amount)}</td>
+                                            <td class="px-4 py-3 text-sm text-center">
+                                                <span class="inline-block px-2 py-1 ${i.status === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-slate-50 text-slate-700'} rounded-md text-xs">${i.status}</span>
+                                            </td>
+                                        </tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>`;
+        }
+
+        function renderButton(label) {
+            return `<button class="px-4 py-2 bg-brand-600 text-white rounded-md hover:bg-brand-700">
+                        ${label}
+                    </button>`;
         }
 
         function setActiveTab(tab, btnEl) {
@@ -107,9 +142,20 @@
             }
 
             const content = document.getElementById('tabContent');
-            if (tab === 'invoices') content.innerHTML = renderInvoices();
-            if (tab === 'expenses') content.innerHTML = '<p class="text-sm text-slate-500">No expenses yet.</p>';
-            if (tab === 'payments') content.innerHTML = '<p class="text-sm text-slate-500">No payments yet.</p>';
+            const actionButton = document.getElementById('actionButton');
+
+            if (tab === 'invoices') {
+                content.innerHTML = renderInvoices();
+                actionButton.innerHTML = renderButton('Add Invoice');
+            }
+            if (tab === 'expenses') {
+                content.innerHTML = '<p class="text-sm text-slate-500">No expenses yet.</p>';
+                actionButton.innerHTML = renderButton('Add Expense');
+            }
+            if (tab === 'payments') {
+                content.innerHTML = '<p class="text-sm text-slate-500">No payments yet.</p>';
+                actionButton.innerHTML = renderButton('Add Payment');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
