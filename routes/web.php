@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -7,51 +8,75 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-// Authentication Routes
+// ============================================
+// Authentication Routes - Public Routes (no auth required)
+// ============================================
+
+// Display login form
 Route::get('/login', function () {
     return view('login');
 })->name('login');
 
+// Handle login form submission
+// This route receives the POST request from the login form
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+
+// Display signup form
 Route::get('/signup', function () {
     return view('signup');
 })->name('signup');
 
-// Main Dashboard
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+// ============================================
+// Protected Routes - Require Authentication
+// ============================================
 
-// Companies Management
-Route::get('/companies', function () {
-    return view('companies');
-})->name('companies');
+// Handle logout request
+// This route logs out the user and destroys their session
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
 
-// Users Management
-Route::get('/users', function () {
-    return view('users');
-})->name('users');
+// Group all protected routes with auth middleware
+// All routes in this group require the user to be logged in
+Route::middleware('auth')->group(function () {
+    
+    // Main Dashboard - First page users see after login
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 
-// Finance Management
-Route::get('/finance', function () {
-    return view('finance');
-})->name('finance');
+    // Companies Management
+    Route::get('/companies', function () {
+        return view('companies');
+    })->name('companies');
 
-// HRM Management
-Route::get('/hrm', function () {
-    return view('hrm');
-})->name('hrm');
+    // Users Management
+    Route::get('/users', function () {
+        return view('users');
+    })->name('users');
 
-// Sales Management
-Route::get('/sales', function () {
-    return view('sales');
-})->name('sales');
+    // Finance Management
+    Route::get('/finance', function () {
+        return view('finance');
+    })->name('finance');
 
-// Inventory Management
-Route::get('/inventory', function () {
-    return view('inventory');
-})->name('inventory');
+    // HRM Management
+    Route::get('/hrm', function () {
+        return view('hrm');
+    })->name('hrm');
 
-// Reports & Analytics
-Route::get('/reports', function () {
-    return view('reports');
-})->name('reports');
+    // Sales Management
+    Route::get('/sales', function () {
+        return view('sales');
+    })->name('sales');
+
+    // Inventory Management
+    Route::get('/inventory', function () {
+        return view('inventory');
+    })->name('inventory');
+
+    // Reports & Analytics
+    Route::get('/reports', function () {
+        return view('reports');
+    })->name('reports');
+});

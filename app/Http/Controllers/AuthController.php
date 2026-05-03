@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+/**
+ * AuthController - Handles user authentication (login and logout)
+ * 
+ * This controller manages:
+ * - User login with email and password
+ * - Session creation and user authentication
+ * - User logout and session destruction
+ */
+class AuthController extends Controller
+{
+    /**
+     * Handle login form submission
+     * 
+     * This method:
+     * 1. Validates the email and password inputs
+     * 2. Checks if a user exists with that email
+     * 3. Verifies the password is correct
+     * 4. Creates an authenticated session if credentials are valid
+     * 5. Redirects to dashboard on success or back with error on failure
+     * 
+     * @param Request $request - Contains email and password from form
+     * @return \Illuminate\Http\RedirectResponse - Redirects to dashboard or back to login
+     */
+    public function login(Request $request)
+    {
+        // Step 1: Validate the incoming request
+        // - email must be provided, valid email format, and max 255 chars
+        // - password must be provided and at least 6 characters
+        $validated = $request->validate([
+            'email' => 'required|email|max:255',
+            'password' => 'required|min:6',
+        ], [
+            // Custom error messages for better user experience
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please provide a valid email address.',
+            'password.required' => 'Password is required.',
+            'password.min' => 'Password must be at least 6 characters.',
+        ]);
+
+        // Step 2: Try to authenticate using Laravel's Auth facade
+        // This will check if a user exists with this email and verify the password
+        if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
+            
+            // Step 3: If authentication succeeds, regenerate the session
+            // This is a security best practice to prevent session fixation attacks
+            $request->session()->regenerate();
+
+            // Step 4: Redirect to the dashboard
+            return redirect()->route('dashboard')->with('success', 'You have been logged in successfully!');
+        }
+
+        // Step 5: If authentication fails, redirect back to login with error message
+        // withInput() keeps the email field filled so user doesn't have to retype it
+        return redirect()
+            ->back()
+            ->withInput($request->only('email'))
+            ->with('error', 'Invalid email or password. Please try again.');
+    }
+
+    /**
+     * Handle user logout
+     * 
+     * This method:
+     * 1. Logs out the authenticated user
+     * 2. Invalidates the current session
+     * 3. Regenerates the session token
+     * 4. Redirects to login page
+     * 
+     * @param Request $request - The current request
+     * @return \Illuminate\Http\RedirectResponse - Redirects to login page
+     */
+    public function logout(Request $request)
+    {
+        // Step 1: Log out the currently authenticated user
+        Auth::logout();
+
+        // Step 2: Invalidate the user's session
+        $request->session()->invalidate();
+
+        // Step 3: Regenerate the session token as security best practice
+        $request->session()->regenerateToken();
+
+        // Step 4: Redirect to login page with success message
+        return redirect()
+            ->route('login')
+            ->with('success', 'You have been logged out successfully!');
+    }
+}

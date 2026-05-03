@@ -34,24 +34,39 @@
         <!-- User Info -->
         <div class="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-4 border-l border-slate-200">
             <div class="text-right hidden lg:block">
-                <p class="text-sm font-medium text-slate-700">John Doe</p>
+                {{-- Display the authenticated user's name --}}
+                <p class="text-sm font-medium text-slate-700">{{ auth()->user()?->name ?? 'User' }}</p>
                 <p class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">Admin</p>
             </div>
 
-            <!-- Logout Button -->
-            <button onclick="logout()"
-                class="flex items-center gap-1 lg:gap-1.5 text-xs lg:text-sm text-slate-500 hover:text-red-600 transition-colors pl-2 lg:pl-4 border-l border-slate-200 flex-shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                <span class="hidden lg:inline">Logout</span>
-            </button>
+            {{-- Logout Form - submits POST request to /logout endpoint --}}
+            <form action="{{ route('logout') }}" method="POST" class="flex items-center">
+                {{-- CSRF Token - required by Laravel for security --}}
+                @csrf
+                
+                {{-- Logout Button - styled as a link but submits the form --}}
+                <button 
+                    type="submit"
+                    class="flex items-center gap-1 lg:gap-1.5 text-xs lg:text-sm text-slate-500 hover:text-red-600 transition-colors pl-2 lg:pl-4 border-l border-slate-200 flex-shrink-0"
+                    title="Log out of your account"
+                >
+                    {{-- Logout icon --}}
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="hidden lg:inline">Logout</span>
+                </button>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
+    /**
+     * Update page title based on current URL
+     * This helps users know which page they're viewing
+     */
     function updatePageTitle() {
         const titles = {
             '/dashboard': 'Dashboard',
@@ -68,9 +83,6 @@
         document.getElementById('pageTitle').textContent = titles[path] || 'Dashboard';
     }
 
-    function logout() {
-        window.location.href = '/login';
-    }
-
+    // Run when page loads to set the correct title
     document.addEventListener('DOMContentLoaded', updatePageTitle);
 </script>
