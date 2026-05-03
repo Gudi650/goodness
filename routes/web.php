@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -54,9 +55,10 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     // Companies Management
-    Route::get('/companies', function () {
-        return view('companies');
-    })->name('companies');
+    // - GET /companies: show companies list (from DB)
+    // - POST /companies: save a new company
+    Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
+    Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
 
     // Users Management
     Route::get('/users', function () {
