@@ -15,10 +15,10 @@
 
     <!-- Buttons -->
     <div class="flex gap-3 justify-center mt-5">
-      <button onclick="closeConfirm()" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">
+      <button onclick="closeConfirm()" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-red-50 rounded-md text-sm font-medium transition-colors">
         Cancel
       </button>
-      <button onclick="confirmAction()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors">
+      <button onclick="confirmAction()" class="px-4 py-2 bg-green-600 hover:bg-greeen-700 text-white rounded-md text-sm font-medium transition-colors">
         Confirm
       </button>
     </div>

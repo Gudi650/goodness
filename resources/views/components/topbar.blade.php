@@ -15,9 +15,16 @@
         <!-- Company Selector (visible on all screens) -->
         <select
             class="block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-green-500 focus:outline-none max-w-xs truncate">
-            <option>Goodness Tanzania Ltd</option>
-            <option>Goodness Kenya Ltd</option>
-            <option>Goodness Uganda Ltd</option>
+            {{-- Load company names directly from the database so the selector stays dynamic. --}}
+            @php
+                $companyOptions = \App\Models\Company::orderBy('name')->get();
+            @endphp
+
+            @forelse ($companyOptions as $company)
+                <option value="{{ $company->id }}">{{ $company->name }}</option>
+            @empty
+                <option disabled selected>No companies available</option>
+            @endforelse
         </select>
 
         <!-- Notification Bell -->

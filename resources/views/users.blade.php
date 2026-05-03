@@ -50,106 +50,185 @@
     @include('components.sidebar')
 
     <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6 min-h-screen">
+        {{-- Success message after updating a user's role --}}
+        @if (session('success'))
+            <div class="mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Validation errors --}}
+        @if ($errors->any())
+            <div class="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
         <div class="mb-6">
             <h1 class="text-2xl font-semibold">Users & Roles</h1>
-            <p class="text-sm text-slate-500">Manage user accounts and permissions</p>
+            <p class="text-sm text-slate-500">Manage user accounts and assign roles/positions</p>
         </div>
+
+        {{-- Search form using server-side filtering --}}
         <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-            <input id="searchUser" type="text" placeholder="Search users..."
-                class="w-full sm:flex-1 px-4 py-2 border border-slate-200 rounded-md bg-white" />
-            <button id="assignRoleBtn" class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Assign
-                Role</button>
+            <form method="GET" action="{{ route('users') }}" class="w-full sm:flex-1 flex gap-2">
+                <input
+                    id="search"
+                    name="search"
+                    type="text"
+                    value="{{ $search ?? '' }}"
+                    placeholder="Search users by name or email..."
+                    class="w-full sm:flex-1 px-4 py-2 border border-slate-200 rounded-md bg-white"
+                />
+                <button type="submit" class="px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                    Search
+                </button>
+            </form>
         </div>
+
+        {{-- Users table rendered from database --}}
         <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto">
             <table class="min-w-full">
                 <thead class="bg-slate-50">
                     <tr>
                         <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Name</th>
                         <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Email</th>
-                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Role</th>
+                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Current Role</th>
+                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody id="usersTbody" class="divide-y divide-slate-100"></tbody>
+                <tbody class="divide-y divide-slate-100">
+                    {{-- Render users directly from database using Blade --}}
+                    @forelse ($users as $user)
+                        <tr>
+                            <td class="px-4 py-3 text-sm">{{ $user->name }}</td>
+                            <td class="px-4 py-3 text-sm">{{ $user->email }}</td>
+                            <td class="px-4 py-3 text-sm text-center">
+                                <span class="inline-block px-2 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">
+                                    {{ $user->role?->name ?? 'No Role' }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-center">
+                                {{-- Button to open the assign role modal --}}
+                                <button
+                                    type="button"
+                                    onclick="openAssignRoleModal({{ $user->id }}, '{{ $user->name }}')"
+                                    class="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-xs font-medium transition-colors"
+                                >
+                                    Change Role
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="px-4 py-6 text-sm text-slate-500 text-center">No users found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
     </main>
 
-    <script>
-        const users = [{
-                id: 1,
-                name: 'John Doe',
-                email: 'john@example.com',
-                role: 'Administrator'
-            },
-            {
-                id: 2,
-                name: 'Jane Smith',
-                email: 'jane@example.com',
-                role: 'Manager'
-            },
-            {
-                id: 3,
-                name: 'Ali Hassan',
-                email: 'ali@example.com',
-                role: 'Employee'
-            }
-        ];
+    {{-- Plain HTML modal for assigning roles --}}
+    <div id="assignRoleModalBackdrop" class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-slate-800 font-display">Assign Role</h2>
+                <button id="closeAssignRoleModalBtn" type="button" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
 
-        function openAssignRoleModal() {
-            const userOptions = users.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
-            const body = `
-                <div class="space-y-4">
-                    <label class="block text-sm text-slate-600">Select User
-                        <select id="assign_user" class="mt-1 block w-full border border-slate-200 rounded p-2">
-                            <option value="">-- Choose a user --</option>
-                            ${userOptions}
-                        </select>
+            {{-- Form to update user role --}}
+            <form id="assignRoleForm" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <div>
+                    <label for="selected_user_name" class="block text-sm text-slate-600 mb-1">
+                        User
                     </label>
-                    <label class="block text-sm text-slate-600">Assign Role
-                        <select id="assign_role" class="mt-1 block w-full border border-slate-200 rounded p-2">
-                            <option>Administrator</option>
-                            <option>Manager</option>
-                            <option>Employee</option>
-                            <option>Viewer</option>
-                        </select>
-                    </label>
+                    <input id="selected_user_name" type="text" class="w-full px-4 py-2 border border-slate-200 rounded-md bg-slate-50 text-slate-600" readonly />
                 </div>
-            `;
-            window.openModal('Assign Role', body, () => {
-                const userId = document.getElementById('assign_user').value;
-                const role = document.getElementById('assign_role').value;
-                if (!userId) {
-                    window.showAlert('error', 'Please select a user');
-                    return false;
-                }
-                const user = users.find(u => u.id == userId);
-                if (user) {
-                    user.role = role;
-                    renderUsers(document.getElementById('searchUser').value);
-                }
-                window.closeModal();
-                window.showAlert('success', 'Role assigned');
-                return true;
-            });
+
+                <div>
+                    <label for="role_id" class="block text-sm text-slate-600 mb-1">
+                        Select New Role
+                    </label>
+                    <select id="role_id" name="role_id" class="w-full px-4 py-2 border border-slate-200 rounded-md bg-white text-slate-800" required>
+                        <option value="">-- Choose a role --</option>
+                        @foreach ($roles as $role)
+                            <option value="{{ $role->id }}">{{ $role->name }} - {{ $role->description }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="flex gap-3 justify-end mt-6">
+                    <button id="cancelAssignRoleBtn" type="button" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button id="submitAssignRoleBtn" type="button" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors">
+                        Assign Role
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal management
+        const assignRoleModalBackdrop = document.getElementById('assignRoleModalBackdrop');
+        const closeAssignRoleModalBtn = document.getElementById('closeAssignRoleModalBtn');
+        const cancelAssignRoleBtn = document.getElementById('cancelAssignRoleBtn');
+        const submitAssignRoleBtn = document.getElementById('submitAssignRoleBtn');
+        const assignRoleForm = document.getElementById('assignRoleForm');
+        const selectedUserNameInput = document.getElementById('selected_user_name');
+        const roleIdInput = document.getElementById('role_id');
+
+        let currentUserId = null;
+
+        function openAssignRoleModal(userId, userName) {
+            currentUserId = userId;
+            selectedUserNameInput.value = userName;
+            roleIdInput.value = '';
+            assignRoleModalBackdrop.classList.remove('hidden');
         }
 
-        function renderUsers(filter = '') {
-            const tbody = document.getElementById('usersTbody');
-            tbody.innerHTML = '';
-            const f = filter.toLowerCase();
-            users.filter(u => u.name.toLowerCase().includes(f) || u.email.toLowerCase().includes(f)).forEach(u => {
-                const tr = document.createElement('tr');
-                tr.innerHTML =
-                    `<td class="px-4 py-3 text-sm">${u.name}</td><td class="px-4 py-3 text-sm">${u.email}</td><td class="px-4 py-3 text-sm text-center"><span class="inline-block px-2 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">${u.role}</span></td>`;
-                tbody.appendChild(tr);
-            });
+        function closeAssignRoleModal() {
+            assignRoleModalBackdrop.classList.add('hidden');
+            currentUserId = null;
         }
-        document.getElementById('searchUser').addEventListener('input', e => renderUsers(e.target.value));
-        document.getElementById('assignRoleBtn').addEventListener('click', openAssignRoleModal);
-        renderUsers();
+
+        closeAssignRoleModalBtn.addEventListener('click', closeAssignRoleModal);
+        cancelAssignRoleBtn.addEventListener('click', closeAssignRoleModal);
+
+        // When user clicks submit, show a confirm dialog first
+        submitAssignRoleBtn.addEventListener('click', () => {
+            if (!roleIdInput.value) {
+                alert('Please select a role');
+                return;
+            }
+
+            // Show the confirm modal
+            openConfirm(
+                'Confirm Role Assignment',
+                `Do you want to assign this role to ${selectedUserNameInput.value}?`,
+                () => {
+                    // After confirming, update the form action and submit
+                    assignRoleForm.action = `/users/${currentUserId}/role`;
+                    assignRoleForm.submit();
+                }
+            );
+        });
+
+        // Close modal when clicking outside
+        assignRoleModalBackdrop.addEventListener('click', (event) => {
+            if (event.target === assignRoleModalBackdrop) {
+                closeAssignRoleModal();
+            }
+        });
     </script>
 
-    @include('components.modal')
     @include('components.alert')
     @include('components.confirm')
 </body>

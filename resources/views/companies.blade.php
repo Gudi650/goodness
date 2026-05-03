@@ -89,7 +89,7 @@
             </div>
 
             {{-- Real POST form to store company in DB --}}
-            <form method="POST" action="{{ route('companies.store') }}" class="space-y-4">
+            <form id="companyForm" method="POST" action="{{ route('companies.store') }}" class="space-y-4">
                 @csrf
 
                 <label for="company_name" class="block text-sm text-slate-600">
@@ -121,7 +121,7 @@
                     <button id="cancelAddCompanyBtn" type="button" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">
                         Cancel
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors">
+                    <button id="submitCompanyBtn" type="button" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors">
                         Submit
                     </button>
                 </div>
@@ -135,6 +135,8 @@
         const addCompanyBtn = document.getElementById('addCompanyBtn');
         const closeAddCompanyModalBtn = document.getElementById('closeAddCompanyModalBtn');
         const cancelAddCompanyBtn = document.getElementById('cancelAddCompanyBtn');
+        const submitCompanyBtn = document.getElementById('submitCompanyBtn');
+        const companyForm = document.getElementById('companyForm');
 
         function openAddCompanyModal() {
             addCompanyModalBackdrop.classList.remove('hidden');
@@ -147,6 +149,26 @@
         addCompanyBtn.addEventListener('click', openAddCompanyModal);
         closeAddCompanyModalBtn.addEventListener('click', closeAddCompanyModal);
         cancelAddCompanyBtn.addEventListener('click', closeAddCompanyModal);
+
+        // Show the confirm modal before saving the company.
+        submitCompanyBtn.addEventListener('click', () => {
+            // openConfirm comes from components/confirm.blade.php.
+            openConfirm(
+                'Save Company',
+                'Do you want to register this company in the database?',
+                () => companyForm.submit()
+            );
+        });
+
+        // Allow Enter key to trigger the same confirm flow instead of direct submission.
+        companyForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            openConfirm(
+                'Save Company',
+                'Do you want to register this company in the database?',
+                () => companyForm.submit()
+            );
+        });
 
         // Close modal when user clicks outside the modal card.
         addCompanyModalBackdrop.addEventListener('click', (event) => {

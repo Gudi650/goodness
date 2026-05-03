@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,7 @@ class AuthController extends Controller
      *
      * This method:
      * 1. Validates the registration form inputs
-     * 2. Creates a new user record in the database
+     * 2. Creates a new user record with the default 'Employee' role
      * 3. Logs the new user in automatically
      * 4. Redirects to the dashboard on success
      *
@@ -32,7 +33,7 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        // Step 1: Validate the incoming registration request
+        //  Validate the incoming registration request
         // - name must be provided
         // - email must be valid and unique
         // - password must be at least 6 characters and match the confirmation field
@@ -51,21 +52,27 @@ class AuthController extends Controller
             'password.confirmed' => 'Passwords do not match.',
         ]);
 
-        // Step 2: Create the user record
+        //  Get the Employee role ID.
+        // All new signups start as employees for safety.
+        // Admins can change roles later from the Users page.
+        $employeeRole = Role::where('name', 'Employee')->first();
+
+        // Step 3: Create the user record with the employee role
         // Laravel will hash the password automatically because the User model uses a hashed cast
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
+            'role_id' => $employeeRole?->id,  // Assign employee role by default
         ]);
 
-        // Step 3: Log the new user in immediately
+        // Step 4: Log the new user in immediately
         Auth::login($user);
 
-        // Step 4: Regenerate the session for security
+        // Step 5: Regenerate the session for security
         $request->session()->regenerate();
 
-        // Step 5: Send the user to the dashboard with a success message
+        // Step 6: Send the user to the dashboard with a success message
         return redirect()
             ->route('dashboard')
             ->with('success', 'Your account has been created successfully!');

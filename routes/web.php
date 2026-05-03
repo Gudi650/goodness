@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -61,9 +62,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
 
     // Users Management
-    Route::get('/users', function () {
-        return view('users');
-    })->name('users');
+    // - GET /users: show users list (from DB)
+    // - PUT /users/{user}/role: update a user's role
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 
     // Finance Management
     Route::get('/finance', function () {
@@ -90,3 +92,4 @@ Route::middleware('auth')->group(function () {
         return view('reports');
     })->name('reports');
 });
+
