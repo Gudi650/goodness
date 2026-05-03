@@ -15,16 +15,24 @@ Route::get('/', function () {
 // Display login form
 Route::get('/login', function () {
     return view('login');
-})->name('login');
+})->middleware('guest')->name('login');
 
 // Handle login form submission
 // This route receives the POST request from the login form
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('guest')
+    ->name('login.submit');
 
 // Display signup form
 Route::get('/signup', function () {
     return view('signup');
-})->name('signup');
+})->middleware('guest')->name('signup');
+
+// Handle signup form submission
+// This route creates a new user account
+Route::post('/signup', [AuthController::class, 'register'])
+    ->middleware('guest')
+    ->name('signup.submit');
 
 // ============================================
 // Protected Routes - Require Authentication

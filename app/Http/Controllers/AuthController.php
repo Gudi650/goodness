@@ -11,12 +11,66 @@ use Illuminate\Support\Facades\Hash;
  * AuthController - Handles user authentication (login and logout)
  * 
  * This controller manages:
+ * - User registration with name, email, and password
  * - User login with email and password
  * - Session creation and user authentication
  * - User logout and session destruction
  */
 class AuthController extends Controller
 {
+    /**
+     * Handle signup form submission
+     *
+     * This method:
+     * 1. Validates the registration form inputs
+     * 2. Creates a new user record in the database
+     * 3. Logs the new user in automatically
+     * 4. Redirects to the dashboard on success
+     *
+     * @param Request $request - Contains name, email, password, and password confirmation
+     * @return \Illuminate\Http\RedirectResponse - Redirects to dashboard or back to signup
+     */
+    public function register(Request $request)
+    {
+        // Step 1: Validate the incoming registration request
+        // - name must be provided
+        // - email must be valid and unique
+        // - password must be at least 6 characters and match the confirmation field
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|min:6|confirmed',
+        ], [
+            // Custom messages keep the form friendly for beginners
+            'name.required' => 'Full name is required.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please provide a valid email address.',
+            'email.unique' => 'This email is already registered.',
+            'password.required' => 'Password is required.',
+            'password.min' => 'Password must be at least 6 characters.',
+            'password.confirmed' => 'Passwords do not match.',
+        ]);
+
+        // Step 2: Create the user record
+        // Laravel will hash the password automatically because the User model uses a hashed cast
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+        ]);
+
+        // Step 3: Log the new user in immediately
+        Auth::login($user);
+
+        // Step 4: Regenerate the session for security
+        $request->session()->regenerate();
+
+        // Step 5: Send the user to the dashboard with a success message
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Your account has been created successfully!');
+    }
+
     /**
      * Handle login form submission
      * 

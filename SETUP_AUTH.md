@@ -66,10 +66,10 @@ All authentication code is beginner-friendly with detailed comments:
 
 ## Key Features
 
-✨ **Simple & Readable** - Code is clean with helpful comments
-✨ **Secure** - Password hashing, CSRF protection, session management
-✨ **Beginner Friendly** - Detailed comments throughout
-✨ **Ready to Use** - Just run migrations and seeders!
+ **Simple & Readable** - Code is clean with helpful comments
+ **Secure** - Password hashing, CSRF protection, session management
+ **Beginner Friendly** - Detailed comments throughout
+ **Ready to Use** - Just run migrations and seeders!
 
 ---
 
