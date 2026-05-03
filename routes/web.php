@@ -65,8 +65,10 @@ Route::middleware('auth')->group(function () {
     // Users Management
     // - GET /users: show users list (from DB)
     // - PUT /users/{user}/role: update a user's role
+    // - PUT /users/{user}/company: update a user's company
     Route::get('/users', [UserController::class, 'index'])->name('users');
     Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
+    Route::put('/users/{user}/company', [UserController::class, 'updateCompany'])->name('users.updateCompany');
 
     // Roles Management
     // - POST /roles: create a new role (used by the Create Role modal)

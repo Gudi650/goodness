@@ -110,6 +110,7 @@
                             <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Name</th>
                             <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Email</th>
                             <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Current Role</th>
+                            <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Company</th>
                             <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Action</th>
                         </tr>
                     </thead>
@@ -125,6 +126,15 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-sm text-center">
+                                    <button
+                                        type="button"
+                                        onclick="openAssignCompanyModal({{ $user->id }}, '{{ $user->name }}')"
+                                        class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-colors"
+                                    >
+                                        {{ $user->company?->name ?? 'Assign' }}
+                                    </button>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-center">
                                     {{-- Button to open the assign role modal --}}
                                     <button
                                         type="button"
@@ -137,7 +147,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-6 text-sm text-slate-500 text-center">No users found.</td>
+                                <td colspan="5" class="px-4 py-6 text-sm text-slate-500 text-center">No users found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -318,6 +328,52 @@
             </div>
         </div>
 
+        {{-- Assign Company modal --}}
+        <div id="assignCompanyModalBackdrop" class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
+            <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-slate-800 font-display">Assign Company</h2>
+                    <button id="closeAssignCompanyModalBtn" type="button" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                {{-- Form to update user company --}}
+                <form id="assignCompanyForm" method="POST" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+
+                    <div>
+                        <label for="selected_user_name_company" class="block text-sm text-slate-600 mb-1">
+                            User
+                        </label>
+                        <input id="selected_user_name_company" type="text" class="w-full px-4 py-2 border border-slate-200 rounded-md bg-slate-50 text-slate-600" readonly />
+                    </div>
+
+                    <div>
+                        <label for="company_id" class="block text-sm text-slate-600 mb-1">
+                            Select Company
+                        </label>
+                        <select id="company_id" name="company_id" class="w-full px-4 py-2 border border-slate-200 rounded-md bg-white text-slate-800" required>
+                            <option value="">-- Choose a company --</option>
+                            @foreach ($companies as $company)
+                                <option value="{{ $company->id }}">{{ $company->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="flex gap-3 justify-end mt-6">
+                        <button id="cancelAssignCompanyBtn" type="button" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">
+                            Cancel
+                        </button>
+                        <button id="submitAssignCompanyBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors">
+                            Assign Company
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     <script>
         // Create Role modal controls (supports both buttons that open modal)
         const createRoleModalBackdrop = document.getElementById('createRoleModalBackdrop');
@@ -375,6 +431,59 @@
         tabRolesBtn.addEventListener('click', showRolesPane);
         // Initialize default visible pane
         showUsersPane();
+
+        // Company assignment modal management
+        const assignCompanyModalBackdrop = document.getElementById('assignCompanyModalBackdrop');
+        const closeAssignCompanyModalBtn = document.getElementById('closeAssignCompanyModalBtn');
+        const cancelAssignCompanyBtn = document.getElementById('cancelAssignCompanyBtn');
+        const submitAssignCompanyBtn = document.getElementById('submitAssignCompanyBtn');
+        const assignCompanyForm = document.getElementById('assignCompanyForm');
+        const selectedUserNameCompany = document.getElementById('selected_user_name_company');
+        const companyIdInput = document.getElementById('company_id');
+
+        let currentUserIdCompany = null;
+
+        // Opens the company assignment modal with user details
+        function openAssignCompanyModal(userId, userName) {
+            currentUserIdCompany = userId;
+            selectedUserNameCompany.value = userName;
+            companyIdInput.value = '';
+            assignCompanyModalBackdrop.classList.remove('hidden');
+        }
+
+        function closeAssignCompanyModal() {
+            assignCompanyModalBackdrop.classList.add('hidden');
+            currentUserIdCompany = null;
+        }
+
+        closeAssignCompanyModalBtn.addEventListener('click', closeAssignCompanyModal);
+        cancelAssignCompanyBtn.addEventListener('click', closeAssignCompanyModal);
+
+        // When user clicks submit, show confirm dialog first
+        submitAssignCompanyBtn.addEventListener('click', () => {
+            if (!companyIdInput.value) {
+                alert('Please select a company');
+                return;
+            }
+
+            // Show the confirm modal
+            openConfirm(
+                'Confirm Company Assignment',
+                `Do you want to assign this company to ${selectedUserNameCompany.value}?`,
+                () => {
+                    // After confirming, update the form action and submit
+                    assignCompanyForm.action = `/users/${currentUserIdCompany}/company`;
+                    assignCompanyForm.submit();
+                }
+            );
+        });
+
+        // Close modal when clicking outside
+        assignCompanyModalBackdrop.addEventListener('click', (event) => {
+            if (event.target === assignCompanyModalBackdrop) {
+                closeAssignCompanyModal();
+            }
+        });
     </script>
 
     @include('components.alert')

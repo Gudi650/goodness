@@ -4,16 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Company model
  *
  * This model represents one company/subsidiary record
- * stored in the companies table.
+ * stored in the companies table. Each company can have
+ * multiple users assigned to it.
  */
 #[Fillable(['name', 'country', 'revenue', 'status'])]
 class Company extends Model
 {
-    // No extra logic needed for now.
-    // Laravel handles basic create/read/update/delete operations.
+    /**
+     * Get all users that belong to this company.
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 }
