@@ -69,64 +69,121 @@
             <p class="text-sm text-slate-500">Manage user accounts and assign roles/positions</p>
         </div>
 
-        {{-- Search form using server-side filtering --}}
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-            <form method="GET" action="{{ route('users') }}" class="w-full sm:flex-1 flex gap-2">
-                <input
-                    id="search"
-                    name="search"
-                    type="text"
-                    value="{{ $search ?? '' }}"
-                    placeholder="Search users by name or email..."
-                    class="w-full sm:flex-1 px-4 py-2 border border-slate-200 rounded-md bg-white"
-                />
-                <button type="submit" class="px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
-                    Search
-                </button>
-            </form>
+        {{-- Navigation tabs: Users / Roles (styled like the screenshot with underline indicator) --}}
+        <div class="mb-4">
+            <nav class="border-b border-slate-200">
+                <ul class="flex space-x-6 -mb-px">
+                    <li>
+                        <button id="tabUsersBtn" class="pb-3 text-sm font-medium text-slate-900 border-b-2 border-brand-500">Users</button>
+                    </li>
+                    <li>
+                        <button id="tabRolesBtn" class="pb-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent">Roles</button>
+                    </li>
+                </ul>
+            </nav>
         </div>
 
-        {{-- Users table rendered from database --}}
-        <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto">
-            <table class="min-w-full">
-                <thead class="bg-slate-50">
-                    <tr>
-                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Name</th>
-                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Email</th>
-                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Current Role</th>
-                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    {{-- Render users directly from database using Blade --}}
-                    @forelse ($users as $user)
+        {{-- Users pane (default visible) --}}
+        <div id="usersPane">
+            {{-- Search form using server-side filtering --}}
+            <div class="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
+                <form method="GET" action="{{ route('users') }}" class="w-full lg:flex-1 flex gap-2">
+                    <input
+                        id="search"
+                        name="search"
+                        type="text"
+                        value="{{ $search ?? '' }}"
+                        placeholder="Search users by name or email..."
+                        class="w-full lg:flex-1 px-4 py-2 border border-slate-200 rounded-md bg-white"
+                    />
+                    <button type="submit" class="px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                        Search
+                    </button>
+                </form>
+            </div>
+
+            {{-- Users table rendered from database --}}
+            <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
                         <tr>
-                            <td class="px-4 py-3 text-sm">{{ $user->name }}</td>
-                            <td class="px-4 py-3 text-sm">{{ $user->email }}</td>
-                            <td class="px-4 py-3 text-sm text-center">
-                                <span class="inline-block px-2 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">
-                                    {{ $user->role?->name ?? 'No Role' }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-center">
-                                {{-- Button to open the assign role modal --}}
-                                <button
-                                    type="button"
-                                    onclick="openAssignRoleModal({{ $user->id }}, '{{ $user->name }}')"
-                                    class="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-xs font-medium transition-colors"
-                                >
-                                    Change Role
-                                </button>
-                            </td>
+                            <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Name</th>
+                            <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Email</th>
+                            <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Current Role</th>
+                            <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Action</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="px-4 py-6 text-sm text-slate-500 text-center">No users found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {{-- Render users directly from database using Blade --}}
+                        @forelse ($users as $user)
+                            <tr>
+                                <td class="px-4 py-3 text-sm">{{ $user->name }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $user->email }}</td>
+                                <td class="px-4 py-3 text-sm text-center">
+                                    <span class="inline-block px-2 py-1 bg-slate-50 text-slate-700 rounded-md text-xs">
+                                        {{ $user->role?->name ?? 'No Role' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-center">
+                                    {{-- Button to open the assign role modal --}}
+                                    <button
+                                        type="button"
+                                        onclick="openAssignRoleModal({{ $user->id }}, '{{ $user->name }}')"
+                                        class="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-xs font-medium transition-colors"
+                                    >
+                                        Change Role
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-6 text-sm text-slate-500 text-center">No users found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        {{-- Roles pane (hidden by default) --}}
+        <div id="rolesPane" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-semibold">Available Roles</h2>
+                    <p class="text-sm text-slate-500">List of roles that can be assigned to users</p>
+                </div>
+                <div>
+                    <button id="openCreateRoleBtnPane" type="button" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium">
+                        Create Role
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Role</th>
+                            <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse ($roles as $role)
+                            <tr>
+                                <td class="px-4 py-3 text-sm">{{ $role->name }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $role->description ?? '-' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="2" class="px-4 py-6 text-sm text-slate-500 text-center">No roles found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- (Removed duplicate users table; users are shown in the Users pane above) --}}
     </main>
 
     {{-- Plain HTML modal for assigning roles --}}
@@ -227,6 +284,97 @@
                 closeAssignRoleModal();
             }
         });
+    </script>
+
+        {{-- Create Role modal (opened by "Create Role" button) --}}
+        <div id="createRoleModalBackdrop" class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
+            <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-slate-800 font-display">Create New Role</h2>
+                    <button id="closeCreateRoleModalBtn" type="button" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                {{-- Form to create a role --}}
+                <form id="createRoleForm" method="POST" action="{{ route('roles.store') }}" class="space-y-4">
+                    @csrf
+
+                    <div>
+                        <label for="role_name" class="block text-sm text-slate-600 mb-1">Role Name</label>
+                        <input id="role_name" name="name" type="text" required class="w-full px-4 py-2 border border-slate-200 rounded-md bg-white" placeholder="e.g. Manager" />
+                    </div>
+
+                    <div>
+                        <label for="role_description" class="block text-sm text-slate-600 mb-1">Description (optional)</label>
+                        <textarea id="role_description" name="description" rows="3" class="w-full px-4 py-2 border border-slate-200 rounded-md bg-white" placeholder="Short description for this role"></textarea>
+                    </div>
+
+                    <div class="flex gap-3 justify-end mt-6">
+                        <button id="cancelCreateRoleBtn" type="button" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">Cancel</button>
+                        <button id="submitCreateRoleBtn" type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium">Create Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    <script>
+        // Create Role modal controls (supports both buttons that open modal)
+        const createRoleModalBackdrop = document.getElementById('createRoleModalBackdrop');
+        const openCreateRoleBtn = document.getElementById('openCreateRoleBtn');
+        const openCreateRoleBtnPane = document.getElementById('openCreateRoleBtnPane');
+        const closeCreateRoleModalBtn = document.getElementById('closeCreateRoleModalBtn');
+        const cancelCreateRoleBtn = document.getElementById('cancelCreateRoleBtn');
+
+        function openCreateRoleModal() {
+            createRoleModalBackdrop.classList.remove('hidden');
+        }
+        function closeCreateRoleModal() {
+            createRoleModalBackdrop.classList.add('hidden');
+        }
+
+        if (openCreateRoleBtn) openCreateRoleBtn.addEventListener('click', openCreateRoleModal);
+        if (openCreateRoleBtnPane) openCreateRoleBtnPane.addEventListener('click', openCreateRoleModal);
+        closeCreateRoleModalBtn.addEventListener('click', closeCreateRoleModal);
+        cancelCreateRoleBtn.addEventListener('click', closeCreateRoleModal);
+
+        // Close when clicking backdrop
+        createRoleModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === createRoleModalBackdrop) closeCreateRoleModal();
+        });
+
+        // Tab navigation between Users and Roles panes
+        const tabUsersBtn = document.getElementById('tabUsersBtn');
+        const tabRolesBtn = document.getElementById('tabRolesBtn');
+        const usersPane = document.getElementById('usersPane');
+        const rolesPane = document.getElementById('rolesPane');
+
+        function showUsersPane() {
+            usersPane.classList.remove('hidden');
+            rolesPane.classList.add('hidden');
+            // active styling for Users tab (underline + darker text)
+            tabUsersBtn.classList.add('text-slate-900', 'border-b-2', 'border-brand-500');
+            tabUsersBtn.classList.remove('text-slate-600', 'border-transparent');
+            // inactive styling for Roles tab
+            tabRolesBtn.classList.remove('text-slate-900', 'border-b-2', 'border-brand-500');
+            tabRolesBtn.classList.add('text-slate-600', 'border-transparent');
+        }
+
+        function showRolesPane() {
+            usersPane.classList.add('hidden');
+            rolesPane.classList.remove('hidden');
+            // active styling for Roles tab
+            tabRolesBtn.classList.add('text-slate-900', 'border-b-2', 'border-brand-500');
+            tabRolesBtn.classList.remove('text-slate-600', 'border-transparent');
+            // inactive styling for Users tab
+            tabUsersBtn.classList.remove('text-slate-900', 'border-b-2', 'border-brand-500');
+            tabUsersBtn.classList.add('text-slate-600', 'border-transparent');
+        }
+
+        tabUsersBtn.addEventListener('click', showUsersPane);
+        tabRolesBtn.addEventListener('click', showRolesPane);
+        // Initialize default visible pane
+        showUsersPane();
     </script>
 
     @include('components.alert')

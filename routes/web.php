@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -66,6 +67,10 @@ Route::middleware('auth')->group(function () {
     // - PUT /users/{user}/role: update a user's role
     Route::get('/users', [UserController::class, 'index'])->name('users');
     Route::put('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
+
+    // Roles Management
+    // - POST /roles: create a new role (used by the Create Role modal)
+    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
 
     // Finance Management
     Route::get('/finance', function () {
