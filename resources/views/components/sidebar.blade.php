@@ -4,7 +4,9 @@
   <!-- Logo Section -->
   <div class="p-4 border-b border-slate-200">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-brand-600 rounded-md flex items-center justify-center text-white font-bold text-sm font-display">GG</div>
+      <div class="w-10 h-10 rounded-md overflow-hidden border border-brand-100 bg-white flex items-center justify-center">
+        <img src="{{ asset('favicon.png') }}" alt="Goodness Group logo" class="w-8 h-8 object-contain" />
+      </div>
       <div>
         <p class="font-semibold text-slate-800 font-display text-sm">Goodness Group</p>
         <p class="text-xs text-slate-500">Enterprise</p>
