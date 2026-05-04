@@ -82,9 +82,9 @@
       const linkPath = link.getAttribute('data-path');
       if (path === linkPath || path.startsWith(linkPath + '/')) {
         link.classList.remove('text-slate-600', 'hover:text-slate-900');
-        link.classList.add('bg-green-50', 'text-green-700', 'border-l-4', 'border-green-600');
+        link.classList.add('bg-brand-50', 'text-brand-700', 'border-l-4', 'border-brand-600');
       } else {
-        link.classList.remove('bg-green-50', 'text-green-700', 'border-l-4', 'border-green-600');
+        link.classList.remove('bg-brand-50', 'text-brand-700', 'border-l-4', 'border-brand-600');
         link.classList.add('text-slate-600');
       }
     });

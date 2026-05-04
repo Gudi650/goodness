@@ -12,11 +12,11 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d'
+                            50: '#fff8e5',
+                            100: '#fde6a1',
+                            500: '#f0b73a',
+                            600: '#eaa106',
+                            700: '#c88600'
                         }
                     },
                     fontFamily: {
@@ -58,7 +58,7 @@
             <div class="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex flex-wrap gap-2">
                     <button id="tabProducts"
-                        class="px-3 py-2 text-green-700 border-b-2 border-brand-600">Products</button>
+                        class="px-3 py-2 text-brand-700 border-b-2 border-brand-600">Products</button>
                     <button id="tabSuppliers" class="px-3 py-2 text-slate-600">Suppliers</button>
                     <button id="tabPO" class="px-3 py-2 text-slate-600">Purchase Orders</button>
                 </div>
@@ -382,16 +382,24 @@
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">PO Number</th>
-                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Supplier</th>
-                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Amount</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Supplier ID</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Order Date</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Expected Delivery Date</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Status</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Total Order Value</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Created By</th>
                                 <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr>
                                 <td class="px-4 py-3 text-sm">PO-001</td>
-                                <td class="px-4 py-3 text-sm">Supplier Inc</td>
+                                <td class="px-4 py-3 text-sm">SUP-001</td>
+                                <td class="px-4 py-3 text-sm">2026-05-01</td>
+                                <td class="px-4 py-3 text-sm">2026-05-08</td>
+                                <td class="px-4 py-3 text-sm"><span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">Pending</span></td>
                                 <td class="px-4 py-3 text-sm text-right">$1,200.00</td>
+                                <td class="px-4 py-3 text-sm">EMP-001</td>
                                 <td class="px-4 py-3 text-sm">
                                     <div class="flex justify-end items-center gap-2 whitespace-nowrap">
                                         <button type="button" title="View" onclick="togglePODetails('po1')" class="p-1.5 rounded-md text-slate-600 hover:bg-slate-100">
@@ -414,20 +422,29 @@
                                 </td>
                             </tr>
                             <tr id="details-po1" class="hidden bg-slate-50/40">
-                                <td colspan="4" class="px-4 py-3">
+                                <td colspan="8" class="px-4 py-3">
                                     <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                                         <div class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Purchase Order Details</div>
-                                        <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
+                                        <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2 lg:grid-cols-3">
                                             <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">PO Number:</span> <span class="font-medium text-slate-800">PO-001</span></div>
-                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Amount:</span> <span class="font-medium text-slate-800">$1,200.00</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Supplier ID:</span> <span class="font-medium text-slate-800">SUP-001</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Order Date:</span> <span class="font-medium text-slate-800">2026-05-01</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Expected Delivery Date:</span> <span class="font-medium text-slate-800">2026-05-08</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Status:</span> <span class="font-medium text-slate-800">Pending</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Total Order Value:</span> <span class="font-medium text-slate-800">$1,200.00</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Created By:</span> <span class="font-medium text-slate-800">EMP-001</span></div>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="px-4 py-3 text-sm">PO-002</td>
-                                <td class="px-4 py-3 text-sm">Acme Co</td>
+                                <td class="px-4 py-3 text-sm">SUP-002</td>
+                                <td class="px-4 py-3 text-sm">2026-05-02</td>
+                                <td class="px-4 py-3 text-sm">2026-05-10</td>
+                                <td class="px-4 py-3 text-sm"><span class="inline-flex rounded-full bg-brand-100 px-2.5 py-1 text-xs font-medium text-brand-700">Approved</span></td>
                                 <td class="px-4 py-3 text-sm text-right">$450.50</td>
+                                <td class="px-4 py-3 text-sm">EMP-002</td>
                                 <td class="px-4 py-3 text-sm">
                                     <div class="flex justify-end items-center gap-2 whitespace-nowrap">
                                         <button type="button" title="View" onclick="togglePODetails('po2')" class="p-1.5 rounded-md text-slate-600 hover:bg-slate-100">
@@ -450,12 +467,17 @@
                                 </td>
                             </tr>
                             <tr id="details-po2" class="hidden bg-slate-50/40">
-                                <td colspan="4" class="px-4 py-3">
+                                <td colspan="8" class="px-4 py-3">
                                     <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                                         <div class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Purchase Order Details</div>
-                                        <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
+                                        <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2 lg:grid-cols-3">
                                             <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">PO Number:</span> <span class="font-medium text-slate-800">PO-002</span></div>
-                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Amount:</span> <span class="font-medium text-slate-800">$450.50</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Supplier ID:</span> <span class="font-medium text-slate-800">SUP-002</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Order Date:</span> <span class="font-medium text-slate-800">2026-05-02</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Expected Delivery Date:</span> <span class="font-medium text-slate-800">2026-05-10</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Status:</span> <span class="font-medium text-slate-800">Approved</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Total Order Value:</span> <span class="font-medium text-slate-800">450.50</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Created By:</span> <span class="font-medium text-slate-800">EMP-002</span></div>
                                         </div>
                                     </div>
                                 </td>
@@ -565,15 +587,37 @@
                             class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Supplier</label>
-                        <select name="supplier" class="w-full px-3 py-2 border border-slate-300 rounded-md">
-                            <option value="">-- Select Supplier --</option>
-                            <option value="Supplier Inc">Supplier Inc</option>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Supplier ID</label>
+                        <input type="text" name="supplierId" placeholder="SUP-001"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Order Date</label>
+                        <input type="date" name="orderDate"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Expected Delivery Date</label>
+                        <input type="date" name="expectedDeliveryDate"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                        <select name="status" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                            <option>Pending</option>
+                            <option>Approved</option>
+                            <option>Received</option>
+                            <option>Partially Received</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Amount</label>
-                        <input type="number" name="amount" placeholder="0"
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Total Order Value</label>
+                        <input type="number" step="0.01" name="amount" placeholder="0.00"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Created By</label>
+                        <input type="text" name="createdBy" placeholder="EMP-001"
                             class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                 </div>

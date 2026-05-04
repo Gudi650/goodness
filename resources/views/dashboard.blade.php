@@ -12,11 +12,11 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d'
+                            50: '#fff8e5',
+                            100: '#fde6a1',
+                            500: '#f0b73a',
+                            600: '#eaa106',
+                            700: '#c88600'
                         }
                     },
                     fontFamily: {
@@ -55,19 +55,19 @@
 
     <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6 min-h-screen">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-green-600">
+            <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-brand-600">
                 <div class="text-sm text-slate-500">Total Companies</div>
                 <div class="text-2xl font-semibold">12</div>
             </div>
-            <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-green-600">
+            <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-brand-600">
                 <div class="text-sm text-slate-500">Total Employees</div>
                 <div class="text-2xl font-semibold">847</div>
             </div>
-            <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-green-600">
+            <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-brand-600">
                 <div class="text-sm text-slate-500">Monthly Revenue</div>
                 <div class="text-2xl font-semibold mono">TZS 5,250,000</div>
             </div>
-            <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-green-600">
+            <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-brand-600">
                 <div class="text-sm text-slate-500">Active Users</div>
                 <div class="text-2xl font-semibold">156</div>
             </div>
@@ -94,14 +94,14 @@
                             <td class="px-4 py-3 text-sm text-right mono">TZS 2,500,000</td>
                             <td class="px-4 py-3 text-sm text-right">320</td>
                             <td class="px-4 py-3 text-sm"><span
-                                    class="px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs">Active</span></td>
+                                    class="px-2 py-1 bg-brand-50 text-brand-700 rounded-md text-xs">Active</span></td>
                         </tr>
                         <tr>
                             <td class="px-4 py-3 text-sm">Goodness Kenya Ltd</td>
                             <td class="px-4 py-3 text-sm text-right mono">TZS 1,550,000</td>
                             <td class="px-4 py-3 text-sm text-right">215</td>
                             <td class="px-4 py-3 text-sm"><span
-                                    class="px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs">Active</span></td>
+                                    class="px-2 py-1 bg-brand-50 text-brand-700 rounded-md text-xs">Active</span></td>
                         </tr>
                         <tr>
                             <td class="px-4 py-3 text-sm">Goodness Uganda Ltd</td>

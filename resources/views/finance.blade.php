@@ -12,11 +12,11 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d'
+                            50: '#fff8e5',
+                            100: '#fde6a1',
+                            500: '#f0b73a',
+                            600: '#eaa106',
+                            700: '#c88600'
                         }
                     },
                     fontFamily: {
@@ -28,6 +28,9 @@
         }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+        tailwind.config = { theme: { extend: { colors: { brand: {50:'#fff8e5',100:'#fde6a1',500:'#f0b73a',600:'#eaa106',700:'#c88600'} }, fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'] } } } }
+        </script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
         rel="stylesheet">
@@ -63,7 +66,7 @@
             <div class="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex flex-wrap gap-2">
                     <button id="tabInvoices" onclick="setActiveTab('invoices', this)"
-                        class="px-3 py-2 bg-green-50 text-green-700 border-b-2 border-brand-600">Invoices</button>
+                        class="px-3 py-2 bg-brand-50 text-brand-700 border-b-2 border-brand-600">Invoices</button>
                     <button id="tabExpenses" onclick="setActiveTab('expenses', this)"
                         class="px-3 py-2 text-slate-600">Expenses</button>
                     <button id="tabPayments" onclick="setActiveTab('payments', this)"
@@ -116,7 +119,7 @@
                                             <td class="px-4 py-3 text-sm">${i.company}</td>
                                             <td class="px-4 py-3 text-sm text-right mono">${formatTZS(i.amount)}</td>
                                             <td class="px-4 py-3 text-sm text-center">
-                                                <span class="inline-block px-2 py-1 ${i.status === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-slate-50 text-slate-700'} rounded-md text-xs">${i.status}</span>
+                                                <span class="inline-block px-2 py-1 ${i.status === 'Paid' ? 'bg-brand-50 text-brand-700' : 'bg-slate-50 text-slate-700'} rounded-md text-xs">${i.status}</span>
                                             </td>
                                         </tr>`).join('')}
                             </tbody>
@@ -309,12 +312,12 @@
             tabs.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.classList.remove('bg-green-50', 'text-green-700', 'border-brand-600', 'border-b-2');
+                el.classList.remove('bg-brand-50', 'text-brand-700', 'border-brand-600', 'border-b-2');
                 el.classList.add('text-slate-600');
             });
 
             if (btnEl) {
-                btnEl.classList.add('bg-green-50', 'text-green-700', 'border-brand-600', 'border-b-2');
+                btnEl.classList.add('bg-brand-50', 'text-brand-700', 'border-brand-600', 'border-b-2');
                 btnEl.classList.remove('text-slate-600');
             }
 

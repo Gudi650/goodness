@@ -10,7 +10,7 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {50:'#f0fdf4',100:'#dcfce7',500:'#22c55e',600:'#16a34a',700:'#15803d'}
+                        brand: {50:'#fff8e5',100:'#fde6a1',500:'#f0b73a',600:'#eaa106',700:'#c88600'}
                     },
                     fontFamily: { sans:['Inter','sans-serif'], display:['Outfit','sans-serif'] }
                 }
@@ -44,7 +44,7 @@
 
             {{-- Display success message if provided --}}
             @if (session('success'))
-                <div class="mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                <div class="mb-4 text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded-md px-3 py-2">
                     {{ session('success') }}
                 </div>
             @endif
@@ -64,7 +64,7 @@
                         name="email" 
                         placeholder="you@company.tz" 
                         value="{{ old('email') }}"
-                        class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('email') border-red-500 @enderror" 
+                        class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('email') border-red-500 @enderror" 
                         required
                     />
                     {{-- Show validation error for email field if it exists --}}
@@ -82,7 +82,7 @@
                             type="password" 
                             name="password" 
                             placeholder="••••••••" 
-                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('password') border-red-500 @enderror" 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('password') border-red-500 @enderror" 
                             required
                         />
                         {{-- Show/Hide password toggle button --}}

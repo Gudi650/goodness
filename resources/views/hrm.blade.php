@@ -33,11 +33,11 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
+                            50: '#fff8e5',
+                            100: '#fde6a1',
+                            500: '#f0b73a',
+                            600: '#eaa106',
+                            700: '#c88600',
                         }
                     },
                     fontFamily: {
@@ -421,7 +421,7 @@
           <td class="px-4 py-3 text-sm">${e.position}</td>
           <td class="px-4 py-3 text-sm">${e.company}</td>
           <td class="px-4 py-3 text-sm">${e.joinDate}</td>
-          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-green-50 text-green-700 text-xs font-medium">${e.status}</span></td>
+          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">${e.status}</span></td>
         </tr>
       `).join('');
         }
@@ -435,7 +435,7 @@
           <td class="px-4 py-3 text-sm">${a.checkin || '-'}</td>
           <td class="px-4 py-3 text-sm">${a.checkout || '-'}</td>
           <td class="px-4 py-3 text-sm">${a.hours}</td>
-          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${a.status === 'Present' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'} text-xs font-medium">${a.status}</span></td>
+          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${a.status === 'Present' ? 'bg-brand-50 text-brand-700' : 'bg-red-50 text-red-700'} text-xs font-medium">${a.status}</span></td>
         </tr>
       `).join('');
         }
@@ -449,9 +449,9 @@
           <td class="px-4 py-3 text-sm">${l.from}</td>
           <td class="px-4 py-3 text-sm">${l.to}</td>
           <td class="px-4 py-3 text-sm">${l.days}</td>
-          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${l.status === 'Approved' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'} text-xs font-medium">${l.status}</span></td>
+          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${l.status === 'Approved' ? 'bg-brand-50 text-brand-700' : 'bg-amber-50 text-amber-700'} text-xs font-medium">${l.status}</span></td>
           <td class="px-4 py-3 text-sm space-x-2">
-            ${l.status === 'Pending' ? `<button onclick="approveLeave(${l.id})" class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded hover:bg-green-100">Approve</button><button onclick="rejectLeave(${l.id})" class="px-2 py-1 bg-red-50 text-red-700 text-xs rounded hover:bg-red-100">Reject</button>` : '-'}
+            ${l.status === 'Pending' ? `<button onclick="approveLeave(${l.id})" class="px-2 py-1 bg-brand-50 text-brand-700 text-xs rounded hover:bg-brand-100">Approve</button><button onclick="rejectLeave(${l.id})" class="px-2 py-1 bg-red-50 text-red-700 text-xs rounded hover:bg-red-100">Reject</button>` : '-'}
           </td>
         </tr>
       `).join('');
@@ -465,7 +465,7 @@
           <td class="px-4 py-3 text-sm">TZS ${p.basic.toLocaleString()}</td>
           <td class="px-4 py-3 text-sm">TZS ${p.deductions.toLocaleString()}</td>
           <td class="px-4 py-3 text-sm">TZS ${p.netPay.toLocaleString()}</td>
-          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${p.status === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'} text-xs font-medium">${p.status}</span></td>
+          <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${p.status === 'Paid' ? 'bg-brand-50 text-brand-700' : 'bg-amber-50 text-amber-700'} text-xs font-medium">${p.status}</span></td>
         </tr>
       `).join('');
         }

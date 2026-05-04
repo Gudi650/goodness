@@ -12,11 +12,11 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d'
+                            50: '#fff8e5',
+                            100: '#fde6a1',
+                            500: '#f0b73a',
+                            600: '#eaa106',
+                            700: '#c88600'
                         }
                     },
                     fontFamily: {
@@ -35,10 +35,6 @@
         body {
             font-family: Inter, sans-serif
         }
-
-        h1,
-        h2,
-        nav,
         button {
             font-family: Outfit, sans-serif
         }
@@ -67,7 +63,7 @@
 
             {{-- Show success messages if the controller sends one --}}
             @if (session('success'))
-                <div class="mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                <div class="mb-4 text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded-md px-3 py-2">
                     {{ session('success') }}
                 </div>
             @endif
@@ -80,7 +76,7 @@
                 <div>
                     <label for="name" class="block text-sm text-slate-500 mb-2">Full Name</label>
                     <input id="name" name="name" type="text" placeholder="Jane Doe" value="{{ old('name') }}"
-                        class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('name') border-red-500 @enderror"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('name') border-red-500 @enderror"
                         required />
                     @error('name')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -90,7 +86,8 @@
                 <div>
                     <label for="email" class="block text-sm text-slate-500 mb-2">Email</label>
                     <input id="email" name="email" type="email" placeholder="you@company.tz" value="{{ old('email') }}"
-                        class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('email') border-red-500 @enderror"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('email') border-red-500 @enderror"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('email') border-red-500 @enderror"
                         required />
                     @error('email')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -101,7 +98,8 @@
                     <label for="password" class="block text-sm text-slate-500 mb-2">Password</label>
                     <div class="relative">
                         <input id="password" name="password" type="password" placeholder="At least 6 characters"
-                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('password') border-red-500 @enderror"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('password') border-red-500 @enderror"
+                                class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('password') border-red-500 @enderror"
                             required />
                         <button id="togglePassword" type="button" class="absolute right-2 top-2 text-sm text-slate-500">Show</button>
                     </div>
@@ -114,7 +112,8 @@
                     <label for="password_confirmation" class="block text-sm text-slate-500 mb-2">Confirm Password</label>
                     <div class="relative">
                         <input id="passwordConfirm" name="password_confirmation" type="password" placeholder="Re-enter password"
-                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                                class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                             required />
                         <button id="togglePasswordConfirm" type="button" class="absolute right-2 top-2 text-sm text-slate-500">Show</button>
                     </div>

@@ -33,11 +33,11 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
+                            50: '#fff8e5',
+                            100: '#fde6a1',
+                            500: '#f0b73a',
+                            600: '#eaa106',
+                            700: '#c88600',
                         }
                     },
                     fontFamily: {
@@ -311,7 +311,7 @@
                     <td class="px-4 py-3 text-sm">${c.phone}</td>
                     <td class="px-4 py-3 text-sm">${c.email}</td>
                     <td class="px-4 py-3 text-sm">${c.assignedTo}</td>
-                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${c.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'} text-xs font-medium">${c.status}</span></td>
+                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${c.status === 'Active' ? 'bg-brand-50 text-brand-700' : 'bg-slate-100 text-slate-600'} text-xs font-medium">${c.status}</span></td>
                 </tr>
             `).join('');
                 }
@@ -327,7 +327,7 @@
                     <td class="px-4 py-3 text-sm">${o.description}</td>
                     <td class="px-4 py-3 text-sm">TZS ${o.total.toLocaleString()}</td>
                     <td class="px-4 py-3 text-sm">${o.date}</td>
-                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${o.status === 'Completed' ? 'bg-green-50 text-green-700' : o.status === 'In Progress' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'} text-xs font-medium">${o.status}</span></td>
+                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${o.status === 'Completed' ? 'bg-brand-50 text-brand-700' : o.status === 'In Progress' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'} text-xs font-medium">${o.status}</span></td>
                 </tr>
             `).join('');
                 }
@@ -343,7 +343,7 @@
                     <td class="px-4 py-3 text-sm">TZS ${c.value.toLocaleString()}</td>
                     <td class="px-4 py-3 text-sm">${c.startDate}</td>
                     <td class="px-4 py-3 text-sm">${c.endDate}</td>
-                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${c.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'} text-xs font-medium">${c.status}</span></td>
+                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded ${c.status === 'Active' ? 'bg-brand-50 text-brand-700' : 'bg-red-50 text-red-700'} text-xs font-medium">${c.status}</span></td>
                 </tr>
             `).join('');
                 }

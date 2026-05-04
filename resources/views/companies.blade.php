@@ -6,7 +6,7 @@
     <title>Companies - Goodness Group</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { brand: {50:'#f0fdf4',100:'#dcfce7',500:'#22c55e',600:'#16a34a',700:'#15803d'} }, fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'] } } } }
+        tailwind.config = { theme: { extend: { colors: { brand: {50:'#fff8e5',100:'#fde6a1',500:'#f0b73a',600:'#eaa106',700:'#c88600'} }, fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'] } } } }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
     <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6 min-h-screen">
         {{-- Success message after creating a company --}}
         @if (session('success'))
-            <div class="mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+            <div class="mb-4 text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded-md px-3 py-2">
                 {{ session('success') }}
             </div>
         @endif
@@ -63,7 +63,7 @@
                             <td class="px-4 py-3 text-sm">{{ $company->country }}</td>
                             <td class="px-4 py-3 text-sm text-right mono">TZS {{ number_format((float) $company->revenue, 0) }}</td>
                             <td class="px-4 py-3 text-sm text-center">
-                                <span class="inline-block px-2 py-1 {{ $company->status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-slate-50 text-slate-600' }} rounded-md text-xs">
+                                <span class="inline-block px-2 py-1 {{ $company->status === 'Active' ? 'bg-brand-50 text-brand-700' : 'bg-slate-50 text-slate-600' }} rounded-md text-xs">
                                     {{ $company->status }}
                                 </span>
                             </td>

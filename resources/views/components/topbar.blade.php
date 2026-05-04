@@ -34,7 +34,7 @@
                 <select
                     name="company_id"
                     onchange="this.form.submit()"
-                    class="block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-green-500 focus:outline-none max-w-xs truncate">
+                    class="block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none max-w-xs truncate">
                     <option value="" @selected(is_null($activeCompanyId))>All companies</option>
 
                     @forelse ($companyOptions as $company)
@@ -60,7 +60,7 @@
                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0018 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
             </button>
-            <span class="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-brand-500 rounded-full"></span>
         </div>
 
         <!-- User Info -->
@@ -68,7 +68,7 @@
             <div class="text-right hidden lg:block">
                 {{-- Display the authenticated user's name --}}
                 <p class="text-sm font-medium text-slate-700">{{ auth()->user()?->name ?? 'User' }}</p>
-                <p class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">
+                <p class="text-xs px-2 py-0.5 rounded bg-brand-100 text-brand-700 font-medium">
                     {{ $isAdmin ? 'Admin' : ($currentUser?->role?->name ?? 'User') }}
                 </p>
             </div>
