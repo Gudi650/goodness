@@ -346,6 +346,9 @@
                                     Description</th>
                                 <th
                                     class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
+                                    Company</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
                                     Created</th>
                             </tr>
                         </thead>
@@ -354,11 +357,12 @@
                                 <tr class="hover:bg-slate-50">
                                     <td class="px-4 py-3 text-sm font-medium">{{ $department['name'] }}</td>
                                     <td class="px-4 py-3 text-sm">{{ $department['description'] }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ $department['company_name'] }}</td>
                                     <td class="px-4 py-3 text-sm">{{ $department['created_at'] }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-4 py-6 text-sm text-slate-500 text-center">No departments found. Create your first department.</td>
+                                    <td colspan="4" class="px-4 py-6 text-sm text-slate-500 text-center">No departments found. Create your first department.</td>
                                 </tr>
                             @endforelse
                         </tbody>

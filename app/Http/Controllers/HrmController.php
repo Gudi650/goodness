@@ -22,7 +22,7 @@ class HrmController extends Controller
         $currentUser = Auth::user();
         $isAdmin = $currentUser?->role?->name === 'Admin';
         $activeCompanyId = session('active_company_id');
-        
+
         $companies = $isAdmin
             ? Company::query()->orderBy('name', 'asc')->get()
             : collect($currentUser?->company ? [$currentUser->company] : []);
@@ -66,6 +66,7 @@ class HrmController extends Controller
         }
 
         $departments = $departmentsQuery
+            ->with('company')
             ->latest()
             ->get()
             ->map(function (Department $dept) {
@@ -73,6 +74,7 @@ class HrmController extends Controller
                     'id' => $dept->id,
                     'name' => $dept->name,
                     'description' => $dept->description ?? '-',
+                    'company_name' => $dept->company?->name ?? 'Unassigned',
                     'created_at' => optional($dept->created_at)->format('Y-m-d') ?? '-',
                 ];
             })
