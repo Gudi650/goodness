@@ -5,6 +5,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HrmController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -80,9 +81,7 @@ Route::middleware('auth')->group(function () {
     })->name('finance');
 
     // HRM Management
-    Route::get('/hrm', function () {
-        return view('hrm');
-    })->name('hrm');
+    Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
 
     // Sales Management
     Route::get('/sales', function () {
