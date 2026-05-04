@@ -12,20 +12,45 @@
 
     <!-- Right Side -->
     <div class="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-        <!-- Company Selector (visible on all screens) -->
-        <select
-            class="block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-green-500 focus:outline-none max-w-xs truncate">
-            {{-- Load company names directly from the database so the selector stays dynamic. --}}
-            @php
-                $companyOptions = \App\Models\Company::orderBy('name')->get();
-            @endphp
+        @php
+            // Load the available companies for the admin selector.
+            $companyOptions = \App\Models\Company::orderBy('name')->get();
 
-            @forelse ($companyOptions as $company)
-                <option value="{{ $company->id }}">{{ $company->name }}</option>
-            @empty
-                <option disabled selected>No companies available</option>
-            @endforelse
-        </select>
+            // Check whether the current user is an admin.
+            $currentUser = auth()->user();
+            $isAdmin = $currentUser?->role?->name === 'Admin';
+
+            // Read the active company id from the session.
+            $activeCompanyId = session('active_company_id');
+
+            // Normal users are always tied to their own company.
+            $currentCompany = $currentUser?->company;
+        @endphp
+
+        @if ($isAdmin)
+            {{-- Admin selector: can switch between companies or see all companies. --}}
+            <form action="{{ route('active-company.store') }}" method="POST" class="flex items-center">
+                @csrf
+                <select
+                    name="company_id"
+                    onchange="this.form.submit()"
+                    class="block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-green-500 focus:outline-none max-w-xs truncate">
+                    <option value="" @selected(is_null($activeCompanyId))>All companies</option>
+
+                    @forelse ($companyOptions as $company)
+                        <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>{{ $company->name }}</option>
+                    @empty
+                        <option disabled selected>No companies available</option>
+                    @endforelse
+                </select>
+            </form>
+        @else
+            {{-- Normal users only see the company they belong to. --}}
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded-md bg-slate-50 text-xs lg:text-sm text-slate-700 max-w-xs truncate">
+                <span class="font-medium text-slate-500">Company:</span>
+                <span class="truncate">{{ $currentCompany?->name ?? 'No company assigned' }}</span>
+            </div>
+        @endif
 
         <!-- Notification Bell -->
         <div class="relative hidden sm:block">
@@ -43,7 +68,9 @@
             <div class="text-right hidden lg:block">
                 {{-- Display the authenticated user's name --}}
                 <p class="text-sm font-medium text-slate-700">{{ auth()->user()?->name ?? 'User' }}</p>
-                <p class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">Admin</p>
+                <p class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">
+                    {{ $isAdmin ? 'Admin' : ($currentUser?->role?->name ?? 'User') }}
+                </p>
             </div>
 
             {{-- Logout Form - submits POST request to /logout endpoint --}}

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * UserController
@@ -25,8 +26,23 @@ class UserController extends Controller
         // Read search keyword from URL query string
         $search = trim((string) $request->query('search', ''));
 
+        // Determine the active company scope.
+        $currentUser = Auth::user();
+        $isAdmin = $currentUser?->role?->name === 'Admin';
+        $activeCompanyId = session('active_company_id');
+
         // Start building a query for users, eagerly load role and company relationships
         $usersQuery = User::with('role', 'company');
+
+        // Admins can filter by the active company selected in the topbar.
+        // Normal users are locked to the company assigned on their profile.
+        if ($isAdmin) {
+            if (! empty($activeCompanyId)) {
+                $usersQuery->where('company_id', $activeCompanyId);
+            }
+        } else {
+            $usersQuery->where('company_id', $currentUser?->company_id);
+        }
 
         // Apply search filter only when user has typed something
         if ($search !== '') {
@@ -40,10 +56,10 @@ class UserController extends Controller
         $users = $usersQuery->latest()->get();
 
         // Get all available roles for the assignment dropdown
-        $roles = Role::orderBy('name')->get();
+        $roles = Role::all()->sortBy('name')->values();
 
         // Get all available companies for the assignment dropdown
-        $companies = Company::orderBy('name')->get();
+        $companies = Company::all()->sortBy('name')->values();
 
         return view('users', [
             'users' => $users,
@@ -96,7 +112,8 @@ class UserController extends Controller
         $user->update(['company_id' => $validated['company_id']]);
 
         // Redirect back with success message
-        $companyName = Company::find($validated['company_id'])->name ?? 'Unknown';
+        $company = Company::all()->firstWhere('id', $validated['company_id']);
+        $companyName = $company?->name ?? 'Unknown';
         return redirect()
             ->route('users')
             ->with('success', "{$user->name} is now assigned to {$companyName}.");

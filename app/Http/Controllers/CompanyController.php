@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * CompanyController
@@ -12,6 +13,45 @@ use Illuminate\Http\Request;
  */
 class CompanyController extends Controller
 {
+    /**
+     * Save the active company selected from the topbar.
+     *
+     * Admins may switch between companies or choose all companies.
+     * Normal users are forced back to their assigned company so they cannot
+     * override access by changing the dropdown value manually.
+     */
+    public function setActiveCompany(Request $request)
+    {
+        $user = Auth::user();
+
+        // If we do not have a logged-in user, just send them back.
+        if (! $user) {
+            return redirect()->back();
+        }
+
+        $isAdmin = $user->role?->name === 'Admin';
+
+        if ($isAdmin) {
+            // Admins can select any company, or leave it blank to view all companies.
+            $validated = $request->validate([
+                'company_id' => 'nullable|exists:companies,id',
+            ]);
+
+            if (empty($validated['company_id'])) {
+                $request->session()->forget('active_company_id');
+            } else {
+                $request->session()->put('active_company_id', (int) $validated['company_id']);
+            }
+
+            return redirect()->back();
+        }
+
+        // Non-admin users are always locked to their assigned company.
+        $request->session()->put('active_company_id', $user->company_id);
+
+        return redirect()->back();
+    }
+
     /**
      * Show the companies page with data from the database.
      *
@@ -22,8 +62,23 @@ class CompanyController extends Controller
         // Read search keyword from URL query string.
         $search = trim((string) $request->query('search', ''));
 
+        // Determine who is viewing the page so we can apply the right company scope.
+        $currentUser = Auth::user();
+        $isAdmin = $currentUser?->role?->name === 'Admin';
+        $activeCompanyId = session('active_company_id');
+
         // Start building a query for companies.
         $companiesQuery = Company::query();
+
+        // Admins can filter to one company from the session, or see all companies.
+        // Normal users are always limited to their own assigned company.
+        if ($isAdmin) {
+            if (! empty($activeCompanyId)) {
+                $companiesQuery->where('id', $activeCompanyId);
+            }
+        } else {
+            $companiesQuery->where('id', $currentUser?->company_id);
+        }
 
         // Apply search filter only when user has typed something.
         if ($search !== '') {

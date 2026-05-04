@@ -20,6 +20,28 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     /**
+     * Store the correct active company in the session.
+     *
+     * Admin users are allowed to choose any company, so we leave the session
+     * empty until they pick one.
+     * Normal users are locked to the company assigned to their account.
+     */
+    private function syncActiveCompanySession(User $user, Request $request): void
+    {
+        // Load the user's role once so we can make a simple admin check.
+        $userRoleName = $user->role?->name;
+
+        if ($userRoleName === 'Admin') {
+            // Admins can view all companies, so no fixed company is forced.
+            $request->session()->forget('active_company_id');
+            return;
+        }
+
+        // Normal users are always tied to their own company.
+        $request->session()->put('active_company_id', $user->company_id);
+    }
+
+    /**
      * Handle signup form submission
      *
      * This method:
@@ -55,7 +77,7 @@ class AuthController extends Controller
         //  Get the Employee role ID.
         // All new signups start as employees for safety.
         // Admins can change roles later from the Users page.
-        $employeeRole = Role::where('name', 'Employee')->first();
+        $employeeRole = Role::all()->firstWhere('name', 'Employee');
 
         // Step 3: Create the user record with the employee role
         // Laravel will hash the password automatically because the User model uses a hashed cast
@@ -72,7 +94,10 @@ class AuthController extends Controller
         // Step 5: Regenerate the session for security
         $request->session()->regenerate();
 
-        // Step 6: Send the user to the dashboard with a success message
+        // Step 6: Save the active company context in the session.
+        $this->syncActiveCompanySession($user, $request);
+
+        // Step 7: Send the user to the dashboard with a success message
         return redirect()
             ->route('dashboard')
             ->with('success', 'Your account has been created successfully!');
@@ -110,12 +135,19 @@ class AuthController extends Controller
         // Step 2: Try to authenticate using Laravel's Auth facade
         // This will check if a user exists with this email and verify the password
         if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
+            // Get the authenticated user so we can set the active company context.
+            $user = Auth::user();
             
             // Step 3: If authentication succeeds, regenerate the session
             // This is a security best practice to prevent session fixation attacks
             $request->session()->regenerate();
 
-            // Step 4: Redirect to the dashboard
+            // Step 4: Save the active company context in the session.
+            if ($user instanceof User) {
+                $this->syncActiveCompanySession($user, $request);
+            }
+
+            // Step 5: Redirect to the dashboard
             return redirect()->route('dashboard')->with('success', 'You have been logged in successfully!');
         }
 
