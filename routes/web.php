@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HrmController;
+use App\Http\Controllers\DepartmentController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -82,6 +83,7 @@ Route::middleware('auth')->group(function () {
 
     // HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
+    Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
 
     // Sales Management
     Route::get('/sales', function () {

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>HRM - Goodness ERP</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -66,6 +67,8 @@
                     class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Leave</button>
                 <button onclick="switchTab('payroll', this)"
                     class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Payroll</button>
+                <button onclick="switchTab('departments', this)"
+                    class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Departments</button>
             </div>
         </div>
 
@@ -320,7 +323,85 @@
                 </div>
             </div>
         </div>
+
+        <div id="tab-departments" class="tab-content hidden">
+            <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
+                <h2 class="text-lg font-semibold font-display">Departments</h2>
+                <button onclick="openAddDepartmentModal()"
+                    class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
+                    Department</button>
+            </div>
+            <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th
+                                    class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
+                                    Name</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
+                                    Description</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
+                                    Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="departmentsTable" class="divide-y divide-slate-100">
+                            @forelse($departments as $department)
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-4 py-3 text-sm font-medium">{{ $department['name'] }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ $department['description'] }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ $department['created_at'] }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-4 py-6 text-sm text-slate-500 text-center">No departments found. Create your first department.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <div id="addDepartmentModal"
+        class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
+            <h2 class="text-lg font-semibold font-display mb-4">Add Department</h2>
+            <form id="departmentForm" method="POST" action="{{ route('departments.store') }}" class="space-y-6">
+                @csrf
+                <div class="space-y-4">
+                    @if ($isAdmin)
+                        <select name="company_id"
+                            class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600"
+                            required>
+                            <option value="">Select Company</option>
+                            @foreach ($companies as $company)
+                                <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>
+                                    {{ $company->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @else
+                        <input type="hidden" name="company_id" value="{{ auth()->user()?->company_id }}">
+                    @endif
+                    <input type="text" name="name" placeholder="Department Name"
+                        class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="deptName" required />
+                    <textarea name="description" placeholder="Description (optional)"
+                        class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="deptDesc" rows="3"></textarea>
+                </div>
+
+                <div class="flex gap-3 justify-end pt-2">
+                    <button type="button" onclick="closeAddDepartmentModal()"
+                        class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div id="addEmployeeModal"
         class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
@@ -329,10 +410,9 @@
             <div class="space-y-4">
                 <input type="text" placeholder="Full Name"
                     class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" id="empName" />
-                <input type="text" placeholder="Department"
-                    class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" id="empDept" />
-                <input type="text" placeholder="Position"
-                    class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" id="empPos" />
+                <select class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" id="empDept">
+                    <option value="">Select Department</option>
+                </select>
                 <select class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" id="empCompany">
                     <option>Goodness Tanzania Ltd</option>
                     <option>Goodness Kenya Ltd</option>
@@ -352,6 +432,7 @@
 
     <script>
         const employeeNames = @json($employeeNames);
+        const departments = @json($departments);
 
         const attendance = [{
                 id: 1,
@@ -444,6 +525,7 @@
         }
 
         function openAddEmployeeModal() {
+            populateDepartmentDropdown();
             document.getElementById('addEmployeeModal').classList.remove('hidden');
         }
 
@@ -458,8 +540,22 @@
                 closeAddEmployeeModal();
                 document.getElementById('empName').value = '';
                 document.getElementById('empDept').value = '';
-                document.getElementById('empPos').value = '';
                 document.getElementById('empJoinDate').value = '';
+            } else {
+                window.showAlert('error', 'Full name is required.');
+            }
+        }
+
+        function populateDepartmentDropdown() {
+            const deptSelect = document.getElementById('empDept');
+            if (deptSelect) {
+                deptSelect.innerHTML = '<option value="">Select Department</option>';
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept.id;
+                    option.textContent = dept.name;
+                    deptSelect.appendChild(option);
+                });
             }
         }
 
@@ -513,6 +609,15 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('-translate-x-full');
         }
+
+        function openAddDepartmentModal() {
+            document.getElementById('addDepartmentModal').classList.remove('hidden');
+        }
+
+        function closeAddDepartmentModal() {
+            document.getElementById('addDepartmentModal').classList.add('hidden');
+        }
+
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {

@@ -23,4 +23,12 @@ class Company extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /**
+     * Get all departments that belong to this company.
+     */
+    public function departments(): HasMany
+    {
+        return $this->hasMany(Department::class);
+    }
 }
