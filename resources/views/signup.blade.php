@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Goodness Group - Sign Up</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -75,7 +76,7 @@
 
                 <div>
                     <label for="name" class="block text-sm text-slate-500 mb-2">Full Name</label>
-                    <input id="name" name="name" type="text" placeholder="Jane Doe" value="{{ old('name') }}"
+                    <input id="name" name="name" type="text" placeholder="Hamis Juma" value="{{ old('name') }}"
                         class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('name') border-red-500 @enderror"
                         required />
                     @error('name')
