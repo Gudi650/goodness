@@ -57,205 +57,423 @@
         <div class="bg-white border border-slate-200 rounded-lg p-4">
             <div class="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex flex-wrap gap-2">
-                    <button id="tabProducts" class="px-3 py-2 text-green-700 border-b-2 border-brand-600">Products</button>
+                    <button id="tabProducts"
+                        class="px-3 py-2 text-green-700 border-b-2 border-brand-600">Products</button>
                     <button id="tabSuppliers" class="px-3 py-2 text-slate-600">Suppliers</button>
                     <button id="tabPO" class="px-3 py-2 text-slate-600">Purchase Orders</button>
                 </div>
-                <div id="actionButton" class="w-full lg:w-auto"></div>
+                <div id="actionButton" class="w-full lg:w-auto">
+                    <div id="actionSuppliers" class="w-full lg:w-auto hidden">
+                        <button onclick="openLocalModal('modalAddSupplier')"
+                            class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                            Supplier</button>
+                    </div>
+                    <div id="actionProducts" class="w-full lg:w-auto hidden">
+                        <button onclick="openLocalModal('modalAddProduct')"
+                            class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                            Product</button>
+                    </div>
+                    <div id="actionPO" class="w-full lg:w-auto hidden">
+                        <button onclick="openLocalModal('modalAddPO')"
+                            class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Add
+                            Purchase Order</button>
+                    </div>
+                </div>
             </div>
-            <div id="invContent"></div>
+            <!-- Products (server-rendered/hard-coded HTML table) -->
+            <div id="productsSection" class="inv-section">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Inventory ID</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Product Name</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">SKU</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Quantity in Stock</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Total Value</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-4 py-3 text-sm">INV-1001</td>
+                                <td class="px-4 py-3 text-sm">Hydraulic Drill Bit</td>
+                                <td class="px-4 py-3 text-sm">MIN-DRL-001</td>
+                                <td class="px-4 py-3 text-sm text-right">120</td>
+                                <td class="px-4 py-3 text-sm text-right">54,000.00</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <div class="flex justify-end items-center gap-2 whitespace-nowrap">
+                                        <button type="button" title="View" onclick="toggleProductDetails('p1')" class="p-1.5 rounded-md text-slate-600 hover:bg-slate-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" title="Edit" class="p-1.5 rounded-md text-blue-600 hover:bg-blue-50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" title="Delete" class="p-1.5 rounded-md text-red-600 hover:bg-red-50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21.75H8.084a2.25 2.25 0 0 1-2.245-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.875c0-1.035-.84-1.875-1.875-1.875h-3.75C9.09 3 8.25 3.84 8.25 4.875v.518" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="details-p1" class="hidden bg-slate-50/40">
+                                <td colspan="6" class="px-4 py-3">
+                                    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                                        <div class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Product Details</div>
+                                        <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Category:</span> <span class="font-medium text-slate-800">Mining Equipment</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Unit of Measure:</span> <span class="font-medium text-slate-800">pieces</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Location:</span> <span class="font-medium text-slate-800">Main Warehouse</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Reorder Level:</span> <span class="font-medium text-slate-800">40</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Supplier ID:</span> <span class="font-medium text-slate-800">SUP-001</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Cost per Unit:</span> <span class="font-medium text-slate-800">450.00</span></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 text-sm">INV-1002</td>
+                                <td class="px-4 py-3 text-sm">Agro-Vet Antibiotic</td>
+                                <td class="px-4 py-3 text-sm">AGV-MED-014</td>
+                                <td class="px-4 py-3 text-sm text-right">250</td>
+                                <td class="px-4 py-3 text-sm text-right">8,125.00</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <div class="flex justify-end items-center gap-2 whitespace-nowrap">
+                                        <button type="button" title="View" onclick="toggleProductDetails('p2')" class="p-1.5 rounded-md text-slate-600 hover:bg-slate-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" title="Edit" class="p-1.5 rounded-md text-blue-600 hover:bg-blue-50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" title="Delete" class="p-1.5 rounded-md text-red-600 hover:bg-red-50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21.75H8.084a2.25 2.25 0 0 1-2.245-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.875c0-1.035-.84-1.875-1.875-1.875h-3.75C9.09 3 8.25 3.84 8.25 4.875v.518" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="details-p2" class="hidden bg-slate-50/40">
+                                <td colspan="6" class="px-4 py-3">
+                                    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                                        <div class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Product Details</div>
+                                        <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Category:</span> <span class="font-medium text-slate-800">Agro-Vet Medicine</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Unit of Measure:</span> <span class="font-medium text-slate-800">liters</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Location:</span> <span class="font-medium text-slate-800">Site Store A</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Reorder Level:</span> <span class="font-medium text-slate-800">80</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Supplier ID:</span> <span class="font-medium text-slate-800">SUP-002</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Cost per Unit:</span> <span class="font-medium text-slate-800">32.50</span></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 text-sm">INV-1003</td>
+                                <td class="px-4 py-3 text-sm">Hybrid Maize Seeds</td>
+                                <td class="px-4 py-3 text-sm">SED-MAZ-210</td>
+                                <td class="px-4 py-3 text-sm text-right">75</td>
+                                <td class="px-4 py-3 text-sm text-right">1,350.00</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <div class="flex justify-end items-center gap-2 whitespace-nowrap">
+                                        <button type="button" title="View" onclick="toggleProductDetails('p3')" class="p-1.5 rounded-md text-slate-600 hover:bg-slate-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" title="Edit" class="p-1.5 rounded-md text-blue-600 hover:bg-blue-50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" title="Delete" class="p-1.5 rounded-md text-red-600 hover:bg-red-50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21.75H8.084a2.25 2.25 0 0 1-2.245-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.875c0-1.035-.84-1.875-1.875-1.875h-3.75C9.09 3 8.25 3.84 8.25 4.875v.518" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="details-p3" class="hidden bg-slate-50/40">
+                                <td colspan="6" class="px-4 py-3">
+                                    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                                        <div class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Product Details</div>
+                                        <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Category:</span> <span class="font-medium text-slate-800">Seeds</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Unit of Measure:</span> <span class="font-medium text-slate-800">kg</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Location:</span> <span class="font-medium text-slate-800">Regional Warehouse</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Reorder Level:</span> <span class="font-medium text-slate-800">25</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Supplier ID:</span> <span class="font-medium text-slate-800">SUP-001</span></div>
+                                            <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Cost per Unit:</span> <span class="font-medium text-slate-800">18.00</span></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Suppliers (server-rendered/hard-coded HTML) -->
+            <div id="suppliersSection" class="inv-section hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Supplier</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Contact</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Email</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-4 py-3 text-sm">Supplier Inc</td>
+                                <td class="px-4 py-3 text-sm">John Doe</td>
+                                <td class="px-4 py-3 text-sm">contact@supplier.com</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 text-sm">Acme Co</td>
+                                <td class="px-4 py-3 text-sm">Jane Smith</td>
+                                <td class="px-4 py-3 text-sm">sales@acme.co</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Purchase Orders (server-rendered/hard-coded HTML) -->
+            <div id="poSection" class="inv-section hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">PO Number</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Supplier</th>
+                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-4 py-3 text-sm">PO-001</td>
+                                <td class="px-4 py-3 text-sm">Supplier Inc</td>
+                                <td class="px-4 py-3 text-sm text-right">$1,200.00</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 text-sm">PO-002</td>
+                                <td class="px-4 py-3 text-sm">Acme Co</td>
+                                <td class="px-4 py-3 text-sm text-right">$450.50</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 
-    <script>
-        const products = [{
-            id: 1,
-            name: 'Widget A',
-            sku: 'W-A',
-            stock: 120
-        }, {
-            id: 2,
-            name: 'Widget B',
-            sku: 'W-B',
-            stock: 45
-        }];
-
-        const suppliers = [];
-        const purchaseOrders = [];
-
-        function renderProducts() {
-            return `<div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-slate-50"><tr><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Product</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">SKU</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Stock</th></tr></thead><tbody class="divide-y divide-slate-100">${products.map(p=>`<tr><td class="px-4 py-3 text-sm">${p.name}</td><td class="px-4 py-3 text-sm">${p.sku}</td><td class="px-4 py-3 text-sm text-right">${p.stock}</td></tr>`).join('')}</tbody></table></div>`;
-        }
-
-        function renderSuppliers() {
-            if (suppliers.length === 0) return '<p class="text-sm text-slate-500">No suppliers yet.</p>';
-            return `<div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-slate-50"><tr><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Supplier</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Contact</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Email</th></tr></thead><tbody class="divide-y divide-slate-100">${suppliers.map(s=>`<tr><td class="px-4 py-3 text-sm">${s.name}</td><td class="px-4 py-3 text-sm">${s.contact}</td><td class="px-4 py-3 text-sm">${s.email}</td></tr>`).join('')}</tbody></table></div>`;
-        }
-
-        function renderPurchaseOrders() {
-            if (purchaseOrders.length === 0) return '<p class="text-sm text-slate-500">No purchase orders yet.</p>';
-            return `<div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-slate-50"><tr><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">PO Number</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Supplier</th><th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Amount</th></tr></thead><tbody class="divide-y divide-slate-100">${purchaseOrders.map(po=>`<tr><td class="px-4 py-3 text-sm">${po.poNumber}</td><td class="px-4 py-3 text-sm">${po.supplier}</td><td class="px-4 py-3 text-sm text-right">${po.amount.toLocaleString()}</td></tr>`).join('')}</tbody></table></div>`;
-        }
-
-        function renderButton(label, onclick) {
-            return `<button onclick="${onclick}" class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">${label}</button>`;
-        }
-
-        function openAddProductModal() {
-            const body = `
+    <!-- Static Add Product Modal -->
+    <div id="modalAddProduct" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-lg max-w-lg w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium">Add Product</h3>
+                <button onclick="closeLocalModal('modalAddProduct')"
+                    class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <form method="POST" action="#" onsubmit="submitAddProduct(event)">
+                @csrf
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Product Name</label>
-                        <input type="text" id="productName" placeholder="Widget C" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <input type="text" name="name" placeholder="Widget C"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                        <input type="text" name="category" placeholder="Gadgets"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">SKU</label>
-                        <input type="text" id="productSku" placeholder="W-C" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <input type="text" name="sku" placeholder="W-C"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Price</label>
+                        <input type="number" step="0.01" name="price" placeholder="0.00"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Stock Quantity</label>
-                        <input type="number" id="productStock" placeholder="0" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <input type="number" name="stock" placeholder="0"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                 </div>
-            `;
-            window.openModal('Add Product', body, () => {
-                const name = document.getElementById('productName').value.trim();
-                const sku = document.getElementById('productSku').value.trim();
-                const stock = parseInt(document.getElementById('productStock').value) || 0;
+                <div class="mt-6 flex justify-end gap-2">
+                    <button type="button" onclick="closeLocalModal('modalAddProduct')"
+                        class="px-4 py-2 border rounded-md">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-md">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                if (!name) { window.showAlert('error', 'Product name is required'); return false; }
-                if (!sku) { window.showAlert('error', 'SKU is required'); return false; }
-                if (stock < 0) { window.showAlert('error', 'Stock must be 0 or greater'); return false; }
-
-                products.push({ id: Date.now(), name, sku, stock });
-                setActiveTab('tabProducts');
-                window.closeModal();
-                window.showAlert('success', 'Product added successfully');
-                return true;
-            });
-        }
-
-        function openAddSupplierModal() {
-            const body = `
+    <!-- Static Add Supplier Modal -->
+    <div id="modalAddSupplier" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-lg max-w-lg w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium">Add Supplier</h3>
+                <button onclick="closeLocalModal('modalAddSupplier')"
+                    class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <form method="POST" action="#" onsubmit="submitAddSupplier(event)">
+                @csrf
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Supplier Name</label>
-                        <input type="text" id="supplierName" placeholder="Supplier Inc" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <input type="text" name="name" placeholder="Supplier Inc"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Contact Person</label>
-                        <input type="text" id="supplierContact" placeholder="John Doe" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <input type="text" name="contact" placeholder="John Doe"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                        <input type="email" id="supplierEmail" placeholder="contact@supplier.com" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <input type="email" name="email" placeholder="contact@supplier.com"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                 </div>
-            `;
-            window.openModal('Add Supplier', body, () => {
-                const name = document.getElementById('supplierName').value.trim();
-                const contact = document.getElementById('supplierContact').value.trim();
-                const email = document.getElementById('supplierEmail').value.trim();
+                <div class="mt-6 flex justify-end gap-2">
+                    <button type="button" onclick="closeLocalModal('modalAddSupplier')"
+                        class="px-4 py-2 border rounded-md">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-md">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                if (!name) { window.showAlert('error', 'Supplier name is required'); return false; }
-                if (!contact) { window.showAlert('error', 'Contact person is required'); return false; }
-                if (!email) { window.showAlert('error', 'Email is required'); return false; }
-
-                suppliers.push({ id: Date.now(), name, contact, email });
-                setActiveTab('tabSuppliers');
-                window.closeModal();
-                window.showAlert('success', 'Supplier added successfully');
-                return true;
-            });
-        }
-
-        function openAddPOModal() {
-            const body = `
+    <!-- Static Add Purchase Order Modal -->
+    <div id="modalAddPO" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-lg max-w-lg w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium">Add Purchase Order</h3>
+                <button onclick="closeLocalModal('modalAddPO')" class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <form method="POST" action="#" onsubmit="submitAddPO(event)">
+                @csrf
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">PO Number</label>
-                        <input type="text" id="poNumber" placeholder="PO-001" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <input type="text" name="poNumber" placeholder="PO-001"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Supplier</label>
-                        <select id="poSupplier" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <select name="supplier" class="w-full px-3 py-2 border border-slate-300 rounded-md">
                             <option value="">-- Select Supplier --</option>
-                            ${suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
+                            <option value="Supplier Inc">Supplier Inc</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Amount</label>
-                        <input type="number" id="poAmount" placeholder="0" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                        <input type="number" name="amount" placeholder="0"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md">
                     </div>
                 </div>
-            `;
-            window.openModal('Add Purchase Order', body, () => {
-                const poNumber = document.getElementById('poNumber').value.trim();
-                const supplier = document.getElementById('poSupplier').value;
-                const amount = parseFloat(document.getElementById('poAmount').value) || 0;
+                <div class="mt-6 flex justify-end gap-2">
+                    <button type="button" onclick="closeLocalModal('modalAddPO')"
+                        class="px-4 py-2 border rounded-md">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-md">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                if (!poNumber) { window.showAlert('error', 'PO Number is required'); return false; }
-                if (!supplier) { window.showAlert('error', 'Please select a supplier'); return false; }
-                if (amount <= 0) { window.showAlert('error', 'Amount must be greater than 0'); return false; }
-
-                purchaseOrders.push({ id: Date.now(), poNumber, supplier, amount });
-                setActiveTab('tabPO');
-                window.closeModal();
-                window.showAlert('success', 'Purchase order added successfully');
-                return true;
-            });
-        }
-
+    <script>
+        // Minimal JS to handle tab and modal visibility. Tables and modal content are static HTML.
         function setActiveTab(activeId) {
             const tabs = ['tabProducts', 'tabSuppliers', 'tabPO'];
             tabs.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
+                const tabBtn = document.getElementById(id);
+                const section = document.getElementById(id.replace('tab', '').toLowerCase() + 'Section');
+                const action = document.getElementById('action' + id.replace('tab', ''));
+                if (!tabBtn || !section) return;
                 if (id === activeId) {
-                    el.classList.remove('text-slate-600');
-                    el.classList.add('text-black', 'border-b-2', 'border-brand-600','font-bold');
+                    tabBtn.classList.remove('text-slate-600');
+                    tabBtn.classList.add('text-black', 'border-b-2', 'border-brand-600', 'font-bold');
+                    section.classList.remove('hidden');
+                    if (action) action.classList.remove('hidden');
                 } else {
-                    el.classList.remove('border-b-2', 'border-brand-600','font-bold');
-                    el.classList.add('text-slate-600');
+                    tabBtn.classList.remove('border-b-2', 'border-brand-600', 'font-bold');
+                    tabBtn.classList.add('text-slate-600');
+                    section.classList.add('hidden');
+                    if (action) action.classList.add('hidden');
                 }
             });
-
-            const content = document.getElementById('invContent');
-            const actionButton = document.getElementById('actionButton');
-
-            if (activeId === 'tabProducts') {
-                content.innerHTML = renderProducts();
-                actionButton.innerHTML = renderButton('Add Product', 'openAddProductModal()');
-            } else if (activeId === 'tabSuppliers') {
-                content.innerHTML = renderSuppliers();
-                actionButton.innerHTML = renderButton('Add Supplier', 'openAddSupplierModal()');
-            } else if (activeId === 'tabPO') {
-                content.innerHTML = renderPurchaseOrders();
-                actionButton.innerHTML = renderButton('Add Purchase Order', 'openAddPOModal()');
-            }
         }
 
-        document.getElementById('tabProducts').addEventListener('click', () => {
-            setActiveTab('tabProducts');
-        });
+        document.getElementById('tabProducts').addEventListener('click', () => setActiveTab('tabProducts'));
+        document.getElementById('tabSuppliers').addEventListener('click', () => setActiveTab('tabSuppliers'));
+        document.getElementById('tabPO').addEventListener('click', () => setActiveTab('tabPO'));
 
-        document.getElementById('tabSuppliers').addEventListener('click', () => {
-            setActiveTab('tabSuppliers');
-        });
+        // Local modal helpers (open/close) - avoid colliding with global openModal used by shared component
+        function openLocalModal(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('hidden');
+        }
 
-        document.getElementById('tabPO').addEventListener('click', () => {
-            setActiveTab('tabPO');
-        });
+        function closeLocalModal(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('hidden');
+        }
 
-        // initialize
+        function toggleProductDetails(productId) {
+            const row = document.getElementById('details-' + productId);
+            if (!row) return;
+            row.classList.toggle('hidden');
+        }
+
+        // Example submit handlers that simply close the modal for this demo page
+        function submitAddProduct(e) {
+            e?.preventDefault();
+            closeLocalModal('modalAddProduct');
+            alert('Product added (demo)');
+        }
+
+        function submitAddSupplier(e) {
+            e?.preventDefault();
+            closeLocalModal('modalAddSupplier');
+            alert('Supplier added (demo)');
+        }
+
+        function submitAddPO(e) {
+            e?.preventDefault();
+            closeLocalModal('modalAddPO');
+            alert('Purchase order added (demo)');
+        }
+
+        // initialize default tab
         setActiveTab('tabProducts');
     </script>
 
     @include('components.modal')
     @include('components.alert')
     @include('components.confirm')
+    
 </body>
 
 </html>
-
-
