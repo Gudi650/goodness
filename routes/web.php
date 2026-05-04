@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -52,9 +53,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
 Route::middleware('auth')->group(function () {
     
     // Main Dashboard - First page users see after login
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Companies Management
     // - GET /companies: show companies list (from DB)
@@ -99,5 +98,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports', function () {
         return view('reports');
     })->name('reports');
+
 });
 

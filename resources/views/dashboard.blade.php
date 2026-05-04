@@ -57,19 +57,19 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-brand-600">
                 <div class="text-sm text-slate-500">Total Companies</div>
-                <div class="text-2xl font-semibold">12</div>
+                <div class="text-2xl font-semibold">{{ $totalCompanies }}</div>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-brand-600">
                 <div class="text-sm text-slate-500">Total Employees</div>
-                <div class="text-2xl font-semibold">847</div>
+                <div class="text-2xl font-semibold">{{ $totalEmployees }}</div>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-brand-600">
                 <div class="text-sm text-slate-500">Monthly Revenue</div>
-                <div class="text-2xl font-semibold mono">TZS 5,250,000</div>
+                <div class="text-2xl font-semibold mono">TZS 0</div>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 p-4 border-l-4 border-brand-600">
                 <div class="text-sm text-slate-500">Active Users</div>
-                <div class="text-2xl font-semibold">156</div>
+                <div class="text-2xl font-semibold">{{ $activeUsers }}</div>
             </div>
         </div>
 
@@ -89,27 +89,20 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        <tr>
-                            <td class="px-4 py-3 text-sm">Goodness Tanzania Ltd</td>
-                            <td class="px-4 py-3 text-sm text-right mono">TZS 2,500,000</td>
-                            <td class="px-4 py-3 text-sm text-right">320</td>
-                            <td class="px-4 py-3 text-sm"><span
-                                    class="px-2 py-1 bg-brand-50 text-brand-700 rounded-md text-xs">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-3 text-sm">Goodness Kenya Ltd</td>
-                            <td class="px-4 py-3 text-sm text-right mono">TZS 1,550,000</td>
-                            <td class="px-4 py-3 text-sm text-right">215</td>
-                            <td class="px-4 py-3 text-sm"><span
-                                    class="px-2 py-1 bg-brand-50 text-brand-700 rounded-md text-xs">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-3 text-sm">Goodness Uganda Ltd</td>
-                            <td class="px-4 py-3 text-sm text-right mono">TZS 1,200,000</td>
-                            <td class="px-4 py-3 text-sm text-right">142</td>
-                            <td class="px-4 py-3 text-sm"><span
-                                    class="px-2 py-1 bg-slate-50 text-slate-600 rounded-md text-xs">Inactive</span></td>
-                        </tr>
+                        @forelse ($companies as $company)
+                            <tr>
+                                <td class="px-4 py-3 text-sm">{{ $company->name }}</td>
+                                <td class="px-4 py-3 text-sm text-right mono">TZS {{ number_format($company->revenue, 2) }}</td>
+                                <td class="px-4 py-3 text-sm text-right">{{ $company->users_count }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span class="px-2 py-1 {{ $company->status === 'Active' ? 'bg-brand-50 text-brand-700' : 'bg-slate-50 text-slate-600' }} rounded-md text-xs">{{ $company->status }}</span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-6 text-sm text-slate-500 text-center">No companies registered yet.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </section>
