@@ -29,11 +29,16 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone_number' => 'nullable|string|max:20',
             'department_id' => 'nullable|exists:departments,id',
             'company_id' => 'nullable|exists:companies,id',
             'join_date' => 'nullable|date',
         ], [
             'name.required' => 'Employee name is required.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Email must be a valid email address.',
+            'email.unique' => 'This email is already in use.',
             'department_id.exists' => 'Invalid department selected.',
             'company_id.exists' => 'Invalid company selected.',
             'join_date.date' => 'Join date must be a valid date.',
@@ -64,24 +69,21 @@ class UserController extends Controller
             }
         }
 
-        $baseEmail = strtolower(str_replace(' ', '.', trim($validated['name']))) . '@goodnesserp.local';
-        $email = $baseEmail;
-        $suffix = 1;
-
-        while (User::query()->where('email', '=', $email)->exists()) {
-            $email = str_replace('@goodnesserp.local', '+' . $suffix . '@goodnesserp.local', $baseEmail);
-            $suffix++;
-        }
-
         $employeeRole = Role::query()->where('name', 'Employee')->first();
+
+        // Use phone_number as password if provided, otherwise use default
+        $password = ! empty($validated['phone_number']) 
+            ? $validated['phone_number'] 
+            : 'password123';
 
         $user = User::create([
             'name' => $validated['name'],
-            'email' => $email,
-            'password' => Hash::make('password123'),
+            'email' => $validated['email'],
+            'password' => Hash::make($password),
             'role_id' => $employeeRole?->id,
             'company_id' => $companyId,
             'department_id' => $departmentId,
+            'phone_number' => $validated['phone_number'] ?? null,
         ]);
 
         if (! empty($validated['join_date'])) {

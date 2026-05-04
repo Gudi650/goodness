@@ -419,6 +419,12 @@
                     <input type="text" name="name" placeholder="Full Name"
                         class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empName" required />
                     
+                    <input type="email" name="email" placeholder="Email Address"
+                        class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empEmail" required />
+                    
+                    <input type="tel" name="phone_number" placeholder="Phone Number "
+                        class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empPhone" />
+                    
                     @if ($isAdmin)
                         <select name="company_id" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empCompany" required>
                             <option value="">Select Company</option>
