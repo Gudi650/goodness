@@ -22,7 +22,10 @@ class HrmController extends Controller
         $currentUser = Auth::user();
         $isAdmin = $currentUser?->role?->name === 'Admin';
         $activeCompanyId = session('active_company_id');
-        $companies = $isAdmin ? Company::orderBy('name')->get() : collect([$currentUser?->company])->filter();
+        
+        $companies = $isAdmin
+            ? Company::query()->orderBy('name', 'asc')->get()
+            : collect($currentUser?->company ? [$currentUser->company] : []);
 
         $usersQuery = User::with('role', 'company', 'department');
 
@@ -75,10 +78,23 @@ class HrmController extends Controller
             })
             ->values();
 
+        $departmentOptions = Department::query()
+            ->orderBy('name', 'asc')
+            ->get()
+            ->map(function (Department $dept) {
+                return [
+                    'id' => $dept->id,
+                    'company_id' => $dept->company_id,
+                    'name' => $dept->name,
+                ];
+            })
+            ->values();
+
         return view('hrm', [
             'employees' => $employees,
             'employeeNames' => $employees->pluck('name')->values(),
             'departments' => $departments,
+            'departmentOptions' => $departmentOptions,
             'companies' => $companies,
             'isAdmin' => $isAdmin,
             'activeCompanyId' => $activeCompanyId,

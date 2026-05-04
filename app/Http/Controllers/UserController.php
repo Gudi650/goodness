@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Company;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * UserController
@@ -16,6 +18,82 @@ use Illuminate\Support\Facades\Auth;
  */
 class UserController extends Controller
 {
+    /**
+     * Store a newly created employee.
+     */
+    public function store(Request $request)
+    {
+        $currentUser = Auth::user();
+        $isAdmin = $currentUser?->role?->name === 'Admin';
+        $activeCompanyId = session('active_company_id');
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'department_id' => 'nullable|exists:departments,id',
+            'company_id' => 'nullable|exists:companies,id',
+            'join_date' => 'nullable|date',
+        ], [
+            'name.required' => 'Employee name is required.',
+            'department_id.exists' => 'Invalid department selected.',
+            'company_id.exists' => 'Invalid company selected.',
+            'join_date.date' => 'Join date must be a valid date.',
+        ]);
+
+        $companyId = $validated['company_id'] ?? $activeCompanyId;
+        if (! $isAdmin && ! empty($currentUser?->company_id)) {
+            $companyId = $currentUser->company_id;
+        }
+
+        if (empty($companyId)) {
+            return redirect()
+                ->route('hrm')
+                ->with('error', 'Please select a company before creating an employee.');
+        }
+
+        $departmentId = $validated['department_id'] ?? null;
+        if (! empty($departmentId)) {
+            $department = Department::query()
+                ->where('id', $departmentId)
+                ->where('company_id', $companyId)
+                ->first();
+
+            if (! $department) {
+                return redirect()
+                    ->route('hrm')
+                    ->with('error', 'Selected department does not belong to the chosen company.');
+            }
+        }
+
+        $baseEmail = strtolower(str_replace(' ', '.', trim($validated['name']))) . '@goodnesserp.local';
+        $email = $baseEmail;
+        $suffix = 1;
+
+        while (User::query()->where('email', '=', $email)->exists()) {
+            $email = str_replace('@goodnesserp.local', '+' . $suffix . '@goodnesserp.local', $baseEmail);
+            $suffix++;
+        }
+
+        $employeeRole = Role::query()->where('name', 'Employee')->first();
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $email,
+            'password' => Hash::make('password123'),
+            'role_id' => $employeeRole?->id,
+            'company_id' => $companyId,
+            'department_id' => $departmentId,
+        ]);
+
+        if (! empty($validated['join_date'])) {
+            $user->created_at = $validated['join_date'] . ' 00:00:00';
+            $user->save();
+        }
+
+        return redirect()
+            ->route('hrm')
+            ->with('success', "Employee '{$validated['name']}' has been created successfully.");
+    }
+
     /**
      * Show all users with their roles and companies.
      * 

@@ -194,7 +194,8 @@
                 <h2 class="text-lg font-semibold font-display">Leave Requests</h2>
                 <button onclick="openAddLeaveModal()"
                     class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
-                    Leave</button>
+                    Leave
+                </button>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -274,6 +275,7 @@
                     </select>
                 </div>
             </div>
+
             <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
@@ -407,32 +409,45 @@
         class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
         <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
             <h2 class="text-lg font-semibold font-display mb-4">Add Employee</h2>
-            <div class="space-y-4">
-                <input type="text" placeholder="Full Name"
-                    class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" id="empName" />
-                <select class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" id="empDept">
-                    <option value="">Select Department</option>
-                </select>
-                <select class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" id="empCompany">
-                    <option>Goodness Tanzania Ltd</option>
-                    <option>Goodness Kenya Ltd</option>
-                    <option>Goodness Uganda Ltd</option>
-                </select>
-                <input type="date" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
-                    id="empJoinDate" />
-            </div>
-            <div class="flex gap-3 justify-end mt-6">
-                <button onclick="closeAddEmployeeModal()"
-                    class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Cancel</button>
-                <button onclick="saveEmployee()"
-                    class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm">Save</button>
-            </div>
+            <form id="employeeForm" method="POST" action="{{ route('employees.store') }}" class="space-y-6">
+                @csrf
+                <div class="space-y-4">
+                    <input type="text" name="name" placeholder="Full Name"
+                        class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empName" required />
+                    
+                    @if ($isAdmin)
+                        <select name="company_id" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empCompany" required>
+                            <option value="">Select Company</option>
+                            @foreach ($companies as $company)
+                                <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>{{ $company->name }}</option>
+                            @endforeach
+                        </select>
+                    @else
+                        <input type="hidden" name="company_id" value="{{ auth()->user()?->company_id }}">
+                        <div class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-slate-50 text-slate-600">
+                            {{ auth()->user()?->company?->name ?? 'No company assigned' }}
+                        </div>
+                    @endif
+                    <select name="department_id" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empDept">
+                        <option value="">Select Department</option>
+                    </select>
+                    <input type="date" name="join_date" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600"
+                        id="empJoinDate" />
+                </div>
+                <div class="flex gap-3 justify-end pt-2">
+                    <button type="button" onclick="closeAddEmployeeModal()"
+                        class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
         const employeeNames = @json($employeeNames);
         const departments = @json($departments);
+        const departmentOptions = @json($departmentOptions);
 
         const attendance = [{
                 id: 1,
@@ -526,6 +541,10 @@
 
         function openAddEmployeeModal() {
             populateDepartmentDropdown();
+            const companySelect = document.getElementById('empCompany');
+            if (companySelect) {
+                companySelect.onchange = populateDepartmentDropdown;
+            }
             document.getElementById('addEmployeeModal').classList.remove('hidden');
         }
 
@@ -548,15 +567,34 @@
 
         function populateDepartmentDropdown() {
             const deptSelect = document.getElementById('empDept');
-            if (deptSelect) {
-                deptSelect.innerHTML = '<option value="">Select Department</option>';
-                departments.forEach(dept => {
+            const companySelect = document.getElementById('empCompany');
+            if (!deptSelect) {
+                return;
+            }
+
+            let selectedCompanyId = '';
+            
+            if (companySelect) {
+                // For admins: use the selected dropdown value
+                selectedCompanyId = companySelect.value;
+            } else {
+                // For non-admins: get the company_id from the hidden input
+                const hiddenCompanyInput = document.querySelector('input[name="company_id"]');
+                if (hiddenCompanyInput) {
+                    selectedCompanyId = hiddenCompanyInput.value;
+                }
+            }
+            
+            deptSelect.innerHTML = '<option value="">Select Department</option>';
+
+            departmentOptions
+                .filter(dept => !selectedCompanyId || String(dept.company_id) === String(selectedCompanyId))
+                .forEach(dept => {
                     const option = document.createElement('option');
                     option.value = dept.id;
                     option.textContent = dept.name;
                     deptSelect.appendChild(option);
                 });
-            }
         }
 
         function openAddLeaveModal() {

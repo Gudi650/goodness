@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
 
     // HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
+    Route::post('/employees', [UserController::class, 'store'])->name('employees.store');
     Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
 
     // Sales Management
