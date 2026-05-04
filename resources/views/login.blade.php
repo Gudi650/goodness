@@ -26,7 +26,9 @@
     <div class="w-full max-w-md mx-auto p-6">
         <div class="bg-white border border-slate-200 shadow-sm rounded-lg p-8">
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-brand-600" aria-hidden></div>
+                <div class="w-10 h-10 rounded-md overflow-hidden border border-brand-100 bg-white flex items-center justify-center" aria-hidden>
+                    <img src="{{ asset('favicon.png') }}" alt="Goodness Group logo" class="w-8 h-8 object-contain" />
+                </div>
                 <div>
                     <div class="text-sm font-semibold text-slate-800">Goodness Group</div>
                     <div class="text-xs text-slate-500">Enterprise Management System</div>
