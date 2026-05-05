@@ -91,6 +91,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/bulk-import/preview', [BulkImportController::class, 'previewImport'])->name('bulk-import.preview');
     Route::post('/bulk-import/confirm', [BulkImportController::class, 'confirmImport'])->name('bulk-import.confirm');
 
+    // Payroll - minimal: record salaries
+    Route::get('/payroll', [\App\Http\Controllers\PayrollController::class, 'index'])->name('payroll.index');
+    Route::post('/payroll', [\App\Http\Controllers\PayrollController::class, 'store'])->name('payroll.store');
+
     // Sales Management
     Route::get('/sales', function () {
         return view('sales');

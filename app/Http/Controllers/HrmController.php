@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\User;
+use App\Models\Salary;
 use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 
@@ -92,6 +93,32 @@ class HrmController extends Controller
             })
             ->values();
 
+        // Fetch recent salary records for the active company (limited)
+        $salaryQuery = Salary::with('user');
+        if ($isAdmin) {
+            if (!empty($activeCompanyId)) {
+                $salaryQuery->where('company_id', $activeCompanyId);
+            }
+        } else {
+            $salaryQuery->where('company_id', $currentUser?->company_id);
+        }
+
+        $salaries = $salaryQuery->orderBy('effective_date', 'desc')
+            ->limit(200)
+            ->get()
+            ->map(function (Salary $s) {
+                return [
+                    'id' => $s->id,
+                    'employee' => $s->user?->name ?? 'Unknown',
+                    'basic' => $s->amount,
+                    'deductions' => $s->deductions ?? 0,
+                    'net' => $s->net_amount ?? ($s->amount - ($s->deductions ?? 0)),
+                    'effective_date' => optional($s->effective_date)->format('Y-m-d') ?? '-',
+                    'status' => 'Recorded',
+                ];
+            })
+            ->values();
+
         return view('hrm', [
             'employees' => $employees,
             'employeeNames' => $employees->pluck('name')->values(),
@@ -100,6 +127,7 @@ class HrmController extends Controller
             'companies' => $companies,
             'isAdmin' => $isAdmin,
             'activeCompanyId' => $activeCompanyId,
+            'salaries' => $salaries,
         ]);
     }
 }

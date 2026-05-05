@@ -72,6 +72,57 @@
             </div>
         </div>
 
+            <div id="recordSalaryModal"
+                class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
+                <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
+                    <h2 class="text-lg font-semibold font-display mb-4">Record Salary</h2>
+                    <form id="salaryForm" method="POST" action="{{ route('payroll.store') }}" class="space-y-4" onsubmit="return showSalaryLoader(event)">
+                        @csrf
+                        <div class="space-y-3">
+                            <label class="block text-sm text-slate-600">Employee
+                                <select name="user_id" required class="mt-1 block w-full border border-slate-300 rounded p-2 text-sm">
+                                    <option value="">Select employee</option>
+                                    @foreach ($employees as $emp)
+                                        <option value="{{ $emp['id'] }}">{{ $emp['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+
+                            <label class="block text-sm text-slate-600">Basic Salary
+                                <input id="basicSalary" name="amount" type="number" step="0.01" min="0" required class="mt-1 block w-full border border-slate-300 rounded p-2 text-sm" />
+                            </label>
+
+                            <label class="block text-sm text-slate-600">Deductions
+                                <input id="deductions" name="deductions" type="number" step="0.01" min="0" class="mt-1 block w-full border border-slate-300 rounded p-2 text-sm" value="0" />
+                            </label>
+
+                            <label class="block text-sm text-slate-600">Net Salary
+                                <input id="netSalary" name="net_amount" type="number" step="0.01" min="0" required class="mt-1 block w-full border border-slate-300 rounded p-2 text-sm bg-slate-50" readonly />
+                            </label>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="block text-sm text-slate-600">Currency
+                                    <input name="currency" type="text" class="mt-1 block w-full border border-slate-300 rounded p-2 text-sm" value="USD" />
+                                </label>
+                                <label class="block text-sm text-slate-600">Effective Date
+                                    <input name="effective_date" type="date" class="mt-1 block w-full border border-slate-300 rounded p-2 text-sm" />
+                                </label>
+                            </div>
+
+                            <label class="block text-sm text-slate-600">Notes (optional)
+                                <textarea name="notes" rows="3" class="mt-1 block w-full border border-slate-300 rounded p-2 text-sm"></textarea>
+                            </label>
+                        </div>
+
+                        <div class="flex gap-3 justify-end pt-2">
+                        <button type="button" onclick="closeRecordSalaryModal()" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Cancel</button>
+                        <button type="submit" id="salarySubmitBtn" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm">Save</button>
+                    </div>
+                    </form>
+                <x-loading id="salaryLoader" size="lg" color="amber" full-page="true" message="Saving salary..." :show="false" />
+                </div>
+            </div>
+
         <div id="tab-employees" class="tab-content">
             <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                 <h2 class="text-lg font-semibold font-display">Employees</h2>
@@ -255,9 +306,11 @@
         </div>
 
         <div id="tab-payroll" class="tab-content hidden">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-3">
                 <h2 class="text-lg font-semibold font-display">Payroll</h2>
-                <div class="flex gap-3">
+                <div class="flex items-center gap-3">
+                    <button onclick="openRecordSalaryModal()"
+                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium">Record Salary</button>
                     <select id="payrollMonth" class="border border-slate-300 rounded-md px-3 py-2 text-sm">
                         <option value="01">January</option>
                         <option value="02">February</option>
@@ -280,7 +333,7 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <div class="bg-white rounded-lg border border-slate-200 overflow-hidden mt-3 w-full">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-slate-50">
@@ -303,27 +356,19 @@
                             </tr>
                         </thead>
                         <tbody id="payrollTable" class="divide-y divide-slate-100">
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-3 text-sm">Amina Hassan</td>
-                                <td class="px-4 py-3 text-sm">TZS 2,500,000</td>
-                                <td class="px-4 py-3 text-sm">TZS 375,000</td>
-                                <td class="px-4 py-3 text-sm">TZS 2,125,000</td>
-                                <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">Paid</span></td>
-                            </tr>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-3 text-sm">Joseph Kimani</td>
-                                <td class="px-4 py-3 text-sm">TZS 1,800,000</td>
-                                <td class="px-4 py-3 text-sm">TZS 270,000</td>
-                                <td class="px-4 py-3 text-sm">TZS 1,530,000</td>
-                                <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-xs font-medium">Pending</span></td>
-                            </tr>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-3 text-sm">Lucy Mwangi</td>
-                                <td class="px-4 py-3 text-sm">TZS 2,200,000</td>
-                                <td class="px-4 py-3 text-sm">TZS 330,000</td>
-                                <td class="px-4 py-3 text-sm">TZS 1,870,000</td>
-                                <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">Paid</span></td>
-                            </tr>
+                            @forelse($salaries ?? [] as $s)
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-4 py-3 text-sm">{{ $s['employee'] }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ number_format($s['basic'], 2) }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ number_format($s['deductions'], 2) }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ number_format($s['net'], 2) }}</td>
+                                    <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">{{ $s['status'] }}</span></td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-6 text-sm text-slate-500 text-center">No salary records found.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -1097,6 +1142,58 @@
 
         function closeAddDepartmentModal() {
             document.getElementById('addDepartmentModal').classList.add('hidden');
+        }
+
+        function openRecordSalaryModal() {
+            document.getElementById('recordSalaryModal').classList.remove('hidden');
+        }
+
+        function closeRecordSalaryModal() {
+            const form = document.getElementById('salaryForm');
+            if (form) form.reset();
+            document.getElementById('recordSalaryModal').classList.add('hidden');
+        }
+
+        // Auto-calc net salary = basic - deductions
+        function calcNetSalary() {
+            const basicEl = document.getElementById('basicSalary');
+            const dedEl = document.getElementById('deductions');
+            const netEl = document.getElementById('netSalary');
+            if (!basicEl || !dedEl || !netEl) return;
+            const basic = parseFloat(basicEl.value) || 0;
+            const ded = parseFloat(dedEl.value) || 0;
+            const net = Math.max(0, basic - ded);
+            netEl.value = net.toFixed(2);
+        }
+
+        document.addEventListener('input', (e) => {
+            if (e.target && (e.target.id === 'basicSalary' || e.target.id === 'deductions')) {
+                calcNetSalary();
+            }
+        });
+
+        function showSalaryLoader(event) {
+            if (event) event.preventDefault();
+            const loader = document.getElementById('salaryLoader');
+            const submitBtn = document.getElementById('salarySubmitBtn');
+            const form = document.getElementById('salaryForm');
+
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+            }
+
+            if (form) {
+                // small timeout to allow loader to render
+                window.setTimeout(() => form.submit(), 75);
+            }
+
+            return true;
         }
 
 
