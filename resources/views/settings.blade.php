@@ -74,158 +74,9 @@
 
         <!-- Tab Contents -->
         <div class="bg-white rounded-b-lg border border-slate-200 overflow-hidden">
-            <!-- Profile Tab -->
-            <div id="tab-profile" class="settings-tab-content p-6 lg:p-8">
-                <h2 class="text-lg font-semibold mb-6 font-display">Profile Information</h2>
-                <form id="profileForm" method="POST" action="{{ route('settings.update.profile') }}" onsubmit="return showLoader(event, 'profileLoader')" class="space-y-6">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
-                            <input type="text" id="name" name="name" value="{{ old('name', auth()->user()->name) }}" required
-                                class="w-full border border-slate-300 rounded-md px-4 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition" />
-                            @error('name')<span class="text-xs text-red-600 mt-1">{{ $message }}</span>@enderror
-                        </div>
-
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
-                            <input type="email" id="email" name="email" value="{{ old('email', auth()->user()->email) }}" required
-                                class="w-full border border-slate-300 rounded-md px-4 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition" />
-                            @error('email')<span class="text-xs text-red-600 mt-1">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label for="phone_number" class="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
-                            <input type="tel" id="phone_number" name="phone_number" value="{{ old('phone_number', auth()->user()->phone_number) }}"
-                                class="w-full border border-slate-300 rounded-md px-4 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition" />
-                            @error('phone_number')<span class="text-xs text-red-600 mt-1">{{ $message }}</span>@enderror
-                        </div>
-
-                        <div>
-                            <label for="company" class="block text-sm font-medium text-slate-700 mb-2">Company</label>
-                            <input type="text" id="company" disabled
-                                value="{{ auth()->user()->company?->name ?? 'Not assigned' }}"
-                                class="w-full border border-slate-300 rounded-md px-4 py-2 text-sm bg-slate-50 text-slate-600" />
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-200 flex gap-3 justify-end">
-                        <button type="button" onclick="resetProfileForm()"
-                            class="px-6 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">
-                            Cancel
-                        </button>
-                        <button type="submit" id="profileSubmitBtn"
-                            class="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">
-                            Save Changes
-                        </button>
-                    </div>
-                </form>
-                <x-loading id="profileLoader" size="lg" color="amber" full-page="true" message="Updating profile..." :show="false" />
-            </div>
-
-            <!-- Password Tab -->
-            <div id="tab-password" class="settings-tab-content hidden p-6 lg:p-8">
-                <div class="">
-                    <h2 class="text-lg font-semibold mb-6 font-display">Change Password</h2>
-                    <form id="passwordForm" method="POST" action="{{ route('settings.update.password') }}" onsubmit="return showLoader(event, 'passwordLoader')" class="space-y-6">
-                        @csrf
-                        @method('PUT')
-
-                        <div>
-                            <label for="current_password" class="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
-                            <input type="password" id="current_password" name="current_password" required
-                                class="w-full border border-slate-300 rounded-md px-4 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition" />
-                            @error('current_password')<span class="text-xs text-red-600 mt-1">{{ $message }}</span>@enderror
-                        </div>
-
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-slate-700 mb-2">New Password</label>
-                            <input type="password" id="password" name="password" required
-                                class="w-full border border-slate-300 rounded-md px-4 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition" />
-                            <div id="passwordStrength" class="mt-2 text-xs text-slate-600">
-                                Password requirements: At least 8 characters, mix of uppercase, lowercase, numbers, and special characters
-                            </div>
-                            @error('password')<span class="text-xs text-red-600 mt-1">{{ $message }}</span>@enderror
-                        </div>
-
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
-                            <input type="password" id="password_confirmation" name="password_confirmation" required
-                                class="w-full border border-slate-300 rounded-md px-4 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition" />
-                            @error('password_confirmation')<span class="text-xs text-red-600 mt-1">{{ $message }}</span>@enderror
-                        </div>
-
-                        <div class="pt-4 border-t border-slate-200 flex gap-3 justify-end">
-                            <button type="button" onclick="resetPasswordForm()"
-                                class="px-6 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">
-                                Cancel
-                            </button>
-                            <button type="submit" id="passwordSubmitBtn"
-                                class="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">
-                                Update Password
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <x-loading id="passwordLoader" size="lg" color="amber" full-page="true" message="Updating password..." :show="false" />
-            </div>
-
-            <!-- Preferences Tab -->
-            <div id="tab-preferences" class="settings-tab-content hidden p-6 lg:p-8">
-                <div class="max-w-md">
-                    <h2 class="text-lg font-semibold mb-6 font-display">Preferences</h2>
-                    <form id="preferencesForm" method="POST" action="{{ route('settings.update.preferences') }}" onsubmit="return showLoader(event, 'preferencesLoader')" class="space-y-6">
-                        @csrf
-                        @method('PUT')
-
-                        <div>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="email_notifications" value="1" 
-                                    {{ old('email_notifications', true) ? 'checked' : '' }}
-                                    class="w-4 h-4 border-slate-300 rounded text-brand-600 focus:ring-brand-600 transition" />
-                                <span class="text-sm font-medium text-slate-700">Receive email notifications</span>
-                            </label>
-                            <p class="text-xs text-slate-500 mt-1 ml-7">Get notified about important updates and activities</p>
-                        </div>
-
-                        <div>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="weekly_digest" value="1" 
-                                    {{ old('weekly_digest', false) ? 'checked' : '' }}
-                                    class="w-4 h-4 border-slate-300 rounded text-brand-600 focus:ring-brand-600 transition" />
-                                <span class="text-sm font-medium text-slate-700">Receive weekly digest</span>
-                            </label>
-                            <p class="text-xs text-slate-500 mt-1 ml-7">Get a summary of weekly activities every Monday</p>
-                        </div>
-
-                        <div class="border-t border-slate-200 pt-6">
-                            <h3 class="text-sm font-medium text-slate-700 mb-3">Language & Localization</h3>
-                            <select name="language"
-                                class="w-full border border-slate-300 rounded-md px-4 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition">
-                                <option value="en" {{ old('language', 'en') === 'en' ? 'selected' : '' }}>English</option>
-                                <option value="es" {{ old('language') === 'es' ? 'selected' : '' }}>Español</option>
-                                <option value="fr" {{ old('language') === 'fr' ? 'selected' : '' }}>Français</option>
-                            </select>
-                        </div>
-
-                        <div class="pt-4 border-t border-slate-200 flex gap-3 justify-end">
-                            <button type="button" onclick="resetPreferencesForm()"
-                                class="px-6 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">
-                                Cancel
-                            </button>
-                            <button type="submit" id="preferencesSubmitBtn"
-                                class="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">
-                                Save Preferences
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <x-loading id="preferencesLoader" size="lg" color="amber" full-page="true" message="Updating preferences..." :show="false" />
-            </div>
+            @include('settings.profile')
+            @include('settings.password')
+            @include('settings.preferences')
         </div>
     </main>
 
@@ -251,7 +102,7 @@
             }
 
             const loader = document.getElementById(loaderId);
-            const form = event.target;
+            const form = event?.currentTarget || event?.target;
 
             if (loader) {
                 loader.classList.remove('hidden');
@@ -259,7 +110,9 @@
             }
 
             setTimeout(() => {
-                form.submit();
+                if (form) {
+                    form.submit();
+                }
             }, 75);
 
             return true;
