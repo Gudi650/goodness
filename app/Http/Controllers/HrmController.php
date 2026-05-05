@@ -109,6 +109,7 @@ class HrmController extends Controller
             ->map(function (Salary $s) {
                 return [
                     'id' => $s->id,
+                    'user_id' => $s->user_id,
                     'employee' => $s->user?->name ?? 'Unknown',
                     'basic' => $s->amount,
                     'deductions' => $s->deductions ?? 0,

@@ -80,10 +80,13 @@
                         @csrf
                         <div class="space-y-3">
                             <label class="block text-sm text-slate-600">Employee
+                                @php $recorded = collect($salaries ?? [])->pluck('user_id')->all(); @endphp
                                 <select name="user_id" required class="mt-1 block w-full border border-slate-300 rounded p-2 text-sm">
                                     <option value="">Select employee</option>
                                     @foreach ($employees as $emp)
-                                        <option value="{{ $emp['id'] }}">{{ $emp['name'] }}</option>
+                                        @if(!in_array($emp['id'], $recorded))
+                                            <option value="{{ $emp['id'] }}">{{ $emp['name'] }}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </label>
