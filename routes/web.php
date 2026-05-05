@@ -84,7 +84,25 @@ Route::middleware('auth')->group(function () {
 
     // Finance Management
     Route::get('/finance', function () {
-        return view('finance');
+        $invoices = [
+            [
+                'id' => 'INV-001',
+                'company' => 'Goodness Tanzania Ltd',
+                'amount' => 1250000,
+                'status' => 'Paid',
+            ],
+            [
+                'id' => 'INV-002',
+                'company' => 'Goodness Kenya Ltd',
+                'amount' => 850000,
+                'status' => 'Unpaid',
+            ],
+        ];
+
+        $expenses = [];
+        $payments = [];
+
+        return view('finance', compact('invoices', 'expenses', 'payments'));
     })->name('finance');
 
     // HRM Management

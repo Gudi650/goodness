@@ -41,7 +41,10 @@
 
   window.submitModal = function() {
     if (modalCallback) {
-      modalCallback();
+      const shouldClose = modalCallback();
+      if (shouldClose === false) {
+        return;
+      }
     }
     closeModal();
   };
