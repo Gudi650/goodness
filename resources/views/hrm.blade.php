@@ -418,6 +418,9 @@
                                 <th
                                     class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
                                     Created</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
+                                    Action</th>
                             </tr>
                         </thead>
                         <tbody id="departmentsTable" class="divide-y divide-slate-100">
@@ -427,10 +430,22 @@
                                     <td class="px-4 py-3 text-sm">{{ $department['description'] }}</td>
                                     <td class="px-4 py-3 text-sm">{{ $department['company_name'] }}</td>
                                     <td class="px-4 py-3 text-sm">{{ $department['created_at'] }}</td>
+                                    <td class="px-4 py-3 text-sm flex gap-2">
+                                        <button onclick='editDepartment({{ json_encode($department) }})' title="Edit" class="p-2 text-blue-600 hover:bg-blue-50 rounded transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
+                                            </svg>
+                                        </button>
+                                        <button onclick="deleteDepartment({{ $department['id'] }})" title="Delete" class="p-2 text-red-600 hover:bg-red-50 rounded transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-6 text-sm text-slate-500 text-center">No departments found. Create your first department.</td>
+                                    <td colspan="5" class="px-4 py-6 text-sm text-slate-500 text-center">No departments found. Create your first department.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -443,12 +458,14 @@
     <div id="addDepartmentModal"
         class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
         <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
-            <h2 class="text-lg font-semibold font-display mb-4">Add Department</h2>
-            <form id="departmentForm" method="POST" action="{{ route('departments.store') }}" class="space-y-6">
+            <h2 class="text-lg font-semibold font-display mb-4" id="departmentModalTitle">Add Department</h2>
+            <form id="departmentForm" method="POST" action="{{ route('departments.store') }}" class="space-y-6" onsubmit="return showDepartmentLoader(event)">
                 @csrf
+                <input type="hidden" id="departmentEditingId" value="">
                 <div class="space-y-4">
                     @if ($isAdmin)
                         <select name="company_id"
+                            id="deptCompany"
                             class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600"
                             required>
                             <option value="">Select Company</option>
@@ -470,12 +487,15 @@
                 <div class="flex gap-3 justify-end pt-2">
                     <button type="button" onclick="closeAddDepartmentModal()"
                         class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Cancel</button>
-                    <button type="submit"
+                    <button type="submit" id="departmentSubmitBtn"
                         class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm">Save</button>
                 </div>
             </form>
+            <x-loading id="departmentLoader" size="lg" color="amber" full-page="true" message="Saving department details..." :show="false" />
         </div>
     </div>
+
+    <x-loading id="departmentDeleteLoader" size="lg" color="amber" full-page="true" message="Deleting department..." :show="false" />
 
     <div id="addEmployeeModal"
         class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
@@ -1156,11 +1176,149 @@
         }
 
         function openAddDepartmentModal() {
+            resetDepartmentForm();
             document.getElementById('addDepartmentModal').classList.remove('hidden');
         }
 
         function closeAddDepartmentModal() {
+            resetDepartmentForm();
             document.getElementById('addDepartmentModal').classList.add('hidden');
+        }
+
+        function showDepartmentLoader(event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            const loader = document.getElementById('departmentLoader');
+            const submitBtn = document.getElementById('departmentSubmitBtn');
+            const form = document.getElementById('departmentForm');
+
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+            }
+
+            if (form) {
+                window.setTimeout(() => form.submit(), 75);
+            }
+
+            return true;
+        }
+
+        function resetDepartmentForm() {
+            const form = document.getElementById('departmentForm');
+            const editingId = document.getElementById('departmentEditingId');
+            const title = document.getElementById('departmentModalTitle');
+            const submitBtn = document.getElementById('departmentSubmitBtn');
+            const loader = document.getElementById('departmentLoader');
+            const deleteLoader = document.getElementById('departmentDeleteLoader');
+            const companySelect = document.getElementById('deptCompany');
+
+            if (editingId) editingId.value = '';
+            if (title) title.textContent = 'Add Department';
+            if (submitBtn) submitBtn.textContent = 'Save';
+            if (submitBtn) submitBtn.disabled = false;
+            if (companySelect) companySelect.disabled = false;
+            if (loader) {
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+            }
+            if (deleteLoader) {
+                deleteLoader.classList.add('hidden');
+                deleteLoader.classList.remove('flex');
+            }
+            if (form) {
+                form.action = '{{ route('departments.store') }}';
+                form.method = 'POST';
+                const methodInput = form.querySelector('input[name="_method"]');
+                if (methodInput) {
+                    methodInput.remove();
+                }
+                form.reset();
+            }
+        }
+
+        function editDepartment(departmentData) {
+            const form = document.getElementById('departmentForm');
+            const editingId = document.getElementById('departmentEditingId');
+            const title = document.getElementById('departmentModalTitle');
+            const submitBtn = document.getElementById('departmentSubmitBtn');
+            const nameInput = document.getElementById('deptName');
+            const descInput = document.getElementById('deptDesc');
+            const companySelect = document.getElementById('deptCompany');
+
+            if (editingId) editingId.value = departmentData.id;
+            if (title) title.textContent = 'Edit Department';
+            if (submitBtn) submitBtn.textContent = 'Update';
+            if (nameInput) nameInput.value = departmentData.name || '';
+            if (descInput) descInput.value = departmentData.description === '-' ? '' : (departmentData.description || '');
+
+            if (companySelect) {
+                companySelect.value = departmentData.company_id || companySelect.value;
+            }
+
+            if (form) {
+                form.action = '/departments/' + departmentData.id;
+                form.method = 'POST';
+
+                let methodInput = form.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                methodInput.value = 'PUT';
+            }
+
+            document.getElementById('addDepartmentModal').classList.remove('hidden');
+        }
+
+        function deleteDepartment(id) {
+            if (typeof window.openConfirm !== 'function') {
+                return;
+            }
+
+            window.openConfirm({
+                title: 'Delete department',
+                message: 'This action cannot be undone. Do you want to continue?',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                variant: 'danger',
+                onConfirm: () => {
+                    const loader = document.getElementById('departmentDeleteLoader');
+                    if (loader) {
+                        loader.classList.remove('hidden');
+                        loader.classList.add('flex');
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/departments/' + id;
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                    const methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    methodInput.value = 'DELETE';
+
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '_token';
+                    tokenInput.value = csrfToken;
+
+                    form.appendChild(methodInput);
+                    form.appendChild(tokenInput);
+                    document.body.appendChild(form);
+                    window.setTimeout(() => form.submit(), 75);
+                }
+            });
         }
 
         function openRecordSalaryModal() {

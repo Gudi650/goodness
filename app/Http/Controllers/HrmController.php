@@ -73,6 +73,7 @@ class HrmController extends Controller
             ->map(function (Department $dept) {
                 return [
                     'id' => $dept->id,
+                    'company_id' => $dept->company_id,
                     'name' => $dept->name,
                     'description' => $dept->description ?? '-',
                     'company_name' => $dept->company?->name ?? 'Unassigned',
