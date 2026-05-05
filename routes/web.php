@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\BulkImportController;
+use App\Http\Controllers\PayrollController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -92,8 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/bulk-import/confirm', [BulkImportController::class, 'confirmImport'])->name('bulk-import.confirm');
 
     // Payroll - minimal: record salaries
-    Route::get('/payroll', [\App\Http\Controllers\PayrollController::class, 'index'])->name('payroll.index');
-    Route::post('/payroll', [\App\Http\Controllers\PayrollController::class, 'store'])->name('payroll.store');
+    Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
+    Route::post('/payroll', [PayrollController::class, 'store'])->name('payroll.store');
+    Route::put('/payroll/{salary}', [PayrollController::class, 'update'])->name('payroll.update');
 
     // Sales Management
     Route::get('/sales', function () {

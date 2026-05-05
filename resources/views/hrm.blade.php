@@ -75,8 +75,9 @@
             <div id="recordSalaryModal"
                 class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
                 <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
-                    <h2 class="text-lg font-semibold font-display mb-4">Record Salary</h2>
+                    <h2 class="text-lg font-semibold font-display mb-4" id="modalTitle">Record Salary</h2>
                     <form id="salaryForm" method="POST" action="{{ route('payroll.store') }}" class="space-y-4" onsubmit="return showSalaryLoader(event)">
+                        <input type="hidden" id="editingId" name="editing_id" value="">
                         @csrf
                         <div class="space-y-3">
                             <label class="block text-sm text-slate-600">Employee
@@ -356,6 +357,9 @@
                                 <th
                                     class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
                                     Status</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
+                                    Action</th>
                             </tr>
                         </thead>
                         <tbody id="payrollTable" class="divide-y divide-slate-100">
@@ -366,10 +370,13 @@
                                     <td class="px-4 py-3 text-sm">{{ number_format($s['deductions'], 2) }}</td>
                                     <td class="px-4 py-3 text-sm">{{ number_format($s['net'], 2) }}</td>
                                     <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">{{ $s['status'] }}</span></td>
+                                    <td class="px-4 py-3 text-sm">
+                                        <button onclick="editSalary({{ $s['id'] }}, {{ json_encode($s) }})" class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs font-medium">Edit</button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-4 py-6 text-sm text-slate-500 text-center">No salary records found.</td>
+                                    <td colspan="6" class="px-4 py-6 text-sm text-slate-500 text-center">No salary records found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -1154,6 +1161,25 @@
         function closeRecordSalaryModal() {
             const form = document.getElementById('salaryForm');
             if (form) form.reset();
+            
+            // Reset form to create mode
+            document.getElementById('editingId').value = '';
+            document.getElementById('modalTitle').textContent = 'Record Salary';
+            form.action = '{{ route('payroll.store') }}';
+            form.method = 'POST';
+            
+            // Remove PUT method override
+            const methodInput = document.querySelector('input[name="_method"]');
+            if (methodInput) {
+                methodInput.remove();
+            }
+            
+            // Re-enable employee select
+            const empSelect = document.querySelector('select[name="user_id"]');
+            if (empSelect) {
+                empSelect.disabled = false;
+            }
+            
             document.getElementById('recordSalaryModal').classList.add('hidden');
         }
 
@@ -1199,6 +1225,57 @@
             return true;
         }
 
+
+        function editSalary(id, salaryData) {
+            // Populate the modal with salary data
+            document.getElementById('editingId').value = id;
+            document.getElementById('modalTitle').textContent = 'Edit Salary';
+            
+            // Pre-fill form fields
+            document.getElementById('basicSalary').value = salaryData.basic;
+            document.getElementById('deductions').value = salaryData.deductions;
+            document.getElementById('netSalary').value = salaryData.net;
+            
+            // Find and select the employee
+            const empSelect = document.querySelector('select[name="user_id"]');
+            if (empSelect) {
+                // Check if the option already exists
+                let option = empSelect.querySelector(`option[value="${salaryData.user_id}"]`);
+                if (!option) {
+                    // Create the option if it doesn't exist (employee was filtered out)
+                    option = document.createElement('option');
+                    option.value = salaryData.user_id;
+                    option.textContent = salaryData.employee; // Use the employee name from salaryData
+                    empSelect.appendChild(option);
+                }
+                empSelect.value = salaryData.user_id;
+                empSelect.disabled = true; // Prevent changing employee
+            }
+            
+            // Set effective date
+            const dateInput = document.querySelector('input[name="effective_date"]');
+            if (dateInput && salaryData.effective_date !== '-') {
+                dateInput.value = salaryData.effective_date;
+            }
+            
+            // Update form action to use update route
+            const form = document.getElementById('salaryForm');
+            form.action = '/payroll/' + id;
+            form.method = 'POST';
+            
+            // Add PUT method override
+            let methodInput = document.querySelector('input[name="_method"]');
+            if (!methodInput) {
+                methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                form.appendChild(methodInput);
+            }
+            methodInput.value = 'PUT';
+            
+            // Open the modal
+            openRecordSalaryModal();
+        }
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
