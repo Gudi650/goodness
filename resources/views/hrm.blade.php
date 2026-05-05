@@ -761,15 +761,59 @@
             if (dragDropPrompt) {
                 dragDropPrompt.classList.remove('hidden');
             }
-            document.getElementById('csvFileInput').value = '';
-            document.getElementById('previewBtn').disabled = true;
+            previewedData = null;
+        }
+
+        function closeBulkImportModal() {
+            const modal = document.getElementById('bulkImportModal');
+            const csvFileInput = document.getElementById('csvFileInput');
+            const selectedCsvFile = document.getElementById('selectedCsvFile');
+            const dragDropPrompt = document.getElementById('dragDropPrompt');
+            const previewBtn = document.getElementById('previewBtn');
+            const confirmBtn = document.getElementById('confirmBtn');
+            const importStep1 = document.getElementById('importStep1');
+            const importStep2 = document.getElementById('importStep2');
+            const importStep3 = document.getElementById('importStep3');
+
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+
+            if (csvFileInput) {
+                csvFileInput.value = '';
+            }
+
+            if (selectedCsvFile) {
+                selectedCsvFile.textContent = '';
+                selectedCsvFile.classList.add('hidden');
+            }
+
+            if (dragDropPrompt) {
+                dragDropPrompt.classList.remove('hidden');
+            }
+
+            if (previewBtn) {
+                previewBtn.disabled = true;
+            }
+
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+            }
+
+            if (importStep1) {
+                importStep1.classList.remove('hidden');
+            }
+
+            if (importStep2) {
+                importStep2.classList.add('hidden');
+            }
+
+            if (importStep3) {
+                importStep3.classList.add('hidden');
+            }
+
             setImportLoading(false);
             clearImportStatus();
-            const dragDropZone = getDragDropZone();
-            if (dragDropZone) {
-                dragDropZone.innerHTML = `<p class="text-sm text-slate-600">Drag CSV file here or <span class="text-brand-600 font-medium">click to browse</span></p>
-                    <p class="text-xs text-slate-500 mt-2">CSV format: Name, Email, Phone, Department, Join Date</p>`;
-            }
             previewedData = null;
         }
 
