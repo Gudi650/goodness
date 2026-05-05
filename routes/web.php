@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
     // - POST /companies: save a new company
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
     Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
+    Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->name('companies.destroy');
     Route::post('/active-company', [CompanyController::class, 'setActiveCompany'])->name('active-company.store');
 
     // Users Management

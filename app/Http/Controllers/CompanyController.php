@@ -126,4 +126,24 @@ class CompanyController extends Controller
             ->route('companies')
             ->with('success', 'Company registered successfully.');
     }
+
+    /**
+     * Delete a company (soft or hard delete depending on model setup).
+     */
+    public function destroy(Request $request, Company $company)
+    {
+        $user = Auth::user();
+        $isAdmin = $user?->role?->name === 'Admin';
+
+        // Only admins may delete arbitrary companies. Non-admins may only
+        // delete if the company matches their assigned company.
+        if (! $isAdmin && $user->company_id !== $company->id) {
+            return redirect()->back()->withErrors('You are not authorized to delete this company.');
+        }
+
+        // Perform delete via query to satisfy static analyzer (soft delete if enabled).
+        Company::query()->where('id', $company->id)->delete();
+
+        return redirect()->route('companies')->with('success', 'Company deleted successfully.');
+    }
 }

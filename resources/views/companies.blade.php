@@ -55,7 +55,15 @@
 
         <div class="bg-white border border-slate-200 rounded-lg overflow-x-auto">
             <table class="min-w-full">
-                <thead class="bg-slate-50"><tr><th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-left">Name</th><th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-left">Country</th><th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-right">Revenue (TZS)</th><th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-center">Status</th></tr></thead>
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-left">Name</th>
+                        <th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-left">Country</th>
+                        <th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-right">Revenue (TZS)</th>
+                        <th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-center">Status</th>
+                        <th class="text-xs text-slate-500 uppercase tracking-wider px-4 py-3 text-center">Action</th>
+                    </tr>
+                </thead>
                 <tbody class="bg-white divide-y divide-slate-100">
                     {{-- Render companies directly in HTML using Blade --}}
                     @forelse ($companies as $company)
@@ -68,10 +76,17 @@
                                     {{ $company->status }}
                                 </span>
                             </td>
+                            <td class="px-4 py-3 text-sm text-center">
+                                <button type="button" title="Delete company" onclick="deleteCompany({{ $company->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-50 text-red-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21.75H8.084a2.25 2.25 0 0 1-2.245-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.875c0-1.035-.84-1.875-1.875-1.875h-3.75C9.09 3 8.25 3.84 8.25 4.875v.518" />
+                                            </svg>
+                                </button>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-6 text-sm text-slate-500 text-center">No companies found.</td>
+                            <td colspan="5" class="px-4 py-6 text-sm text-slate-500 text-center">No companies found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -178,11 +193,56 @@
             }
         });
 
+        // CSRF token for dynamic DELETE form submission
+        const __csrf = '{{ csrf_token() }}';
+
+        // Show a full-page loader then submit a DELETE form for the company
+        function showCompanyDeleteLoader(cb) {
+            const el = document.getElementById('companyDeleteLoader');
+            if (!el) return cb();
+            el.classList.remove('hidden');
+            setTimeout(() => cb(), 75);
+        }
+
+        function deleteCompany(id) {
+            openConfirm(
+                {
+                    title: 'Delete Company',
+                    message: 'This will permanently delete the company and its data. Continue?',
+                    confirmText: 'Delete',
+                    variant: 'danger',
+                    onConfirm: () => {
+                    showCompanyDeleteLoader(() => {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ url('companies') }}/' + id;
+                        form.style.display = 'none';
+
+                        const csrf = document.createElement('input');
+                        csrf.name = '_token';
+                        csrf.value = __csrf;
+                        form.appendChild(csrf);
+
+                        const method = document.createElement('input');
+                        method.name = '_method';
+                        method.value = 'DELETE';
+                        form.appendChild(method);
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    });
+                    }
+                }
+            );
+        }
+
         // If validation failed on form submit, reopen modal so user sees errors immediately.
         @if ($errors->any())
             openAddCompanyModal();
         @endif
     </script>
+
+    <x-loading id="companyDeleteLoader" message="Deleting company..." full-page="true" class="hidden" />
 
     @include('components.alert')
     @include('components.confirm')
