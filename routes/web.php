@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
     Route::post('/payroll', [PayrollController::class, 'store'])->name('payroll.store');
     Route::put('/payroll/{salary}', [PayrollController::class, 'update'])->name('payroll.update');
+    Route::delete('/payroll/{salary}', [PayrollController::class, 'destroy'])->name('payroll.destroy');
 
     // Sales Management
     Route::get('/sales', function () {

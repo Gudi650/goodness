@@ -370,8 +370,9 @@
                                     <td class="px-4 py-3 text-sm">{{ number_format($s['deductions'], 2) }}</td>
                                     <td class="px-4 py-3 text-sm">{{ number_format($s['net'], 2) }}</td>
                                     <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">{{ $s['status'] }}</span></td>
-                                    <td class="px-4 py-3 text-sm">
+                                    <td class="px-4 py-3 text-sm flex gap-2">
                                         <button onclick="editSalary({{ $s['id'] }}, {{ json_encode($s) }})" class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs font-medium">Edit</button>
+                                        <button onclick="deleteSalary({{ $s['id'] }})" class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-medium">Delete</button>
                                     </td>
                                 </tr>
                             @empty
@@ -1275,6 +1276,32 @@
             
             // Open the modal
             openRecordSalaryModal();
+        }
+
+        function deleteSalary(id) {
+            if (!confirm('Are you sure you want to delete this salary record? This action cannot be undone.')) {
+                return;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/payroll/' + id;
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = csrfToken;
+
+            form.appendChild(methodInput);
+            form.appendChild(tokenInput);
+            document.body.appendChild(form);
+            form.submit();
         }
 
         function logout() {

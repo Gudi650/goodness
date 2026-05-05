@@ -85,4 +85,18 @@ class PayrollController extends Controller
 
         return back()->with('success', 'Salary record updated.');
     }
+
+    public function destroy(Request $request, Salary $salary)
+    {
+        $companyId = session('active_company_id') ?? auth()->user()?->company_id;
+
+        // Ensure user can only delete salaries in their company
+        if ($salary->company_id !== $companyId) {
+            return back()->withErrors('Unauthorized');
+        }
+
+        $salary->delete();
+
+        return back()->with('success', 'Salary record deleted.');
+    }
 }
