@@ -417,7 +417,7 @@
         class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
         <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
             <h2 class="text-lg font-semibold font-display mb-4">Add Employee</h2>
-            <form id="employeeForm" method="POST" action="{{ route('employees.store') }}" class="space-y-6">
+            <form id="employeeForm" method="POST" action="{{ route('employees.store') }}" class="space-y-6" onsubmit="return showEmployeeLoader(event)">
                 @csrf
                 <div class="space-y-4">
                     <input type="text" name="name" placeholder="Full Name"
@@ -456,10 +456,12 @@
                 <div class="flex gap-3 justify-end pt-2">
                     <button type="button" onclick="closeAddEmployeeModal()"
                         class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Cancel</button>
-                    <button type="submit"
+                    <button type="submit" id="employeeSubmitBtn"
                         class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm">Save</button>
                 </div>
             </form>
+            
+            <x-loading id="employeeLoader" size="lg" color="amber" full-page="true" message="Saving employee details..." :show="false" />
         </div>
     </div>
 
@@ -502,12 +504,12 @@
             <div id="importStep2" class="hidden space-y-4">
                 <div id="previewResults" class="space-y-3">
                     <div id="validRowsPreview" class="hidden">
-                        <h3 class="text-sm font-medium text-slate-700 mb-2">✅ Valid Rows (<span id="validCount">0</span>)</h3>
+                        <h3 class="text-sm font-medium text-slate-700 mb-2"> Valid Rows (<span id="validCount">0</span>)</h3>
                         <div id="validRowsList" class="bg-slate-50 rounded p-3 max-h-40 overflow-y-auto text-xs text-slate-600 space-y-1"></div>
                     </div>
 
                     <div id="errorRowsPreview" class="hidden">
-                        <h3 class="text-sm font-medium text-slate-700 mb-2">❌ Error Rows (<span id="errorCount">0</span>)</h3>
+                        <h3 class="text-sm font-medium text-slate-700 mb-2"> Error Rows (<span id="errorCount">0</span>)</h3>
                         <div id="errorRowsList" class="bg-red-50 border border-red-200 rounded p-3 max-h-40 overflow-y-auto text-xs text-red-600 space-y-1"></div>
                     </div>
 
@@ -533,12 +535,8 @@
                     class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Cancel</button>
             </div>
 
-            <div id="importLoader" class="hidden absolute inset-0 z-10 items-center justify-center rounded-lg bg-white/80 backdrop-blur-[1px]">
-                <div class="flex flex-col items-center gap-3 rounded-lg border border-slate-200 bg-white px-6 py-5 shadow-md">
-                    <div class="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600"></div>
-                    <div id="importLoaderText" class="text-sm font-medium text-slate-700">Working...</div>
-                </div>
-            </div>
+            <x-loading id="importLoader" size="lg" color="amber" full-page="true" message="Processing..." :show="false" />
+
         </div>
     </div>
 
@@ -668,7 +666,7 @@
             if (dragDropPrompt) {
                 dragDropPrompt.classList.remove('hidden');
             }
-ocument.getElementById('csvFileInput').value = '';
+            document.getElementById('csvFileInput').value = '';
             document.getElementById('previewBtn').disabled = true;
             setImportLoading(false);
             clearImportStatus();
@@ -822,19 +820,30 @@ ocument.getElementById('csvFileInput').value = '';
 
                 const resultHtml = `
                     <div class="text-left">
-                        <h3 class="font-semibold text-lg mb-2">${data.success ? '✅ Import Complete!' : '❌ Import Failed'}</h3>
+                        <h3 class="font-semibold text-lg mb-2">${data.success ? ' Import Complete!' : '❌ Import Failed'}</h3>
                         <p class="mb-3"><strong>${data.message}</strong></p>
                         <ul class="text-sm space-y-1">
                             <li>📥 Imported: <strong>${data.imported}</strong></li>
                             <li>⏭️ Skipped: <strong>${data.skipped}</strong></li>
-                            ${data.errors && data.errors.length > 0 ? '<li>⚠️ Errors: ' + data.errors.join('; ') + '</li>' : ''}
+                            ${data.errors && data.errors.length > 0 ? '<li> Errors: ' + data.errors.join('; ') + '</li>' : ''}
                         </ul>
                     </div>
                 `;
                 document.getElementById('importResult').innerHTML = resultHtml;
 
+                if (window.showAlert) {
+                    if (data.success && data.imported > 0 && data.skipped > 0) {
+                        window.showAlert('warning', `${data.imported} employees imported and ${data.skipped} existing record(s) skipped.`);
+                    } else if (data.success && data.imported > 0) {
+                        window.showAlert('success', `Successfully imported ${data.imported} employees!`);
+                    } else if (data.success && data.skipped > 0) {
+                        window.showAlert('warning', `${data.skipped} employee record(s) were skipped because they already existed.`);
+                    } else if (data.success) {
+                        window.showAlert('info', data.message || 'Import completed.');
+                    }
+                }
+
                 if (data.success && data.imported > 0) {
-                    if (window.showAlert) window.showAlert('success', `Successfully imported ${data.imported} employees!`);
                     // Reload page to show new employees
                     setTimeout(() => {
                         location.reload();
@@ -958,6 +967,34 @@ ocument.getElementById('csvFileInput').value = '';
             document.getElementById('addEmployeeModal').classList.add('hidden');
         }
 
+        function showEmployeeLoader(event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            const loader = document.getElementById('employeeLoader');
+            const submitBtn = document.getElementById('employeeSubmitBtn');
+            const form = document.getElementById('employeeForm');
+
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+            }
+
+            if (form) {
+                window.setTimeout(() => {
+                    form.submit();
+                }, 75);
+            }
+
+            return true;
+        }
+
         function saveEmployee() {
             const name = document.getElementById('empName').value;
             if (name) {
@@ -1074,7 +1111,7 @@ ocument.getElementById('csvFileInput').value = '';
         });
     </script>
     @include('components.modal')
-    @include('components.alert')
+    <x-alert />
     @include('components.confirm')
 </body>
 
