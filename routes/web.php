@@ -87,6 +87,7 @@ Route::middleware('auth')->group(function () {
     // HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
     Route::post('/employees', [UserController::class, 'store'])->name('employees.store');
+    Route::delete('/employees/{user}', [UserController::class, 'destroy'])->name('employees.destroy');
     Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
     Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy');

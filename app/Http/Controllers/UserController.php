@@ -198,4 +198,26 @@ class UserController extends Controller
             ->route('users')
             ->with('success', "{$user->name} is now assigned to {$companyName}.");
     }
+
+    /**
+     * Delete an employee from HRM.
+     */
+    public function destroy(User $user)
+    {
+        $currentUser = Auth::user();
+        $isAdmin = $currentUser?->role?->name === 'Admin';
+        $activeCompanyId = session('active_company_id');
+
+        if ($isAdmin) {
+            if (! empty($activeCompanyId) && (int) $user->company_id !== (int) $activeCompanyId) {
+                return redirect()->route('hrm')->with('error', 'You are not authorized to delete this employee.');
+            }
+        } elseif ((int) $user->company_id !== (int) $currentUser?->company_id) {
+            return redirect()->route('hrm')->with('error', 'You are not authorized to delete this employee.');
+        }
+
+        User::query()->where('id', $user->id)->delete();
+
+        return redirect()->route('hrm')->with('success', 'Employee deleted successfully.');
+    }
 }

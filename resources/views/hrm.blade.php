@@ -161,6 +161,9 @@
                                 <th
                                     class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
                                     Status</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs uppercase tracking-wider font-medium text-slate-500">
+                                    Action</th>
                             </tr>
                         </thead>
                         <tbody id="employeesTable" class="divide-y divide-slate-100">
@@ -174,10 +177,17 @@
                                     <td class="px-4 py-3 text-sm">
                                         <span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">{{ $employee['status'] }}</span>
                                     </td>
+                                    <td class="px-4 py-3 text-sm">
+                                        <button type="button" onclick="deleteEmployee({{ $employee['id'] }})" title="Delete" class="p-2 text-red-600 hover:bg-red-50 rounded transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-4 py-6 text-sm text-slate-500 text-center">No employees found.</td>
+                                    <td colspan="7" class="px-4 py-6 text-sm text-slate-500 text-center">No employees found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -496,6 +506,7 @@
     </div>
 
     <x-loading id="departmentDeleteLoader" size="lg" color="amber" full-page="true" message="Deleting department..." :show="false" />
+    <x-loading id="employeeDeleteLoader" size="lg" color="amber" full-page="true" message="Deleting employee..." :show="false" />
 
     <div id="addEmployeeModal"
         class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
@@ -1049,6 +1060,47 @@
 
         function closeAddEmployeeModal() {
             document.getElementById('addEmployeeModal').classList.add('hidden');
+        }
+
+        function deleteEmployee(id) {
+            if (typeof window.openConfirm !== 'function') {
+                return;
+            }
+
+            window.openConfirm({
+                title: 'Delete employee',
+                message: 'This action cannot be undone. Do you want to continue?',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                variant: 'danger',
+                onConfirm: () => {
+                    const loader = document.getElementById('employeeDeleteLoader');
+                    if (loader) {
+                        loader.classList.remove('hidden');
+                        loader.classList.add('flex');
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/employees/' + id;
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                    const methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    methodInput.value = 'DELETE';
+
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '_token';
+                    tokenInput.value = csrfToken;
+
+                    form.appendChild(methodInput);
+                    form.appendChild(tokenInput);
+                    document.body.appendChild(form);
+                    window.setTimeout(() => form.submit(), 75);
+                }
+            });
         }
 
         function showEmployeeLoader(event) {
