@@ -51,20 +51,7 @@
     @include('components.sidebar')
 
     <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6 min-h-screen">
-        {{-- Success message after updating a user's role --}}
-        @if (session('success'))
-            <div class="mb-4 text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded-md px-3 py-2">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        {{-- Validation errors --}}
-        @if ($errors->any())
-            <div class="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-                {{ $errors->first() }}
-            </div>
-        @endif
-
+        
         <div class="mb-6">
             <h1 class="text-2xl font-semibold">Users & Roles</h1>
             <p class="text-sm text-slate-500">Manage user accounts and assign roles/positions</p>
@@ -94,6 +81,7 @@
     {{-- Modals moved to partials --}}
     @include('users.modals.assign-role')
     @include('users.modals.create-role')
+    @include('users.modals.edit-role')
     @include('users.modals.assign-company')
 
     {{-- Centralized scripts for users page --}}

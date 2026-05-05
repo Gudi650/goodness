@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * RoleController
@@ -41,5 +42,37 @@ class RoleController extends Controller
 
         // Redirect back to the users page with a friendly success message.
         return redirect()->route('users')->with('success', 'Role created successfully.');
+    }
+
+    /**
+     * Update an existing role.
+     */
+    public function update(Request $request, Role $role)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100', Rule::unique('roles', 'name')->ignore($role->id)],
+            'description' => 'nullable|string|max:255',
+        ], [
+            'name.required' => 'Please provide a role name.',
+            'name.unique' => 'A role with this name already exists.',
+        ]);
+
+        $role->update([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        return redirect()->route('users')->with('success', 'Role updated successfully.');
+    }
+
+    /**
+     * Delete a role.
+     */
+    public function destroy(Role $role)
+    {
+        $roleName = $role->name;
+        Role::query()->whereKey($role->id)->delete();
+
+        return redirect()->route('users')->with('success', "Role '{$roleName}' deleted successfully.");
     }
 }

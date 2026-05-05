@@ -8,7 +8,7 @@
         </div>
 
         {{-- Form to create a role --}}
-        <form id="createRoleForm" method="POST" action="{{ route('roles.store') }}" class="space-y-4">
+        <form id="createRoleForm" method="POST" action="{{ route('roles.store') }}" class="space-y-4" onsubmit="return showLoader(event, 'createRoleLoader')">
             @csrf
 
             <div>
@@ -26,5 +26,9 @@
                 <button id="submitCreateRoleBtn" type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium">Create Role</button>
             </div>
         </form>
+    </div>
+</div>
+
+<x-loading id="createRoleLoader" message="Creating role..." :show="false" fullPage />
     </div>
 </div>

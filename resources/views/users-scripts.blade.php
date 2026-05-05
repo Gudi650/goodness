@@ -1,4 +1,26 @@
 <script>
+    function showLoader(event, loaderId) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        const loader = document.getElementById(loaderId);
+        const form = event?.currentTarget || event?.target;
+
+        if (loader) {
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        setTimeout(() => {
+            if (form) {
+                form.submit();
+            }
+        }, 75);
+
+        return true;
+    }
+
     const tabUsersBtn = document.getElementById('tabUsersBtn');
     const tabRolesBtn = document.getElementById('tabRolesBtn');
     const usersPane = document.getElementById('usersPane');
@@ -154,6 +176,48 @@
         });
     }
 
+    const editRoleModalBackdrop = document.getElementById('editRoleModalBackdrop');
+    const closeEditRoleModalBtn = document.getElementById('closeEditRoleModalBtn');
+    const cancelEditRoleBtn = document.getElementById('cancelEditRoleBtn');
+    const editRoleForm = document.getElementById('editRoleForm');
+    const editRoleNameInput = document.getElementById('edit_role_name');
+    const editRoleDescriptionInput = document.getElementById('edit_role_description');
+
+    function openEditRoleModal(roleId, roleName, roleDescription) {
+        if (!editRoleModalBackdrop || !editRoleForm || !editRoleNameInput || !editRoleDescriptionInput) {
+            return;
+        }
+
+        editRoleForm.action = `/roles/${roleId}`;
+        editRoleNameInput.value = roleName || '';
+        editRoleDescriptionInput.value = roleDescription || '';
+        editRoleModalBackdrop.classList.remove('hidden');
+    }
+
+    function closeEditRoleModal() {
+        if (!editRoleModalBackdrop) {
+            return;
+        }
+
+        editRoleModalBackdrop.classList.add('hidden');
+    }
+
+    if (closeEditRoleModalBtn) {
+        closeEditRoleModalBtn.addEventListener('click', closeEditRoleModal);
+    }
+
+    if (cancelEditRoleBtn) {
+        cancelEditRoleBtn.addEventListener('click', closeEditRoleModal);
+    }
+
+    if (editRoleModalBackdrop) {
+        editRoleModalBackdrop.addEventListener('click', (event) => {
+            if (event.target === editRoleModalBackdrop) {
+                closeEditRoleModal();
+            }
+        });
+    }
+
     const assignCompanyModalBackdrop = document.getElementById('assignCompanyModalBackdrop');
     const closeAssignCompanyModalBtn = document.getElementById('closeAssignCompanyModalBtn');
     const cancelAssignCompanyBtn = document.getElementById('cancelAssignCompanyBtn');
@@ -224,4 +288,5 @@
 
     window.openAssignRoleModal = openAssignRoleModal;
     window.openAssignCompanyModal = openAssignCompanyModal;
+    window.openEditRoleModal = openEditRoleModal;
 </script>

@@ -79,6 +79,8 @@ Route::middleware('auth')->group(function () {
     // Roles Management
     // - POST /roles: create a new role (used by the Create Role modal)
     Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
     // Finance Management
     Route::get('/finance', function () {
