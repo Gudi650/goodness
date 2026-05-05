@@ -371,8 +371,16 @@
                                     <td class="px-4 py-3 text-sm">{{ number_format($s['net'], 2) }}</td>
                                     <td class="px-4 py-3 text-sm"><span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">{{ $s['status'] }}</span></td>
                                     <td class="px-4 py-3 text-sm flex gap-2">
-                                        <button onclick="editSalary({{ $s['id'] }}, {{ json_encode($s) }})" class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs font-medium">Edit</button>
-                                        <button onclick="deleteSalary({{ $s['id'] }})" class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-medium">Delete</button>
+                                        <button onclick="editSalary({{ $s['id'] }}, {{ json_encode($s) }})" title="Edit" class="p-2 text-blue-600 hover:bg-blue-50 rounded transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
+                                            </svg>
+                                        </button>
+                                        <button onclick="deleteSalary({{ $s['id'] }})" title="Delete" class="p-2 text-red-600 hover:bg-red-50 rounded transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
                                     </td>
                                 </tr>
                             @empty
@@ -1279,29 +1287,38 @@
         }
 
         function deleteSalary(id) {
-            if (!confirm('Are you sure you want to delete this salary record? This action cannot be undone.')) {
+            if (typeof window.openConfirm !== 'function') {
                 return;
             }
 
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/payroll/' + id;
+            window.openConfirm({
+                title: 'Delete salary record',
+                message: 'This action cannot be undone. Do you want to continue?',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                variant: 'danger',
+                onConfirm: () => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/payroll/' + id;
 
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-            const methodInput = document.createElement('input');
-            methodInput.type = 'hidden';
-            methodInput.name = '_method';
-            methodInput.value = 'DELETE';
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                    const methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    methodInput.value = 'DELETE';
 
-            const tokenInput = document.createElement('input');
-            tokenInput.type = 'hidden';
-            tokenInput.name = '_token';
-            tokenInput.value = csrfToken;
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '_token';
+                    tokenInput.value = csrfToken;
 
-            form.appendChild(methodInput);
-            form.appendChild(tokenInput);
-            document.body.appendChild(form);
-            form.submit();
+                    form.appendChild(methodInput);
+                    form.appendChild(tokenInput);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         }
 
         function logout() {
