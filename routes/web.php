@@ -9,6 +9,7 @@ use App\Http\Controllers\HrmController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\BulkImportController;
 use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -101,6 +102,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/payroll', [PayrollController::class, 'store'])->name('payroll.store');
     Route::put('/payroll/{salary}', [PayrollController::class, 'update'])->name('payroll.update');
     Route::delete('/payroll/{salary}', [PayrollController::class, 'destroy'])->name('payroll.destroy');
+
+    // Account Settings
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.update.profile');
+    Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.update.password');
+    Route::put('/settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.update.preferences');
 
     // Sales Management
     Route::get('/sales', function () {
