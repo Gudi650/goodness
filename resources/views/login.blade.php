@@ -37,77 +37,59 @@
 
             <h2 class="text-2xl font-semibold text-slate-800 mb-4">Sign in to your account</h2>
 
-            {{-- Display error message if authentication fails --}}
             @if ($errors->any())
                 <div class="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-                    {{-- Show the first error message --}}
                     {{ $errors->first() }}
                 </div>
             @endif
 
-            {{-- Display success message if provided --}}
-            @if (session('success'))
-                <div class="mb-4 text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded-md px-3 py-2">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            {{-- Login Form - submits POST request to /login endpoint --}}
-            <form method="POST" action="{{ route('login.submit') }}" class="space-y-4">
-                {{-- CSRF Token - required by Laravel for security --}}
-                {{-- Prevents cross-site request forgery attacks --}}
+            <form method="POST" action="{{ route('login.submit') }}" onsubmit="return showLoader(event, 'loginLoader')" class="space-y-4">
                 @csrf
 
-                {{-- Email Input Field --}}
                 <div>
                     <label for="email" class="block text-sm text-slate-500 mb-2">Email</label>
-                    <input 
-                        id="email" 
-                        type="email" 
-                        name="email" 
-                        placeholder="you@company.tz" 
+                    <input
+                        id="email"
+                        type="email"
+                        name="email"
+                        placeholder="you@company.tz"
                         value="{{ old('email') }}"
-                        class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('email') border-red-500 @enderror" 
+                        class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('email') border-red-500 @enderror"
                         required
                     />
-                    {{-- Show validation error for email field if it exists --}}
                     @error('email')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                {{-- Password Input Field --}}
                 <div>
                     <label for="password" class="block text-sm text-slate-500 mb-2">Password</label>
                     <div class="relative">
-                        <input 
-                            id="password" 
-                            type="password" 
-                            name="password" 
-                            placeholder="••••••••" 
-                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('password') border-red-500 @enderror" 
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            placeholder="••••••••"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 @error('password') border-red-500 @enderror"
                             required
                         />
-                        {{-- Show/Hide password toggle button --}}
-                        <button 
-                            id="togglePwd" 
-                            type="button" 
-                            class="absolute right-2 top-2 text-sm text-slate-500"
+                        <button
+                            id="togglePwd"
+                            type="button"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500 hover:text-slate-700 transition"
                         >
                             Show
                         </button>
                     </div>
-                    {{-- Show validation error for password field if it exists --}}
                     @error('password')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                {{-- Submit Button --}}
-                <div>
-                    <button 
-                        type="submit" 
-                        class="w-full px-4 py-2 bg-brand-600 text-white rounded-md font-medium hover:bg-brand-700 transition"
+                <div class="pt-2">
+                    <button
+                        type="submit"
+                        class="w-full px-4 py-2.5 bg-brand-600 text-white rounded-md font-medium hover:bg-brand-700 transition focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
                     >
                         Sign In
                     </button>
@@ -122,38 +104,46 @@
         <p class="text-center text-sm text-slate-500 mt-4">Goodness Group — Multi-company ERP</p>
     </div>
 
+    <x-loading id="loginLoader" size="lg" color="amber" full-page="true" message="Signing you in..." :show="false" />
+    <x-alert />
+
     <script>
-        /**
-         * Password visibility toggle
-         * Allows user to show/hide password while typing
-         */
+        function showLoader(event, loaderId) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            const loader = document.getElementById(loaderId);
+            const form = event?.currentTarget || event?.target;
+
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+            }
+
+            setTimeout(() => {
+                if (form) {
+                    form.submit();
+                }
+            }, 75);
+
+            return true;
+        }
+
         const toggle = document.getElementById('togglePwd');
         const pwd = document.getElementById('password');
-        
-        // Listen for click on the Show/Hide button
-        toggle.addEventListener('click', () => {
-            // If password is currently hidden, show it
-            if (pwd.type === 'password') {
-                pwd.type = 'text';
-                toggle.textContent = 'Hide';
-            } 
-            // If password is currently visible, hide it
-            else {
-                pwd.type = 'password';
-                toggle.textContent = 'Show';
-            }
-        });
 
-        /**
-         * Allow user to press Enter to submit the form
-         * This is a common UX pattern for login forms
-         */
-        document.addEventListener('keydown', (e) => {
-            // If user presses Enter key, submit the form
-            if (e.key === 'Enter') {
-                document.querySelector('form').submit();
-            }
-        });
+        if (toggle && pwd) {
+            toggle.addEventListener('click', () => {
+                if (pwd.type === 'password') {
+                    pwd.type = 'text';
+                    toggle.textContent = 'Hide';
+                } else {
+                    pwd.type = 'password';
+                    toggle.textContent = 'Show';
+                }
+            });
+        }
     </script>
 </body>
 </html>
