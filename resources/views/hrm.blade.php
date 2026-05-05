@@ -75,9 +75,13 @@
         <div id="tab-employees" class="tab-content">
             <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                 <h2 class="text-lg font-semibold font-display">Employees</h2>
-                <button onclick="openAddEmployeeModal()"
-                    class="w-full sm:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
-                    Employee</button>
+                <div class="flex flex-col gap-2 w-full sm:w-auto sm:flex-row">
+                    <button onclick="openAddEmployeeModal()"
+                        class="flex-1 sm:flex-none px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">Add
+                        Employee</button>
+                    <button onclick="openBulkImportModal()"
+                        class="flex-1 sm:flex-none px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-md text-sm font-medium transition-colors">Import CSV</button>
+                </div>
             </div>
             <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -426,18 +430,23 @@
                         class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empPhone" />
                     
                     @if ($isAdmin)
+                    
                         <select name="company_id" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empCompany" required>
                             <option value="">Select Company</option>
                             @foreach ($companies as $company)
                                 <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>{{ $company->name }}</option>
                             @endforeach
                         </select>
+
                     @else
+
                         <input type="hidden" name="company_id" value="{{ auth()->user()?->company_id }}">
                         <div class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-slate-50 text-slate-600">
                             {{ auth()->user()?->company?->name ?? 'No company assigned' }}
                         </div>
+
                     @endif
+
                     <select name="department_id" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" id="empDept">
                         <option value="">Select Department</option>
                     </select>
@@ -454,11 +463,398 @@
         </div>
     </div>
 
+    <div id="bulkImportModal"
+        class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-2xl mx-4 p-6">
+            <h2 class="text-lg font-semibold font-display mb-2">Bulk Import Employees</h2>
+            <p class="text-sm text-slate-600 mb-4">Upload a CSV file with columns: Name, Email, Phone Number, Department, Join Date (YYYY-MM-DD)</p>
+            
+            <div id="importStep1" class="space-y-4">
+                <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer" id="dragDropZone">
+                    <input type="file" id="csvFileInput" accept=".csv,.txt" class="hidden" onchange="handleFileSelect(event)">
+                    <p id="dragDropPrompt" class="text-sm text-slate-600">Drag CSV file here or <span class="text-brand-600 font-medium">click to browse</span></p>
+                    <p id="selectedCsvFile" class="hidden text-sm text-brand-600 font-medium"></p>
+                    <p class="text-xs text-slate-500 mt-2">CSV format: Name, Email, Phone, Department, Join Date</p>
+                </div>
+
+                <div id="importStatus" class="hidden rounded-md border px-3 py-2 text-sm"></div>
+
+                @if ($isAdmin)
+                    <select id="bulkImportCompany" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" required>
+                        <option value="">Select Company</option>
+                        @foreach ($companies as $company)
+                            <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>
+                                {{ $company->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                @else
+                    <input type="hidden" id="bulkImportCompany" value="{{ auth()->user()?->company_id }}">
+                    <div class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-slate-50 text-slate-600">
+                        {{ auth()->user()?->company?->name ?? 'No company assigned' }}
+                    </div>
+                @endif
+
+                <button type="button" id="previewBtn" onclick="previewImport()" disabled
+                    class="w-full px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 text-white rounded-md text-sm font-medium transition-colors">Preview & Validate</button>
+            </div>
+
+            <div id="importStep2" class="hidden space-y-4">
+                <div id="previewResults" class="space-y-3">
+                    <div id="validRowsPreview" class="hidden">
+                        <h3 class="text-sm font-medium text-slate-700 mb-2">✅ Valid Rows (<span id="validCount">0</span>)</h3>
+                        <div id="validRowsList" class="bg-slate-50 rounded p-3 max-h-40 overflow-y-auto text-xs text-slate-600 space-y-1"></div>
+                    </div>
+
+                    <div id="errorRowsPreview" class="hidden">
+                        <h3 class="text-sm font-medium text-slate-700 mb-2">❌ Error Rows (<span id="errorCount">0</span>)</h3>
+                        <div id="errorRowsList" class="bg-red-50 border border-red-200 rounded p-3 max-h-40 overflow-y-auto text-xs text-red-600 space-y-1"></div>
+                    </div>
+
+                    <div id="previewMessage" class="text-sm text-slate-600 bg-blue-50 border border-blue-200 p-3 rounded"></div>
+                </div>
+
+                <div class="flex gap-3 justify-end pt-2">
+                    <button type="button" onclick="backToUpload()"
+                        class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Back</button>
+                    <button type="button" id="confirmBtn" onclick="confirmImport()" disabled
+                        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 text-white rounded-md text-sm font-medium">Confirm Import</button>
+                </div>
+            </div>
+
+            <div id="importStep3" class="hidden text-center space-y-4">
+                <div id="importResult" class="bg-slate-50 rounded p-4 text-sm"></div>
+                <button type="button" onclick="closeBulkImportModal()"
+                    class="w-full px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm">Close</button>
+            </div>
+
+            <div class="flex gap-3 justify-end pt-4 border-t border-slate-200 mt-6">
+                <button type="button" onclick="closeBulkImportModal()"
+                    class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm">Cancel</button>
+            </div>
+
+            <div id="importLoader" class="hidden absolute inset-0 z-10 items-center justify-center rounded-lg bg-white/80 backdrop-blur-[1px]">
+                <div class="flex flex-col items-center gap-3 rounded-lg border border-slate-200 bg-white px-6 py-5 shadow-md">
+                    <div class="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600"></div>
+                    <div id="importLoaderText" class="text-sm font-medium text-slate-700">Working...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const employeeNames = @json($employeeNames);
         const departments = @json($departments);
         const departmentOptions = @json($departmentOptions);
+        let previewedData = null;
 
+        function getDragDropZone() {
+            return document.getElementById('dragDropZone');
+        }
+
+        function setImportStatus(message, type = 'info') {
+            const status = document.getElementById('importStatus');
+            if (!status) return;
+
+            const styles = {
+                info: 'border-blue-200 bg-blue-50 text-blue-700',
+                success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                error: 'border-red-200 bg-red-50 text-red-700',
+            };
+
+            status.className = `rounded-md border px-3 py-2 text-sm ${styles[type] || styles.info}`;
+            status.textContent = message;
+            status.classList.remove('hidden');
+        }
+
+        function clearImportStatus() {
+            const status = document.getElementById('importStatus');
+            if (!status) return;
+            status.textContent = '';
+            status.classList.add('hidden');
+        }
+
+        function setImportLoading(isLoading, message = '') {
+            const loader = document.getElementById('importLoader');
+            const loaderText = document.getElementById('importLoaderText');
+            const previewBtn = document.getElementById('previewBtn');
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            if (loader) {
+                loader.classList.toggle('hidden', !isLoading);
+                loader.classList.toggle('flex', isLoading);
+            }
+
+            if (loaderText && message) {
+                loaderText.textContent = message;
+            }
+
+            if (previewBtn) {
+                previewBtn.disabled = isLoading;
+            }
+
+            if (confirmBtn) {
+                confirmBtn.disabled = isLoading;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const dragDropZone = getDragDropZone();
+
+            if (!dragDropZone) return;
+
+            dragDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dragDropZone.classList.add('bg-brand-50', 'border-brand-400');
+            });
+
+            dragDropZone.addEventListener('dragleave', () => {
+                dragDropZone.classList.remove('bg-brand-50', 'border-brand-400');
+            });
+
+            dragDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dragDropZone.classList.remove('bg-brand-50', 'border-brand-400');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('csvFileInput').files = files;
+                    handleFileSelect({ target: { files } });
+                }
+            });
+
+            dragDropZone.addEventListener('click', () => {
+                document.getElementById('csvFileInput').click();
+            });
+        });
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                document.getElementById('previewBtn').disabled = false;
+                clearImportStatus();
+
+                const selectedCsvFile = document.getElementById('selectedCsvFile');
+                const dragDropPrompt = document.getElementById('dragDropPrompt');
+
+                if (selectedCsvFile) {
+                    selectedCsvFile.textContent = `✓ ${files[0].name}`;
+                    selectedCsvFile.classList.remove('hidden');
+                }
+
+                if (dragDropPrompt) {
+                    dragDropPrompt.classList.add('hidden');
+                }
+            }
+        }
+
+        function openBulkImportModal() {
+            document.getElementById('bulkImportModal').classList.remove('hidden');
+            const csvFileInput = document.getElementById('csvFileInput');
+            if (csvFileInput) {
+                csvFileInput.value = '';
+            }
+            document.getElementById('previewBtn').disabled = true;
+            setImportLoading(false);
+            clearImportStatus();
+
+            const selectedCsvFile = document.getElementById('selectedCsvFile');
+            const dragDropPrompt = document.getElementById('dragDropPrompt');
+
+            if (selectedCsvFile) {
+                selectedCsvFile.textContent = '';
+                selectedCsvFile.classList.add('hidden');
+            }
+
+            if (dragDropPrompt) {
+                dragDropPrompt.classList.remove('hidden');
+            }
+ocument.getElementById('csvFileInput').value = '';
+            document.getElementById('previewBtn').disabled = true;
+            setImportLoading(false);
+            clearImportStatus();
+            const dragDropZone = getDragDropZone();
+            if (dragDropZone) {
+                dragDropZone.innerHTML = `<p class="text-sm text-slate-600">Drag CSV file here or <span class="text-brand-600 font-medium">click to browse</span></p>
+                    <p class="text-xs text-slate-500 mt-2">CSV format: Name, Email, Phone, Department, Join Date</p>`;
+            }
+            previewedData = null;
+        }
+
+        function previewImport() {
+            const fileInput = document.getElementById('csvFileInput');
+            if (!fileInput) {
+                setImportStatus('CSV file input was not found. Reopen the import modal and try again.', 'error');
+                if (window.showAlert) window.showAlert('error', 'CSV file input was not found.');
+                return;
+            }
+
+            const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+            const companyId = document.getElementById('bulkImportCompany').value;
+
+            if (!file) {
+                setImportStatus('Please select a CSV file first.', 'error');
+                if (window.showAlert) window.showAlert('error', 'Please select a CSV file');
+                return;
+            }
+
+            if (!companyId) {
+                setImportStatus('Please select a company first.', 'error');
+                if (window.showAlert) window.showAlert('error', 'Please select a company');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csv_file', file);
+            formData.append('company_id', companyId);
+
+            setImportLoading(true, 'Validating CSV...');
+            setImportStatus('Validating file and checking rows...', 'info');
+
+            fetch('{{ route("bulk-import.preview") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: formData,
+            })
+            .then(async response => {
+                const text = await response.text();
+                let payload = {};
+
+                try {
+                    payload = text ? JSON.parse(text) : {};
+                } catch (error) {
+                    payload = { message: text || 'Invalid server response.' };
+                }
+
+                if (!response.ok) {
+                    throw new Error(payload.message || 'Preview failed');
+                }
+
+                return payload;
+            })
+            .then(data => {
+                setImportLoading(false);
+
+                if (data.success) {
+                    previewedData = data.valid_rows;
+                    displayPreview(data);
+                    document.getElementById('importStep1').classList.add('hidden');
+                    document.getElementById('importStep2').classList.remove('hidden');
+                    setImportStatus(`Preview completed: ${data.valid_count} valid, ${data.error_count} errors.`, 'success');
+                    if (data.valid_count > 0) {
+                        document.getElementById('confirmBtn').disabled = false;
+                    }
+                } else {
+                    setImportStatus(data.message || 'Preview failed', 'error');
+                    if (window.showAlert) window.showAlert('error', data.message || 'Preview failed');
+                }
+            })
+            .catch(error => {
+                setImportLoading(false);
+                setImportStatus(error.message || 'Preview request failed.', 'error');
+                if (window.showAlert) window.showAlert('error', 'Error: ' + error.message);
+            });
+        }
+
+        function displayPreview(data) {
+            document.getElementById('previewMessage').innerHTML = `<strong>Summary:</strong> ${data.message}`;
+
+            if (data.valid_count > 0) {
+                document.getElementById('validCount').textContent = data.valid_count;
+                document.getElementById('validRowsList').innerHTML = data.valid_rows
+                    .map((row, idx) => `
+                        <div>${idx + 1}. <strong>${row.name}</strong> (${row.email}) - Dept: ${row.department_name || 'None'}</div>
+                    `)
+                    .join('');
+                document.getElementById('validRowsPreview').classList.remove('hidden');
+            }
+
+            if (data.error_count > 0) {
+                document.getElementById('errorCount').textContent = data.error_count;
+                document.getElementById('errorRowsList').innerHTML = data.error_rows
+                    .map(row => `
+                        <div><strong>Line ${row.line}:</strong> ${row.data.name || row.data.email} - ${row.errors.join('; ')}</div>
+                    `)
+                    .join('');
+                document.getElementById('errorRowsPreview').classList.remove('hidden');
+            }
+        }
+
+        function confirmImport() {
+            if (!previewedData || previewedData.length === 0) {
+                setImportStatus('No valid rows to import.', 'error');
+                if (window.showAlert) window.showAlert('error', 'No valid rows to import');
+                return;
+            }
+
+            setImportLoading(true, 'Importing employees...');
+            setImportStatus('Importing the valid rows now...', 'info');
+
+            fetch('{{ route("bulk-import.confirm") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ valid_rows: previewedData }),
+            })
+            .then(async response => {
+                const text = await response.text();
+                let payload = {};
+
+                try {
+                    payload = text ? JSON.parse(text) : {};
+                } catch (error) {
+                    payload = { message: text || 'Invalid server response.' };
+                }
+
+                if (!response.ok) {
+                    throw new Error(payload.message || 'Import failed');
+                }
+
+                return payload;
+            })
+            .then(data => {
+                setImportLoading(false);
+                document.getElementById('importStep2').classList.add('hidden');
+                document.getElementById('importStep3').classList.remove('hidden');
+
+                const resultHtml = `
+                    <div class="text-left">
+                        <h3 class="font-semibold text-lg mb-2">${data.success ? '✅ Import Complete!' : '❌ Import Failed'}</h3>
+                        <p class="mb-3"><strong>${data.message}</strong></p>
+                        <ul class="text-sm space-y-1">
+                            <li>📥 Imported: <strong>${data.imported}</strong></li>
+                            <li>⏭️ Skipped: <strong>${data.skipped}</strong></li>
+                            ${data.errors && data.errors.length > 0 ? '<li>⚠️ Errors: ' + data.errors.join('; ') + '</li>' : ''}
+                        </ul>
+                    </div>
+                `;
+                document.getElementById('importResult').innerHTML = resultHtml;
+
+                if (data.success && data.imported > 0) {
+                    if (window.showAlert) window.showAlert('success', `Successfully imported ${data.imported} employees!`);
+                    // Reload page to show new employees
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                setImportLoading(false);
+                setImportStatus(error.message || 'Import request failed.', 'error');
+                if (window.showAlert) window.showAlert('error', 'Error: ' + error.message);
+            });
+        }
+
+        function backToUpload() {
+            document.getElementById('importStep2').classList.add('hidden');
+            document.getElementById('importStep1').classList.remove('hidden');
+            previewedData = null;
+        }
+
+        // ===== ORIGINAL SCRIPT CONTENT =====
         const attendance = [{
                 id: 1,
                 employee: 'Amina Hassan',

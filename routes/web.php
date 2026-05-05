@@ -7,6 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\BulkImportController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -85,6 +86,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
     Route::post('/employees', [UserController::class, 'store'])->name('employees.store');
     Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
+
+    // Bulk Import
+    Route::post('/bulk-import/preview', [BulkImportController::class, 'previewImport'])->name('bulk-import.preview');
+    Route::post('/bulk-import/confirm', [BulkImportController::class, 'confirmImport'])->name('bulk-import.confirm');
 
     // Sales Management
     Route::get('/sales', function () {
