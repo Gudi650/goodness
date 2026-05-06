@@ -127,7 +127,7 @@
 
         if (tab === 'invoices') {
             sectionTitle.textContent = 'Invoices';
-            actionButton.innerHTML = renderButton('Add Invoice', 'openAddInvoiceModal()');
+            actionButton.innerHTML = renderButton('Add Invoice', 'openInvoiceModal()');
             return;
         }
 
