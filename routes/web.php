@@ -92,28 +92,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
-    /* Finance Management
-    Route::get('/finance', function () {
-        $invoices = [
-            [
-                'id' => 'INV-001',
-                'company' => 'Goodness Tanzania Ltd',
-                'amount' => 1250000,
-                'status' => 'Paid',
-            ],
-            [
-                'id' => 'INV-002',
-                'company' => 'Goodness Kenya Ltd',
-                'amount' => 850000,
-                'status' => 'Unpaid',
-            ],
-        ];
-
-        $expenses = [];
-        $payments = [];
-
-        return view('finance', compact('invoices', 'expenses', 'payments'));
-    })->name('finance'); */
 
     //Finance Management
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
