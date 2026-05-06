@@ -174,12 +174,9 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        Invoice::destroy($invoice->id);
+        Invoice::query()->whereKey($invoice->id)->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Invoice deleted successfully',
-        ]);
+        return back()->with('success', 'Salary record updated.');
     }
 
     /**

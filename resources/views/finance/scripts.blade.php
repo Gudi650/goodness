@@ -141,6 +141,47 @@
         actionButton.innerHTML = renderButton('Add Payment', 'openAddPaymentModal()');
     }
 
+    function deleteInvoice(id) {
+        if (typeof window.openConfirm !== 'function') {
+            return;
+        }
+
+        window.openConfirm({
+            title: 'Delete invoice',
+            message: 'This action cannot be undone. Do you want to continue?',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'danger',
+            onConfirm: () => {
+                // Show loader if function exists (from invoices.blade.php)
+                if (typeof showInvoiceLoader === 'function') {
+                    showInvoiceLoader();
+                }
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/invoices/' + id;
+                form.style.display = 'none';
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                tokenInput.value = csrfToken;
+
+                form.appendChild(methodInput);
+                form.appendChild(tokenInput);
+                document.body.appendChild(form);
+                window.setTimeout(() => form.submit(), 75);
+            }
+        });
+    }
+
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
         switchTab('invoices', document.querySelector('.tab-btn'));
