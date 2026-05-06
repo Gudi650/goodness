@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FinanceController extends Controller
 {
@@ -12,6 +14,21 @@ class FinanceController extends Controller
     public function index()
     {
         //
+        $invoices = Invoice::with(['company', 'creator', 'items'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        $companies = DB::table('companies')->pluck('name', 'id');
+
+        $expenses = [];
+        $payments = [];
+
+        return view('finance', [
+            'invoices' => $invoices,
+            'expenses' => $expenses,
+            'payments' => $payments,
+            'companies' => $companies,
+        ]);
     }
 
     /**

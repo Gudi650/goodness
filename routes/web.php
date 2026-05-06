@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\BulkImportController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\InvoiceController;
@@ -115,7 +116,7 @@ Route::middleware('auth')->group(function () {
     })->name('finance'); */
 
     //Finance Management
-    Route::get('/finance', [InvoiceController::class, 'index'])->name('finance');
+    Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
 
     // HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
