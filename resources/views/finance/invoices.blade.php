@@ -1,4 +1,6 @@
+{{-- Loading components for invoice actions --}}
 <x-loading id="invoiceDeleteLoader" message="Deleting invoice..." :show="false" full-page="true" />
+<x-loading id="invoiceEditLoader" message="Updating invoice..." :show="false" full-page="true" />
 
 <div id="invoicesPane">
     <div class="overflow-x-auto">
@@ -38,7 +40,7 @@
                                 </button>
                                 <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
                                     title="Edit invoice" aria-label="Edit invoice"
-                                    onclick="window.showAlert ? window.showAlert('info', 'Edit invoice is not wired yet.') : null">
+                                    onclick="openEditInvoiceModal({{ $invoice->id }})">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -169,6 +171,8 @@
     </div>
 </div>
 
+{{-- Edit uses the same modal UI as Create — we will populate the existing invoice modal when editing. --}}
+
 <script>
     function showInvoiceLoader() {
         const loader = document.getElementById('invoiceDeleteLoader');
@@ -183,6 +187,67 @@
             loader.classList.add('hidden');
         }
     }
+
+    // Open edit invoice modal by reusing the create-invoice modal UI.
+    // Populates the existing create modal fields and marks the form for PUT submission.
+    function openEditInvoiceModal(invoiceId) {
+        // Fetch invoice data
+        fetch(`/invoices/${invoiceId}`)
+            .then(response => response.json())
+            .then(invoice => {
+                // mark global editing id used by send/save functions
+                window.editingInvoiceId = invoiceId;
+
+                // Populate create-modal fields (ids from add-invoice.blade.php)
+                document.getElementById('invoiceNumber').value = invoice.invoice_number || '';
+                document.getElementById('invoiceCompany').value = invoice.company_id || '';
+                document.getElementById('invoiceClientName').value = invoice.client_name || '';
+                document.getElementById('invoiceClientEmail').value = invoice.client_email || '';
+                document.getElementById('invoiceClientPhone').value = invoice.client_phone || '';
+                document.getElementById('invoiceClientAddress').value = invoice.client_address || '';
+                document.getElementById('invoiceDate').value = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : '';
+                document.getElementById('invoiceDueDate').value = invoice.due_date ? invoice.due_date.split('T')[0] : '';
+                document.getElementById('invoiceStatus').value = invoice.status || 'draft';
+                document.getElementById('invoicePaymentMethod').value = invoice.payment_method || 'cash';
+                document.getElementById('invoiceNotes').value = invoice.notes || '';
+
+                // Remove existing dynamic rows then populate items
+                const container = document.getElementById('invoiceItemsContainer');
+                container.innerHTML = '';
+                if (invoice.items && invoice.items.length) {
+                    invoice.items.forEach(item => {
+                        // reuse global addInvoiceItem to append rows then fill values
+                        window.addInvoiceItem();
+                    });
+                    // Fill values into the created rows
+                    const rows = container.querySelectorAll('.invoice-item-row');
+                    invoice.items.forEach((item, idx) => {
+                        const row = rows[idx];
+                        if (!row) return;
+                        row.querySelector('.invoice-item-desc').value = item.description || '';
+                        row.querySelector('.invoice-item-qty').value = item.quantity || 1;
+                        row.querySelector('.invoice-item-price').value = (item.unit_price ?? 0).toFixed(2);
+                    });
+                } else {
+                    // ensure at least one row
+                    window.addInvoiceItem();
+                }
+
+                // sync totals to reflect populated items
+                if (typeof syncTotals === 'function') syncTotals();
+
+                // Open the create modal UI
+                if (typeof window.openInvoiceModal === 'function') {
+                    document.getElementById('invoiceModalBackdrop').classList.remove('hidden');
+                }
+            })
+            .catch(err => {
+                console.error('Failed to load invoice for editing', err);
+                window.showAlert && window.showAlert('error', 'Failed to load invoice for editing');
+            });
+    }
+
+    // (editing flow now uses the create invoice modal UI; submission handled in the create modal script)
 
     function toggleInvoiceDetails(invoiceId) {
         const targetRow = document.getElementById(`invoice-details-${invoiceId}`);

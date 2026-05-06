@@ -295,6 +295,8 @@
     }
 
     window.openInvoiceModal = function() {
+        // Open create modal; clear any editing state
+        window.editingInvoiceId = null;
         document.getElementById('invoiceModalBackdrop').classList.remove('hidden');
         document.getElementById('invoiceForm').reset();
         document.getElementById('invoiceNumber').value = 'INV-' + Math.floor(Math.random() * 9000 + 1000);
@@ -302,11 +304,18 @@
         document.getElementById('invoiceDate').value = today;
         document.getElementById('invoiceDueDate').value = today;
         document.getElementById('invoiceTaxRate').value = 18;
+        // remove any leftover hidden items container inputs
+        document.getElementById('invoiceItemsDataContainer').innerHTML = '';
         syncTotals();
     };
 
     window.closeInvoiceModal = function() {
         document.getElementById('invoiceModalBackdrop').classList.add('hidden');
+        // clear editing state when closing
+        window.editingInvoiceId = null;
+        // remove any _method override if injected
+        const existingMethod = document.querySelector('#invoiceForm input[name="_method"]');
+        if (existingMethod) existingMethod.remove();
     };
 
     window.addInvoiceItem = function() {
@@ -362,7 +371,43 @@
     window.saveInvoiceAsDraft = function() {
         if (!validateForm()) return;
         collectItemsAsHiddenInputs();
+        // If editing an existing invoice, send via AJAX PUT
         const form = document.getElementById('invoiceForm');
+        if (window.editingInvoiceId) {
+            // prepare FormData
+            const fd = new FormData(form);
+            fd.append('_method', 'PUT');
+            fd.set('status', 'draft');
+
+            // show loader if available
+            const editLoader = document.getElementById('invoiceEditLoader');
+            if (editLoader) editLoader.classList.remove('hidden');
+
+            fetch(`/invoices/${window.editingInvoiceId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: fd
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (editLoader) editLoader.classList.add('hidden');
+                if (data.success) {
+                    window.showAlert && window.showAlert('success', data.message || 'Invoice updated');
+                    setTimeout(() => window.location.reload(), 800);
+                } else {
+                    window.showAlert && window.showAlert('error', data.message || 'Failed to update invoice');
+                }
+            })
+            .catch(err => {
+                if (editLoader) editLoader.classList.add('hidden');
+                console.error(err);
+                window.showAlert && window.showAlert('error', 'An error occurred while updating invoice');
+            });
+            return;
+        }
+
         form.action = '/invoices/draft';
         form.submit();
     };
@@ -371,6 +416,39 @@
         if (!validateForm()) return;
         collectItemsAsHiddenInputs();
         const form = document.getElementById('invoiceForm');
+        // If editing, submit via AJAX PUT to update endpoint
+        if (window.editingInvoiceId) {
+            const fd = new FormData(form);
+            fd.append('_method', 'PUT');
+
+            const editLoader = document.getElementById('invoiceEditLoader');
+            if (editLoader) editLoader.classList.remove('hidden');
+
+            fetch(`/invoices/${window.editingInvoiceId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: fd
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (editLoader) editLoader.classList.add('hidden');
+                if (data.success) {
+                    window.showAlert && window.showAlert('success', data.message || 'Invoice updated');
+                    setTimeout(() => window.location.reload(), 800);
+                } else {
+                    window.showAlert && window.showAlert('error', data.message || 'Failed to update invoice');
+                }
+            })
+            .catch(err => {
+                if (editLoader) editLoader.classList.add('hidden');
+                console.error(err);
+                window.showAlert && window.showAlert('error', 'An error occurred while updating invoice');
+            });
+            return;
+        }
+
         form.action = '/invoices';
         form.submit();
     };
