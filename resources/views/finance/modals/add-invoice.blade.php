@@ -41,12 +41,14 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Company</label>
+
                     <select id="invoiceCompany" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                         <option value="">Select company...</option>
-                        <option value="goodness-tz">Goodness Tanzania Ltd</option>
-                        <option value="goodness-ke">Goodness Kenya Ltd</option>
-                        <option value="goodness-ug">Goodness Uganda Ltd</option>
+                        <option value="1">Goodness Tanzania Ltd</option>
+                        <option value="2">Goodness Kenya Ltd</option>
+                        <option value="3">Goodness Uganda Ltd</option>
                     </select>
+
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Payment Method</label>
@@ -200,6 +202,9 @@
     window.openInvoiceModal = function() {
         const backdrop = document.getElementById('invoiceModalBackdrop');
         backdrop.classList.remove('hidden');
+
+        // Reset first, then apply defaults.
+        document.getElementById('invoiceForm').reset();
         
         // Auto-generate invoice number
         const invNum = 'INV-' + Math.floor(Math.random() * 9000 + 1000);
@@ -208,10 +213,10 @@
         // Set today's date
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('invoiceDate').value = today;
+        document.getElementById('invoiceDueDate').value = today;
         
-        // Reset form
-        document.getElementById('invoiceForm').reset();
         document.getElementById('invoiceTaxRate').value = 18;
+        updateInvoiceTotals();
     };
 
     window.closeInvoiceModal = function() {
@@ -319,10 +324,111 @@
     }
 
     window.saveInvoiceAsDraft = function() {
-        closeInvoiceModal();
-        if (window.showAlert) {
-            window.showAlert('info', 'Invoice saved as draft.');
+        const clientName = document.getElementById('invoiceClientName').value.trim();
+        if (!clientName) {
+            if (window.showAlert) {
+                window.showAlert('error', 'Please enter client name before saving as draft.');
+            }
+            return;
         }
+
+        // Collect form data
+        const invoiceNumber = document.getElementById('invoiceNumber').value;
+        const companyId = document.getElementById('invoiceCompany').value;
+        const invoiceDate = document.getElementById('invoiceDate').value;
+        const dueDate = document.getElementById('invoiceDueDate').value;
+        const paymentMethod = document.getElementById('invoicePaymentMethod').value;
+        const notes = document.getElementById('invoiceNotes').value;
+        const subtotal = parseFloat(document.getElementById('invoiceSubtotal').textContent) || 0;
+        const discountAmount = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
+        const totalAmount = parseFloat(document.getElementById('invoiceOverallTotal').textContent) || 0;
+
+        // Collect items
+        const items = [];
+        const rows = document.querySelectorAll('.invoice-item-row');
+        rows.forEach((row, idx) => {
+            const desc = row.querySelector('.invoice-item-desc').value.trim();
+            const qty = parseInt(row.querySelector('.invoice-item-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.invoice-item-price').value) || 0;
+            const total = qty * price;
+
+            if (desc && price > 0) {
+                items.push({
+                    item_number: idx + 1,
+                    description: desc,
+                    quantity: qty,
+                    unit_price: price,
+                    total_price: total,
+                });
+            }
+        });
+
+        if (items.length === 0) {
+            if (window.showAlert) {
+                window.showAlert('error', 'Add at least one item before saving as draft.');
+            }
+            return;
+        }
+
+        // Send data to backend
+        fetch('/invoices/draft', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({
+                invoice_number: invoiceNumber,
+                company_id: companyId,
+                client_name: clientName,
+                client_email: document.getElementById('invoiceClientEmail').value,
+                client_phone: document.getElementById('invoiceClientPhone').value,
+                client_address: document.getElementById('invoiceClientAddress').value,
+                invoice_date: invoiceDate,
+                due_date: dueDate,
+                payment_method: paymentMethod,
+                subtotal: subtotal,
+                discount_amount: discountAmount,
+                total_amount: totalAmount,
+                notes: notes,
+                items: items,
+            }),
+        })
+            .then(async response => {
+                const contentType = response.headers.get('content-type') || '';
+                const payload = contentType.includes('application/json')
+                    ? await response.json()
+                    : { message: await response.text() };
+
+                if (!response.ok) {
+                    const firstValidationError = payload.errors
+                        ? Object.values(payload.errors)[0]?.[0]
+                        : null;
+                    throw new Error(firstValidationError || payload.message || 'Failed to save draft.');
+                }
+
+                return payload;
+            })
+            .then(data => {
+                if (data.success) {
+                    closeInvoiceModal();
+                    if (window.showAlert) {
+                        window.showAlert('success', 'Invoice saved as draft successfully!');
+                    }
+                } else {
+                    if (window.showAlert) {
+                        window.showAlert('error', data.message || 'Failed to save invoice as draft.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (window.showAlert) {
+                    window.showAlert('error', error.message || 'An error occurred while saving the draft.');
+                }
+            });
     };
 
     window.sendInvoice = function() {
@@ -359,8 +465,9 @@
         }
         
         // Check items
-        const items = document.querySelectorAll('.invoice-item-row');
-        if (items.length === 0) {
+        const items = [];
+        const rows = document.querySelectorAll('.invoice-item-row');
+        if (rows.length === 0) {
             if (window.showAlert) {
                 window.showAlert('error', 'Add at least one item.');
             }
@@ -368,9 +475,10 @@
         }
         
         let hasValidItem = false;
-        items.forEach(row => {
+        rows.forEach((row, idx) => {
             const desc = row.querySelector('.invoice-item-desc').value.trim();
             const price = parseFloat(row.querySelector('.invoice-item-price').value) || 0;
+            const qty = parseInt(row.querySelector('.invoice-item-qty').value) || 0;
             const errorSpans = row.querySelectorAll('.invoice-item-error');
             
             if (!desc) {
@@ -386,6 +494,14 @@
             } else {
                 errorSpans[1].classList.add('hidden');
                 hasValidItem = true;
+                const total = qty * price;
+                items.push({
+                    item_number: idx + 1,
+                    description: desc,
+                    quantity: qty,
+                    unit_price: price,
+                    total_price: total,
+                });
             }
         });
         
@@ -396,11 +512,78 @@
             return;
         }
         
-        // Success
-        closeInvoiceModal();
-        if (window.showAlert) {
-            window.showAlert('success', 'Invoice sent successfully.');
-        }
+        // Collect form data
+        const invoiceNumber = document.getElementById('invoiceNumber').value;
+        const subtotal = parseFloat(document.getElementById('invoiceSubtotal').textContent) || 0;
+        const taxAmount = parseFloat(document.getElementById('invoiceTaxAmount').textContent) || 0;
+        const discountAmount = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
+        const totalAmount = parseFloat(document.getElementById('invoiceOverallTotal').textContent) || 0;
+        const notes = document.getElementById('invoiceNotes').value;
+        const paymentMethod = document.getElementById('invoicePaymentMethod').value;
+        
+        // Send data to backend
+        fetch('/invoices', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({
+                invoice_number: invoiceNumber,
+                company_id: company,
+                client_name: clientName,
+                client_email: document.getElementById('invoiceClientEmail').value,
+                client_phone: document.getElementById('invoiceClientPhone').value,
+                client_address: document.getElementById('invoiceClientAddress').value,
+                invoice_date: invoiceDate,
+                due_date: dueDate,
+                status: 'pending',
+                payment_method: paymentMethod,
+                subtotal: subtotal,
+                tax_amount: taxAmount,
+                discount_amount: discountAmount,
+                total_amount: totalAmount,
+                notes: notes,
+                items: items,
+            }),
+        })
+            .then(async response => {
+                const contentType = response.headers.get('content-type') || '';
+                const payload = contentType.includes('application/json')
+                    ? await response.json()
+                    : { message: await response.text() };
+
+                if (!response.ok) {
+                    const firstValidationError = payload.errors
+                        ? Object.values(payload.errors)[0]?.[0]
+                        : null;
+                    throw new Error(firstValidationError || payload.message || 'Failed to send invoice.');
+                }
+
+                return payload;
+            })
+            .then(data => {
+                if (data.success) {
+                    closeInvoiceModal();
+                    if (window.showAlert) {
+                        window.showAlert('success', 'Invoice sent successfully!');
+                    }
+                    // Optionally reload invoices list
+                    // location.reload();
+                } else {
+                    if (window.showAlert) {
+                        window.showAlert('error', data.message || 'Failed to send invoice.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (window.showAlert) {
+                    window.showAlert('error', error.message || 'An error occurred while sending the invoice.');
+                }
+            });
     };
 
     // Attach listeners to initial item
