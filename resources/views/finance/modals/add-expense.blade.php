@@ -1,4 +1,4 @@
-<div id="addExpenseModal" class="space-y-4">
+<div id="addExpenseModal" class="space-y-4 hidden">
     <div>
         <label class="block text-sm font-medium text-slate-700 mb-1">Expense ID</label>
         <input type="text" id="expenseId" placeholder="EXP-001" class="w-full px-3 py-2 border border-slate-300 rounded-md">
