@@ -1,6 +1,5 @@
 <div id="invoiceModalBackdrop" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex items-start justify-center pt-10 pb-10 px-4 overflow-y-auto" onclick="if(event.target === this) closeInvoiceModal()">
     <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-3xl">
-        <!-- Header -->
         <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200">
             <div class="flex items-center gap-3">
                 <div class="w-3 h-3 bg-brand-600 rounded-sm"></div>
@@ -13,26 +12,25 @@
             </button>
         </div>
 
-        <!-- Form Content -->
-        <form id="invoiceForm" class="p-6 space-y-6 max-h-[calc(90vh-120px)] overflow-y-auto">
+        <form id="invoiceForm" method="POST" action="/invoices" class="p-6 space-y-6 max-h-[calc(90vh-120px)] overflow-y-auto">
+            @csrf
 
-            <!-- Section 1: Invoice Details -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Invoice Number</label>
-                    <input id="invoiceNumber" type="text" readonly class="w-full bg-slate-50 text-slate-400 px-3 py-2 rounded-md border border-slate-300 cursor-not-allowed" />
+                    <input id="invoiceNumber" name="invoice_number" type="text" readonly class="w-full bg-slate-50 text-slate-400 px-3 py-2 rounded-md border border-slate-300 cursor-not-allowed" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Invoice Date</label>
-                    <input id="invoiceDate" type="date" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                    <input id="invoiceDate" name="invoice_date" type="date" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Due Date</label>
-                    <input id="invoiceDueDate" type="date" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                    <input id="invoiceDueDate" name="due_date" type="date" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
-                    <select id="invoiceStatus" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    <select id="invoiceStatus" name="status" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                         <option value="draft">Draft</option>
                         <option value="pending">Pending</option>
                         <option value="paid">Paid</option>
@@ -41,18 +39,25 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Company</label>
-
-                    <select id="invoiceCompany" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    <select id="invoiceCompany" name="company_id" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                         <option value="">Select company...</option>
-                        <option value="1">Goodness Tanzania Ltd</option>
-                        <option value="2">Goodness Kenya Ltd</option>
-                        <option value="3">Goodness Uganda Ltd</option>
+                        @foreach ($companies as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
                     </select>
-
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Payment Method</label>
-                    <select id="invoicePaymentMethod" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    <select id="invoicePaymentMethod" name="payment_method" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="mobile">Mobile Money (M-Pesa / Tigopesa)</option>
+                        <option value="cheque">Cheque</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Payment Method</label>
+                    <select id="invoicePaymentMethod" name="payment_method" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                         <option value="cash">Cash</option>
                         <option value="bank">Bank Transfer</option>
                         <option value="mobile">Mobile Money (M-Pesa / Tigopesa)</option>
@@ -61,32 +66,30 @@
                 </div>
             </div>
 
-            <!-- Section 2: Client Information -->
             <div class="pt-4 border-t border-slate-200">
                 <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">Client Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Client Name <span class="text-red-500">*</span></label>
-                        <input id="invoiceClientName" type="text" placeholder="e.g. Karibu Traders Ltd" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                        <input id="invoiceClientName" name="client_name" type="text" placeholder="e.g. Karibu Traders Ltd" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                         <span class="invoice-error text-red-500 text-xs mt-1 hidden">Client name is required</span>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Client Email</label>
-                        <input id="invoiceClientEmail" type="email" placeholder="client@example.com" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                        <input id="invoiceClientEmail" name="client_email" type="email" placeholder="client@example.com" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Client Phone</label>
-                        <input id="invoiceClientPhone" type="text" placeholder="+255 7XX XXX XXX" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                        <input id="invoiceClientPhone" name="client_phone" type="text" placeholder="+255 7XX XXX XXX" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                     </div>
                     <div></div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-slate-700 mb-2">Client Address</label>
-                        <textarea id="invoiceClientAddress" placeholder="Street, City, Tanzania" rows="2" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
+                        <textarea id="invoiceClientAddress" name="client_address" placeholder="Street, City, Tanzania" rows="2" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 3: Invoice Items -->
             <div class="pt-4 border-t border-slate-200">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Invoice Items</h3>
@@ -116,15 +119,16 @@
                             <input type="number" min="0" step="0.01" placeholder="0.00" class="invoice-item-price w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                             <span class="invoice-item-error text-red-500 text-xs mt-1 hidden">Price required</span>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Total (TZS)</label>
-                            <div class="invoice-item-total px-3 py-2 rounded-md border border-slate-200 bg-slate-50 text-slate-700 text-sm font-medium mono">0.00</div>
+                        <div class="md:col-span-2 flex items-end gap-2">
+                            <div class="flex-1">
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Total (TZS)</label>
+                                <div class="invoice-item-total px-3 py-2 rounded-md border border-slate-200 bg-slate-50 text-slate-700 text-sm font-medium mono">0.00</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 4: Totals Summary -->
             <div class="pt-4 border-t border-slate-200">
                 <div class="w-full bg-slate-50 border border-slate-200 rounded-md p-4 space-y-3">
                     <div class="flex justify-between items-center text-sm">
@@ -141,7 +145,7 @@
                     </div>
                     <div class="flex justify-between items-center text-sm gap-3">
                         <span class="text-slate-600">Discount (TZS):</span>
-                        <input id="invoiceDiscount" type="number" min="0" step="0.01" value="0" class="w-24 px-2 py-1 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent text-right text-sm" />
+                        <input id="invoiceDiscount" name="discount_amount" type="number" min="0" step="0.01" value="0" class="w-24 px-2 py-1 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent text-right text-sm" />
                     </div>
                     <div class="pt-2 border-t border-slate-300 flex justify-between items-center text-lg">
                         <span class="font-semibold text-slate-900">Total:</span>
@@ -154,22 +158,20 @@
                 </div>
             </div>
 
-            <!-- Section 5: Notes -->
             <div class="pt-4 border-t border-slate-200">
                 <label class="block text-sm font-medium text-slate-700 mb-2">Notes / Additional Info</label>
-                <textarea id="invoiceNotes" placeholder="Payment terms, delivery instructions, or any additional notes..." rows="3" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
+                <textarea name="notes" id="invoiceNotes" placeholder="Payment terms, delivery instructions, or any additional notes..." rows="3" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
             </div>
 
+            <input type="hidden" id="invoiceSubtotalHidden" name="subtotal" value="0">
+            <input type="hidden" id="invoiceTaxAmountHidden" name="tax_amount" value="0">
+            <input type="hidden" id="invoiceTotalAmountHidden" name="total_amount" value="0">
+            <div id="invoiceItemsDataContainer"></div>
         </form>
 
-        <!-- Footer -->
         <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
-            <button type="button" onclick="closeInvoiceModal()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium">
-                Cancel
-            </button>
-            <button type="button" onclick="saveInvoiceAsDraft()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">
-                Save as Draft
-            </button>
+            <button type="button" onclick="closeInvoiceModal()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium">Cancel</button>
+            <button type="button" onclick="saveInvoiceAsDraft()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">Save as Draft</button>
             <button type="button" onclick="sendInvoice()" class="flex items-center gap-2 px-4 py-2 rounded-md bg-brand-600 hover:bg-brand-700 text-white transition-colors text-sm font-medium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                 Send Invoice
@@ -180,64 +182,147 @@
 
 <style>
     @keyframes modalIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
     }
-    
-    #invoiceModalBackdrop:not(.hidden) {
-        animation: modalIn 0.2s ease-out;
-    }
+    #invoiceModalBackdrop:not(.hidden) { animation: modalIn 0.2s ease-out; }
 </style>
 
 <script>
 (function() {
     let itemCounter = 1;
 
-    window.openInvoiceModal = function() {
-        const backdrop = document.getElementById('invoiceModalBackdrop');
-        backdrop.classList.remove('hidden');
+    function syncTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('.invoice-item-row').forEach(row => {
+            const qty = parseFloat(row.querySelector('.invoice-item-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.invoice-item-price').value) || 0;
+            const total = qty * price;
+            row.querySelector('.invoice-item-total').textContent = total.toFixed(2);
+            subtotal += total;
+        });
 
-        // Reset first, then apply defaults.
+        const taxRate = parseFloat(document.getElementById('invoiceTaxRate').value) || 0;
+        const taxAmount = subtotal * (taxRate / 100);
+        const discount = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
+        const grandTotal = subtotal + taxAmount - discount;
+
+        document.getElementById('invoiceSubtotal').textContent = subtotal.toFixed(2) + ' TZS';
+        document.getElementById('invoiceTaxAmount').textContent = taxAmount.toFixed(2) + ' TZS';
+        document.getElementById('invoiceTotalAmount').textContent = grandTotal.toFixed(2) + ' TZS';
+        document.getElementById('invoiceOverallTotal').textContent = grandTotal.toFixed(2) + ' TZS';
+        document.getElementById('invoiceSubtotalHidden').value = subtotal.toFixed(2);
+        document.getElementById('invoiceTaxAmountHidden').value = taxAmount.toFixed(2);
+        document.getElementById('invoiceTotalAmountHidden').value = grandTotal.toFixed(2);
+    }
+
+    function attachItemListeners(row) {
+        const inputs = row.querySelectorAll('.invoice-item-qty, .invoice-item-price, .invoice-item-desc');
+        inputs.forEach(input => {
+            input.addEventListener('input', syncTotals);
+            input.addEventListener('blur', function() {
+                if (this.classList.contains('invoice-item-price') && this.value) {
+                    this.value = parseFloat(this.value).toFixed(2);
+                }
+            });
+        });
+
+        document.getElementById('invoiceTaxRate').addEventListener('input', syncTotals);
+        document.getElementById('invoiceDiscount').addEventListener('input', syncTotals);
+    }
+
+    function updateItemNumbers() {
+        document.querySelectorAll('.invoice-item-row').forEach((row, idx) => {
+            row.querySelector('div:first-child div:last-child').textContent = idx + 1;
+        });
+        itemCounter = document.querySelectorAll('.invoice-item-row').length;
+    }
+
+    function collectItemsAsHiddenInputs() {
+        const container = document.getElementById('invoiceItemsDataContainer');
+        container.innerHTML = '';
+
+        document.querySelectorAll('.invoice-item-row').forEach((row, idx) => {
+            const description = row.querySelector('.invoice-item-desc').value;
+            const quantity = row.querySelector('.invoice-item-qty').value;
+            const unitPrice = row.querySelector('.invoice-item-price').value;
+            const totalPrice = (parseFloat(quantity) * parseFloat(unitPrice)) || 0;
+
+            [
+                ['item_number', idx + 1],
+                ['description', description],
+                ['quantity', quantity],
+                ['unit_price', unitPrice],
+                ['total_price', totalPrice.toFixed(2)],
+            ].forEach(([key, value]) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `items[${idx}][${key}]`;
+                input.value = value;
+                container.appendChild(input);
+            });
+        });
+    }
+
+    function validateForm() {
+        const clientName = document.getElementById('invoiceClientName').value.trim();
+        const invoiceDate = document.getElementById('invoiceDate').value;
+        const dueDate = document.getElementById('invoiceDueDate').value;
+        const company = document.getElementById('invoiceCompany').value;
+
+        let valid = true;
+        if (!clientName) valid = false;
+        if (!invoiceDate) valid = false;
+        if (!dueDate) valid = false;
+        if (!company) valid = false;
+
+        const rows = document.querySelectorAll('.invoice-item-row');
+        if (!rows.length) valid = false;
+
+        const hasValidItem = Array.from(rows).some(row => {
+            const description = row.querySelector('.invoice-item-desc').value.trim();
+            const price = parseFloat(row.querySelector('.invoice-item-price').value) || 0;
+            return description && price > 0;
+        });
+
+        if (!hasValidItem) valid = false;
+
+        if (!valid && window.showAlert) {
+            window.showAlert('error', 'Please fill in all required fields.');
+        }
+
+        return valid;
+    }
+
+    window.openInvoiceModal = function() {
+        document.getElementById('invoiceModalBackdrop').classList.remove('hidden');
         document.getElementById('invoiceForm').reset();
-        
-        // Auto-generate invoice number
-        const invNum = 'INV-' + Math.floor(Math.random() * 9000 + 1000);
-        document.getElementById('invoiceNumber').value = invNum;
-        
-        // Set today's date
+        document.getElementById('invoiceNumber').value = 'INV-' + Math.floor(Math.random() * 9000 + 1000);
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('invoiceDate').value = today;
         document.getElementById('invoiceDueDate').value = today;
-        
         document.getElementById('invoiceTaxRate').value = 18;
-        updateInvoiceTotals();
+        syncTotals();
     };
 
     window.closeInvoiceModal = function() {
-        const backdrop = document.getElementById('invoiceModalBackdrop');
-        backdrop.classList.add('hidden');
+        document.getElementById('invoiceModalBackdrop').classList.add('hidden');
     };
 
     window.addInvoiceItem = function() {
         const container = document.getElementById('invoiceItemsContainer');
         itemCounter++;
-        
-        const newRow = document.createElement('div');
-        newRow.className = 'invoice-item-row grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-2 items-end p-3 border border-slate-200 rounded-md bg-white';
-        newRow.innerHTML = `
+
+        const row = document.createElement('div');
+        row.className = 'invoice-item-row grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-2 items-end p-3 border border-slate-200 rounded-md bg-white';
+        row.innerHTML = `
             <div class="md:col-span-1">
                 <label class="block text-xs font-medium text-slate-500 mb-1">#</label>
                 <div class="text-sm font-medium text-slate-700">${itemCounter}</div>
             </div>
             <div class="md:col-span-5">
                 <label class="block text-xs font-medium text-slate-700 mb-1">Description</label>
-                 <input type="text" placeholder="Item description" class="invoice-item-desc w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+                <input type="text" placeholder="Item description" class="invoice-item-desc w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
                 <span class="invoice-item-error text-red-500 text-xs mt-1 hidden">Description required</span>
             </div>
             <div class="md:col-span-2">
@@ -259,334 +344,37 @@
                 </button>
             </div>
         `;
-        
-        container.appendChild(newRow);
-        attachItemListeners(newRow);
-        updateInvoiceTotals();
+        container.appendChild(row);
+        attachItemListeners(row);
+        syncTotals();
     };
 
     window.removeInvoiceItem = function(btn) {
         const row = btn.closest('.invoice-item-row');
         const container = document.getElementById('invoiceItemsContainer');
-        
         if (container.querySelectorAll('.invoice-item-row').length > 1) {
             row.remove();
             updateItemNumbers();
-            updateInvoiceTotals();
+            syncTotals();
         }
     };
 
-    function attachItemListeners(row) {
-        const inputs = row.querySelectorAll('.invoice-item-qty, .invoice-item-price, .invoice-item-desc');
-        inputs.forEach(input => {
-            input.addEventListener('input', updateInvoiceTotals);
-            input.addEventListener('blur', function() {
-                if (this.classList.contains('invoice-item-price') && this.value) {
-                    this.value = parseFloat(this.value).toFixed(2);
-                }
-            });
-        });
-        
-        document.getElementById('invoiceTaxRate').addEventListener('input', updateInvoiceTotals);
-        document.getElementById('invoiceDiscount').addEventListener('input', updateInvoiceTotals);
-    }
-
-    function updateItemNumbers() {
-        const rows = document.querySelectorAll('.invoice-item-row');
-        rows.forEach((row, idx) => {
-            row.querySelector('div:first-child div:last-child').textContent = idx + 1;
-        });
-        itemCounter = rows.length;
-    }
-
-    function updateInvoiceTotals() {
-        let subtotal = 0;
-        const rows = document.querySelectorAll('.invoice-item-row');
-        
-        rows.forEach(row => {
-            const qty = parseFloat(row.querySelector('.invoice-item-qty').value) || 0;
-            const price = parseFloat(row.querySelector('.invoice-item-price').value) || 0;
-            const total = qty * price;
-            
-            row.querySelector('.invoice-item-total').textContent = total.toFixed(2);
-            subtotal += total;
-        });
-        
-        const taxRate = parseFloat(document.getElementById('invoiceTaxRate').value) || 0;
-        const taxAmount = subtotal * (taxRate / 100);
-        const discount = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
-        const grandTotal = subtotal + taxAmount - discount;
-        
-        document.getElementById('invoiceSubtotal').textContent = subtotal.toFixed(2) + ' TZS';
-        document.getElementById('invoiceTaxAmount').textContent = taxAmount.toFixed(2) + ' TZS';
-        document.getElementById('invoiceTotalAmount').textContent = grandTotal.toFixed(2) + ' TZS';
-        document.getElementById('invoiceOverallTotal').textContent = grandTotal.toFixed(2) + ' TZS';
-    }
-
     window.saveInvoiceAsDraft = function() {
-        const clientName = document.getElementById('invoiceClientName').value.trim();
-        if (!clientName) {
-            if (window.showAlert) {
-                window.showAlert('error', 'Please enter client name before saving as draft.');
-            }
-            return;
-        }
-
-        // Collect form data
-        const invoiceNumber = document.getElementById('invoiceNumber').value;
-        const companyId = document.getElementById('invoiceCompany').value;
-        const invoiceDate = document.getElementById('invoiceDate').value;
-        const dueDate = document.getElementById('invoiceDueDate').value;
-        const paymentMethod = document.getElementById('invoicePaymentMethod').value;
-        const notes = document.getElementById('invoiceNotes').value;
-        const subtotal = parseFloat(document.getElementById('invoiceSubtotal').textContent) || 0;
-        const discountAmount = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
-        const totalAmount = parseFloat(document.getElementById('invoiceOverallTotal').textContent) || 0;
-
-        // Collect items
-        const items = [];
-        const rows = document.querySelectorAll('.invoice-item-row');
-        rows.forEach((row, idx) => {
-            const desc = row.querySelector('.invoice-item-desc').value.trim();
-            const qty = parseInt(row.querySelector('.invoice-item-qty').value) || 0;
-            const price = parseFloat(row.querySelector('.invoice-item-price').value) || 0;
-            const total = qty * price;
-
-            if (desc && price > 0) {
-                items.push({
-                    item_number: idx + 1,
-                    description: desc,
-                    quantity: qty,
-                    unit_price: price,
-                    total_price: total,
-                });
-            }
-        });
-
-        if (items.length === 0) {
-            if (window.showAlert) {
-                window.showAlert('error', 'Add at least one item before saving as draft.');
-            }
-            return;
-        }
-
-        // Send data to backend
-        fetch('/invoices/draft', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            },
-            body: JSON.stringify({
-                invoice_number: invoiceNumber,
-                company_id: companyId,
-                client_name: clientName,
-                client_email: document.getElementById('invoiceClientEmail').value,
-                client_phone: document.getElementById('invoiceClientPhone').value,
-                client_address: document.getElementById('invoiceClientAddress').value,
-                invoice_date: invoiceDate,
-                due_date: dueDate,
-                payment_method: paymentMethod,
-                subtotal: subtotal,
-                discount_amount: discountAmount,
-                total_amount: totalAmount,
-                notes: notes,
-                items: items,
-            }),
-        })
-            .then(async response => {
-                const contentType = response.headers.get('content-type') || '';
-                const payload = contentType.includes('application/json')
-                    ? await response.json()
-                    : { message: await response.text() };
-
-                if (!response.ok) {
-                    const firstValidationError = payload.errors
-                        ? Object.values(payload.errors)[0]?.[0]
-                        : null;
-                    throw new Error(firstValidationError || payload.message || 'Failed to save draft.');
-                }
-
-                return payload;
-            })
-            .then(data => {
-                if (data.success) {
-                    closeInvoiceModal();
-                    if (window.showAlert) {
-                        window.showAlert('success', 'Invoice saved as draft successfully!');
-                    }
-                } else {
-                    if (window.showAlert) {
-                        window.showAlert('error', data.message || 'Failed to save invoice as draft.');
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                if (window.showAlert) {
-                    window.showAlert('error', error.message || 'An error occurred while saving the draft.');
-                }
-            });
+        if (!validateForm()) return;
+        collectItemsAsHiddenInputs();
+        const form = document.getElementById('invoiceForm');
+        form.action = '/invoices/draft';
+        form.submit();
     };
 
     window.sendInvoice = function() {
-        // Validation
-        const clientName = document.getElementById('invoiceClientName').value.trim();
-        const invoiceDate = document.getElementById('invoiceDate').value;
-        const dueDate = document.getElementById('invoiceDueDate').value;
-        const company = document.getElementById('invoiceCompany').value;
-        
-        let valid = true;
-        
-        // Clear previous errors
-        document.querySelectorAll('.invoice-item-error').forEach(el => el.classList.add('hidden'));
-        
-        // Check client name
-        if (!clientName) {
-            document.getElementById('invoiceClientName').parentElement.querySelector('.invoice-item-error').classList.remove('hidden');
-            valid = false;
-        }
-        
-        if (!invoiceDate) {
-            document.getElementById('invoiceDate').classList.add('border-red-500');
-            valid = false;
-        }
-        
-        if (!dueDate) {
-            document.getElementById('invoiceDueDate').classList.add('border-red-500');
-            valid = false;
-        }
-        
-        if (!company) {
-            document.getElementById('invoiceCompany').classList.add('border-red-500');
-            valid = false;
-        }
-        
-        // Check items
-        const items = [];
-        const rows = document.querySelectorAll('.invoice-item-row');
-        if (rows.length === 0) {
-            if (window.showAlert) {
-                window.showAlert('error', 'Add at least one item.');
-            }
-            return;
-        }
-        
-        let hasValidItem = false;
-        rows.forEach((row, idx) => {
-            const desc = row.querySelector('.invoice-item-desc').value.trim();
-            const price = parseFloat(row.querySelector('.invoice-item-price').value) || 0;
-            const qty = parseInt(row.querySelector('.invoice-item-qty').value) || 0;
-            const errorSpans = row.querySelectorAll('.invoice-item-error');
-            
-            if (!desc) {
-                errorSpans[0].classList.remove('hidden');
-                valid = false;
-            } else {
-                errorSpans[0].classList.add('hidden');
-            }
-            
-            if (price <= 0) {
-                errorSpans[1].classList.remove('hidden');
-                valid = false;
-            } else {
-                errorSpans[1].classList.add('hidden');
-                hasValidItem = true;
-                const total = qty * price;
-                items.push({
-                    item_number: idx + 1,
-                    description: desc,
-                    quantity: qty,
-                    unit_price: price,
-                    total_price: total,
-                });
-            }
-        });
-        
-        if (!valid || !hasValidItem) {
-            if (window.showAlert) {
-                window.showAlert('error', 'Please fill in all required fields.');
-            }
-            return;
-        }
-        
-        // Collect form data
-        const invoiceNumber = document.getElementById('invoiceNumber').value;
-        const subtotal = parseFloat(document.getElementById('invoiceSubtotal').textContent) || 0;
-        const taxAmount = parseFloat(document.getElementById('invoiceTaxAmount').textContent) || 0;
-        const discountAmount = parseFloat(document.getElementById('invoiceDiscount').value) || 0;
-        const totalAmount = parseFloat(document.getElementById('invoiceOverallTotal').textContent) || 0;
-        const notes = document.getElementById('invoiceNotes').value;
-        const paymentMethod = document.getElementById('invoicePaymentMethod').value;
-        
-        // Send data to backend
-        fetch('/invoices', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            },
-            body: JSON.stringify({
-                invoice_number: invoiceNumber,
-                company_id: company,
-                client_name: clientName,
-                client_email: document.getElementById('invoiceClientEmail').value,
-                client_phone: document.getElementById('invoiceClientPhone').value,
-                client_address: document.getElementById('invoiceClientAddress').value,
-                invoice_date: invoiceDate,
-                due_date: dueDate,
-                status: 'pending',
-                payment_method: paymentMethod,
-                subtotal: subtotal,
-                tax_amount: taxAmount,
-                discount_amount: discountAmount,
-                total_amount: totalAmount,
-                notes: notes,
-                items: items,
-            }),
-        })
-            .then(async response => {
-                const contentType = response.headers.get('content-type') || '';
-                const payload = contentType.includes('application/json')
-                    ? await response.json()
-                    : { message: await response.text() };
-
-                if (!response.ok) {
-                    const firstValidationError = payload.errors
-                        ? Object.values(payload.errors)[0]?.[0]
-                        : null;
-                    throw new Error(firstValidationError || payload.message || 'Failed to send invoice.');
-                }
-
-                return payload;
-            })
-            .then(data => {
-                if (data.success) {
-                    closeInvoiceModal();
-                    if (window.showAlert) {
-                        window.showAlert('success', 'Invoice sent successfully!');
-                    }
-                    // Optionally reload invoices list
-                    // location.reload();
-                } else {
-                    if (window.showAlert) {
-                        window.showAlert('error', data.message || 'Failed to send invoice.');
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                if (window.showAlert) {
-                    window.showAlert('error', error.message || 'An error occurred while sending the invoice.');
-                }
-            });
+        if (!validateForm()) return;
+        collectItemsAsHiddenInputs();
+        const form = document.getElementById('invoiceForm');
+        form.action = '/invoices';
+        form.submit();
     };
 
-    // Attach listeners to initial item
     document.addEventListener('DOMContentLoaded', function() {
         const firstRow = document.querySelector('.invoice-item-row');
         if (firstRow) {

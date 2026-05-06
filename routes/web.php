@@ -91,7 +91,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
-    // Finance Management
+    /* Finance Management
     Route::get('/finance', function () {
         $invoices = [
             [
@@ -112,7 +112,10 @@ Route::middleware('auth')->group(function () {
         $payments = [];
 
         return view('finance', compact('invoices', 'expenses', 'payments'));
-    })->name('finance');
+    })->name('finance'); */
+
+    //Finance Management
+    Route::get('/finance', [InvoiceController::class, 'index'])->name('finance');
 
     // HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');

@@ -12,11 +12,11 @@
             <tbody class="divide-y divide-slate-100">
                 @forelse ($invoices as $invoice)
                     <tr>
-                        <td class="px-4 py-3 text-sm">{{ $invoice['id'] }}</td>
-                        <td class="px-4 py-3 text-sm">{{ $invoice['company'] }}</td>
-                        <td class="px-4 py-3 text-sm text-right mono">TZS {{ number_format($invoice['amount']) }}</td>
+                        <td class="px-4 py-3 text-sm font-medium">{{ $invoice->invoice_number }}</td>
+                        <td class="px-4 py-3 text-sm">{{ $invoice->company->name ?? 'N/A' }}</td>
+                        <td class="px-4 py-3 text-sm text-right mono">TZS {{ number_format($invoice->total_amount) }}</td>
                         <td class="px-4 py-3 text-sm text-center">
-                            <span class="inline-block px-2 py-1 {{ $invoice['status'] === 'Paid' ? 'bg-brand-50 text-brand-700' : 'bg-slate-50 text-slate-700' }} rounded-md text-xs">{{ $invoice['status'] }}</span>
+                            <span class="inline-block px-2 py-1 {{ $invoice->status === 'paid' ? 'bg-brand-50 text-brand-700' : 'bg-slate-50 text-slate-700' }} rounded-md text-xs font-medium">{{ ucfirst($invoice->status) }}</span>
                         </td>
                     </tr>
                 @empty

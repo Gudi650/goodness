@@ -39,13 +39,9 @@ class InvoiceController extends Controller
             'items.*.total_price' => 'required|numeric|min:0',
         ]);
 
-        // Create the invoice
         $resolvedCompanyId = $this->resolveCompanyId($validated['company_id']);
         if (!$resolvedCompanyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please select a valid company.',
-            ], 422);
+            return back()->withErrors(['company_id' => 'Please select a valid company.']);
         }
 
         $invoice = Invoice::create([
@@ -67,7 +63,6 @@ class InvoiceController extends Controller
             'created_by' => Auth::id(),
         ]);
 
-        // Create invoice items
         foreach ($validated['items'] as $item) {
             InvoiceItem::create([
                 'invoice_id' => $invoice->id,
@@ -79,24 +74,29 @@ class InvoiceController extends Controller
             ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Invoice created successfully',
-            'invoice_id' => $invoice->id,
-            'invoice_number' => $invoice->invoice_number,
-        ]);
+        return redirect('/invoices')->with('success', 'Invoice sent successfully! Invoice #' . $invoice->invoice_number . ' has been created.');
     }
 
     /**
      * Get invoices for the finance page.
      */
-    public function index(Request $request)
+    public function index()
     {
         $invoices = Invoice::with(['company', 'creator', 'items'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return response()->json($invoices);
+        $companies = DB::table('companies')->pluck('name', 'id');
+
+        $expenses = [];
+        $payments = [];
+
+        return view('finance', [
+            'invoices' => $invoices,
+            'expenses' => $expenses,
+            'payments' => $payments,
+            'companies' => $companies,
+        ]);
     }
 
     /**
@@ -135,7 +135,6 @@ class InvoiceController extends Controller
             'items.*.total_price' => 'required|numeric|min:0',
         ]);
 
-        // Update invoice
         $invoice->update([
             'client_name' => $validated['client_name'],
             'client_email' => $validated['client_email'],
@@ -152,7 +151,6 @@ class InvoiceController extends Controller
             'notes' => $validated['notes'],
         ]);
 
-        // Delete old items and create new ones
         $invoice->items()->delete();
         foreach ($validated['items'] as $item) {
             InvoiceItem::create([
@@ -211,13 +209,9 @@ class InvoiceController extends Controller
             'items.*.total_price' => 'required|numeric|min:0',
         ]);
 
-        // Create invoice as draft
         $resolvedCompanyId = $this->resolveCompanyId($validated['company_id']);
         if (!$resolvedCompanyId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please select a valid company.',
-            ], 422);
+            return back()->withErrors(['company_id' => 'Please select a valid company.']);
         }
 
         $invoice = Invoice::create([
@@ -239,7 +233,6 @@ class InvoiceController extends Controller
             'created_by' => Auth::id(),
         ]);
 
-        // Create invoice items
         foreach ($validated['items'] as $item) {
             InvoiceItem::create([
                 'invoice_id' => $invoice->id,
@@ -251,12 +244,7 @@ class InvoiceController extends Controller
             ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Invoice saved as draft',
-            'invoice_id' => $invoice->id,
-            'invoice_number' => $invoice->invoice_number,
-        ]);
+        return redirect('/invoices')->with('success', 'Invoice saved as draft! Invoice #' . $invoice->invoice_number . ' is ready for editing.');
     }
 
     /**
