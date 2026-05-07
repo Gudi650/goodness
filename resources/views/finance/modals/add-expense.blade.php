@@ -27,15 +27,18 @@
                     <label class="mb-1 block text-sm font-medium text-slate-700">Department</label>
                     <select id="expenseDepartment" class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="">Select department...</option>
-                        <option value="HR">HR</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Operations">Operations</option>
-                        <option value="Sales">Sales</option>
-                        <option value="IT">IT</option>
-                        <option value="Administration">Administration</option>
+                        @if (isset($departments))
+                            @foreach ($departments as $key => $department)
+                                @if (is_object($department))
+                                    <option value="{{ $department->id }}" data-company-id="{{ $department->company_id }}">{{ $department->name }}</option>
+                                @else
+                                    <option value="{{ $key }}">{{ $department }}</option>
+                                @endif
+                            @endforeach
+                        @endif
                     </select>
                 </div>
-                <div class="md:col-span-2">
+                <div class="md:col-span-2 hidden">
                     <label class="mb-1 block text-sm font-medium text-slate-700">Recorded By</label>
                     <select id="expenseRecordedBy" class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="{{ auth()->user()?->id ?? '' }}">{{ auth()->user()?->name ?? 'Current user' }}</option>
@@ -74,7 +77,6 @@
                         <option value="Bank Transfer">Bank Transfer</option>
                         <option value="Mobile Money">Mobile Money</option>
                         <option value="Cheque">Cheque</option>
-                        <option value="Petty Cash">Petty Cash</option>
                     </select>
                 </div>
                 <div>
@@ -136,6 +138,6 @@
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-2 sm:flex-row sm:justify-end">
             <button type="button" onclick="window.closeModal && window.closeModal()" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">Cancel</button>
             <button type="button" onclick="setExpenseSubmitMode('draft')" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">Save as Draft</button>
-            <button type="button" onclick="setExpenseSubmitMode('submit')" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700">Submit Expense</button>
+            <button type="button" onclick="setExpenseSubmitMode('submit')" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700">Submit Expense</button>
         </div>
     </div>

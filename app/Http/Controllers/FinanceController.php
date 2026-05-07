@@ -18,7 +18,16 @@ class FinanceController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
+        //get the companies
         $companies = DB::table('companies')->pluck('name', 'id');
+
+        // Get departments with company mapping for dependent dropdowns in modals.
+        $departments = DB::table('departments')
+            ->select('id', 'name', 'company_id')
+            ->orderBy('name')
+            ->get();
+
+        
 
         $expenses = [];
         $payments = [];
@@ -28,6 +37,7 @@ class FinanceController extends Controller
             'expenses' => $expenses,
             'payments' => $payments,
             'companies' => $companies,
+            'departments' => $departments,
         ]);
     }
 

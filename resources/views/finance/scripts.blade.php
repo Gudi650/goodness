@@ -50,15 +50,15 @@
         const body = document.getElementById('addExpenseModal').innerHTML;
 
         window.openModal('Add Expense', body, () => {
-            const id = document.getElementById('expenseId').value.trim();
-            const category = document.getElementById('expenseCategory').value.trim();
-            const amount = parseFloat(document.getElementById('expenseAmount').value);
-            const company = document.getElementById('expenseCompany').value;
-            const department = document.getElementById('expenseDepartment').value;
-            const recordedBy = document.getElementById('expenseRecordedBy').value;
-            const paymentMethod = document.getElementById('expensePaymentMethod').value;
-            const date = document.getElementById('expenseDate').value;
-            const mode = document.getElementById('expenseSubmitMode')?.value || 'submit';
+            const id = getExpenseField('expenseId')?.value.trim() || '';
+            const category = getExpenseField('expenseCategory')?.value.trim() || '';
+            const amount = parseFloat(getExpenseField('expenseAmount')?.value || '0');
+            const company = getExpenseField('expenseCompany')?.value || '';
+            const department = getExpenseField('expenseDepartment')?.value || '';
+            const recordedBy = getExpenseField('expenseRecordedBy')?.value || '';
+            const paymentMethod = getExpenseField('expensePaymentMethod')?.value || '';
+            const date = getExpenseField('expenseDate')?.value || '';
+            const mode = getExpenseField('expenseSubmitMode')?.value || 'submit';
 
             if (!id) {
                 window.showAlert('error', 'Expense number is required');
@@ -104,14 +104,25 @@
             return true;
         }, {
             widthClass: 'max-w-6xl',
-            bodyClass: 'max-h-[calc(100vh-12rem)]'
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
         });
 
-        initializeExpenseModalForm();
+        // Use requestAnimationFrame to ensure form is initialized after DOM is rendered
+        requestAnimationFrame(initializeExpenseModalForm);
+    }
+
+    function getExpenseField(id) {
+        const modalBody = document.getElementById('modal-body');
+        if (modalBody) {
+            const inModal = modalBody.querySelector(`#${id}`);
+            if (inModal) return inModal;
+        }
+        return document.getElementById(id);
     }
 
     function setExpenseSubmitMode(mode) {
-        const input = document.getElementById('expenseSubmitMode');
+        const input = getExpenseField('expenseSubmitMode');
         if (input) {
             input.value = mode === 'draft' ? 'draft' : 'submit';
         }
@@ -121,9 +132,9 @@
         const today = new Date().toISOString().split('T')[0];
         const random = Math.floor(Math.random() * 9000) + 1000;
 
-        const expenseId = document.getElementById('expenseId');
-        const expenseDate = document.getElementById('expenseDate');
-        const submitMode = document.getElementById('expenseSubmitMode');
+        const expenseId = getExpenseField('expenseId');
+        const expenseDate = getExpenseField('expenseDate');
+        const submitMode = getExpenseField('expenseSubmitMode');
 
         if (expenseId && !expenseId.value) {
             expenseId.value = `EXP-${random}`;
@@ -136,8 +147,50 @@
         }
 
         bindExpenseCategoryOptions();
+        bindExpenseDepartmentFilter();
         bindExpenseVatCalculations();
         bindExpenseFilePreview();
+    }
+
+    function bindExpenseDepartmentFilter() {
+        const company = getExpenseField('expenseCompany');
+        const department = getExpenseField('expenseDepartment');
+        if (!company || !department) return;
+
+        const allOptions = Array.from(department.querySelectorAll('option')).map(option => ({
+            value: option.value,
+            label: option.textContent,
+            companyId: option.dataset.companyId || '',
+        }));
+
+        const syncDepartments = () => {
+            const selectedCompanyId = company.value;
+            const previousValue = department.value;
+
+            department.innerHTML = '<option value="">Select department...</option>';
+
+            allOptions.forEach(option => {
+                if (!option.value) return;
+
+                if (!selectedCompanyId || !option.companyId || option.companyId === selectedCompanyId) {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.label;
+                    if (option.companyId) {
+                        opt.dataset.companyId = option.companyId;
+                    }
+                    department.appendChild(opt);
+                }
+            });
+
+            // Preserve selection only if it still belongs to selected company.
+            if (previousValue && Array.from(department.options).some(opt => opt.value === previousValue)) {
+                department.value = previousValue;
+            }
+        };
+
+        company.addEventListener('change', syncDepartments);
+        syncDepartments();
     }
 
     function bindExpenseCategoryOptions() {
@@ -151,8 +204,8 @@
             Miscellaneous: ['Other'],
         };
 
-        const category = document.getElementById('expenseCategory');
-        const subCategory = document.getElementById('expenseSubCategory');
+        const category = getExpenseField('expenseCategory');
+        const subCategory = getExpenseField('expenseSubCategory');
         if (!category || !subCategory) return;
 
         const syncSubCategories = () => {
@@ -171,13 +224,13 @@
     }
 
     function bindExpenseVatCalculations() {
-        const amountInput = document.getElementById('expenseAmount');
-        const vatToggle = document.getElementById('expenseVatIncluded');
-        const vatRate = document.getElementById('expenseVatRate');
-        const vatAmount = document.getElementById('expenseVatAmount');
-        const netAmount = document.getElementById('expenseNetAmount');
-        const vatRateWrap = document.getElementById('expenseVatRateWrap');
-        const vatAmountWrap = document.getElementById('expenseVatAmountWrap');
+        const amountInput = getExpenseField('expenseAmount');
+        const vatToggle = getExpenseField('expenseVatIncluded');
+        const vatRate = getExpenseField('expenseVatRate');
+        const vatAmount = getExpenseField('expenseVatAmount');
+        const netAmount = getExpenseField('expenseNetAmount');
+        const vatRateWrap = getExpenseField('expenseVatRateWrap');
+        const vatAmountWrap = getExpenseField('expenseVatAmountWrap');
 
         if (!amountInput || !vatToggle || !vatRate || !vatAmount || !netAmount || !vatRateWrap || !vatAmountWrap) return;
 
@@ -208,8 +261,8 @@
     }
 
     function bindExpenseFilePreview() {
-        const input = document.getElementById('expenseAttachment');
-        const preview = document.getElementById('expenseFilePreview');
+        const input = getExpenseField('expenseAttachment');
+        const preview = getExpenseField('expenseFilePreview');
         if (!input || !preview) return;
 
         input.addEventListener('change', () => {

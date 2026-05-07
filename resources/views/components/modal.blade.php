@@ -12,11 +12,11 @@
     <div id="modal-body" class="mt-4 overflow-y-auto flex-1 pr-1"></div>
 
     <!-- Footer -->
-    <div class="flex gap-3 justify-end mt-6">
+    <div id="modalFooter" class="flex gap-3 justify-end mt-6">
       <button onclick="closeModal()" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-md text-sm font-medium transition-colors">
         Cancel
       </button>
-      <button onclick="submitModal()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors">
+      <button onclick="submitModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">
         Submit
       </button>
     </div>
@@ -36,6 +36,9 @@
     const modalBody = document.getElementById('modal-body');
     modalBody.className = 'mt-4 overflow-y-auto flex-1 pr-1 ' + (options.bodyClass || '');
 
+    const modalFooter = document.getElementById('modalFooter');
+    modalFooter.classList.toggle('hidden', !!options.hideFooter);
+
     document.getElementById('modalBackdrop').classList.remove('hidden');
     modalCallback = submitCallback;
     window._modalOptions = options;
@@ -44,6 +47,7 @@
   window.closeModal = function() {
     document.getElementById('modalBackdrop').classList.add('hidden');
     document.getElementById('modal-body').innerHTML = '';
+    document.getElementById('modalFooter').classList.remove('hidden');
     modalCallback = null;
     window._modalOptions = null;
   };

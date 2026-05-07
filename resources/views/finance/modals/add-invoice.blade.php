@@ -41,9 +41,11 @@
                     <label class="block text-sm font-medium text-slate-700 mb-2">Company</label>
                     <select id="invoiceCompany" name="company_id" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                         <option value="">Select company...</option>
-                        @foreach ($companies as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
+                        @if (isset($companies))
+                            @foreach ($companies as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        @endif
                     </select>
                 </div>
                 <div>
