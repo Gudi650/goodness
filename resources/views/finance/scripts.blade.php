@@ -234,31 +234,10 @@
     }
 
     function openAddPaymentModal() {
-        const body = document.getElementById('addPaymentModal').innerHTML;
-
-        window.openModal('Add Payment', body, () => {
-            const id = document.getElementById('paymentId').value.trim();
-            const company = document.getElementById('paymentCompany').value.trim();
-            const amount = parseFloat(document.getElementById('paymentAmount').value);
-
-            if (!id) {
-                window.showAlert('error', 'Payment ID is required');
-                return false;
-            }
-
-            if (!company) {
-                window.showAlert('error', 'Company is required');
-                return false;
-            }
-
-            if (!amount || amount <= 0) {
-                window.showAlert('error', 'Amount must be greater than 0');
-                return false;
-            }
-
-            window.showAlert('success', 'Payment added successfully');
-            return true;
-        });
+        // Use the dedicated payment modal shell so the richer layout and dynamic fields work correctly.
+        if (typeof window.openPaymentModal === 'function') {
+            window.openPaymentModal();
+        }
     }
 
     function switchTab(tab, btnEl) {
