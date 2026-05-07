@@ -126,10 +126,13 @@
                     <label class="mb-1 block text-sm font-medium text-slate-700">Receipt / Document</label>
                     <input type="file" id="expenseAttachment" name="attachment" accept=".jpg,.jpeg,.png,.pdf" class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-brand-700 hover:file:bg-brand-100">
                 </div>
+                {{-- 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">File Preview</label>
                     <div id="expenseFilePreview" class="flex min-h-[44px] items-center rounded-md border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-500">No file selected</div>
                 </div>
+                 --}}
+                 
                 <div class="md:col-span-2">
                     <label class="mb-1 block text-sm font-medium text-slate-700">Notes / Description</label>
                     <textarea id="expenseDesc" name="notes" rows="3" placeholder="Explain what this expense was for..." class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500"></textarea>

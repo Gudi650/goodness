@@ -53,12 +53,13 @@
                                             d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
                                     </svg>
                                 </button>
-                                <form method="POST" action="{{ route('expenses.destroy', ['expense' => $expense['id']]) }}" onsubmit="return confirm('Delete this expense?');">
+                                <form id="delete-expense-form-{{ $expense['id'] }}" method="POST" action="{{ route('expenses.destroy', ['expense' => $expense['id']]) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" 
-                                    class="text-red-600 hover:text-red-700 transition-colors" 
-                                    title="Delete expense" aria-label="Delete expense">
+                                    <button type="button" 
+                                        onclick="confirmExpenseDelete({{ $expense['id'] }}, @js($expense['display_id']))"
+                                        class="text-red-600 hover:text-red-700 transition-colors" 
+                                        title="Delete expense" aria-label="Delete expense">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -113,12 +114,12 @@
                                     @if ($expense['attachment_url'])
                                         <div class="mt-2">
                                             @if ($expense['attachment_is_image'])
-                                                <a href="{{ $expense['attachment_url'] }}" target="_blank" rel="noopener" class="inline-flex items-center gap-3 rounded-lg border border-slate-200 p-2 hover:border-brand-400">
+                                                <a href="{{ $expense['attachment_url'] }}" target="_blank" rel="noopener" onclick="showExpenseDownloadLoader()" class="inline-flex items-center gap-3 rounded-lg border border-slate-200 p-2 hover:border-brand-400">
                                                     <img src="{{ $expense['attachment_url'] }}" alt="Expense attachment" class="h-20 w-20 rounded-md object-cover">
                                                     <span class="text-sm font-medium text-slate-700">View attachment</span>
                                                 </a>
                                             @else
-                                                <a href="{{ $expense['attachment_url'] }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-brand-700 hover:border-brand-400 hover:text-brand-800">
+                                                <a href="{{ $expense['attachment_url'] }}" target="_blank" rel="noopener" onclick="showExpenseDownloadLoader()" class="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-brand-700 hover:border-brand-400 hover:text-brand-800">
                                                     View or download attachment
                                                 </a>
                                             @endif
@@ -139,3 +140,47 @@
         </table>
     </div>
 </div>
+
+<x-loading id="expenseActionLoader" fullPage="true" class="hidden" />
+
+<script>
+    function showExpenseActionLoader() {
+        const loader = document.getElementById('expenseActionLoader');
+        if (loader) {
+            loader.classList.remove('hidden');
+        }
+    }
+
+    function showExpenseDownloadLoader() {
+        showExpenseActionLoader();
+        window.setTimeout(() => {
+            const loader = document.getElementById('expenseActionLoader');
+            if (loader) {
+                loader.classList.add('hidden');
+            }
+        }, 1200);
+    }
+
+    function confirmExpenseDelete(expenseId, expenseNumber) {
+        if (typeof window.openConfirm !== 'function') {
+            return;
+        }
+
+        window.openConfirm({
+            title: 'Delete expense',
+            message: `Are you sure you want to delete expense ${expenseNumber}? This cannot be undone.`,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'warning',
+            onConfirm: () => {
+                showExpenseActionLoader();
+                window.setTimeout(() => {
+                    const form = document.getElementById(`delete-expense-form-${expenseId}`);
+                    if (form) {
+                        form.submit();
+                    }
+                }, 75);
+            },
+        });
+    }
+</script>
