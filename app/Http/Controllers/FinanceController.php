@@ -121,14 +121,18 @@ class FinanceController extends Controller
         ]);
 
         $attachmentPath = null;
+        $originalFileName = null;
         if ($request->hasFile('attachment')) {
-            $attachmentPath = $request->file('attachment')->store('expense-attachments', 'public');
+            $attachment = $request->file('attachment');
+            $attachmentPath = $attachment->store('expense-attachments', 'public');
+            $originalFileName = $attachment->getClientOriginalName();
         }
 
         $mode = $validated['submit_mode'] ?? 'submit';
         $status = $mode === 'draft' ? 'draft' : 'submitted';
 
-        $expense = Expense::create([
+        $expense = new Expense();
+        $expense->forceFill([
             'expense_number' => $validated['expense_number'],
             'expense_date' => $validated['expense_date'],
             'company_id' => (int) $validated['company_id'],
@@ -145,9 +149,11 @@ class FinanceController extends Controller
             'vat_amount' => $validated['vat_amount'] ?? 0,
             'net_amount' => $validated['net_amount'],
             'attachment_path' => $attachmentPath,
+            'original_file_name' => $originalFileName,
             'notes' => $validated['notes'] ?? null,
             'submitted_at' => $status === 'submitted' ? now() : null,
         ]);
+        $expense->save();
 
         return redirect()->route('finance')->with(
             'success',
@@ -219,6 +225,9 @@ class FinanceController extends Controller
             return redirect()->route('finance')->with('error', 'No attachment found for this expense.');
         }
 
-        return Storage::disk('public')->download($expense->attachment_path);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk->download($expense->attachment_path, $expense->original_file_name ?: null);
     }
 }

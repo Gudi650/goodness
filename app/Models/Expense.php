@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'attachment_path',
     'notes',
     'submitted_at',
+    'original_file_name',
 ])]
 class Expense extends Model
 {
