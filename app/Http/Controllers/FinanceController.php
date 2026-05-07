@@ -7,6 +7,8 @@ use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
 
 class FinanceController extends Controller
 {
@@ -29,16 +31,43 @@ class FinanceController extends Controller
             ->orderBy('name')
             ->get();
 
-        $expenses = Expense::query()
+        $expenses = Expense::with(['company', 'department', 'creator'])
             ->latest()
             ->limit(100)
             ->get()
-            ->map(fn (Expense $expense) => [
-                'id' => $expense->expense_number,
-                'category' => $expense->category,
-                'amount' => (float) $expense->net_amount,
-                'description' => $expense->notes ?: '-',
-            ])
+            ->map(function (Expense $expense) {
+                $attachmentUrl = $expense->attachment_path ? asset('storage/' . $expense->attachment_path) : null;
+                $attachmentIsImage = false;
+                if ($expense->attachment_path) {
+                    $ext = strtolower(pathinfo($expense->attachment_path, PATHINFO_EXTENSION));
+                    $attachmentIsImage = in_array($ext, ['jpg', 'jpeg', 'png']);
+                }
+
+                return [
+                    'id' => $expense->id,
+                    'display_id' => $expense->expense_number,
+                    'expense_date' => Carbon::parse($expense->expense_date)->format('M d, Y'),
+                    'company_name' => $expense->company?->name ?? '-',
+                    'department_name' => $expense->department?->name ?? '-',
+                    'category' => $expense->category,
+                    'sub_category' => $expense->sub_category ?: '-',
+                    'payment_method' => $expense->payment_method,
+                    'reference_number' => $expense->reference_number ?: '-',
+                    'amount' => (float) $expense->net_amount,
+                    'gross_amount' => (float) $expense->amount,
+                    'vat_included' => (bool) $expense->vat_included,
+                    'vat_rate' => (float) $expense->vat_rate,
+                    'vat_amount' => (float) $expense->vat_amount,
+                    'net_amount' => (float) $expense->net_amount,
+                    'status' => $expense->status,
+                    'description' => $expense->notes ?: '-',
+                    'notes' => $expense->notes ?: '-',
+                    'creator_name' => $expense->creator?->name ?? '-',
+                    'submitted_at' => $expense->submitted_at ? Carbon::parse($expense->submitted_at)->format('M d, Y h:i A') : '-',
+                    'attachment_url' => $attachmentUrl,
+                    'attachment_is_image' => $attachmentIsImage,
+                ];
+            })
             ->all();
         $payments = [];
 
@@ -155,8 +184,23 @@ class FinanceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Expense $expense)
     {
-        //
+        if ($expense->attachment_path) {
+            Storage::disk('public')->delete($expense->attachment_path);
+        }
+
+        DB::table('expenses')->where('id', $expense->id)->delete();
+
+        return redirect()->route('finance')->with('success', 'Expense deleted successfully.');
+    }
+
+    /**
+     * Delete an expense record.
+     */
+    // kept for backward compatibility if needed
+    public function destroyExpense(Expense $expense)
+    {
+        return $this->destroy($expense);
     }
 }

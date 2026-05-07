@@ -221,6 +221,18 @@
         });
     }
 
+    function toggleExpenseDetails(detailRowId, buttonEl) {
+        const detailRow = document.getElementById(detailRowId);
+        if (!detailRow) return;
+
+        detailRow.classList.toggle('hidden');
+
+        if (buttonEl) {
+            buttonEl.classList.toggle('bg-slate-100');
+            buttonEl.classList.toggle('text-brand-700');
+        }
+    }
+
     function openAddPaymentModal() {
         const body = document.getElementById('addPaymentModal').innerHTML;
 
