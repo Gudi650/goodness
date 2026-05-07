@@ -95,6 +95,7 @@ Route::middleware('auth')->group(function () {
 
     //Finance Management
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
+    Route::post('/expenses', [FinanceController::class, 'storeExpense'])->name('expenses.store');
 
     // HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');

@@ -49,60 +49,7 @@
     function openAddExpenseModal() {
         const body = document.getElementById('addExpenseModal').innerHTML;
 
-        window.openModal('Add Expense', body, () => {
-            const id = getExpenseField('expenseId')?.value.trim() || '';
-            const category = getExpenseField('expenseCategory')?.value.trim() || '';
-            const amount = parseFloat(getExpenseField('expenseAmount')?.value || '0');
-            const company = getExpenseField('expenseCompany')?.value || '';
-            const department = getExpenseField('expenseDepartment')?.value || '';
-            const recordedBy = getExpenseField('expenseRecordedBy')?.value || '';
-            const paymentMethod = getExpenseField('expensePaymentMethod')?.value || '';
-            const date = getExpenseField('expenseDate')?.value || '';
-            const mode = getExpenseField('expenseSubmitMode')?.value || 'submit';
-
-            if (!id) {
-                window.showAlert('error', 'Expense number is required');
-                return false;
-            }
-
-            if (!date) {
-                window.showAlert('error', 'Expense date is required');
-                return false;
-            }
-
-            if (!company) {
-                window.showAlert('error', 'Company is required');
-                return false;
-            }
-
-            if (!department) {
-                window.showAlert('error', 'Department is required');
-                return false;
-            }
-
-            if (!recordedBy) {
-                window.showAlert('error', 'Recorded By is required');
-                return false;
-            }
-
-            if (!category) {
-                window.showAlert('error', 'Category is required');
-                return false;
-            }
-
-            if (!paymentMethod) {
-                window.showAlert('error', 'Payment method is required');
-                return false;
-            }
-
-            if (!amount || amount <= 0) {
-                window.showAlert('error', 'Amount must be greater than 0');
-                return false;
-            }
-
-            window.showAlert('success', mode === 'draft' ? 'Expense saved as draft successfully' : 'Expense submitted successfully');
-            return true;
-        }, {
+        window.openModal('Add Expense', body, null, {
             widthClass: 'max-w-6xl',
             bodyClass: 'max-h-[calc(100vh-12rem)]',
             hideFooter: true
@@ -121,29 +68,18 @@
         return document.getElementById(id);
     }
 
-    function setExpenseSubmitMode(mode) {
-        const input = getExpenseField('expenseSubmitMode');
-        if (input) {
-            input.value = mode === 'draft' ? 'draft' : 'submit';
-        }
-    }
-
     function initializeExpenseModalForm() {
         const today = new Date().toISOString().split('T')[0];
         const random = Math.floor(Math.random() * 9000) + 1000;
 
         const expenseId = getExpenseField('expenseId');
         const expenseDate = getExpenseField('expenseDate');
-        const submitMode = getExpenseField('expenseSubmitMode');
 
         if (expenseId && !expenseId.value) {
             expenseId.value = `EXP-${random}`;
         }
         if (expenseDate && !expenseDate.value) {
             expenseDate.value = today;
-        }
-        if (submitMode) {
-            submitMode.value = 'submit';
         }
 
         bindExpenseCategoryOptions();

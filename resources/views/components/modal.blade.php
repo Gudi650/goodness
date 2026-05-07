@@ -52,9 +52,9 @@
     window._modalOptions = null;
   };
 
-  window.submitModal = function() {
+  window.submitModal = async function() {
     if (modalCallback) {
-      const shouldClose = modalCallback();
+      const shouldClose = await modalCallback();
       if (shouldClose === false) {
         return;
       }
