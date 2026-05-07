@@ -1,5 +1,5 @@
 <div id="addExpenseModal" class="hidden">
-    <form action="{{ route('expenses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+    <form action="{{ route('expenses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="showExpenseCreateLoader()">
         @csrf
 
         <section class="rounded-lg border border-slate-100 bg-white p-4 shadow-sm">
@@ -147,3 +147,14 @@
         </div>
     </form>
 </div>
+
+<x-loading id="expenseCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+    function showExpenseCreateLoader() {
+        const loader = document.getElementById('expenseCreateLoader');
+        if (loader) {
+            loader.classList.remove('hidden');
+        }
+    }
+</script>
