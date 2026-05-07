@@ -24,17 +24,17 @@
                         <td class="px-4 py-3 text-sm">{{ $expense['category'] }}</td>
                         <td class="px-4 py-3 text-sm text-right mono">TZS {{ number_format($expense['amount']) }}</td>
                         <td class="px-4 py-3 text-sm">
-                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ $expense['status'] === 'draft' ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700' }}">
+                            <span
+                                class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ $expense['status'] === 'draft' ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700' }}">
                                 {{ ucfirst($expense['status']) }}
                             </span>
                         </td>
                         <td class="px-4 py-3 text-sm">{{ $expense['description'] }}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="inline-flex items-center gap-6">
-                                <button type="button" 
-                                    onclick="toggleExpenseDetails('expense-details-{{ $expense['id'] }}', this)" 
-                                    class="text-slate-600 hover:text-slate-800 transition-colors" 
-                                    title="Show details" 
+                                <button type="button"
+                                    onclick="toggleExpenseDetails('expense-details-{{ $expense['id'] }}', this)"
+                                    class="text-slate-600 hover:text-slate-800 transition-colors" title="Show details"
                                     aria-label="Show details">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
@@ -44,8 +44,7 @@
                                             d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                 </button>
-                                <button type="button" 
-                                    class="text-blue-600 hover:text-blue-800 transition-colors" 
+                                <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
                                     title="Edit expense" aria-label="Edit expense">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
@@ -53,13 +52,14 @@
                                             d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
                                     </svg>
                                 </button>
-                                <form id="delete-expense-form-{{ $expense['id'] }}" method="POST" action="{{ route('expenses.destroy', ['expense' => $expense['id']]) }}">
+                                <form id="delete-expense-form-{{ $expense['id'] }}" method="POST"
+                                    action="{{ route('expenses.destroy', ['expense' => $expense['id']]) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" 
+                                    <button type="button"
                                         onclick="confirmExpenseDelete({{ $expense['id'] }}, @js($expense['display_id']))"
-                                        class="text-red-600 hover:text-red-700 transition-colors" 
-                                        title="Delete expense" aria-label="Delete expense">
+                                        class="text-red-600 hover:text-red-700 transition-colors" title="Delete expense"
+                                        aria-label="Delete expense">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -74,54 +74,81 @@
                         <td colspan="9" class="px-4 py-4">
                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Payment Method</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Payment
+                                        Method</p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['payment_method'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Reference Number</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Reference
+                                        Number</p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['reference_number'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Sub-category</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Sub-category
+                                    </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['sub_category'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Recorded By</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Recorded By
+                                    </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['creator_name'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Gross Amount</p>
-                                    <p class="mt-1 text-sm text-slate-700 mono">TZS {{ number_format($expense['gross_amount']) }}</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Gross Amount
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700 mono">TZS
+                                        {{ number_format($expense['gross_amount']) }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">VAT Included</p>
-                                    <p class="mt-1 text-sm text-slate-700">{{ $expense['vat_included'] ? 'Yes' : 'No' }}</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">VAT Included
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $expense['vat_included'] ? 'Yes' : 'No' }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">VAT Amount</p>
-                                    <p class="mt-1 text-sm text-slate-700 mono">TZS {{ number_format($expense['vat_amount']) }}</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">VAT Amount
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700 mono">TZS
+                                        {{ number_format($expense['vat_amount']) }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Submitted At</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Submitted At
+                                    </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['submitted_at'] }}</p>
                                 </div>
-                                <div class="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2 lg:col-span-4">
+                                <div
+                                    class="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2 lg:col-span-4">
                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Notes</p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['notes'] }}</p>
                                 </div>
-                                <div class="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2 lg:col-span-4">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Attachment</p>
+                                <div
+                                    class="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2 lg:col-span-4">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Attachment
+                                    </p>
                                     @if ($expense['attachment_url'])
                                         <div class="mt-2">
                                             @if ($expense['attachment_is_image'])
-                                                <a href="{{ $expense['attachment_url'] }}" target="_blank" rel="noopener" onclick="showExpenseDownloadLoader()" class="inline-flex items-center gap-3 rounded-lg border border-slate-200 p-2 hover:border-brand-400">
-                                                    <img src="{{ $expense['attachment_url'] }}" alt="Expense attachment" class="h-20 w-20 rounded-md object-cover">
-                                                    <span class="text-sm font-medium text-slate-700">View attachment</span>
+                                                <a href="{{ $expense['attachment_url'] }}" target="_blank"
+                                                    rel="noopener" onclick="showExpenseDownloadLoader()"
+                                                    class="inline-flex items-center gap-3 rounded-lg border border-slate-200 p-2 hover:border-brand-400">
+                                                    <img src="{{ $expense['attachment_url'] }}"
+                                                        alt="Expense attachment"
+                                                        class="h-20 w-20 rounded-md object-cover">
+                                                    <span class="text-sm font-medium text-slate-700">View
+                                                        attachment</span>
                                                 </a>
                                             @else
-                                                <a href="{{ $expense['attachment_url'] }}" target="_blank" rel="noopener" onclick="showExpenseDownloadLoader()" class="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-brand-700 hover:border-brand-400 hover:text-brand-800">
+                                                <a href="{{ $expense['attachment_url'] }}" target="_blank"
+                                                    rel="noopener" onclick="showExpenseDownloadLoader()"
+                                                    class="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-brand-700 hover:border-brand-400 hover:text-brand-800">
                                                     View or download attachment
                                                 </a>
+
+                                                <!--download button-->
+                                                <a href="{{ route('expenses.download', $expense['id']) }}">
+                                                    Download Attachment
+                                                </a>
+
                                             @endif
                                         </div>
                                     @else

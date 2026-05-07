@@ -95,8 +95,12 @@ Route::middleware('auth')->group(function () {
 
     //Finance Management
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
+
+    //expenses
     Route::post('/expenses', [FinanceController::class, 'storeExpense'])->name('expenses.store');
-        Route::delete('/expenses/{expense}', [FinanceController::class, 'destroy'])->name('expenses.destroy');
+    Route::delete('/expenses/{expense}', [FinanceController::class, 'destroy'])->name('expenses.destroy');
+    Route::get('/expenses/{expense}/download', [FinanceController::class, 'downloadAttachment'])->name('expenses.download');
+
 
     // HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');

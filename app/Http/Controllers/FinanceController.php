@@ -203,4 +203,22 @@ class FinanceController extends Controller
     {
         return $this->destroy($expense);
     }
+
+    /**
+     * Download the attachment file for a specific expense.
+     */
+    public function downloadAttachment($expenseId)
+    {
+        $expense = Expense::findOrFail($expenseId);
+
+        //if there isnt any expense found of the id
+        if(!$expense) return redirect()->route('finance')->with('error', 'Expense not found.');
+
+
+        if (!$expense->attachment_path) {
+            return redirect()->route('finance')->with('error', 'No attachment found for this expense.');
+        }
+
+        return Storage::disk('public')->download($expense->attachment_path);
+    }
 }
