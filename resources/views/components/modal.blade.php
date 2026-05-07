@@ -1,5 +1,5 @@
 <div id="modalBackdrop" class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 z-50 flex items-start justify-center pt-20 overflow-y-auto">
-  <div id="modalCard" class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6">
+  <div id="modalCard" class="bg-white rounded-lg shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6 max-h-[calc(100vh-5rem)] flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between mb-4">
       <h2 id="modalTitle" class="text-lg font-semibold text-slate-800 font-display"></h2>
@@ -9,7 +9,7 @@
     </div>
 
     <!-- Body -->
-    <div id="modal-body" class="mt-4"></div>
+    <div id="modal-body" class="mt-4 overflow-y-auto flex-1 pr-1"></div>
 
     <!-- Footer -->
     <div class="flex gap-3 justify-end mt-6">
@@ -26,17 +26,26 @@
 <script>
   let modalCallback = null;
 
-  window.openModal = function(title, bodyHTML, submitCallback = null) {
+  window.openModal = function(title, bodyHTML, submitCallback = null, options = {}) {
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modal-body').innerHTML = bodyHTML;
+
+    const modalCard = document.getElementById('modalCard');
+    modalCard.className = 'bg-white rounded-lg shadow-xl border border-slate-200 w-full mx-4 p-6 max-h-[calc(100vh-5rem)] flex flex-col ' + (options.widthClass || 'max-w-lg');
+
+    const modalBody = document.getElementById('modal-body');
+    modalBody.className = 'mt-4 overflow-y-auto flex-1 pr-1 ' + (options.bodyClass || '');
+
     document.getElementById('modalBackdrop').classList.remove('hidden');
     modalCallback = submitCallback;
+    window._modalOptions = options;
   };
 
   window.closeModal = function() {
     document.getElementById('modalBackdrop').classList.add('hidden');
     document.getElementById('modal-body').innerHTML = '';
     modalCallback = null;
+    window._modalOptions = null;
   };
 
   window.submitModal = function() {

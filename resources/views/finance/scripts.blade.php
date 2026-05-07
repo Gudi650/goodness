@@ -53,9 +53,35 @@
             const id = document.getElementById('expenseId').value.trim();
             const category = document.getElementById('expenseCategory').value.trim();
             const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const company = document.getElementById('expenseCompany').value;
+            const department = document.getElementById('expenseDepartment').value;
+            const recordedBy = document.getElementById('expenseRecordedBy').value;
+            const paymentMethod = document.getElementById('expensePaymentMethod').value;
+            const date = document.getElementById('expenseDate').value;
+            const mode = document.getElementById('expenseSubmitMode')?.value || 'submit';
 
             if (!id) {
-                window.showAlert('error', 'Expense ID is required');
+                window.showAlert('error', 'Expense number is required');
+                return false;
+            }
+
+            if (!date) {
+                window.showAlert('error', 'Expense date is required');
+                return false;
+            }
+
+            if (!company) {
+                window.showAlert('error', 'Company is required');
+                return false;
+            }
+
+            if (!department) {
+                window.showAlert('error', 'Department is required');
+                return false;
+            }
+
+            if (!recordedBy) {
+                window.showAlert('error', 'Recorded By is required');
                 return false;
             }
 
@@ -64,13 +90,145 @@
                 return false;
             }
 
+            if (!paymentMethod) {
+                window.showAlert('error', 'Payment method is required');
+                return false;
+            }
+
             if (!amount || amount <= 0) {
                 window.showAlert('error', 'Amount must be greater than 0');
                 return false;
             }
 
-            window.showAlert('success', 'Expense added successfully');
+            window.showAlert('success', mode === 'draft' ? 'Expense saved as draft successfully' : 'Expense submitted successfully');
             return true;
+        }, {
+            widthClass: 'max-w-6xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]'
+        });
+
+        initializeExpenseModalForm();
+    }
+
+    function setExpenseSubmitMode(mode) {
+        const input = document.getElementById('expenseSubmitMode');
+        if (input) {
+            input.value = mode === 'draft' ? 'draft' : 'submit';
+        }
+    }
+
+    function initializeExpenseModalForm() {
+        const today = new Date().toISOString().split('T')[0];
+        const random = Math.floor(Math.random() * 9000) + 1000;
+
+        const expenseId = document.getElementById('expenseId');
+        const expenseDate = document.getElementById('expenseDate');
+        const submitMode = document.getElementById('expenseSubmitMode');
+
+        if (expenseId && !expenseId.value) {
+            expenseId.value = `EXP-${random}`;
+        }
+        if (expenseDate && !expenseDate.value) {
+            expenseDate.value = today;
+        }
+        if (submitMode) {
+            submitMode.value = 'submit';
+        }
+
+        bindExpenseCategoryOptions();
+        bindExpenseVatCalculations();
+        bindExpenseFilePreview();
+    }
+
+    function bindExpenseCategoryOptions() {
+        const map = {
+            Operational: ['Rent', 'Utilities', 'Internet', 'Office Supplies', 'Cleaning'],
+            Payroll: ['Salaries', 'Overtime', 'Allowances', 'Statutory (NSSF/PAYE)'],
+            Travel: ['Fuel', 'Transport', 'Accommodation', 'Per Diem'],
+            Procurement: ['Stock Purchase', 'Equipment', 'Raw Materials'],
+            Marketing: ['Advertising', 'Events', 'Branding'],
+            Maintenance: ['Vehicle', 'Equipment', 'Building'],
+            Miscellaneous: ['Other'],
+        };
+
+        const category = document.getElementById('expenseCategory');
+        const subCategory = document.getElementById('expenseSubCategory');
+        if (!category || !subCategory) return;
+
+        const syncSubCategories = () => {
+            const options = map[category.value] || [];
+            subCategory.innerHTML = '<option value="">Select sub-category...</option>';
+            options.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                subCategory.appendChild(opt);
+            });
+        };
+
+        category.addEventListener('change', syncSubCategories);
+        syncSubCategories();
+    }
+
+    function bindExpenseVatCalculations() {
+        const amountInput = document.getElementById('expenseAmount');
+        const vatToggle = document.getElementById('expenseVatIncluded');
+        const vatRate = document.getElementById('expenseVatRate');
+        const vatAmount = document.getElementById('expenseVatAmount');
+        const netAmount = document.getElementById('expenseNetAmount');
+        const vatRateWrap = document.getElementById('expenseVatRateWrap');
+        const vatAmountWrap = document.getElementById('expenseVatAmountWrap');
+
+        if (!amountInput || !vatToggle || !vatRate || !vatAmount || !netAmount || !vatRateWrap || !vatAmountWrap) return;
+
+        const recalc = () => {
+            const gross = parseFloat(amountInput.value) || 0;
+            const rate = parseFloat(vatRate.value) || 0;
+            const hasVat = vatToggle.checked;
+
+            vatRateWrap.classList.toggle('hidden', !hasVat);
+            vatAmountWrap.classList.toggle('hidden', !hasVat);
+
+            if (!hasVat || rate <= 0) {
+                vatAmount.value = '0.00';
+                netAmount.value = gross.toFixed(2);
+                return;
+            }
+
+            const vat = gross * (rate / (100 + rate));
+            const net = gross - vat;
+            vatAmount.value = vat.toFixed(2);
+            netAmount.value = net.toFixed(2);
+        };
+
+        amountInput.addEventListener('input', recalc);
+        vatToggle.addEventListener('change', recalc);
+        vatRate.addEventListener('input', recalc);
+        recalc();
+    }
+
+    function bindExpenseFilePreview() {
+        const input = document.getElementById('expenseAttachment');
+        const preview = document.getElementById('expenseFilePreview');
+        if (!input || !preview) return;
+
+        input.addEventListener('change', () => {
+            const file = input.files && input.files[0];
+            if (!file) {
+                preview.textContent = 'No file selected';
+                return;
+            }
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.innerHTML = `<div class="flex items-center gap-3"><img src="${e.target.result}" alt="preview" class="w-12 h-12 object-cover rounded border border-slate-200"><span class="text-slate-700">${file.name}</span></div>`;
+                };
+                reader.readAsDataURL(file);
+                return;
+            }
+
+            preview.textContent = file.name;
         });
     }
 
