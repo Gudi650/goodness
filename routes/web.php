@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\BulkImportController;
+use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\SettingsController;
@@ -97,9 +98,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
 
     //expenses
-    Route::post('/expenses', [FinanceController::class, 'storeExpense'])->name('expenses.store');
-    Route::delete('/expenses/{expense}', [FinanceController::class, 'destroy'])->name('expenses.destroy');
-    Route::get('/expenses/{expense}/download', [FinanceController::class, 'downloadAttachment'])->name('expenses.download');
+    Route::post('/expenses', [ExpensesController::class, 'storeExpense'])->name('expenses.store');
+    Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
+    Route::get('/expenses/{expense}/download', [ExpensesController::class, 'downloadAttachment'])->name('expenses.download');
 
 
     // HRM Management
