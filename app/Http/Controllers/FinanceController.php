@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +70,52 @@ class FinanceController extends Controller
                 ];
             })
             ->all();
-        $payments = [];
+        $payments = Payment::query()
+            ->orderByDesc('created_at')
+            ->limit(100)
+            ->get()
+            ->map(function (Payment $payment) {
+                $attachmentUrl = $payment->proof_of_payment_path ? asset('storage/' . $payment->proof_of_payment_path) : null;
+                $attachmentIsImage = false;
+
+                if ($payment->proof_of_payment_path) {
+                    $ext = strtolower(pathinfo($payment->proof_of_payment_path, PATHINFO_EXTENSION));
+                    $attachmentIsImage = in_array($ext, ['jpg', 'jpeg', 'png']);
+                }
+
+                $tzsEquivalent = $payment->currency === 'TZS'
+                    ? (float) $payment->amount
+                    : (float) ($payment->amount * $payment->exchange_rate);
+
+                return [
+                    'id' => $payment->id,
+                    'payment_reference' => $payment->payment_reference,
+                    'payment_date_value' => Carbon::parse($payment->payment_date)->format('Y-m-d'),
+                    'payment_date' => Carbon::parse($payment->payment_date)->format('M d, Y'),
+                    'company' => $payment->company,
+                    'payment_direction' => $payment->payment_direction,
+                    'party_name' => $payment->party_name,
+                    'payment_method' => $payment->payment_method,
+                    'reference_number' => $payment->reference_number ?: '-',
+                    'payment_category' => $payment->payment_category ?: '-',
+                    'linked_to' => $payment->linked_to ?: '-',
+                    'amount' => (float) $payment->amount,
+                    'currency' => $payment->currency,
+                    'exchange_rate' => (float) $payment->exchange_rate,
+                    'tzs_equivalent' => $tzsEquivalent,
+                    'payment_status' => $payment->payment_status,
+                    'notes' => $payment->notes ?: '-',
+                    'proof_of_payment_path' => $payment->proof_of_payment_path,
+                    'original_proof_filename' => $payment->original_proof_filename,
+                    'attachment_url' => $attachmentUrl,
+                    'attachment_is_image' => $attachmentIsImage,
+                    'edit_url' => route('payments.edit', $payment->id),
+                    'update_url' => route('payments.update', $payment->id),
+                    'delete_url' => route('payments.destroy', $payment->id),
+                    'download_url' => route('payments.download-proof', $payment->id),
+                ];
+            })
+            ->all();
 
         return view('finance', [
             'invoices' => $invoices,
