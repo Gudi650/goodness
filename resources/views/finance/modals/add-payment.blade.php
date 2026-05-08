@@ -20,7 +20,7 @@
             </button>
         </div>
 
-        <form id="paymentForm" method="POST" action="#" class="flex flex-col flex-1 overflow-hidden" enctype="multipart/form-data">
+        <form id="paymentForm" method="POST" action="{{ route('payments.store') }}" class="flex flex-col flex-1 overflow-hidden" enctype="multipart/form-data">
             @csrf
 
             <!-- Scrollable Body -->
@@ -80,8 +80,7 @@
                                 <option value="">Select method...</option>
                                 <option value="Cash">Cash</option>
                                 <option value="Bank Transfer">Bank Transfer</option>
-                                <option value="Mobile Money (M-Pesa)">Mobile Money (M-Pesa)</option>
-                                <option value="Mobile Money (Tigopesa)">Mobile Money (Tigopesa)</option>
+                                <option value="Mobile Money">Mobile Money</option>
                                 <option value="Cheque">Cheque</option>
                                 <option value="Direct Debit">Direct Debit</option>
                             </select>

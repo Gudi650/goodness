@@ -13,6 +13,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -101,6 +102,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/expenses', [ExpensesController::class, 'storeExpense'])->name('expenses.store');
     Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
     Route::get('/expenses/{expense}/download', [ExpensesController::class, 'downloadAttachment'])->name('expenses.download');
+
+    // Payments Management
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
+    Route::get('/payments/{payment}/edit', [PaymentController::class, 'edit'])->name('payments.edit');
+    Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+    Route::get('/payments/{payment}/download-proof', [PaymentController::class, 'downloadProof'])->name('payments.download-proof');
 
 
     // HRM Management
