@@ -13,8 +13,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-800">Record Payment</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Record an incoming or outgoing payment</p>
+                    <h2 id="paymentModalTitle" class="text-lg font-semibold text-slate-800">Record Payment</h2>
+                    <p id="paymentModalSubtitle" class="text-xs text-slate-400 mt-0.5">Record an incoming or outgoing payment</p>
                 </div>
             </div>
             <button type="button" onclick="closePaymentModal()"
@@ -450,6 +450,8 @@
             const submitButton = getPaymentField('paymentSubmitButton');
             const draftButton = getPaymentField('paymentDraftButton');
             const paymentId = getPaymentField('paymentId');
+            const modalTitle = getPaymentField('paymentModalTitle');
+            const modalSubtitle = getPaymentField('paymentModalSubtitle');
             if (!form || !formMethod || !submitButton || !draftButton) return;
 
             if (!payment) {
@@ -458,13 +460,15 @@
                 if (paymentId) {
                     paymentId.readOnly = false;
                 }
+                if (modalTitle) modalTitle.textContent = 'Record Payment';
+                if (modalSubtitle) modalSubtitle.textContent = 'Record an incoming or outgoing payment';
+                draftButton.classList.remove('hidden');
                 submitButton.innerHTML = `
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 13l4 4L19 7"/>
                     </svg>
                     Record Payment
                 `;
-                draftButton.style.display = '';
                 return;
             }
 
@@ -473,13 +477,22 @@
             if (paymentId) {
                 paymentId.readOnly = true;
             }
+            if (modalTitle) modalTitle.textContent = 'Edit Payment';
+            if (modalSubtitle) modalSubtitle.textContent = `Update ${payment.payment_reference}`;
+            draftButton.classList.add('hidden');
             submitButton.innerHTML = `
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 13l4 4L19 7"/>
                 </svg>
                 Update Payment
             `;
-            draftButton.style.display = '';
+        }
+
+        function showPaymentActionLoader() {
+            const loader = getPaymentField('paymentActionLoader');
+            if (loader) {
+                loader.classList.remove('hidden');
+            }
         }
 
         function fillPaymentFields(payment) {
@@ -589,6 +602,13 @@
             setPaymentModalMode(payment);
             backdrop.classList.remove('hidden');
             initializePaymentModal(payment);
+
+            if (!form.dataset.submitBound) {
+                form.dataset.submitBound = 'true';
+                form.addEventListener('submit', function() {
+                    showPaymentActionLoader();
+                });
+            }
         };
 
         window.openEditPaymentModal = function(payment) {
@@ -602,10 +622,16 @@
             const content = getPaymentField('paymentFilePreviewContent');
             const formMethod = getPaymentField('paymentFormMethod');
             const submitButton = getPaymentField('paymentSubmitButton');
+            const draftButton = getPaymentField('paymentDraftButton');
+            const modalTitle = getPaymentField('paymentModalTitle');
+            const modalSubtitle = getPaymentField('paymentModalSubtitle');
             if (backdrop) backdrop.classList.add('hidden');
             if (form) form.reset();
             if (form) form.action = @json(route('payments.store'));
             if (formMethod) formMethod.value = 'POST';
+            if (draftButton) draftButton.classList.remove('hidden');
+            if (modalTitle) modalTitle.textContent = 'Record Payment';
+            if (modalSubtitle) modalSubtitle.textContent = 'Record an incoming or outgoing payment';
             if (submitButton) {
                 submitButton.innerHTML = `
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

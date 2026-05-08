@@ -45,7 +45,8 @@
                                     </svg>
                                 </button>
                                 <button type="button"
-                                        onclick='openEditPaymentModal(@js($payment))'
+                                    data-payment='@json($payment)'
+                                    onclick="openEditPaymentModalFromButton(this)"
                                         class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-brand-300 hover:text-brand-700 hover:bg-brand-50 transition-colors"
                                         aria-label="Edit payment">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,6 +154,19 @@
 <x-loading id="paymentActionLoader" fullPage="true" class="hidden" />
 
 <script>
+    function openEditPaymentModalFromButton(buttonEl) {
+        if (!buttonEl || !buttonEl.dataset.payment || typeof window.openPaymentModal !== 'function') {
+            return;
+        }
+
+        try {
+            const payment = JSON.parse(buttonEl.dataset.payment);
+            window.openPaymentModal(payment);
+        } catch (error) {
+            console.error('Failed to open payment edit modal:', error);
+        }
+    }
+
     function togglePaymentDetails(detailRowId, buttonEl) {
         const detailRow = document.getElementById(detailRowId);
         if (!detailRow) return;
