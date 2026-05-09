@@ -327,7 +327,7 @@
                     </div> 
                 </div>
             </div>
-            @include('components.loading', ['id' => 'productSaveLoading', 'show' => false])
+            @include('components.loading', ['id' => 'productSaveLoading', 'show' => false, 'fullPage' => true])
         </form>
     </div>
 </div>

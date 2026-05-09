@@ -10,6 +10,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\BulkImportController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\InvoiceController;
@@ -146,6 +147,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/inventory', function () {
         return view('inventory');
     })->name('inventory');
+
+    //Inventory Management
+    //Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
 
     // Products (inventory)
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
