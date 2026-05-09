@@ -14,6 +14,7 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -145,6 +146,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/inventory', function () {
         return view('inventory');
     })->name('inventory');
+
+    // Products (inventory)
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
 
     // Reports & Analytics
     Route::get('/reports', function () {
