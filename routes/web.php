@@ -143,13 +143,13 @@ Route::middleware('auth')->group(function () {
         return view('sales');
     })->name('sales');
 
-    // Inventory Management
+    /* Inventory Management
     Route::get('/inventory', function () {
         return view('inventory');
-    })->name('inventory');
+    })->name('inventory'); */
 
     //Inventory Management
-    //Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
 
     // Products (inventory)
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');

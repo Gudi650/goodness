@@ -2,45 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class InventoryController extends Controller
 {
-    // display the datas of the inventory pages here
+    //
     public function index()
     {
-        // get the company of the user of if admin from the session
         $currentUser = Auth::user();
-        $isAdmin = $currentUser?->role?->name === 'Admin';
+        $isAdmin = $currentUser && $currentUser->role && $currentUser->role->name === 'Admin';
         $activeCompanyId = session('active_company_id');
-
-        $companies = $isAdmin
-            ? Company::query()->orderBy('name', 'asc')->get()
-            : collect($currentUser?->company ? [$currentUser->company] : []);
 
         $usersQuery = User::with('role', 'company', 'department');
 
-        if ($isAdmin) {
-            if (! empty($activeCompanyId)) {
-                $usersQuery->where('company_id', $activeCompanyId);
-            }
-        } else {
-            $usersQuery->where('company_id', $currentUser?->company_id);
+        if ($isAdmin && !empty($activeCompanyId)) {
+            $usersQuery->where('company_id', $activeCompanyId);
+        } elseif ($currentUser) {
+            $usersQuery->where('company_id', $currentUser->company_id);
         }
 
-        // now query the products using the selected company
-        $products = Product::where(function ($query) use ($activeCompanyId, $isAdmin, $currentUser) {
-            if ($isAdmin) {
-                if (! empty($activeCompanyId)) {
-                    $query->where('company_id', $activeCompanyId);
-                }
-            } else {
-                $query->where('company_id', $currentUser?->company_id);
-            }
-        })->latest()->paginate(25);
+        // finalize the query
+        $users = $usersQuery->get();
 
+        $productsQuery = Product::query()->with('company')
+            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+
+        $summaryProducts = (clone $productsQuery)->get();
+
+        $products = (clone $productsQuery)
+            ->latest()
+            ->paginate(25);
+
+        $totalProducts = $summaryProducts->count();
+        $totalStockValue = $summaryProducts->sum(function (Product $product) {
+            return (float) $product->stock * (float) $product->selling_price;
+        });
+        $lowStockCount = $summaryProducts->filter(function (Product $product) {
+            return (int) $product->stock <= (int) $product->reorder_level;
+        })->count();
+        $expiringSoonCount = $summaryProducts->filter(function (Product $product) {
+            if (empty($product->expiry_date)) {
+                return false;
+            }
+
+            $expiryDate = Carbon::parse($product->expiry_date);
+
+            return $expiryDate->between(now(), now()->addDays(30));
+        })->count();
+
+        return view('inventory', [
+            'products' => $products,
+            'users' => $users,
+            'totalProducts' => $totalProducts,
+            'totalStockValue' => $totalStockValue,
+            'lowStockCount' => $lowStockCount,
+            'expiringSoonCount' => $expiringSoonCount
+        ]);
     }
 }
