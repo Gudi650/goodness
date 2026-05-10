@@ -9,6 +9,19 @@ use Illuminate\Support\Facades\Storage;
 
 class PurchaseOrderController extends Controller
 {
+    /**
+     * Get a specific purchase order for editing
+     */
+    public function show(PurchaseOrder $purchaseOrder)
+    {
+        $purchaseOrder->load('items');
+
+        return response()->json([
+            'success' => true,
+            'data' => $purchaseOrder,
+        ]);
+    }
+
     private function generateItemSku(string $productName): string
     {
         $namePart = strtoupper(preg_replace('/[^A-Z0-9]+/', '-', strtoupper(trim($productName))));
@@ -261,7 +274,7 @@ class PurchaseOrderController extends Controller
             ]);
         }
 
-        return redirect()->route('inventory.purchase-orders.index')
+        return redirect()->route('inventory')
             ->with('success', 'Purchase Order updated successfully');
     }
 

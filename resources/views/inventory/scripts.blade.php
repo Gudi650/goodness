@@ -609,4 +609,182 @@
         if (!row) return;
         row.classList.toggle('hidden');
     }
+
+    function editPurchaseOrder(poId) {
+        if (!poId) {
+            console.error('No PO ID provided');
+            return;
+        }
+
+        // Show loading state
+        const form = document.getElementById('poForm');
+        const modal = document.getElementById('modalAddPO');
+        if (!modal) {
+            console.error('Modal not found');
+            return;
+        }
+
+        // Open modal in loading state
+        openLocalModal('modalAddPO');
+
+        // Fetch PO data from server
+        fetch(`/purchase-orders/${poId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load PO');
+            return response.json();
+        })
+        .then(data => {
+            const purchaseOrder = data.data || data;
+            
+            // Reset form first
+            resetPOForm();
+
+            // Get modal elements
+            const modalTitle = modal.querySelector('h3');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            // Update modal header
+            modalTitle.textContent = 'Edit Purchase Order';
+            submitBtn.textContent = 'Update Purchase Order';
+
+            // Set form action to update route
+            form.action = `/purchase-orders/${purchaseOrder.id}`;
+            
+            // Remove existing _method field if present
+            let methodField = form.querySelector('input[name="_method"]');
+            if (methodField) {
+                methodField.remove();
+            }
+            
+            // Add _method field for PUT request
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'PUT';
+            form.appendChild(methodInput);
+
+            // Populate Section 1: PO Identity
+            document.querySelector('input[name="po_number"]').value = purchaseOrder.po_number || '';
+            document.querySelector('input[name="po_date"]').value = purchaseOrder.po_date?.split('T')[0] || '';
+            document.querySelector('input[name="expected_delivery_date"]').value = purchaseOrder.expected_delivery_date?.split('T')[0] || '';
+            document.querySelector('select[name="company_id"]').value = purchaseOrder.company_id || '';
+            document.querySelector('select[name="department_id"]').value = purchaseOrder.department_id || '';
+            document.querySelector('select[name="priority_level"]').value = purchaseOrder.priority_level || 'Normal';
+            document.querySelector('select[name="status"]').value = purchaseOrder.status || 'Draft';
+
+            // Populate Section 2: Supplier Information
+            const supplierSelect = document.querySelector('select[name="supplier_id"]');
+            supplierSelect.value = purchaseOrder.supplier_id || '';
+            updateSupplierInfo();
+            document.querySelector('textarea[name="delivery_address"]').value = purchaseOrder.delivery_address || '';
+            document.querySelector('select[name="delivery_method"]').value = purchaseOrder.delivery_method || '';
+
+            // Populate Section 3: Order Items
+            const itemsBody = document.getElementById('orderItemsBody');
+            itemsBody.innerHTML = '';
+            poItemCount = 0;
+
+            if (purchaseOrder.items && purchaseOrder.items.length > 0) {
+                purchaseOrder.items.forEach((item) => {
+                    poItemCount++;
+                    const row = document.createElement('tr');
+                    row.id = `poItem_${poItemCount}`;
+                    row.className = 'hover:bg-slate-50';
+                    row.innerHTML = `
+                        <td class="px-2 py-2">${poItemCount}</td>
+                        <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][product_name]" placeholder="Product" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" required></td>
+                        <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][sku]" placeholder="Auto SKU" readonly class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-slate-600"></td>
+                        <td class="px-2 py-2"><input type="number" name="items[${poItemCount}][quantity_ordered]" placeholder="0" min="1" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" onchange="calculateTotals()" required></td>
+                        <td class="px-2 py-2">
+                            <select name="items[${poItemCount}][unit_of_measure]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs">
+                                <option value="">Select Unit</option>
+                                <option value="pieces">Pieces</option>
+                                <option value="kg">Kilogram (kg)</option>
+                                <option value="liters">Liters</option>
+                                <option value="meters">Meters (m)</option>
+                                <option value="bags">Bags</option>
+                                <option value="boxes">Boxes</option>
+                                <option value="drums">Drums</option>
+                            </select>
+                        </td>
+                        <td class="px-2 py-2"><input type="number" name="items[${poItemCount}][unit_price]" placeholder="0.00" step="0.01" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" onchange="calculateTotals()" required></td>
+                        <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][total_price]" placeholder="0.00" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" readonly></td>
+                        <td class="px-2 py-2 text-center"><button type="button" onclick="removeOrderItem('poItem_${poItemCount}')" class="text-red-600 hover:text-red-900 text-xs">Remove</button></td>
+                    `;
+                    itemsBody.appendChild(row);
+
+                    // Populate item data
+                    row.querySelector(`input[name="items[${poItemCount}][product_name]"]`).value = item.product_name || '';
+                    row.querySelector(`input[name="items[${poItemCount}][sku]"]`).value = item.sku || '';
+                    row.querySelector(`input[name="items[${poItemCount}][quantity_ordered]"]`).value = item.quantity_ordered || '';
+                    row.querySelector(`select[name="items[${poItemCount}][unit_of_measure]"]`).value = item.unit_of_measure || '';
+                    row.querySelector(`input[name="items[${poItemCount}][unit_price]"]`).value = item.unit_price || '';
+                    row.querySelector(`input[name="items[${poItemCount}][total_price]"]`).value = item.total_price || '';
+                });
+            }
+
+            // Populate Section 5: Payment Information
+            document.querySelector('select[name="payment_terms"]').value = purchaseOrder.payment_terms || '';
+            document.querySelector('select[name="payment_method"]').value = purchaseOrder.payment_method || '';
+            document.querySelector('input[name="discount_percent"]').value = purchaseOrder.discount_percent || '';
+            document.querySelector('input[name="vat_percent"]').value = purchaseOrder.vat_percent || 18;
+            document.querySelector('input[name="shipping_cost"]').value = purchaseOrder.shipping_cost || '';
+            document.querySelector('input[name="deposit_amount"]').value = purchaseOrder.deposit_amount || '';
+
+            // Populate Section 6: Approval & Authorization
+            document.querySelector('select[name="requested_by"]').value = purchaseOrder.requested_by || '';
+            document.querySelector('select[name="approved_by"]').value = purchaseOrder.approved_by || '';
+            document.querySelector('input[name="approval_date"]').value = purchaseOrder.approval_date?.split('T')[0] || '';
+            document.querySelector('textarea[name="authorization_notes"]').value = purchaseOrder.authorization_notes || '';
+
+            // Populate Section 7: Attachments & Notes
+            document.querySelector('textarea[name="internal_notes"]').value = purchaseOrder.internal_notes || '';
+            document.querySelector('textarea[name="terms_and_conditions"]').value = purchaseOrder.terms_and_conditions || '';
+
+            // Update document preview
+            if (purchaseOrder.supporting_document_name) {
+                document.getElementById('documentPreview').innerHTML = `<span class="text-slate-600"><strong>${purchaseOrder.supporting_document_name}</strong></span>`;
+            }
+
+            // Recalculate totals
+            calculateTotals();
+        })
+        .catch(error => {
+            console.error('Error loading PO:', error);
+            alert('Error loading purchase order. Please try again.');
+            modal.classList.add('hidden');
+        });
+    }
+
+    function resetPOModalForCreate() {
+        const form = document.getElementById('poForm');
+        const modal = document.getElementById('modalAddPO');
+        const modalTitle = modal.querySelector('h3');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        // Reset modal header and button
+        modalTitle.textContent = 'Add Purchase Order';
+        submitBtn.textContent = 'Save Purchase Order';
+
+        // Reset form action to create route
+        form.action = '/purchase-orders';
+
+        // Remove _method field if it exists (for PUT)
+        let methodField = form.querySelector('input[name="_method"]');
+        if (methodField) {
+            methodField.remove();
+        }
+
+        // Reset the form
+        resetPOForm();
+
+        // Open the modal
+        openLocalModal('modalAddPO');
+    }
 </script>
