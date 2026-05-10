@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\Department;
 use App\Models\Product;
+use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -32,6 +34,9 @@ class InventoryController extends Controller
 
         //get the companies all companies in the system for the dropdown filter
         $companies = Company::pluck('name', 'id');
+        
+        //get all departments for the dropdown filter
+        $departments = Department::pluck('name', 'id');
 
         $productsQuery = Product::query()->with('company')
             ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
@@ -66,6 +71,9 @@ class InventoryController extends Controller
         //fetch the suppliers details to be displayed from the suppliers table
         $suppliers = $this->getSuppliers($isAdmin, $activeCompanyId,$currentUser);
 
+        //fetch the products details to be displayed from the products table
+        $purchases = $this->getProducts($isAdmin, $activeCompanyId,$currentUser);
+
 
         return view('inventory', [
             'products' => $products,
@@ -75,7 +83,9 @@ class InventoryController extends Controller
             'lowStockCount' => $lowStockCount,
             'expiringSoonCount' => $expiringSoonCount,
             'companies' => $companies,
+            'departments' => $departments,
             'suppliers' => $suppliers,
+            'purchases' => $purchases,
         ]);
     }
 
@@ -91,5 +101,21 @@ class InventoryController extends Controller
 
         return $suppliers;
         
+    }
+
+    //function for getting the products orders details to be displayed from the products table
+    protected function getProducts($isAdmin, $activeCompanyId,$currentUser)
+    {
+
+        $purchases = PurchaseOrder::query()
+            ->with('company')
+            ->with('items') // Eager load items relationship
+            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
+            ->latest()
+            ->get();
+
+        return $purchases;
+
     }
 }

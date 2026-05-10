@@ -191,6 +191,10 @@
             const loader = document.getElementById('productSaveLoading');
             if (loader) loader.classList.add('hidden');
         }
+        // reset purchase order form when closing the add/edit PO modal
+        if (id === 'modalAddPO') {
+            resetPOForm();
+        }
     }
 
     function toggleProductDetails(productId) {
@@ -457,5 +461,126 @@
                 }
             });
         }
+
+        // Set default PO date to today when modal opens
+        const poModal = document.getElementById('modalAddPO');
+        if (poModal) {
+            const observer = new MutationObserver(() => {
+                if (!poModal.classList.contains('hidden')) {
+                    const poDateInput = document.querySelector('input[name="po_date"]');
+                    if (poDateInput && !poDateInput.value) {
+                        poDateInput.value = new Date().toISOString().split('T')[0];
+                    }
+                }
+            });
+            observer.observe(poModal, { attributes: true, attributeFilter: ['class'] });
+        }
     });
+
+    // ===== PURCHASE ORDER FUNCTIONS =====
+
+    let poItemCount = 0;
+
+    function addOrderItem() {
+        poItemCount++;
+        const tbody = document.getElementById('orderItemsBody');
+        const row = document.createElement('tr');
+        row.id = `poItem_${poItemCount}`;
+        row.className = 'hover:bg-slate-50';
+        row.innerHTML = `
+            <td class="px-2 py-2">${poItemCount}</td>
+            <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][product_name]" placeholder="Product" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" required></td>
+            <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][sku]" placeholder="SKU" class="w-full px-2 py-1 border border-slate-200 rounded text-xs"></td>
+            <td class="px-2 py-2"><input type="number" name="items[${poItemCount}][quantity_ordered]" placeholder="0" min="1" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" onchange="calculateTotals()" required></td>
+            <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][unit_of_measure]" placeholder="Unit" class="w-full px-2 py-1 border border-slate-200 rounded text-xs"></td>
+            <td class="px-2 py-2"><input type="number" name="items[${poItemCount}][unit_price]" placeholder="0.00" step="0.01" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" onchange="calculateTotals()" required></td>
+            <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][total_price]" placeholder="0.00" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" readonly></td>
+            <td class="px-2 py-2 text-center"><button type="button" onclick="removeOrderItem('poItem_${poItemCount}')" class="text-red-600 hover:text-red-900 text-xs">Remove</button></td>
+        `;
+        tbody.appendChild(row);
+        calculateTotals();
+    }
+
+    function removeOrderItem(rowId) {
+        const row = document.getElementById(rowId);
+        if (row) {
+            row.remove();
+            calculateTotals();
+        }
+    }
+
+    function updateSupplierInfo() {
+        const select = document.getElementById('supplierSelect');
+        const option = select.options[select.selectedIndex];
+        const contact = option.dataset.contact || '';
+        const phone = option.dataset.phone || '';
+        
+        document.getElementById('supplierContact').value = contact;
+        document.getElementById('supplierPhone').value = phone;
+    }
+
+    function calculateTotals() {
+        const tbody = document.getElementById('orderItemsBody');
+        const rows = tbody.querySelectorAll('tr');
+        let subtotal = 0;
+
+        rows.forEach(row => {
+            const qtyInput = row.querySelector('input[name*="[quantity_ordered]"]');
+            const priceInput = row.querySelector('input[name*="[unit_price]"]');
+            const totalInput = row.querySelector('input[name*="[total_price]"]');
+
+            if (qtyInput && priceInput && totalInput) {
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const total = qty * price;
+                totalInput.value = total.toFixed(2);
+                subtotal += total;
+            }
+        });
+
+        const discountPercent = parseFloat(document.querySelector('input[name="discount_percent"]').value) || 0;
+        const vatPercent = parseFloat(document.querySelector('input[name="vat_percent"]').value) || 0;
+        const shippingCost = parseFloat(document.querySelector('input[name="shipping_cost"]').value) || 0;
+        const depositAmount = parseFloat(document.querySelector('input[name="deposit_amount"]').value) || 0;
+
+        const discountAmount = subtotal * (discountPercent / 100);
+        const vatAmount = (subtotal - discountAmount) * (vatPercent / 100);
+        const totalAmount = subtotal - discountAmount + vatAmount + shippingCost;
+        const balanceDue = totalAmount - depositAmount;
+
+        document.getElementById('subtotal').value = subtotal.toFixed(2);
+        document.getElementById('discountAmount').value = discountAmount.toFixed(2);
+        document.getElementById('vatAmount').value = vatAmount.toFixed(2);
+        document.getElementById('totalAmount').value = totalAmount.toFixed(2);
+        document.getElementById('balanceDue').value = balanceDue.toFixed(2);
+    }
+
+    function updateDocumentPreview(event) {
+        const file = event.target.files[0];
+        const previewDiv = document.getElementById('documentPreview');
+        
+        if (file) {
+            previewDiv.innerHTML = `<span class="text-slate-700">📄 ${file.name}</span>`;
+        } else {
+            previewDiv.innerHTML = '<span class="text-slate-500">No file selected</span>';
+        }
+    }
+
+    function resetPOForm() {
+        const form = document.getElementById('poForm');
+        if (form) {
+            form.reset();
+            poItemCount = 0;
+            document.getElementById('orderItemsBody').innerHTML = '';
+            document.getElementById('poNumber').value = '';
+            document.getElementById('documentPreview').innerHTML = '<span class="text-slate-500">No file selected</span>';
+            calculateTotals();
+        }
+    }
+
+    function togglePODetails(poId) {
+        const row = document.getElementById('details-' + poId);
+        if (!row) return;
+        row.classList.toggle('hidden');
+    }
 </script>
