@@ -108,4 +108,21 @@ class SupplierController extends Controller
 
         return redirect()->back()->with('success', 'Supplier created successfully');
     }
+
+    //function to downlaod the attachments
+        public function downloadAttachment(Supplier $supplier, $type)
+        {
+            if (!in_array($type, ['business_registration_certificate', 'tin_certificate'])) {
+                return redirect()->back()->with('error', 'Invalid document type.');
+            }
+    
+            $filePath = $supplier->{$type . '_path'};
+            $fileName = $supplier->{$type . '_name'};
+    
+            if (!$filePath || !Storage::disk('public')->exists($filePath)) {
+                return redirect()->back()->with('error', 'File not found.');
+            }
+    
+            return Storage::disk('public')->download($filePath, $fileName);
+        }
 }

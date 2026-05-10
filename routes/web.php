@@ -144,11 +144,6 @@ Route::middleware('auth')->group(function () {
         return view('sales');
     })->name('sales');
 
-    /* Inventory Management
-    Route::get('/inventory', function () {
-        return view('inventory');
-    })->name('inventory'); */
-
     //Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
 
@@ -160,6 +155,9 @@ Route::middleware('auth')->group(function () {
 
     // Suppliers (inventory)
     Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+
+    //download  attachements list
+    Route::get('/suppliers/{supplier}/download/{type}', [SupplierController::class, 'downloadAttachment'])->name('suppliers.downloadAttachment');
 
     // Reports & Analytics
     Route::get('/reports', function () {

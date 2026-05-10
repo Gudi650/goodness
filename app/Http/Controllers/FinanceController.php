@@ -70,6 +70,7 @@ class FinanceController extends Controller
                 ];
             })
             ->all();
+            
         $payments = Payment::query()
             ->orderByDesc('created_at')
             ->limit(100)

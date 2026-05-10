@@ -110,7 +110,7 @@ class ExpensesController extends Controller
         //if there isnt any expense found of the id
         if(!$expense) return redirect()->route('finance')->with('error', 'Expense not found.');
 
-
+        //if there is no attachment found for the expense
         if (!$expense->attachment_path) {
             return redirect()->route('finance')->with('error', 'No attachment found for this expense.');
         }

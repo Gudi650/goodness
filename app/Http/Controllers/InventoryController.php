@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\Product;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -43,12 +44,15 @@ class InventoryController extends Controller
             ->paginate(25);
 
         $totalProducts = $summaryProducts->count();
+
         $totalStockValue = $summaryProducts->sum(function (Product $product) {
             return (float) $product->stock * (float) $product->selling_price;
         });
+
         $lowStockCount = $summaryProducts->filter(function (Product $product) {
             return (int) $product->stock <= (int) $product->reorder_level;
         })->count();
+        
         $expiringSoonCount = $summaryProducts->filter(function (Product $product) {
             if (empty($product->expiry_date)) {
                 return false;
@@ -59,6 +63,10 @@ class InventoryController extends Controller
             return $expiryDate->between(now(), now()->addDays(30));
         })->count();
 
+        //fetch the suppliers details to be displayed from the suppliers table
+        $suppliers = $this->getSuppliers($isAdmin, $activeCompanyId,$currentUser);
+
+
         return view('inventory', [
             'products' => $products,
             'users' => $users,
@@ -67,6 +75,21 @@ class InventoryController extends Controller
             'lowStockCount' => $lowStockCount,
             'expiringSoonCount' => $expiringSoonCount,
             'companies' => $companies,
+            'suppliers' => $suppliers,
         ]);
+    }
+
+    //function to get suppliers details to be displayed from the suppliers table
+    protected function getSuppliers($isAdmin, $activeCompanyId,$currentUser)
+    {
+        $suppliers = Supplier::query()
+            ->with('company')
+            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
+            ->latest()
+            ->get();
+
+        return $suppliers;
+        
     }
 }
