@@ -25,6 +25,30 @@
         return generateSKU('POITEM', productName);
     }
 
+    function confirmDeletePurchaseOrder(poId, poNumber) {
+        if (typeof openConfirm !== 'function') {
+            alert('Confirmation dialog is not available right now.');
+            return;
+        }
+
+        const deleteUrlTemplate = @js(route('purchase-orders.destroy', ['purchaseOrder' => '__ID__']));
+        const deleteUrl = deleteUrlTemplate.replace('__ID__', poId);
+
+        openConfirm({
+            title: 'Delete Purchase Order',
+            message: `Are you sure you want to delete purchase order "${poNumber}"? This action cannot be undone.`,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'warning',
+            onConfirm: function () {
+                const form = document.getElementById(`delete-po-form-${poId}`);
+                if (!form) return;
+                form.action = deleteUrl;
+                form.submit();
+            }
+        });
+    }
+
     function deleteSupplier(supplierId, supplierName) {
         if (typeof openConfirm !== 'function') {
             alert('Confirmation dialog is not available right now.');
