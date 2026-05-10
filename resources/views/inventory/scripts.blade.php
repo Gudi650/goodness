@@ -164,9 +164,15 @@
     }
 
     function submitAddSupplier(e) {
-        e?.preventDefault();
-        closeLocalModal('modalAddSupplier');
-        alert('Supplier added (demo)');
+        const form = document.getElementById('supplierForm');
+        const loader = document.getElementById('supplierSaveLoading');
+        const submitBtn = document.getElementById('submitSupplierBtn');
+
+        if (loader && submitBtn) {
+            loader.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
     }
 
     function updateSupplierFilePreview(inputEl, previewId) {
@@ -288,6 +294,19 @@
     // Initialize - show products tab by default
     document.addEventListener('DOMContentLoaded', function() {
         switchTab('products', document.querySelector('[onclick*="switchTab(\'products\'"]'));
+
+        const supplierForm = document.getElementById('supplierForm');
+        if (supplierForm) {
+            supplierForm.addEventListener('submit', function () {
+                const loader = document.getElementById('supplierSaveLoading');
+                const submitBtn = document.getElementById('submitSupplierBtn');
+                if (loader && submitBtn) {
+                    loader.classList.remove('hidden');
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            });
+        }
 
         // Wire up product form submission to show loader
         const productForm = document.querySelector('#modalAddProduct form');

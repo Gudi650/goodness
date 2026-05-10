@@ -8,7 +8,7 @@
             <button onclick="closeLocalModal('modalAddSupplier')" class="text-slate-400 hover:text-slate-600">✕</button>
         </div>
 
-        <form method="POST" action="#" onsubmit="submitAddSupplier(event)">
+        <form id="supplierForm" method="POST" action="{{ route('suppliers.store') }}" enctype="multipart/form-data">
             @csrf
             <div class="px-6 py-5 space-y-6 max-h-[calc(100vh-220px)] overflow-y-auto">
 
@@ -33,6 +33,17 @@
                                 <option value="Individual">Individual</option>
                                 <option value="Government">Government</option>
                                 <option value="NGO">NGO</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Company <span class="text-red-500">*</span></label>
+                            <select name="company_id" required class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                                <option value="">Select Company</option>
+                                @if (isset($companies))
+                                    @foreach ($companies as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div>
@@ -178,6 +189,17 @@
                                 <option>60 Days Credit</option>
                             </select>
                         </div> -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Payment Terms</label>
+                            <select name="payment_terms" class="w-full px-3 py-2 border border-slate-300 rounded-md">
+                                <option value="">Select payment terms</option>
+                                <option>Cash on Delivery</option>
+                                <option>7 Days Credit</option>
+                                <option>14 Days Credit</option>
+                                <option>30 Days Credit</option>
+                                <option>60 Days Credit</option>
+                            </select>
+                        </div>
 
                     </div>
                 </div>
@@ -287,9 +309,16 @@
                 <p class="text-xs text-slate-500"><span class="text-red-500">*</span> required fields</p>
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="closeLocalModal('modalAddSupplier')" class="px-4 py-2 border rounded-md">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-md">Save</button>
+                    <div class="flex items-center gap-3" id="supplier-save-wrap">
+                        <button type="submit" id="submitSupplierBtn" class="px-4 py-2 bg-brand-600 text-white rounded-md">Save</button>
+                    </div>
                 </div>
             </div>
+            @include('components.loading', [
+                'id' => 'supplierSaveLoading',
+                'show' => false,
+                'fullPage' => true,
+            ])
         </form>
     </div>
 </div>
