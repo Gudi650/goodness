@@ -9,6 +9,29 @@ use Illuminate\Support\Facades\Storage;
 
 class PurchaseOrderController extends Controller
 {
+    private function generateItemSku(string $productName): string
+    {
+        $namePart = strtoupper(preg_replace('/[^A-Z0-9]+/', '-', strtoupper(trim($productName))));
+        $namePart = trim(preg_replace('/-+/', '-', $namePart), '-');
+
+        if ($namePart === '') {
+            return '';
+        }
+
+        return 'POITEM-' . $namePart . '-' . random_int(100, 999);
+    }
+
+    private function normalizeItems(array $items): array
+    {
+        return collect($items)->map(function (array $item) {
+            $productName = trim((string) ($item['product_name'] ?? ''));
+
+            $item['sku'] = $this->generateItemSku($productName);
+
+            return $item;
+        })->all();
+    }
+
     /**
      * Store a newly created purchase order
      */
@@ -45,6 +68,8 @@ class PurchaseOrderController extends Controller
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.total_price' => 'required|numeric|min:0',
         ]);
+
+        $validated['items'] = $this->normalizeItems($validated['items']);
 
         // Generate PO Number
         $poNumber = $this->generatePONumber();
@@ -103,7 +128,7 @@ class PurchaseOrderController extends Controller
             PurchaseOrderItem::create([
                 'purchase_order_id' => $po->id,
                 'product_name' => $item['product_name'],
-                'sku' => $item['sku'] ?? null,
+                'sku' => $item['sku'],
                 'quantity_ordered' => $item['quantity_ordered'],
                 'unit_of_measure' => $item['unit_of_measure'] ?? null,
                 'unit_price' => $item['unit_price'],
@@ -159,6 +184,8 @@ class PurchaseOrderController extends Controller
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.total_price' => 'required|numeric|min:0',
         ]);
+
+        $validated['items'] = $this->normalizeItems($validated['items']);
 
         // Calculate totals
         $subtotal = collect($validated['items'])->sum('total_price');
@@ -218,7 +245,7 @@ class PurchaseOrderController extends Controller
             PurchaseOrderItem::create([
                 'purchase_order_id' => $purchaseOrder->id,
                 'product_name' => $item['product_name'],
-                'sku' => $item['sku'] ?? null,
+                'sku' => $item['sku'],
                 'quantity_ordered' => $item['quantity_ordered'],
                 'unit_of_measure' => $item['unit_of_measure'] ?? null,
                 'unit_price' => $item['unit_price'],

@@ -21,6 +21,10 @@
         return `${categoryPart}-${namePart}-${suffix}`;
     }
 
+    function generateOrderItemSku(productName) {
+        return generateSKU('POITEM', productName);
+    }
+
     function deleteSupplier(supplierId, supplierName) {
         if (typeof openConfirm !== 'function') {
             alert('Confirmation dialog is not available right now.');
@@ -490,14 +494,36 @@
         row.innerHTML = `
             <td class="px-2 py-2">${poItemCount}</td>
             <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][product_name]" placeholder="Product" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" required></td>
-            <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][sku]" placeholder="SKU" class="w-full px-2 py-1 border border-slate-200 rounded text-xs"></td>
+            <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][sku]" placeholder="Auto SKU" readonly class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-slate-600"></td>
             <td class="px-2 py-2"><input type="number" name="items[${poItemCount}][quantity_ordered]" placeholder="0" min="1" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" onchange="calculateTotals()" required></td>
-            <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][unit_of_measure]" placeholder="Unit" class="w-full px-2 py-1 border border-slate-200 rounded text-xs"></td>
+            <td class="px-2 py-2">
+                <select name="items[${poItemCount}][unit_of_measure]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs">
+                    <option value="">Select Unit</option>
+                    <option value="pieces">Pieces</option>
+                    <option value="kg">Kilogram (kg)</option>
+                    <option value="liters">Liters</option>
+                    <option value="meters">Meters (m)</option>
+                    <option value="bags">Bags</option>
+                    <option value="boxes">Boxes</option>
+                    <option value="drums">Drums</option>
+                </select>
+            </td>
             <td class="px-2 py-2"><input type="number" name="items[${poItemCount}][unit_price]" placeholder="0.00" step="0.01" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" onchange="calculateTotals()" required></td>
             <td class="px-2 py-2"><input type="text" name="items[${poItemCount}][total_price]" placeholder="0.00" class="w-full px-2 py-1 border border-slate-200 rounded text-xs text-right" readonly></td>
             <td class="px-2 py-2 text-center"><button type="button" onclick="removeOrderItem('poItem_${poItemCount}')" class="text-red-600 hover:text-red-900 text-xs">Remove</button></td>
         `;
         tbody.appendChild(row);
+
+        const productNameInput = row.querySelector('input[name*="[product_name]"]');
+        const skuInput = row.querySelector('input[name*="[sku]"]');
+        const syncOrderItemSku = () => {
+            if (!skuInput) return;
+            skuInput.value = generateOrderItemSku(productNameInput?.value) || '';
+        };
+
+        productNameInput?.addEventListener('input', syncOrderItemSku);
+        syncOrderItemSku();
+
         calculateTotals();
     }
 
