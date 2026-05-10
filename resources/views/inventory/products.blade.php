@@ -108,7 +108,28 @@
                                 default => 'bg-green-100 text-green-700 border border-green-200',
                             };
                         @endphp
-                        <tr>
+                        <tr data-product-id="{{ $product->id }}"
+                            data-product-name="{{ e($product->name) }}"
+                            data-product-sku="{{ e($product->sku) }}"
+                            data-product-barcode="{{ e($product->barcode) }}"
+                            data-product-category="{{ e($product->category) }}"
+                            data-product-brand="{{ e($product->brand) }}"
+                            data-product-company-id="{{ $product->company_id }}"
+                            data-product-status="{{ e($product->status) }}"
+                            data-product-stock="{{ (int) $product->stock }}"
+                            data-product-unit="{{ e($product->unit_of_measure) }}"
+                            data-product-reorder="{{ (int) $product->reorder_level }}"
+                            data-product-location="{{ e($product->location) }}"
+                            data-product-last-restocked="{{ $product->last_restocked_date }}"
+                            data-product-last-movement="{{ e($product->last_stock_movement) }}"
+                            data-product-cost="{{ (float) $product->cost_per_unit }}"
+                            data-product-selling="{{ (float) $product->selling_price }}"
+                            data-product-profit="{{ $product->profit_margin }}"
+                            data-product-tax="{{ e($product->tax_vat) }}"
+                            data-product-supplier="{{ e($product->supplier_id) }}"
+                            data-product-expiry="{{ $product->expiry_date }}"
+                            data-product-description="{{ e($product->product_description) }}"
+                        >
                             <td class="px-4 py-3 text-sm">{{ $inventoryId }}</td>
                             <td class="px-4 py-3 text-sm">{{ $product->name }}</td>
                             <td class="px-4 py-3 text-sm font-mono text-xs">{{ $product->sku }}</td>
@@ -129,12 +150,12 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                         </svg>
                                     </button>
-                                    <button type="button" title="Edit" class="p-1.5 rounded-md text-blue-600 hover:bg-blue-50">
+                                    <button type="button" title="Edit" onclick="openEditProduct({{ $product->id }})" class="p-1.5 rounded-md text-blue-600 hover:bg-blue-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
                                         </svg>
                                     </button>
-                                    <button type="button" title="Delete" class="p-1.5 rounded-md text-red-600 hover:bg-red-50">
+                                    <button type="button" title="Delete" onclick="confirmDeleteProduct({{ $product->id }}, '{{ addslashes($product->name) }}')" class="p-1.5 rounded-md text-red-600 hover:bg-red-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21.75H8.084a2.25 2.25 0 0 1-2.245-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.875c0-1.035-.84-1.875-1.875-1.875h-3.75C9.09 3 8.25 3.84 8.25 4.875v.518" />
                                         </svg>
@@ -209,4 +230,16 @@
             </div>
         @endif
     </div>
+    
+    <!-- Hidden delete form used by confirm dialog -->
+    <form id="productDeleteForm" method="POST" style="display:none">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    @include('components.loading', [
+        'id' => 'productDeleteLoading',
+        'show' => false,
+        'fullPage' => true,
+    ])
 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -27,6 +28,9 @@ class InventoryController extends Controller
 
         // finalize the query
         $users = $usersQuery->get();
+
+        //get the companies all companies in the system for the dropdown filter
+        $companies = Company::pluck('name', 'id');
 
         $productsQuery = Product::query()->with('company')
             ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
@@ -61,7 +65,8 @@ class InventoryController extends Controller
             'totalProducts' => $totalProducts,
             'totalStockValue' => $totalStockValue,
             'lowStockCount' => $lowStockCount,
-            'expiringSoonCount' => $expiringSoonCount
+            'expiringSoonCount' => $expiringSoonCount,
+            'companies' => $companies,
         ]);
     }
 }
