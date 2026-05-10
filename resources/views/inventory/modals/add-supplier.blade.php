@@ -5,11 +5,12 @@
                 <h3 class="text-xl font-semibold text-slate-900">Add Supplier</h3>
                 <p class="text-xs text-slate-500 mt-1">Capture supplier profile, payment, and compliance details</p>
             </div>
-            <button onclick="closeLocalModal('modalAddSupplier')" class="text-slate-400 hover:text-slate-600">✕</button>
+            <button onclick="closeLocalModal('modalAddSupplier'); resetSupplierForm();" class="text-slate-400 hover:text-slate-600">✕</button>
         </div>
 
-        <form id="supplierForm" method="POST" action="{{ route('suppliers.store') }}" enctype="multipart/form-data">
+        <form id="supplierForm" method="POST" action="{{ route('suppliers.store') }}" enctype="multipart/form-data" onsubmit="submitAddSupplier(event)">
             @csrf
+            <input type="hidden" id="supplierMethod" name="_method" value="POST">
             <div class="px-6 py-5 space-y-6 max-h-[calc(100vh-220px)] overflow-y-auto">
 
                 <div class="border-b border-slate-200 pb-4">
@@ -308,7 +309,7 @@
             <div class="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-between items-center rounded-b-lg">
                 <p class="text-xs text-slate-500"><span class="text-red-500">*</span> required fields</p>
                 <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeLocalModal('modalAddSupplier')" class="px-4 py-2 border rounded-md">Cancel</button>
+                    <button type="button" onclick="closeLocalModal('modalAddSupplier'); resetSupplierForm();" class="px-4 py-2 border rounded-md">Cancel</button>
                     <div class="flex items-center gap-3" id="supplier-save-wrap">
                         <button type="submit" id="submitSupplierBtn" class="px-4 py-2 bg-brand-600 text-white rounded-md">Save</button>
                     </div>

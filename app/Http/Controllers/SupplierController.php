@@ -109,20 +109,85 @@ class SupplierController extends Controller
         return redirect()->back()->with('success', 'Supplier created successfully');
     }
 
-    //function to downlaod the attachments
-        public function downloadAttachment(Supplier $supplier, $type)
-        {
-            if (!in_array($type, ['business_registration_certificate', 'tin_certificate'])) {
-                return redirect()->back()->with('error', 'Invalid document type.');
-            }
-    
-            $filePath = $supplier->{$type . '_path'};
-            $fileName = $supplier->{$type . '_name'};
-    
-            if (!$filePath || !Storage::disk('public')->exists($filePath)) {
-                return redirect()->back()->with('error', 'File not found.');
-            }
-    
-            return Storage::disk('public')->download($filePath, $fileName);
+    public function update(Request $request, Supplier $supplier)
+    {
+        $validated = $request->validate([
+            'company_id' => 'required|exists:companies,id',
+            'supplier_name' => 'required|string|max:255',
+            'supplier_type' => 'required|string|max:50',
+            'registration_number' => 'nullable|string|max:100',
+            'status' => 'nullable|string|max:50',
+            'contact_person_name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:30',
+            'alternative_phone_number' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
+            'website' => 'nullable|url|max:255',
+            'country' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:100',
+            'district' => 'nullable|string|max:100',
+            'street_address' => 'nullable|string|max:255',
+            'po_box' => 'nullable|string|max:100',
+            'categories_supplied' => 'nullable|array',
+            'categories_supplied.*' => 'nullable|string|max:100',
+            'products_supplied' => 'nullable|string',
+            'lead_time' => 'nullable|string|max:50',
+            'minimum_order_value' => 'nullable|numeric',
+            'payment_terms' => 'nullable|string|max:50',
+            'bank_name' => 'nullable|string|max:100',
+            'account_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:100',
+            'branch_name' => 'nullable|string|max:100',
+            'mobile_money_number' => 'nullable|string|max:30',
+            'preferred_payment_method' => 'nullable|string|max:50',
+            'rating' => 'nullable|integer|min:1|max:5',
+            'contract_start_date' => 'nullable|date',
+            'contract_end_date' => 'nullable|date',
+            'notes' => 'nullable|string',
+            'business_registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'tin_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        // Handle business registration certificate upload
+        if ($request->hasFile('business_registration_certificate')) {
+            $businessRegistrationFile = $request->file('business_registration_certificate');
+            $businessRegistrationPath = $businessRegistrationFile->store('suppliers/documents', 'public');
+            $validated['business_registration_certificate_path'] = $businessRegistrationPath;
+            $validated['business_registration_certificate_name'] = $businessRegistrationFile->getClientOriginalName();
         }
+
+        // Handle TIN certificate upload
+        if ($request->hasFile('tin_certificate')) {
+            $tinCertificateFile = $request->file('tin_certificate');
+            $tinCertificatePath = $tinCertificateFile->store('suppliers/documents', 'public');
+            $validated['tin_certificate_path'] = $tinCertificatePath;
+            $validated['tin_certificate_name'] = $tinCertificateFile->getClientOriginalName();
+        }
+
+        // Handle categories_supplied array
+        if (isset($validated['categories_supplied']) && is_array($validated['categories_supplied'])) {
+            $validated['categories_supplied'] = implode(', ', $validated['categories_supplied']);
+        }
+
+        // Update the supplier
+        $supplier->update($validated);
+
+        return redirect()->back()->with('success', 'Supplier updated successfully');
+    }
+
+    //function to downlaod the attachments
+    public function downloadAttachment(Supplier $supplier, $type)
+    {
+        if (!in_array($type, ['business_registration_certificate', 'tin_certificate'])) {
+            return redirect()->back()->with('error', 'Invalid document type.');
+        }
+
+        $filePath = $supplier->{$type . '_path'};
+        $fileName = $supplier->{$type . '_name'};
+
+        if (!$filePath || !Storage::disk('public')->exists($filePath)) {
+            return redirect()->back()->with('error', 'File not found.');
+        }
+
+        return Storage::disk('public')->download($filePath, $fileName);
+    }
 }

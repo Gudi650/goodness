@@ -163,6 +163,85 @@
         alert('Product added (demo)');
     }
 
+    function resetSupplierForm() {
+        const form = document.getElementById('supplierForm');
+        if (form) {
+            form.reset();
+            const methodInput = document.getElementById('supplierMethod');
+            if (methodInput) methodInput.value = 'POST';
+            const supplierIdInput = document.getElementById('supplierId');
+            if (supplierIdInput) {
+                supplierIdInput.value = '';
+                supplierIdInput.readOnly = false;
+            }
+            document.getElementById('modalAddSupplier').querySelector('h3').textContent = 'Add Supplier';
+            document.getElementById('submitSupplierBtn').textContent = 'Save';
+            document.getElementById('businessRegPreview').textContent = 'No file selected';
+            document.getElementById('tinCertPreview').textContent = 'No file selected';
+        }
+    }
+
+    function editSupplier(supplierData) {
+        const form = document.getElementById('supplierForm');
+        const methodInput = document.getElementById('supplierMethod');
+        if (!form) return;
+
+        // Set form to PUT method for update
+        if (methodInput) methodInput.value = 'PUT';
+        form.action = '{{ route('suppliers.update', ['supplier' => '__ID__']) }}'.replace('__ID__', supplierData.id);
+
+        // Update modal title and button text
+        document.getElementById('modalAddSupplier').querySelector('h3').textContent = 'Edit Supplier';
+        document.getElementById('submitSupplierBtn').textContent = 'Update';
+
+        // Populate form fields
+        document.getElementById('supplierId').value = supplierData.supplier_id;
+        document.getElementById('supplierId').readOnly = true;
+        document.querySelector('input[name="supplier_name"]').value = supplierData.supplier_name || '';
+        document.querySelector('select[name="supplier_type"]').value = supplierData.supplier_type || '';
+        document.querySelector('select[name="company_id"]').value = supplierData.company_id || '';
+        document.querySelector('input[name="registration_number"]').value = supplierData.registration_number || '';
+        document.querySelector('select[name="status"]').value = supplierData.status || 'Active';
+        
+        document.querySelector('input[name="contact_person_name"]').value = supplierData.contact_person_name || '';
+        document.querySelector('input[name="phone_number"]').value = supplierData.phone_number || '';
+        document.querySelector('input[name="alternative_phone_number"]').value = supplierData.alternative_phone_number || '';
+        document.querySelector('input[name="email"]').value = supplierData.email || '';
+        document.querySelector('input[name="website"]').value = supplierData.website || '';
+        
+        document.querySelector('input[name="country"]').value = supplierData.country || 'Tanzania';
+        document.querySelector('select[name="region"]').value = supplierData.region || '';
+        document.querySelector('input[name="district"]').value = supplierData.district || '';
+        document.querySelector('input[name="po_box"]').value = supplierData.po_box || '';
+        document.querySelector('textarea[name="street_address"]').value = supplierData.street_address || '';
+        
+        // Handle categories (checkboxes)
+        const categories = (supplierData.categories_supplied || '').split(', ').filter(c => c);
+        document.querySelectorAll('input[name="categories_supplied[]"]').forEach(checkbox => {
+            checkbox.checked = categories.includes(checkbox.value);
+        });
+        
+        document.querySelector('textarea[name="products_supplied"]').value = supplierData.products_supplied || '';
+        document.querySelector('select[name="lead_time"]').value = supplierData.lead_time || '';
+        document.querySelector('input[name="minimum_order_value"]').value = supplierData.minimum_order_value || '';
+        document.querySelector('select[name="payment_terms"]').value = supplierData.payment_terms || '';
+        
+        document.querySelector('select[name="bank_name"]').value = supplierData.bank_name || '';
+        document.querySelector('input[name="account_name"]').value = supplierData.account_name || '';
+        document.querySelector('input[name="account_number"]').value = supplierData.account_number || '';
+        document.querySelector('input[name="branch_name"]').value = supplierData.branch_name || '';
+        document.querySelector('input[name="mobile_money_number"]').value = supplierData.mobile_money_number || '';
+        document.querySelector('select[name="preferred_payment_method"]').value = supplierData.preferred_payment_method || '';
+        
+        document.querySelector('select[name="rating"]').value = supplierData.rating || '';
+        document.querySelector('input[name="contract_start_date"]').value = supplierData.contract_start_date || '';
+        document.querySelector('input[name="contract_end_date"]').value = supplierData.contract_end_date || '';
+        document.querySelector('textarea[name="notes"]').value = supplierData.notes || '';
+
+        // Open modal
+        openLocalModal('modalAddSupplier');
+    }
+
     function submitAddSupplier(e) {
         const form = document.getElementById('supplierForm');
         const loader = document.getElementById('supplierSaveLoading');
