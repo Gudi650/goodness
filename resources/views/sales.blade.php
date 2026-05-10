@@ -75,6 +75,7 @@
     @include('components.modal')
     @include('components.alert')
     @include('components.confirm')
+    <x-loading id="customerCreateLoader" size="lg" color="amber" full-page="true" message="Saving customer..." :show="false" />
     @include('sales.modals.add-customer')
     @include('sales.modals.add-order')
     @include('sales.modals.add-contract')

@@ -90,4 +90,54 @@ class CustomerController extends Controller
 
         return redirect()->back()->with('success', 'Customer created successfully.');
     }
+
+    public function show(Customer $customer)
+    {
+        return response()->json($customer);
+    }
+
+    public function update(Request $request, Customer $customer)
+    {
+        $validated = $request->validate([
+            'company_id' => 'nullable|exists:companies,id',
+            'customer_type' => 'required|string|max:50',
+            'customer_name' => 'required|string|max:255',
+            'business_trading_name' => 'nullable|string|max:255',
+            'registration_number' => 'nullable|string|max:100',
+            'industry_sector' => 'nullable|string|max:100',
+            'status' => 'required|in:Active,Inactive,Blacklisted,Prospect',
+            'contact_person_name' => 'nullable|string|max:255',
+            'phone_number' => 'required|string|max:30',
+            'alternative_phone_number' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
+            'whatsapp_number' => 'nullable|string|max:30',
+            'website' => 'nullable|url|max:255',
+            'country' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:100',
+            'district' => 'nullable|string|max:100',
+            'street_address' => 'nullable|string|max:255',
+            'po_box' => 'nullable|string|max:100',
+            'assigned_sales_rep_id' => 'nullable|exists:users,id',
+            'customer_source' => 'nullable|string|max:100',
+            'price_category' => 'nullable|string|max:100',
+            'credit_limit' => 'nullable|numeric|min:0',
+            'payment_terms' => 'nullable|string|max:50',
+            'preferred_payment_method' => 'nullable|string|max:100',
+            'currency_preference' => 'nullable|string|max:10',
+            'bank_name' => 'nullable|string|max:100',
+            'account_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:100',
+            'mobile_money_number' => 'nullable|string|max:30',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|in:Male,Female,Prefer not to say',
+            'national_id_number' => 'nullable|string|max:100',
+            'tags' => 'nullable|string|max:255',
+            'customer_rating' => 'nullable|integer|min:1|max:5',
+            'notes' => 'nullable|string',
+        ]);
+
+        $customer->update($validated);
+
+        return redirect()->back()->with('success', 'Customer updated successfully.');
+    }
 }

@@ -150,6 +150,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/sales', [SalesController::class, 'index'])->name('sales');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+    Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+    Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
 
     //Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
