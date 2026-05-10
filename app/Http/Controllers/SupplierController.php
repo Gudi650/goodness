@@ -190,4 +190,17 @@ class SupplierController extends Controller
 
         return Storage::disk('public')->download($filePath, $fileName);
     }
+
+    public function destroy(Request $request, Supplier $supplier)
+    {
+        $supplier->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Supplier deleted successfully',
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Supplier deleted successfully');
+    }
 }

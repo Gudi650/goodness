@@ -15,7 +15,7 @@
                         <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Supplier Name</th>
                         <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Phone</th>
                         <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Email</th>
-                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Rating / Reliability</th>
+                        <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Minimum Order Value</th>
                         <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Action</th>
                     </tr>
                 </thead>
@@ -27,7 +27,9 @@
                             <td class="px-4 py-3 text-sm">{{ $supplier->supplier_name }}</td>
                             <td class="px-4 py-3 text-sm">{{ $supplier->phone_number ?? '-' }}</td>
                             <td class="px-4 py-3 text-sm">{{ $supplier->email ?? '-' }}</td>
-                            <td class="px-4 py-3 text-sm text-right">{{ $supplier->rating ? $supplier->rating . ' / 5' : '-' }}</td>
+                            <td class="px-4 py-3 text-sm text-right">
+                                {{ $supplier->minimum_order_value !== null ? number_format((float) $supplier->minimum_order_value, 2) . ' TZS' : '-' }}
+                            </td>
                             <td class="px-4 py-3 text-sm">
                                 <div class="flex justify-end items-center gap-2 whitespace-nowrap">
 
@@ -44,11 +46,12 @@
                                         </svg>
                                     </button>
 
-                                    <button type="button" title="Delete" class="p-1.5 rounded-md text-red-600 hover:bg-red-50">
+                                    <button type="button" title="Delete" onclick="deleteSupplier({{ $supplier->id }}, @js($supplier->supplier_name))" class="p-1.5 rounded-md text-red-600 hover:bg-red-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21.75H8.084a2.25 2.25 0 0 1-2.245-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.875c0-1.035-.84-1.875-1.875-1.875h-3.75C9.09 3 8.25 3.84 8.25 4.875v.518" />
                                         </svg>
                                     </button>
+
                                 </div>
                             </td>
                         </tr>
@@ -57,16 +60,15 @@
                                 <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                                     <div class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Supplier Details</div>
                                     <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2 lg:grid-cols-3">
-                                        <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Supplier ID:</span> <span class="font-medium text-slate-800">{{ $supplier->supplier_id ?? '-' }}</span></div>
-                                        <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Supplier Name:</span> <span class="font-medium text-slate-800">{{ $supplier->supplier_name ?? '-' }}</span></div>
+                                        
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Supplier Type:</span> <span class="font-medium text-slate-800">{{ $supplier->supplier_type ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Company:</span> <span class="font-medium text-slate-800">{{ optional($supplier->company)->name ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Registration Number / TIN:</span> <span class="font-medium text-slate-800">{{ $supplier->registration_number ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Status:</span> <span class="font-medium text-slate-800">{{ $supplier->status ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Contact Person:</span> <span class="font-medium text-slate-800">{{ $supplier->contact_person_name ?? '-' }}</span></div>
-                                        <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Phone:</span> <span class="font-medium text-slate-800">{{ $supplier->phone_number ?? '-' }}</span></div>
+
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Alternative Phone:</span> <span class="font-medium text-slate-800">{{ $supplier->alternative_phone_number ?? '-' }}</span></div>
-                                        <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Email:</span> <span class="font-medium text-slate-800">{{ $supplier->email ?? '-' }}</span></div>
+
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Website:</span> <span class="font-medium text-slate-800">{{ $supplier->website ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Country:</span> <span class="font-medium text-slate-800">{{ $supplier->country ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Address:</span> <span class="font-medium text-slate-800">{{ $supplier->street_address ?? '-' }}</span></div>
@@ -75,7 +77,7 @@
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Category of Supply:</span> <span class="font-medium text-slate-800">{{ $supplier->categories_supplied ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Products Supplied:</span> <span class="font-medium text-slate-800">{{ $supplier->products_supplied ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Lead Time:</span> <span class="font-medium text-slate-800">{{ $supplier->lead_time ?? '-' }}</span></div>
-                                        <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Minimum Order Value:</span> <span class="font-medium text-slate-800">{{ $supplier->minimum_order_value !== null ? number_format((float) $supplier->minimum_order_value, 2) . ' TZS' : '-' }}</span></div>
+                                        
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Payment Terms:</span> <span class="font-medium text-slate-800">{{ $supplier->payment_terms ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Bank Name:</span> <span class="font-medium text-slate-800">{{ $supplier->bank_name ?? '-' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Account Name:</span> <span class="font-medium text-slate-800">{{ $supplier->account_name ?? '-' }}</span></div>

@@ -156,6 +156,7 @@ Route::middleware('auth')->group(function () {
     // Suppliers (inventory)
     Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
     Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
 
     //download  attachements list
     Route::get('/suppliers/{supplier}/download/{type}', [SupplierController::class, 'downloadAttachment'])->name('suppliers.downloadAttachment');

@@ -18,8 +18,57 @@
         if (!categoryPart || !namePart) {
             return '';
         }
-
         return `${categoryPart}-${namePart}-${suffix}`;
+    }
+
+    function deleteSupplier(supplierId, supplierName) {
+        if (typeof openConfirm !== 'function') {
+            alert('Confirmation dialog is not available right now.');
+            return;
+        }
+
+        const deleteUrlTemplate = @js(route('suppliers.destroy', ['supplier' => '__ID__']));
+        const deleteUrl = deleteUrlTemplate.replace('__ID__', supplierId);
+
+        openConfirm({
+            title: 'Delete Supplier',
+            message: `Are you sure you want to delete "${supplierName}"? This action cannot be undone.`,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'danger',
+            onConfirm: async function () {
+                try {
+                    
+                    const response = await fetch(deleteUrl, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        let errorMessage = 'Failed to delete supplier';
+                        try {
+                            const error = await response.json();
+                            errorMessage = error.message || errorMessage;
+                        } catch (parseError) {
+                            const fallbackText = await response.text();
+                            if (fallbackText) {
+                                errorMessage = fallbackText;
+                            }
+                        }
+                        alert('Error: ' + errorMessage);
+                        return;
+                    }
+
+                    location.reload();
+                } catch (err) {
+                    console.error('Delete error:', err);
+                    alert('Error deleting supplier: ' + err.message);
+                }
+            }
+        });
     }
 
     function generateBarcode() {
