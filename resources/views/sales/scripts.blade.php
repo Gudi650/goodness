@@ -188,6 +188,53 @@
         }
     }
 
+    function confirmDeleteCustomer(customerId, customerName) {
+        openConfirm({
+            title: 'Delete Customer',
+            message: `Are you sure you want to delete "${customerName}"? This action cannot be undone.`,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'danger',
+            onConfirm: function() {
+                deleteCustomer(customerId);
+            }
+        });
+    }
+
+    function deleteCustomer(customerId) {
+        const loader = document.getElementById('customerCreateLoader');
+        const messageEl = document.getElementById('customerCreateLoaderText');
+
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Deleting customer...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        fetch(`{{ url('customers') }}/${customerId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json().catch(() => ({}));
+            }
+            throw new Error('Failed to delete customer');
+        })
+        .then(() => {
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error deleting customer:', error);
+            if (loader) loader.classList.add('hidden');
+            window.showAlert('error', 'Failed to delete customer. Please try again.');
+        });
+    }
+
     // Initialize tab on page load
     document.addEventListener('DOMContentLoaded', () => { switchTab('customers', document.querySelector('.tab-btn')); });
 </script>

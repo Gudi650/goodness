@@ -140,4 +140,18 @@ class CustomerController extends Controller
 
         return redirect()->back()->with('success', 'Customer updated successfully.');
     }
+
+    public function destroy(Request $request, Customer $customer)
+    {
+        $customerName = $customer->customer_name;
+        Customer::query()->whereKey($customer->id)->delete();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => "Customer '{$customerName}' deleted successfully.",
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Customer '{$customerName}' deleted successfully.");
+    }
 }

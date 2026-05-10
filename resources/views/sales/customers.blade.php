@@ -68,7 +68,7 @@
                                     <button
                                         type="button"
                                         title="Delete customer"
-                                        onclick="window.showAlert('info', 'Delete customer will be added soon.')"
+                                        onclick="confirmDeleteCustomer('{{ $customer->id }}', '{{ $customer->customer_name }}')"
                                         class="inline-flex h-8 w-8 items-center justify-center rounded border border-slate-200 text-red-600 hover:bg-red-50"
                                     >
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

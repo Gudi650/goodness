@@ -142,16 +142,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.update.password');
     Route::put('/settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.update.preferences');
 
-    /* Sales Management
-    Route::get('/sales', function () {
-        return view('sales');
-    })->name('sales'); 
-    */
+    // Sales Management
 
     Route::get('/sales', [SalesController::class, 'index'])->name('sales');
+
+    // Customers (sales)
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
     Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+    Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
     //Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
