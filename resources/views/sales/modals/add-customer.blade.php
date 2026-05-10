@@ -10,7 +10,8 @@
                 class="text-slate-400 hover:text-slate-600">✕</button>
         </div>
 
-        <form id="customerForm" onsubmit="submitAddCustomer(event)">
+        <form id="customerForm" action="{{ route('customers.store') }}" method="POST">
+            @csrf
             <div class="px-6 py-5 max-h-96 overflow-y-auto space-y-6">
                 <!-- Section 1: Customer Identity -->
                 <div>
@@ -19,7 +20,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Customer Type</label>
-                                <select id="customer_type"
+                                <select id="customer_type" name="customer_type"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm">
                                     <option value="">-- Select --</option>
                                     <option value="Individual">Individual</option>
@@ -31,7 +32,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Company</label>
-                                <select id="customer_company"
+                                <select id="customer_company" name="company_id"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm">
                                     <option value="">-- Select Sub-Company --</option>
                                     @if (isset($companies))
@@ -45,7 +46,7 @@
                         <div>
                             <label class="block text-xs text-slate-600 font-medium">Customer Name <span
                                     class="text-red-500">*</span></label>
-                            <input id="customer_name" type="text"
+                            <input id="customer_name" name="customer_name" type="text"
                                 class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm"
                                 placeholder="Full name or company name" required />
                         </div>
@@ -60,20 +61,20 @@
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Phone Number <span
                                         class="text-red-500">*</span></label>
-                                <input id="customer_phone" type="tel"
+                                <input id="customer_phone" name="phone_number" type="tel"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm"
                                     placeholder="+255..." required />
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">WhatsApp Number</label>
-                                <input id="customer_whatsapp" type="tel"
+                                <input id="customer_whatsapp" name="whatsapp_number" type="tel"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm"
                                     placeholder="+255..." />
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs text-slate-600 font-medium">Email Address</label>
-                            <input id="customer_email" type="email"
+                            <input id="customer_email" name="email" type="email"
                                 class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm" />
                         </div>
                     </div>
@@ -86,7 +87,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Region</label>
-                                <select id="customer_region"
+                                <select id="customer_region" name="region"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm">
                                     <option value="">-- Select Region --</option>
                                     <option value="Dar es Salaam">Dar es Salaam</option>
@@ -103,13 +104,13 @@
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">District</label>
-                                <input id="customer_district" type="text"
+                                <input id="customer_district" name="district" type="text"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm" />
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs text-slate-600 font-medium">Street Address</label>
-                            <input id="customer_address" type="text"
+                            <input id="customer_address" name="street_address" type="text"
                                 class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm" />
                         </div>
                     </div>
@@ -133,7 +134,7 @@
                             -->
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Customer Source</label>
-                                <select id="customer_source"
+                                <select id="customer_source" name="customer_source"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm">
                                     <option value="">-- Select Source --</option>
                                     <option value="Walk In">Walk In</option>
@@ -149,7 +150,7 @@
 
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Price Category</label>
-                                <select id="customer_price_category"
+                                <select id="customer_price_category" name="price_category"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm">
                                     <option value="">-- Select --</option>
                                     <option value="Retail Price">Retail Price</option>
@@ -169,7 +170,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Payment Terms</label>
-                                <select id="customer_payment_terms"
+                                <select id="customer_payment_terms" name="payment_terms"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm">
                                     <option value="">-- Select --</option>
                                     <option value="Cash">Cash</option>
@@ -182,7 +183,7 @@
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Preferred Payment
                                     Method</label>
-                                <select id="customer_payment_method"
+                                <select id="customer_payment_method" name="preferred_payment_method"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm">
                                     <option value="">-- Select --</option>
                                     <option value="Cash">Cash</option>
@@ -204,7 +205,7 @@
 
                             <div>
                                 <label class="block text-xs text-slate-600 font-medium">Status</label>
-                                <select id="customer_status"
+                                <select id="customer_status" name="status"
                                     class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm">
                                     <option value="Active">Active</option>
                                     <option value="Inactive">Inactive</option>
@@ -214,7 +215,7 @@
                         </div>
                         <div>
                             <label class="block text-xs text-slate-600 font-medium">Notes / Additional Info</label>
-                            <textarea id="customer_notes" class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm" rows="3"
+                            <textarea id="customer_notes" name="notes" class="mt-1 block w-full border border-slate-200 rounded p-2 text-sm" rows="3"
                                 placeholder="Any additional notes about this customer..."></textarea>
                         </div>
                     </div>

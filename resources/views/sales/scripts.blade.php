@@ -44,12 +44,8 @@
         openLocalModal('modalAddContract');
     }
 
-    // Form submission handlers (placeholder for potential backend integration)
     function submitAddCustomer(e) {
-        e.preventDefault();
-        window.showAlert('info', 'Customer form submitted');
-        closeLocalModal('modalAddCustomer');
-        return false;
+        return true;
     }
 
     function submitAddOrder(e) {
