@@ -38,7 +38,9 @@
             variant: 'danger',
             onConfirm: async function () {
                 try {
-                    
+                    const loader = document.getElementById('supplierDeleteLoading');
+                    if (loader) loader.classList.remove('hidden');
+
                     const response = await fetch(deleteUrl, {
                         method: 'DELETE',
                         headers: {
@@ -58,12 +60,15 @@
                                 errorMessage = fallbackText;
                             }
                         }
+                        if (loader) loader.classList.add('hidden');
                         alert('Error: ' + errorMessage);
                         return;
                     }
 
                     location.reload();
                 } catch (err) {
+                    const loader = document.getElementById('supplierDeleteLoading');
+                    if (loader) loader.classList.add('hidden');
                     console.error('Delete error:', err);
                     alert('Error deleting supplier: ' + err.message);
                 }

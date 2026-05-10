@@ -147,3 +147,9 @@
         </div>
     </div>
 </div>
+
+@include('components.loading', [
+    'id' => 'supplierDeleteLoading',
+    'show' => false,
+    'fullPage' => true,
+])
