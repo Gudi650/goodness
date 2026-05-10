@@ -18,6 +18,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -140,10 +141,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.update.password');
     Route::put('/settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.update.preferences');
 
-    // Sales Management
+    /* Sales Management
     Route::get('/sales', function () {
         return view('sales');
-    })->name('sales');
+    })->name('sales'); 
+    */
+
+    Route::get('/sales', [SalesController::class, 'index'])->name('sales');
 
     //Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
