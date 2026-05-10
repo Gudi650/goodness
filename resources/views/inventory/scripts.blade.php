@@ -107,6 +107,14 @@
         const el = document.getElementById(id);
         if (!el) return;
         el.classList.remove('hidden');
+
+        if (id === 'modalAddSupplier') {
+            const supplierIdInput = document.getElementById('supplierId');
+            if (supplierIdInput && !supplierIdInput.value) {
+                const randomPart = Math.floor(1000 + Math.random() * 9000);
+                supplierIdInput.value = `SUP-${randomPart}`;
+            }
+        }
     }
 
     function closeLocalModal(id) {
@@ -159,6 +167,36 @@
         e?.preventDefault();
         closeLocalModal('modalAddSupplier');
         alert('Supplier added (demo)');
+    }
+
+    function updateSupplierFilePreview(inputEl, previewId) {
+        const preview = document.getElementById(previewId);
+        if (!preview) return;
+
+        if (!inputEl || !inputEl.files || !inputEl.files.length) {
+            preview.className = 'mt-2 text-xs text-slate-500';
+            preview.textContent = 'No file selected';
+            return;
+        }
+
+        const file = inputEl.files[0];
+        const isImage = file.type.startsWith('image/');
+
+        if (isImage) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                preview.className = 'mt-2';
+                preview.innerHTML = `
+                    <p class="text-xs text-slate-600 mb-2">${file.name}</p>
+                    <img src="${event.target.result}" alt="Preview" class="h-20 w-auto rounded border border-slate-300" />
+                `;
+            };
+            reader.readAsDataURL(file);
+            return;
+        }
+
+        preview.className = 'mt-2 text-xs text-slate-600';
+        preview.textContent = file.name;
     }
 
     function submitAddPO(e) {
