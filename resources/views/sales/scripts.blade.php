@@ -615,12 +615,311 @@
         }
     }
 
-    function editOrder(orderId) {
-        if (window.showAlert) {
-            window.showAlert('info', 'Order edit is not wired yet.');
+    function getProductSelectHTML(selectedProductId = '') {
+        const container = document.getElementById('productOptionsContainer');
+        if (!container) {
+            return '<option value="">-- Select Product --</option>';
         }
-        console.log('Edit order requested:', orderId);
+        
+        let html = '<option value="">-- Select Product --</option>';
+        container.querySelectorAll('.product-option').forEach(el => {
+            const id = el.getAttribute('data-id');
+            const name = el.getAttribute('data-name');
+            const selected = selectedProductId == id ? 'selected' : '';
+            html += `<option value="${id}" ${selected}>${name}</option>`;
+        });
+        return html;
     }
+
+    function getCustomerSelectHTML(selectedCustomerId = '') {
+        const container = document.getElementById('customerOptionsContainer');
+        if (!container) {
+            return '<option value="">-- Select Customer --</option>';
+        }
+        
+        let html = '<option value="">-- Select Customer --</option>';
+        container.querySelectorAll('.customer-option').forEach(el => {
+            const id = el.getAttribute('data-id');
+            const name = el.getAttribute('data-name');
+            const selected = selectedCustomerId == id ? 'selected' : '';
+            html += `<option value="${id}" ${selected}>${name}</option>`;
+        });
+        return html;
+    }
+
+
+    function editOrder(orderId) {
+        const loader = document.getElementById('orderLoader');
+        const messageEl = document.getElementById('orderLoaderText');
+
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Loading order details...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        fetch(`{{ url('orders') }}/${orderId}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load order');
+            return response.json();
+        })
+        .then(order => {
+            if (loader) loader.classList.add('hidden');
+            
+            // Store current order ID for update
+            window.editingOrderId = order.id;
+            
+            // Populate form fields
+            document.getElementById('edit_order_no').value = order.order_number || '';
+            document.getElementById('edit_order_date').value = order.order_date || '';
+            document.getElementById('edit_expected_delivery_date').value = order.expected_delivery_date || '';
+            document.getElementById('edit_order_priority').value = order.priority || 'Normal';
+            document.getElementById('edit_order_company').value = order.company_id || '';
+            document.getElementById('edit_order_department').value = order.department_id || '';
+            document.getElementById('edit_order_type').value = order.order_type || 'Sale';
+            document.getElementById('edit_order_status').value = order.status || 'Draft';
+            
+            // Populate customer dropdown with HTML options
+            const customerSelect = document.getElementById('edit_order_customer');
+            if (customerSelect) {
+                customerSelect.innerHTML = getCustomerSelectHTML(order.customer_id);
+            }
+            
+            document.getElementById('edit_order_billing_address').value = order.billing_address || '';
+            document.getElementById('edit_order_shipping_address').value = order.shipping_address || '';
+            document.getElementById('edit_order_payment_status').value = order.payment_status || 'Unpaid';
+            document.getElementById('edit_order_payment_method').value = order.payment_method || '';
+            document.getElementById('edit_order_payment_date').value = order.payment_date || '';
+            document.getElementById('edit_order_amount_paid').value = order.amount_paid || 0;
+            document.getElementById('edit_order_payment_reference').value = order.payment_reference || '';
+            document.getElementById('edit_order_credit_terms').value = order.credit_terms || 30;
+            document.getElementById('edit_order_delivery_method').value = order.delivery_method || '';
+            document.getElementById('edit_order_delivery_date').value = order.delivery_date || '';
+            document.getElementById('edit_order_delivery_status').value = order.delivery_status || 'Not Dispatched';
+            document.getElementById('edit_order_driver_name').value = order.driver_name || '';
+            document.getElementById('edit_order_vehicle_plate_number').value = order.vehicle_plate_number || '';
+            document.getElementById('edit_order_delivery_notes').value = order.delivery_notes || '';
+            document.getElementById('edit_order_sales_rep').value = order.sales_rep_id || '';
+            document.getElementById('edit_order_approved_by').value = order.approved_by || '';
+            
+            const commissionPercent = document.getElementById('edit_order_commission_percent');
+            if (commissionPercent) commissionPercent.value = order.commission_percent || 0;
+            
+            const commissionAmount = document.getElementById('edit_order_commission_amount');
+            if (commissionAmount) commissionAmount.value = order.commission_amount || 0;
+            
+            document.getElementById('edit_order_internal_notes').value = order.internal_notes || '';
+            document.getElementById('edit_order_customer_notes').value = order.customer_notes || '';
+            document.getElementById('edit_order_terms_and_conditions').value = order.terms_and_conditions || '';
+            document.getElementById('edit_order_subtotal').value = order.subtotal || 0;
+            document.getElementById('edit_order_discount_percent').value = order.discount_percent || 0;
+            document.getElementById('edit_order_discount_amount').value = order.discount_amount || 0;
+            document.getElementById('edit_order_vat_percent').value = order.vat_percent || 18;
+            document.getElementById('edit_order_vat_amount').value = order.vat_amount || 0;
+            document.getElementById('edit_order_shipping_cost').value = order.shipping_cost || 0;
+            document.getElementById('edit_order_other_charges').value = order.other_charges || 0;
+            document.getElementById('edit_order_grand_total').value = order.grand_total || 0;
+            document.getElementById('edit_order_balance_due').value = order.balance_due || 0;
+
+            // Populate order items
+            const itemsBody = document.getElementById('editOrderItemsBody');
+            if (itemsBody && order.items && order.items.length > 0) {
+                itemsBody.innerHTML = '';
+                order.items.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    row.className = 'order-item-row';
+                    
+                    // Build product select HTML
+                    const productSelectHtml = getProductSelectHTML(item.product_id);
+                    
+                    row.innerHTML = `
+                        <td class="px-3 py-2 text-sm text-slate-600 item-number">${index + 1}</td>
+                        <td class="px-3 py-2">
+                            <select class="order-product block w-full border border-slate-200 rounded p-2 text-sm" onchange="handleOrderProductChange(this)">
+                                ${productSelectHtml}
+                            </select>
+                        </td>
+                        <td class="px-3 py-2">
+                            <input type="text" class="order-sku block w-full border border-slate-200 rounded p-2 text-sm bg-slate-50" readonly />
+                        </td>
+                        <td class="px-3 py-2">
+                            <input type="text" class="order-description block w-full border border-slate-200 rounded p-2 text-sm" value="${(item.description || '').replace(/"/g, '&quot;')}" />
+                        </td>
+                        <td class="px-3 py-2">
+                            <input type="number" min="1" value="${item.quantity || 1}" class="order-qty block w-full border border-slate-200 rounded p-2 text-sm" oninput="recalculateOrderTotals()" />
+                        </td>
+                        <td class="px-3 py-2">
+                            <select class="order-uom block w-full border border-slate-200 rounded p-2 text-sm">
+                                <option value="Piece" ${item.unit_of_measure === 'Piece' ? 'selected' : ''}>Piece</option>
+                                <option value="Box" ${item.unit_of_measure === 'Box' ? 'selected' : ''}>Box</option>
+                                <option value="Kg" ${item.unit_of_measure === 'Kg' ? 'selected' : ''}>Kg</option>
+                                <option value="Litre" ${item.unit_of_measure === 'Litre' ? 'selected' : ''}>Litre</option>
+                            </select>
+                        </td>
+                        <td class="px-3 py-2">
+                            <input type="number" min="0" value="${item.unit_price || 0}" class="order-unit-price block w-full border border-slate-200 rounded p-2 text-sm" oninput="recalculateOrderTotals()" />
+                        </td>
+                        <td class="px-3 py-2">
+                            <input type="number" min="0" value="${item.discount_percent || 0}" class="order-discount block w-full border border-slate-200 rounded p-2 text-sm" oninput="recalculateOrderTotals()" />
+                        </td>
+                        <td class="px-3 py-2">
+                            <input type="number" min="0" value="${item.line_total || 0}" class="order-total block w-full border border-slate-200 rounded p-2 text-sm bg-slate-50" readonly />
+                        </td>
+                        <td class="px-3 py-2 text-center">
+                            <button type="button" onclick="removeOrderItemRow(this)" class="text-red-600 hover:text-red-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </td>
+                    `;
+                    itemsBody.appendChild(row);
+                    // Set product select value
+                    row.querySelector('.order-product').value = item.product_id || '';
+                });
+            }
+
+            // Update form action to PUT route
+            const form = document.getElementById('editOrderForm');
+            if (form) {
+                form.action = `{{ url('orders') }}/${order.id}`;
+            }
+
+            // Show modal
+            openLocalModal('modalEditOrder');
+        })
+        .catch(error => {
+            console.error('Error loading order:', error);
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('error', 'Failed to load order details. Please try again.');
+            }
+        });
+    }
+
+
+    function resetEditOrderForm() {
+        const form = document.getElementById('editOrderForm');
+        if (form) {
+            form.reset();
+        }
+        window.editingOrderId = null;
+    }
+
+    function submitEditOrder(e) {
+        e.preventDefault();
+        
+        if (!window.editingOrderId) {
+            if (window.showAlert) {
+                window.showAlert('error', 'Order ID not found');
+            }
+            return false;
+        }
+
+        const form = document.getElementById('editOrderForm');
+        if (!form) return false;
+
+        // Collect all form data
+        const formData = new FormData(form);
+
+        // Remove empty approved_by field
+        if (!formData.get('approved_by')) {
+            formData.delete('approved_by');
+        }
+
+        // Collect order items
+        const items = [];
+        document.querySelectorAll('#editOrderItemsBody .order-item-row').forEach((row, index) => {
+            const product = row.querySelector('.order-product')?.value;
+            const qty = row.querySelector('.order-qty')?.value;
+            const unitPrice = row.querySelector('.order-unit-price')?.value;
+            const discount = row.querySelector('.order-discount')?.value;
+            const description = row.querySelector('.order-description')?.value;
+            const sku = row.querySelector('.order-sku')?.value;
+            const uom = row.querySelector('.order-uom')?.value;
+            const lineTotal = row.querySelector('.order-total')?.value;
+
+            if (product && qty) {
+                items.push({
+                    product_id: product,
+                    quantity: parseFloat(qty),
+                    unit_price: parseFloat(unitPrice || 0),
+                    discount_percent: parseFloat(discount || 0),
+                    description: description || '',
+                    sku: sku || '',
+                    unit_of_measure: uom || 'Piece',
+                    line_total: parseFloat(lineTotal || 0),
+                });
+            }
+        });
+
+        if (items.length === 0) {
+            if (window.showAlert) {
+                window.showAlert('error', 'Please add at least one item to the order.');
+            }
+            return false;
+        }
+
+        // Add items to form data
+        items.forEach((item, index) => {
+            Object.entries(item).forEach(([key, value]) => {
+                formData.append(`items[${index}][${key}]`, value);
+            });
+        });
+
+        // Show loader
+        const loader = document.getElementById('orderLoader');
+        const messageEl = document.getElementById('orderLoaderText');
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Updating order...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        // Submit via fetch
+        fetch(`{{ url('orders') }}/${window.editingOrderId}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Failed to update order');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('success', data.message || 'Order updated successfully!');
+            }
+            resetEditOrderForm();
+            closeLocalModal('modalEditOrder');
+            setTimeout(() => window.location.reload(), 1500);
+        })
+        .catch(error => {
+            console.error('Error updating order:', error);
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('error', error.message || 'Failed to update order. Please try again.');
+            }
+        });
+
+        return false;
+    }
+
 
     function confirmDeleteOrder(orderId, orderNumber) {
         if (typeof openConfirm !== 'function') {
@@ -637,12 +936,51 @@
             cancelText: 'Cancel',
             variant: 'danger',
             onConfirm: function() {
-                if (window.showAlert) {
-                    window.showAlert('info', `Delete order ${orderNumber} is not connected to a backend route yet.`);
-                }
+                deleteOrder(orderId, orderNumber);
             }
         });
     }
+
+    function deleteOrder(orderId, orderNumber) {
+        const loader = document.getElementById('orderLoader');
+        const messageEl = document.getElementById('orderLoaderText');
+
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Deleting order...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        fetch(`{{ url('orders') }}/${orderId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json().catch(() => ({}));
+            }
+            throw new Error('Failed to delete order');
+        })
+        .then(() => {
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('success', `Order ${orderNumber} deleted successfully!`);
+            }
+            setTimeout(() => window.location.reload(), 1500);
+        })
+        .catch(error => {
+            console.error('Error deleting order:', error);
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('error', 'Failed to delete order. Please try again.');
+            }
+        });
+    }
+
 
     function toggleCustomerDetails(customerId, buttonEl) {
         const targetRow = document.getElementById(`customer-details-${customerId}`);

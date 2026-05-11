@@ -77,8 +77,10 @@
     @include('components.alert')
     @include('components.confirm')
     <x-loading id="customerCreateLoader" size="lg" color="amber" full-page="true" message="Saving customer..." :show="false" />
+    <x-loading id="orderLoader" size="lg" color="amber" full-page="true" message="Processing order..." :show="false" />
     @include('sales.modals.add-customer')
     @include('sales.modals.add-order')
+    @include('sales.modals.edit-order')
     @include('sales.modals.add-contract')
     @include('sales.scripts')
 </body>

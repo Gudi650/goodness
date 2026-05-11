@@ -42,7 +42,7 @@
                         @endphp
                         <tr>
                             <td class="px-4 py-3 font-medium text-slate-800">{{ $order->order_number }}</td>
-                            <td class="px-4 py-3">{{ $order->customer?->name ?? 'N/A' }}</td>
+                            <td class="px-4 py-3">{{ $order->customer?->customer_name ?? 'N/A' }}</td>
                             <td class="px-4 py-3">{{ $description }}</td>
                             <td class="px-4 py-3">{{ '$' . number_format((float) $order->grand_total, 2) }}</td>
                             <td class="px-4 py-3">{{ optional($order->order_date)->format('Y-m-d') }}</td>
@@ -84,7 +84,7 @@
                                     <div class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Order Details</div>
                                     <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2 lg:grid-cols-3">
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Order Number:</span> <span class="font-medium text-slate-800">{{ $order->order_number }}</span></div>
-                                        <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Customer:</span> <span class="font-medium text-slate-800">{{ $order->customer?->name ?? 'N/A' }}</span></div>
+                                        <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Customer:</span> <span class="font-medium text-slate-800">{{ $order->customer?->customer_name ?? 'N/A' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Sales Rep:</span> <span class="font-medium text-slate-800">{{ $order->salesRep?->name ?? 'N/A' }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Payment Status:</span> <span class="font-medium text-slate-800">{{ $order->payment_status }}</span></div>
                                         <div class="rounded-md bg-slate-50 px-3 py-2"><span class="text-slate-500">Delivery Status:</span> <span class="font-medium text-slate-800">{{ $order->delivery_status }}</span></div>
