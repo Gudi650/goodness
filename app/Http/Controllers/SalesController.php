@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Department;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,13 +38,24 @@ class SalesController extends Controller
         //get the customers
         $customers = $this->getCustomers($isAdmin, $activeCompanyId, $currentUser);
 
+        //get the departments
+        $departments = Department::pluck('name', 'id');
+
+
+
 
         //get the companies for the dropdown filter
-        $companes = Company::latest()->pluck('name', 'id');
+        $companes = Company::orderByDesc('id')->pluck('name', 'id');
+
+        //get the products
+        $products = Product::query()->orderByDesc('id')->get();
 
         return view('sales',[
             'companies' => $companes,
             'customers' => $customers,
+            'departments' => $departments,
+            'products' => $products,
+            'users' => $users,
         ]);
     }
 
@@ -60,6 +73,29 @@ class SalesController extends Controller
 
         return $customers;
 
+    }
+
+    //function to get the products based on search query and company filter
+    public function getProducts($isAdmin, $activeCompanyId,$currentUser)
+    {
+        $productsQuery = Product::query()
+            ->with('company')
+            ->when($isAdmin && !empty($activeCompanyId), function ($query) use ($activeCompanyId) {
+                $query->where(function ($productQuery) use ($activeCompanyId) {
+                    $productQuery->where('company_id', $activeCompanyId)
+                        ->orWhereNull('company_id');
+                });
+            })
+            ->when(!$isAdmin && $currentUser, function ($query) use ($currentUser) {
+                $query->where(function ($productQuery) use ($currentUser) {
+                    $productQuery->where('company_id', $currentUser->company_id)
+                        ->orWhereNull('company_id');
+                });
+            });
+
+        $products = $productsQuery->latest()->get();
+
+        return $products;
     }
 
 

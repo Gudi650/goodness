@@ -18,6 +18,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
@@ -152,11 +153,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
+    // Orders (sales)
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+
     //Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
 
     // Products (inventory)
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');

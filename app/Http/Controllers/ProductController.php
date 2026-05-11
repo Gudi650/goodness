@@ -238,4 +238,16 @@ class ProductController extends Controller
         $product->delete();
         return redirect()->back()->with('success', 'Product deleted');
     }
+
+    public function show(Product $product)
+    {
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'sku' => $product->sku,
+            'stock' => $product->stock ?? 0,
+            'selling_price' => $product->selling_price ?? 0,
+            'unit_of_measure' => $product->unit_of_measure ?? 'Piece',
+        ]);
+    }
 }

@@ -28,6 +28,8 @@
         el.classList.add('hidden');
     }
 
+    window.orderProductOptionsHtml = document.querySelector('#orderItemsBody .order-product')?.innerHTML || '<option value="">-- Select Product --</option>';
+
     // Modal open handlers
     function openAddCustomerModal() {
         resetCustomerForm();
@@ -62,7 +64,7 @@
 
     function openEditCustomerModal(customerId) {
         // Fetch customer data
-        fetch(`{{ route('customers.show', ':id') }}`.replace(':id', customerId))
+        fetch(`{{ url('customers') }}/${customerId}`)
             .then(response => response.json())
             .then(customer => {
                 window.editingCustomerId = customerId;
@@ -192,7 +194,7 @@
             <td class="px-3 py-2 text-sm text-slate-600 item-number">${index}</td>
             <td class="px-3 py-2">
                 <select class="order-product block w-full border border-slate-200 rounded p-2 text-sm" onchange="handleOrderProductChange(this)">
-                    <option value="">-- Select Product --</option>
+                    ${window.orderProductOptionsHtml || '<option value="">-- Select Product --</option>'}
                 </select>
             </td>
             <td class="px-3 py-2">
@@ -282,13 +284,89 @@
         const stock = row.querySelector('.order-stock');
         const warning = row.querySelector('.order-stock-warning');
 
-        if (sku) sku.value = select.value ? `SKU-${select.value}` : '';
-        if (unitPrice) unitPrice.value = select.value ? '0' : '0';
-        if (uom) uom.value = 'Piece';
-        if (stock) stock.textContent = 'Available: 0';
-        if (warning) warning.classList.add('hidden');
+        const productId = select.value;
+        if (!productId) {
+            if (sku) sku.value = '';
+            if (unitPrice) unitPrice.value = 0;
+            if (uom) uom.value = 'Piece';
+            if (stock) stock.textContent = 'Available: 0';
+            if (warning) warning.classList.add('hidden');
+            row.dataset.availableStock = 0;
+            recalculateOrderTotals();
+            return;
+        }
 
-        recalculateOrderTotals();
+        fetch(`{{ url('products') }}/${productId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (sku) sku.value = data.sku || '';
+                if (unitPrice) unitPrice.value = (data.selling_price ?? 0);
+                if (uom) uom.value = data.unit_of_measure || 'Piece';
+                const available = Number(data.stock ?? 0);
+                if (stock) stock.textContent = `Available: ${available}`;
+                if (warning) warning.classList.toggle('hidden', false);
+                // store available stock on row for later checks
+                row.dataset.availableStock = available;
+
+                // hide warning initially unless qty exceeds stock
+                const qty = parseFloat(row.querySelector('.order-qty')?.value || '0');
+                if (warning) warning.classList.toggle('hidden', qty <= available || !qty);
+
+                recalculateOrderTotals();
+            })
+            .catch(err => {
+                console.error('Failed to fetch product details', err);
+                if (stock) stock.textContent = 'Available: 0';
+                if (warning) warning.classList.add('hidden');
+                row.dataset.availableStock = 0;
+                recalculateOrderTotals();
+            });
+    }
+
+    function handleOrderCustomerChange(select) {
+        const customerId = select.value;
+        const nameField = document.getElementById('order_customer_name');
+        const phoneField = document.getElementById('order_customer_phone');
+        const emailField = document.getElementById('order_customer_email');
+        const billingField = document.getElementById('order_billing_address');
+        const shippingField = document.getElementById('order_shipping_address');
+        const sameAsBilling = document.getElementById('same_as_billing');
+
+        if (!customerId) {
+            if (nameField) nameField.value = '';
+            if (phoneField) phoneField.value = '';
+            if (emailField) emailField.value = '';
+            if (billingField) billingField.value = '';
+            if (shippingField && sameAsBilling && sameAsBilling.checked) shippingField.value = '';
+            return;
+        }
+
+        fetch(`{{ url('customers') }}/${customerId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (nameField) nameField.value = data.customer_name || '';
+                if (phoneField) phoneField.value = data.phone_number || '';
+                if (emailField) emailField.value = data.email || '';
+
+                // Prefer street_address, fallback to region/district
+                let billing = data.street_address || '';
+                if (!billing) {
+                    const parts = [];
+                    if (data.region) parts.push(data.region);
+                    if (data.district) parts.push(data.district);
+                    billing = parts.join(', ');
+                }
+
+                if (billingField) billingField.value = billing;
+
+                // If user checked same-as-billing, copy to shipping
+                if (shippingField && sameAsBilling && sameAsBilling.checked) {
+                    shippingField.value = billing;
+                }
+            })
+            .catch(err => {
+                console.error('Failed to fetch customer details', err);
+            });
     }
 
     function toggleShippingAddress(checkbox) {
@@ -338,7 +416,7 @@
             const discount = parseFloat(row.querySelector('.order-discount')?.value || '0');
             const stockWarning = row.querySelector('.order-stock-warning');
             const stockText = row.querySelector('.order-stock');
-            const availableStock = 0;
+            const availableStock = Number(row.dataset.availableStock ?? 0);
 
             const lineGross = qty * unitPrice;
             const lineDiscount = lineGross * (discount / 100);
@@ -422,7 +500,95 @@
 
     function submitAddOrder(e) {
         e.preventDefault();
-        window.showAlert('info', 'Order form ready - backend integration can be added next.');
+        const form = document.getElementById('orderForm');
+        if (!form) return;
+
+        // Collect all form data
+        const formData = new FormData(form);
+        
+        // Remove empty approved_by field to ensure it sends as null or not sent at all
+        if (!formData.get('approved_by')) {
+            formData.delete('approved_by');
+        }
+
+        // Collect order items
+        const items = [];
+        document.querySelectorAll('#orderItemsBody .order-item-row').forEach((row, index) => {
+            const product = row.querySelector('.order-product')?.value;
+            const qty = row.querySelector('.order-qty')?.value;
+            const unitPrice = row.querySelector('.order-unit-price')?.value;
+            const discount = row.querySelector('.order-discount')?.value;
+            const description = row.querySelector('.order-description')?.value;
+            const sku = row.querySelector('.order-sku')?.value;
+            const uom = row.querySelector('.order-uom')?.value;
+            const lineTotal = row.querySelector('.order-total')?.value;
+
+            if (product && qty) {
+                items.push({
+                    product_id: product,
+                    quantity: parseFloat(qty),
+                    unit_price: parseFloat(unitPrice || 0),
+                    discount_percent: parseFloat(discount || 0),
+                    description: description || '',
+                    sku: sku || '',
+                    unit_of_measure: uom || 'Piece',
+                    line_total: parseFloat(lineTotal || 0),
+                });
+            }
+        });
+
+        if (items.length === 0) {
+            window.showAlert('error', 'Please add at least one item to the order.');
+            return false;
+        }
+
+        // Add items to form data
+        items.forEach((item, index) => {
+            Object.entries(item).forEach(([key, value]) => {
+                formData.append(`items[${index}][${key}]`, value);
+            });
+        });
+
+        // Show loader
+        const loader = document.getElementById('customerCreateLoader');
+        const messageEl = document.getElementById('customerCreateLoaderText');
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Creating order...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        // Submit via fetch
+        fetch('{{ route("orders.store") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Failed to create order');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (loader) loader.classList.add('hidden');
+            window.showAlert('success', data.message || 'Order created successfully!');
+            resetOrderForm();
+            closeLocalModal('modalAddOrder');
+            setTimeout(() => window.location.reload(), 1500);
+        })
+        .catch(error => {
+            console.error('Error creating order:', error);
+            if (loader) loader.classList.add('hidden');
+            window.showAlert('error', error.message || 'Failed to create order. Please try again.');
+        });
+
         closeLocalModal('modalAddOrder');
         return false;
     }
