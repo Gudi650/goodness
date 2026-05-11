@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -41,8 +42,8 @@ class SalesController extends Controller
         //get the departments
         $departments = Department::pluck('name', 'id');
 
-
-
+        //get the orders
+        $orders = $this->getOrders($isAdmin, $activeCompanyId, $currentUser);
 
         //get the companies for the dropdown filter
         $companes = Company::orderByDesc('id')->pluck('name', 'id');
@@ -56,6 +57,7 @@ class SalesController extends Controller
             'departments' => $departments,
             'products' => $products,
             'users' => $users,
+            'orders' => $orders,
         ]);
     }
 
@@ -96,6 +98,19 @@ class SalesController extends Controller
         $products = $productsQuery->latest()->get();
 
         return $products;
+    }
+
+    //function get orders dta from the db
+    public function getOrders($isAdmin, $activeCompanyId,$currentUser)
+    {
+        $ordersQuery = Order::query()
+            ->with('company', 'customer', 'salesRep', 'approvedBy', 'items')
+            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+
+        $orders = $ordersQuery->latest()->get();
+
+        return $orders;
     }
 
 

@@ -600,6 +600,50 @@
         return false;
     }
 
+    function toggleOrderDetails(orderId) {
+        const detailsRow = document.getElementById(`order-details-${orderId}`);
+        if (!detailsRow) return;
+
+        const shouldOpen = detailsRow.classList.contains('hidden');
+
+        document.querySelectorAll('[id^="order-details-"]').forEach(row => {
+            row.classList.add('hidden');
+        });
+
+        if (shouldOpen) {
+            detailsRow.classList.remove('hidden');
+        }
+    }
+
+    function editOrder(orderId) {
+        if (window.showAlert) {
+            window.showAlert('info', 'Order edit is not wired yet.');
+        }
+        console.log('Edit order requested:', orderId);
+    }
+
+    function confirmDeleteOrder(orderId, orderNumber) {
+        if (typeof openConfirm !== 'function') {
+            if (window.showAlert) {
+                window.showAlert('info', `Delete order ${orderNumber} is not wired yet.`);
+            }
+            return;
+        }
+
+        openConfirm({
+            title: 'Delete Order',
+            message: `Are you sure you want to delete order "${orderNumber}"? This action cannot be undone.`,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'danger',
+            onConfirm: function() {
+                if (window.showAlert) {
+                    window.showAlert('info', `Delete order ${orderNumber} is not connected to a backend route yet.`);
+                }
+            }
+        });
+    }
+
     function toggleCustomerDetails(customerId, buttonEl) {
         const targetRow = document.getElementById(`customer-details-${customerId}`);
         if (!targetRow) return;
