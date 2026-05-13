@@ -21,30 +21,44 @@
                     </tr>
                 </thead>
                 <tbody id="contractsTable" class="divide-y divide-slate-100">
-                    <tr>
-                        <td class="px-4 py-3">CTR-2026-1001</td>
-                        <td class="px-4 py-3">Acme Corp</td>
-                        <td class="px-4 py-3">$120,000</td>
-                        <td class="px-4 py-3">2026-01-01</td>
-                        <td class="px-4 py-3">2026-12-31</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs bg-green-50 text-green-700">Active</span></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3">CTR-2026-1005</td>
-                        <td class="px-4 py-3">Bright Solutions</td>
-                        <td class="px-4 py-3">$18,500</td>
-                        <td class="px-4 py-3">2026-03-15</td>
-                        <td class="px-4 py-3">2026-09-14</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs bg-yellow-50 text-yellow-700">Expiring</span></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3">CTR-2025-0902</td>
-                        <td class="px-4 py-3">Cedar Industries</td>
-                        <td class="px-4 py-3">$7,200</td>
-                        <td class="px-4 py-3">2025-06-01</td>
-                        <td class="px-4 py-3">2026-05-31</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs bg-red-50 text-red-700">Expired</span></td>
-                    </tr>
+                    @forelse(($contracts ?? []) as $contract)
+                        <tr class="hover:bg-slate-50/60">
+                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">{{ $contract->contract_number }}</td>
+                            <td class="px-4 py-3 text-sm text-slate-700">
+                                {{ $contract->contract_counterparty_name }}
+                                <div class="text-xs text-slate-500 mt-1">
+                                    {{ $contract->company->name ?? 'N/A' }}
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-slate-700">
+                                {{ $contract->contract_currency }} {{ number_format((float) $contract->contract_value, 2) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-slate-700">{{ optional($contract->contract_start_date)->format('Y-m-d') }}</td>
+                            <td class="px-4 py-3 text-sm text-slate-700">{{ optional($contract->contract_end_date)->format('Y-m-d') }}</td>
+                            <td class="px-4 py-3">
+                                @php
+                                    $status = $contract->contract_status ?? 'Draft';
+                                    $statusStyles = [
+                                        'Active' => 'bg-green-50 text-green-700',
+                                        'Draft' => 'bg-slate-100 text-slate-700',
+                                        'Under Review' => 'bg-blue-50 text-blue-700',
+                                        'Expired' => 'bg-red-50 text-red-700',
+                                        'Terminated' => 'bg-red-50 text-red-700',
+                                        'Suspended' => 'bg-amber-50 text-amber-700',
+                                        'Renewed' => 'bg-emerald-50 text-emerald-700',
+                                    ];
+                                    $statusClass = $statusStyles[$status] ?? 'bg-slate-100 text-slate-700';
+                                @endphp
+                                <span class="px-2 py-1 rounded text-xs {{ $statusClass }}">{{ $status }}</span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
+                                No contracts found. Create one using the Add Contract button.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

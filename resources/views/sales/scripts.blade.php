@@ -29,6 +29,137 @@
     }
 
     window.orderProductOptionsHtml = document.querySelector('#orderItemsBody .order-product')?.innerHTML || '<option value="">-- Select Product --</option>';
+    window.contractCustomers = @json($contractCustomers ?? []);
+    window.contractSuppliers = @json($contractSuppliers ?? []);
+
+    function generateContractDraftNumber() {
+        const today = new Date();
+        const stamp = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+        return `CON-${stamp}`;
+    }
+
+    function resetContractForm() {
+        const form = document.getElementById('contractForm');
+        if (form) form.reset();
+
+        const numberInput = document.getElementById('contract_number');
+        if (numberInput) numberInput.value = generateContractDraftNumber();
+
+        const counterpartySelect = document.getElementById('contract_counterparty_name');
+        if (counterpartySelect) {
+            counterpartySelect.innerHTML = '<option value="">-- Select or add --</option>';
+        }
+
+        const vatFields = document.getElementById('vat_fields');
+        if (vatFields) vatFields.classList.add('hidden');
+
+        const warningWrap = document.getElementById('contract_duration_warning');
+        if (warningWrap) warningWrap.innerHTML = '';
+
+        computeFinancials();
+        computeContractDuration();
+    }
+
+    function updateCounterpartyOptions() {
+        const type = document.getElementById('contract_counterparty_type')?.value;
+        const counterpartySelect = document.getElementById('contract_counterparty_name');
+        if (!counterpartySelect) return;
+
+        const list = type === 'Customer'
+            ? (window.contractCustomers || [])
+            : (type === 'Supplier' ? (window.contractSuppliers || []) : []);
+
+        counterpartySelect.innerHTML = '<option value="">-- Select or add --</option>';
+        list.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.name || '';
+            option.textContent = item.name || '';
+            option.dataset.contactPerson = item.contact_person || '';
+            option.dataset.phone = item.phone || '';
+            option.dataset.email = item.email || '';
+            option.dataset.address = item.address || '';
+            counterpartySelect.appendChild(option);
+        });
+    }
+
+    function autoFillCounterpartyDetails() {
+        const select = document.getElementById('contract_counterparty_name');
+        if (!select) return;
+
+        const selected = select.options[select.selectedIndex];
+        if (!selected) return;
+
+        const contactInput = document.getElementById('contract_contact_person');
+        const phoneInput = document.getElementById('contract_counterparty_phone');
+        const emailInput = document.getElementById('contract_counterparty_email');
+        const addressInput = document.getElementById('contract_counterparty_address');
+
+        if (contactInput && selected.dataset.contactPerson) contactInput.value = selected.dataset.contactPerson;
+        if (phoneInput && selected.dataset.phone) phoneInput.value = selected.dataset.phone;
+        if (emailInput && selected.dataset.email) emailInput.value = selected.dataset.email;
+        if (addressInput && selected.dataset.address) addressInput.value = selected.dataset.address;
+    }
+
+    function computeContractDuration() {
+        const start = document.getElementById('contract_start_date')?.value;
+        const end = document.getElementById('contract_end_date')?.value;
+        const display = document.getElementById('contract_duration_display');
+        const warning = document.getElementById('contract_duration_warning');
+
+        if (!display) return;
+
+        if (!start || !end) {
+            display.value = '';
+            if (warning) warning.innerHTML = '';
+            return;
+        }
+
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            display.value = '';
+            if (warning) {
+                warning.innerHTML = '<p class="text-xs text-red-600">End date cannot be before start date.</p>';
+            }
+            return;
+        }
+
+        const months = Math.floor(diffDays / 30);
+        const days = diffDays % 30;
+        display.value = months > 0 ? `${months} month(s) ${days} day(s)` : `${diffDays} day(s)`;
+        if (warning) warning.innerHTML = '';
+    }
+
+    function toggleVATFields() {
+        const checked = document.getElementById('contract_vat_applicable')?.checked;
+        const vatFields = document.getElementById('vat_fields');
+        if (vatFields) vatFields.classList.toggle('hidden', !checked);
+        computeFinancials();
+    }
+
+    function computeFinancials() {
+        const value = parseFloat(document.getElementById('contract_value')?.value || '0');
+        const rate = parseFloat(document.getElementById('contract_exchange_rate')?.value || '1');
+        const vatChecked = document.getElementById('contract_vat_applicable')?.checked ?? false;
+        const vatRate = parseFloat(document.getElementById('contract_vat_rate')?.value || '0');
+
+        const tzsEquivalent = value * rate;
+        const vatAmount = vatChecked ? (tzsEquivalent * vatRate / 100) : 0;
+
+        const tzsEquivalentInput = document.getElementById('contract_tzs_equivalent');
+        const vatAmountInput = document.getElementById('contract_vat_amount');
+
+        if (tzsEquivalentInput) tzsEquivalentInput.value = tzsEquivalent.toFixed(2);
+        if (vatAmountInput) vatAmountInput.value = vatAmount.toFixed(2);
+    }
+
+    function computePaymentAmount() {
+        // Placeholder for future payment split calculations by schedule.
+        return;
+    }
 
     // Modal open handlers
     function openAddCustomerModal() {
@@ -464,7 +595,8 @@
     }
 
     function openAddContractModal() {
-        document.getElementById('contractForm')?.reset();
+        resetContractForm();
+        updateCounterpartyOptions();
         openLocalModal('modalAddContract');
     }
 
@@ -595,8 +727,49 @@
 
     function submitAddContract(e) {
         e.preventDefault();
-        window.showAlert('info', 'Contract form submitted');
-        closeLocalModal('modalAddContract');
+        const form = document.getElementById('contractForm');
+        if (!form) return false;
+
+        const formData = new FormData(form);
+
+        const loader = document.getElementById('orderLoader');
+        const messageEl = document.getElementById('orderLoaderText');
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Creating contract...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        fetch('{{ route("contracts.store") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(async response => {
+            if (response.ok) return response.json();
+            const data = await response.json().catch(() => ({}));
+            if (data.errors) {
+                const firstError = Object.values(data.errors)[0];
+                throw new Error(Array.isArray(firstError) ? firstError[0] : 'Validation failed');
+            }
+            throw new Error(data.message || 'Failed to create contract');
+        })
+        .then(data => {
+            if (loader) loader.classList.add('hidden');
+            window.showAlert('success', data.message || 'Contract created successfully!');
+            resetContractForm();
+            closeLocalModal('modalAddContract');
+            setTimeout(() => window.location.reload(), 1200);
+        })
+        .catch(error => {
+            if (loader) loader.classList.add('hidden');
+            window.showAlert('error', error.message || 'Failed to create contract. Please try again.');
+        });
+
         return false;
     }
 

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Contract;
 use App\Models\Department;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +50,33 @@ class SalesController extends Controller
         //get the companies for the dropdown filter
         $companes = Company::orderByDesc('id')->pluck('name', 'id');
 
+        //get suppliers for contract counterparties
+        $suppliers = $this->getSuppliers($isAdmin, $activeCompanyId, $currentUser);
+
+        //get the contracts
+        $contracts = $this->getContracts($isAdmin, $activeCompanyId, $currentUser);
+
+        // prepare lightweight arrays for inline JS (avoid closures in Blade @json)
+        $contractCustomers = ($customers ?? collect())->map(function ($customer) {
+            return [
+                'name' => $customer->customer_name,
+                'contact_person' => $customer->contact_person_name,
+                'phone' => $customer->phone_number,
+                'email' => $customer->email,
+                'address' => $customer->street_address,
+            ];
+        })->values()->toArray();
+
+        $contractSuppliers = ($suppliers ?? collect())->map(function ($supplier) {
+            return [
+                'name' => $supplier->supplier_name,
+                'contact_person' => $supplier->contact_person_name,
+                'phone' => $supplier->phone_number,
+                'email' => $supplier->email,
+                'address' => $supplier->street_address,
+            ];
+        })->values()->toArray();
+
         //get the products
         $products = Product::query()->orderByDesc('id')->get();
 
@@ -58,6 +87,10 @@ class SalesController extends Controller
             'products' => $products,
             'users' => $users,
             'orders' => $orders,
+            'suppliers' => $suppliers,
+            'contracts' => $contracts,
+            'contractCustomers' => $contractCustomers,
+            'contractSuppliers' => $contractSuppliers,
         ]);
     }
 
@@ -98,6 +131,25 @@ class SalesController extends Controller
         $products = $productsQuery->latest()->get();
 
         return $products;
+    }
+
+    public function getSuppliers($isAdmin, $activeCompanyId, $currentUser)
+    {
+        $suppliersQuery = Supplier::query()
+            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+
+        return $suppliersQuery->latest()->get();
+    }
+
+    public function getContracts($isAdmin, $activeCompanyId, $currentUser)
+    {
+        $contractsQuery = Contract::query()
+            ->with('company', 'manager')
+            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('contract_our_company', $activeCompanyId))
+            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('contract_our_company', $currentUser->company_id));
+
+        return $contractsQuery->latest()->get();
     }
 
     //function get orders dta from the db

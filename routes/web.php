@@ -18,6 +18,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\SalesController;
@@ -158,6 +159,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
+    // Contracts (sales)
+    Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
 
     //Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
