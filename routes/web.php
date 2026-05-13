@@ -162,6 +162,9 @@ Route::middleware('auth')->group(function () {
 
     // Contracts (sales)
     Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
+    Route::get('/contracts/{contract}', [ContractController::class, 'show'])->name('contracts.show');
+    Route::put('/contracts/{contract}', [ContractController::class, 'update'])->name('contracts.update');
+    Route::delete('/contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
 
     //Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');

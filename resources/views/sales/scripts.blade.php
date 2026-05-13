@@ -1219,4 +1219,295 @@
 
     // Initialize tab on page load
     document.addEventListener('DOMContentLoaded', () => { switchTab('customers', document.querySelector('.tab-btn')); });
+
+    function toggleContractDetails(contractId, buttonEl) {
+        const targetRow = document.getElementById(`contract-details-${contractId}`);
+        if (!targetRow) return;
+
+        const shouldOpen = targetRow.classList.contains('hidden');
+
+        document.querySelectorAll('[id^="contract-details-"]').forEach(row => {
+            row.classList.add('hidden');
+        });
+
+        if (shouldOpen) {
+            targetRow.classList.remove('hidden');
+            buttonEl?.classList.add('bg-blue-50', 'text-blue-600', 'border-blue-300');
+        } else {
+            buttonEl?.classList.remove('bg-blue-50', 'text-blue-600', 'border-blue-300');
+        }
+    }
+
+    function formatDateForInput(value) {
+        if (!value) return '';
+        return String(value).substring(0, 10);
+    }
+
+    function toggleEditVATFields() {
+        const vatCheckbox = document.getElementById('edit_contract_vat_applicable');
+        const vatFields = document.getElementById('edit_vat_fields');
+        if (!vatCheckbox || !vatFields) return;
+
+        if (vatCheckbox.checked) {
+            vatFields.classList.remove('hidden');
+        } else {
+            vatFields.classList.add('hidden');
+        }
+    }
+
+    function editContract(contractId) {
+        const loader = document.getElementById('orderLoader');
+        const messageEl = document.getElementById('orderLoaderText');
+
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Loading contract details...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        fetch(`{{ url('contracts') }}/${contractId}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load contract');
+            return response.json();
+        })
+        .then(contract => {
+            if (loader) loader.classList.add('hidden');
+            
+            // Store current contract ID for update
+            window.editingContractId = contract.id;
+            
+            // Populate form fields
+            document.getElementById('edit_contract_number').value = contract.contract_number || '';
+            document.getElementById('edit_contract_title').value = contract.contract_title || '';
+            document.getElementById('edit_contract_type').value = contract.contract_type || '';
+            document.getElementById('edit_contract_category').value = contract.contract_category || '';
+            document.getElementById('edit_contract_status').value = contract.contract_status || '';
+            document.getElementById('edit_contract_priority').value = contract.contract_priority || '';
+            document.getElementById('edit_contract_ref_number').value = contract.contract_ref_number || '';
+            
+            document.getElementById('edit_contract_our_company').value = contract.contract_our_company || '';
+            document.getElementById('edit_contract_counterparty_type').value = contract.contract_counterparty_type || '';
+            document.getElementById('edit_contract_counterparty_name').value = contract.contract_counterparty_name || '';
+            document.getElementById('edit_contract_contact_person').value = contract.contract_contact_person || '';
+            document.getElementById('edit_contract_counterparty_phone').value = contract.contract_counterparty_phone || '';
+            document.getElementById('edit_contract_counterparty_email').value = contract.contract_counterparty_email || '';
+            document.getElementById('edit_contract_counterparty_address').value = contract.contract_counterparty_address || '';
+            
+            document.getElementById('edit_contract_start_date').value = formatDateForInput(contract.contract_start_date);
+            document.getElementById('edit_contract_end_date').value = formatDateForInput(contract.contract_end_date);
+            document.getElementById('edit_contract_renewal_type').value = contract.contract_renewal_type || '';
+            document.getElementById('edit_contract_renewal_notice').value = contract.contract_renewal_notice || '';
+            document.getElementById('edit_contract_renewal_date').value = formatDateForInput(contract.contract_renewal_date);
+            
+            document.getElementById('edit_contract_value').value = contract.contract_value || '';
+            document.getElementById('edit_contract_currency').value = contract.contract_currency || '';
+            document.getElementById('edit_contract_exchange_rate').value = contract.contract_exchange_rate || '';
+            document.getElementById('edit_contract_payment_schedule').value = contract.contract_payment_schedule || '';
+            document.getElementById('edit_contract_payment_due_day').value = contract.contract_payment_due_day || '';
+            document.getElementById('edit_contract_payment_terms').value = contract.contract_payment_terms || '';
+            document.getElementById('edit_contract_vat_applicable').checked = contract.contract_vat_applicable || false;
+            document.getElementById('edit_contract_vat_rate').value = contract.contract_vat_rate || '';
+            document.getElementById('edit_contract_vat_amount').value = contract.contract_vat_amount || '';
+            document.getElementById('edit_contract_penalty_clause').value = contract.contract_penalty_clause || '';
+            
+            document.getElementById('edit_contract_scope').value = contract.contract_scope || '';
+            document.getElementById('edit_contract_deliverables').value = contract.contract_deliverables || '';
+            document.getElementById('edit_contract_exclusions').value = contract.contract_exclusions || '';
+            document.getElementById('edit_contract_kpis').value = contract.contract_kpis || '';
+            
+            document.getElementById('edit_contract_governing_law').value = contract.contract_governing_law || '';
+            document.getElementById('edit_contract_dispute_resolution').value = contract.contract_dispute_resolution || '';
+            document.getElementById('edit_contract_jurisdiction').value = contract.contract_jurisdiction || '';
+            document.getElementById('edit_contract_confidentiality').value = contract.contract_confidentiality || '';
+            document.getElementById('edit_contract_liability_cap').value = contract.contract_liability_cap || '';
+            document.getElementById('edit_contract_warranty_period').value = contract.contract_warranty_period || '';
+            document.getElementById('edit_contract_termination_clause').value = contract.contract_termination_clause || '';
+            
+            document.getElementById('edit_contract_our_signatory_name').value = contract.contract_our_signatory_name || '';
+            document.getElementById('edit_contract_our_signatory_title').value = contract.contract_our_signatory_title || '';
+            document.getElementById('edit_contract_our_signatory_date').value = formatDateForInput(contract.contract_our_signatory_date);
+            document.getElementById('edit_contract_counterparty_signatory_name').value = contract.contract_counterparty_signatory_name || '';
+            document.getElementById('edit_contract_counterparty_signatory_title').value = contract.contract_counterparty_signatory_title || '';
+            document.getElementById('edit_contract_counterparty_signatory_date').value = formatDateForInput(contract.contract_counterparty_signatory_date);
+            document.getElementById('edit_contract_witness_name').value = contract.contract_witness_name || '';
+            document.getElementById('edit_contract_approved_by').value = contract.contract_approved_by || '';
+            document.getElementById('edit_contract_approval_date').value = formatDateForInput(contract.contract_approval_date);
+            document.getElementById('edit_contract_signature_status').value = contract.contract_signature_status || '';
+            
+            document.getElementById('edit_contract_expiry_reminder').value = contract.contract_expiry_reminder || '';
+            document.getElementById('edit_contract_renewal_reminder').value = contract.contract_renewal_reminder || '';
+            document.getElementById('edit_contract_payment_reminder').value = contract.contract_payment_reminder || '';
+            document.getElementById('edit_contract_notify_contract_manager').checked = contract.contract_notify_contract_manager || false;
+            document.getElementById('edit_contract_notify_finance').checked = contract.contract_notify_finance || false;
+            document.getElementById('edit_contract_notify_ceo').checked = contract.contract_notify_ceo || false;
+            document.getElementById('edit_contract_notify_legal').checked = contract.contract_notify_legal || false;
+            document.getElementById('edit_contract_reminder_notes').value = contract.contract_reminder_notes || '';
+            
+            document.getElementById('edit_contract_manager').value = contract.contract_manager || '';
+            document.getElementById('edit_contract_related').value = contract.contract_related || '';
+            document.getElementById('edit_contract_internal_notes').value = contract.contract_internal_notes || '';
+            document.getElementById('edit_contract_tags').value = contract.contract_tags || '';
+            
+            // Update form action to PUT route
+            const form = document.getElementById('editContractForm');
+            if (form) {
+                form.action = `{{ url('contracts') }}/${contract.id}`;
+            }
+
+            toggleEditVATFields();
+
+            // Open modal
+            openLocalModal('modalEditContract');
+        })
+        .catch(error => {
+            console.error('Error loading contract:', error);
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('error', 'Failed to load contract details. Please try again.');
+            }
+        });
+    }
+
+    function resetEditContractForm() {
+        const form = document.getElementById('editContractForm');
+        if (form) {
+            form.reset();
+        }
+        toggleEditVATFields();
+        window.editingContractId = null;
+    }
+
+    function submitEditContract(e) {
+        e.preventDefault();
+        
+        if (!window.editingContractId) {
+            if (window.showAlert) {
+                window.showAlert('error', 'Contract ID not found');
+            }
+            return false;
+        }
+
+        const form = document.getElementById('editContractForm');
+        if (!form) return false;
+
+        // Collect all form data
+        const formData = new FormData(form);
+        
+        // Add PUT method override
+        formData.append('_method', 'PUT');
+
+        // Show loader
+        const loader = document.getElementById('orderLoader');
+        const messageEl = document.getElementById('orderLoaderText');
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Updating contract...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        // Submit via fetch
+        fetch(`{{ url('contracts') }}/${window.editingContractId}`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(async response => {
+            if (response.ok) return response.json();
+            const data = await response.json().catch(() => ({}));
+            if (data.errors) {
+                const firstError = Object.values(data.errors)[0];
+                throw new Error(Array.isArray(firstError) ? firstError[0] : 'Validation failed');
+            }
+            throw new Error(data.message || 'Failed to update contract');
+        })
+        .then(data => {
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('success', data.message || 'Contract updated successfully!');
+            }
+            resetEditContractForm();
+            closeLocalModal('modalEditContract');
+            setTimeout(() => window.location.reload(), 1200);
+        })
+        .catch(error => {
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('error', error.message || 'Failed to update contract. Please try again.');
+            }
+        });
+
+        return false;
+    }
+
+
+    function confirmDeleteContract(contractId, contractNumber) {
+        if (typeof openConfirm !== 'function') {
+            if (window.showAlert) {
+                window.showAlert('info', `Delete contract ${contractNumber} is not wired yet.`);
+            }
+            return;
+        }
+
+        openConfirm({
+            title: 'Delete Contract',
+            message: `Are you sure you want to delete contract "${contractNumber}"? This action cannot be undone.`,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'danger',
+            onConfirm: function() {
+                deleteContract(contractId, contractNumber);
+            }
+        });
+    }
+
+    function deleteContract(contractId, contractNumber) {
+        const loader = document.getElementById('orderLoader');
+        const messageEl = document.getElementById('orderLoaderText');
+
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Deleting contract...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        fetch(`{{ url('contracts') }}/${contractId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json().catch(() => ({}));
+            }
+            throw new Error('Failed to delete contract');
+        })
+        .then(() => {
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('success', `Contract ${contractNumber} deleted successfully!`);
+            }
+            setTimeout(() => window.location.reload(), 1500);
+        })
+        .catch(error => {
+            console.error('Error deleting contract:', error);
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('error', 'Failed to delete contract. Please try again.');
+            }
+        });
+    }
+
 </script>

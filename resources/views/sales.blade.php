@@ -82,6 +82,7 @@
     @include('sales.modals.add-order')
     @include('sales.modals.edit-order')
     @include('sales.modals.add-contract')
+    @include('sales.modals.edit-contract')
     @include('sales.scripts')
 </body>
 
