@@ -86,7 +86,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-6 text-sm text-slate-500 text-center">No companies found.</td>
+                            <td colspan="5" class="px-4 py-6 text-sm text-slate-500 text-center">No companies found. Hey there!</td>
                         </tr>
                     @endforelse
                 </tbody>
