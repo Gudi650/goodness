@@ -64,7 +64,13 @@ class CompanyController extends Controller
 
         // Determine who is viewing the page so we can apply the right company scope.
         $currentUser = Auth::user();
-        $isAdmin = $currentUser?->role?->name === 'Admin';
+        
+        // If no user is authenticated, redirect to login
+        if (!$currentUser) {
+            return redirect()->route('login');
+        }
+        
+        $isAdmin = $currentUser->role?->name === 'Admin';
         $activeCompanyId = session('active_company_id');
 
         // Start building a query for companies.
@@ -73,11 +79,22 @@ class CompanyController extends Controller
         // Admins can filter to one company from the session, or see all companies.
         // Normal users are always limited to their own assigned company.
         if ($isAdmin) {
-            if (! empty($activeCompanyId)) {
+            if (!empty($activeCompanyId)) {
                 $companiesQuery->where('id', $activeCompanyId);
             }
+            // Admins can see all companies if no active company is selected
         } else {
-            $companiesQuery->where('id', $currentUser?->company_id);
+            // Non-admin users: use their assigned company
+            $userCompanyId = $currentUser->company_id;
+            if ($userCompanyId) {
+                $companiesQuery->where('id', $userCompanyId);
+            } else {
+                // User has no company assigned - return empty result with message
+                return view('companies', [
+                    'companies' => collect(),
+                    'search' => $search,
+                ]);
+            }
         }
 
         // Apply search filter only when user has typed something.
