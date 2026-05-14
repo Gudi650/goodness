@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
     // - POST /companies: save a new company
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
     Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
+    Route::patch('/companies/{company}', [CompanyController::class, 'update'])->name('companies.approve');
     Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->name('companies.destroy');
     Route::post('/active-company', [CompanyController::class, 'setActiveCompany'])->name('active-company.store');
 
@@ -111,6 +112,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/expenses', [ExpensesController::class, 'storeExpense'])->name('expenses.store');
     Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
     Route::get('/expenses/{expense}/download', [ExpensesController::class, 'downloadAttachment'])->name('expenses.download');
+    Route::patch('/expenses/{expense}/approve', [ExpensesController::class, 'approveExpense'])->name('expenses.approve');
 
     // Payments Management
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');

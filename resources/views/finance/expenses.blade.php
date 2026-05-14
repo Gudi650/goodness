@@ -44,14 +44,22 @@
                                             d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                 </button>
-                                <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
-                                    title="Edit expense" aria-label="Edit expense">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
-                                    </svg>
-                                </button>
+
+                                <form method="POST" action="{{ route('expenses.approve', ['expense' => $expense['id']]) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" onclick="showExpenseActionLoader()" class="text-blue-600 hover:text-blue-800 transition-colors"
+                                        title="Approve expense" aria-label="Approve expense">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z" />
+                                        </svg>
+                                    </button>
+                                </form>
+
+
                                 <form id="delete-expense-form-{{ $expense['id'] }}" method="POST"
                                     action="{{ route('expenses.destroy', ['expense' => $expense['id']]) }}">
                                     @csrf
@@ -67,6 +75,14 @@
                                         </svg>
                                     </button>
                                 </form>
+                                <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
+                                    title="Edit expense" aria-label="Edit expense">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
+                                    </svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -94,13 +110,27 @@
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['creator_name'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Gross Amount
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved By</p>
+                                    <p class="mt-1 text-sm text-slate-700">{{ $expense['approved_by_name'] }}</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Issued By</p>
+                                    <p class="mt-1 text-sm text-slate-700">{{ $expense['issued_by_name'] }}</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Checked By</p>
+                                    <p class="mt-1 text-sm text-slate-700">{{ $expense['checked_by_name'] }}</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Gross
+                                        Amount
                                     </p>
                                     <p class="mt-1 text-sm text-slate-700 mono">TZS
                                         {{ number_format($expense['gross_amount']) }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">VAT Included
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">VAT
+                                        Included
                                     </p>
                                     <p class="mt-1 text-sm text-slate-700">
                                         {{ $expense['vat_included'] ? 'Yes' : 'No' }}</p>
@@ -112,9 +142,14 @@
                                         {{ number_format($expense['vat_amount']) }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Submitted At
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Submitted
+                                        At
                                     </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['submitted_at'] }}</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved At</p>
+                                    <p class="mt-1 text-sm text-slate-700">{{ $expense['approved_at'] }}</p>
                                 </div>
                                 <div
                                     class="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2 lg:col-span-4">
@@ -148,7 +183,6 @@
                                                 <a href="{{ route('expenses.download', $expense['id']) }}">
                                                     Download Attachment
                                                 </a>
-
                                             @endif
                                         </div>
                                     @else

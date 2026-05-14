@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'company_id',
     'department_id',
     'created_by',
+    'approved_by',
+    'issued_by',
+    'checked_by',
     'status',
     'expense_date',
     'category',
@@ -27,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'notes',
     'submitted_at',
     'original_file_name',
+    ''
 ])]
 class Expense extends Model
 {
@@ -54,5 +58,29 @@ class Expense extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the user who approved the expense.
+     */
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Get the user who issued the expense.
+     */
+    public function issuer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'issued_by');
+    }
+
+    /**
+     * Get the user who checked the expense.
+     */
+    public function checker(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'checked_by');
     }
 }

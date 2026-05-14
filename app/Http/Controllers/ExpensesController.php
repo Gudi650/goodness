@@ -121,5 +121,68 @@ class ExpensesController extends Controller
         return $disk->download($expense->attachment_path, $expense->original_file_name ?: null);
     }
 
+    /**
+     * Approve an expense record.
+     */
+
+    public function approveExpense(Expense $expense)
+    {
+        
+
+        //check it the usser is the manager of the company or an admin
+        $user = Auth::user();
+
+        $isAdmin = $user?->role?->name === 'Admin';
+        $isManager = $user?->role?->name === 'Manager';
+        $isCEO = $user?->role?->name === 'CEO';
+        $isHr = $user?->role?->name === 'HR Manager';
+        
+
+        //now here if te user is a manager, we need to check if the expense belongs to his company
+        //if is manager then change the status to checked
+        if ( $isManager && $user->company_id === $expense->company_id) {
+            $expense->status = 'checked';
+            $expense->checked_by = Auth::id();
+            $expense->save();
+
+            return redirect()->route('finance')->with('success', 'Expense checked successfully. Awaiting final approval from CEO.');
+        }
+
+        /**
+         * if the user is HR manager, we need to check if the expense belongs to his company
+         * if is HR manager then change the status to approved
+         */
+        if ( $isHr && $user->company_id === $expense->company_id) {
+            $expense->status = 'approved';
+            $expense->approved_by = Auth::id();
+            $expense->approved_at = Carbon::now();
+            $expense->save();
+
+            return redirect()->route('finance')->with('success', 'Expense approved successfully.');
+        }
+
+        /**
+         * if the user is CEO, we need to check if the expense is already checked by the manager, if not we will not allow the CEO to approve it
+         * if the expense is checked by the manager, then we will allow the CEO to approve it and change the status to approved
+         */
+        if ($isCEO) {
+
+            if ($expense->status !== 'approved') {
+                return redirect()->route('finance')->with('error', 'Expense must be checked by the manager before it can be approved by the CEO.');
+            }
+
+            $expense->status = 'issued';
+            $expense->approved_by = Auth::id();
+            $expense->approved_at = Carbon::now();
+            $expense->save();
+
+            return redirect()->route('finance')->with('success', 'Expense approved successfully.');
+        }
+
+        
+
+    }
+
 
 }
+

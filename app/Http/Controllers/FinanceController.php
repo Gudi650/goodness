@@ -32,7 +32,7 @@ class FinanceController extends Controller
             ->orderBy('name')
             ->get();
 
-        $expenses = Expense::with(['company', 'department', 'creator'])
+        $expenses = Expense::with(['company', 'department', 'creator', 'approver', 'issuer', 'checker'])
             ->latest()
             ->limit(100)
             ->get()
@@ -64,7 +64,11 @@ class FinanceController extends Controller
                     'description' => $expense->notes ?: '-',
                     'notes' => $expense->notes ?: '-',
                     'creator_name' => $expense->creator?->name ?? '-',
+                    'approved_by_name' => $expense->approver?->name ?? '-',
+                    'issued_by_name' => $expense->issuer?->name ?? '-',
+                    'checked_by_name' => $expense->checker?->name ?? '-',
                     'submitted_at' => $expense->submitted_at ? Carbon::parse($expense->submitted_at)->format('M d, Y h:i A') : '-',
+                    'approved_at' => $expense->approved_at ? Carbon::parse($expense->approved_at)->format('M d, Y h:i A') : '-',
                     'attachment_url' => $attachmentUrl,
                     'attachment_is_image' => $attachmentIsImage,
                 ];
