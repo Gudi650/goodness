@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\User;
 use App\Models\Salary;
 use App\Models\Department;
+use App\Models\Leave;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -130,6 +131,7 @@ class HrmController extends Controller
             'isAdmin' => $isAdmin,
             'activeCompanyId' => $activeCompanyId,
             'salaries' => $salaries,
+            'leaves' => Leave::with('user', 'approver')->orderBy('created_at', 'desc')->get(),
         ]);
     }
 }

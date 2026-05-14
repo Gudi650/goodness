@@ -579,51 +579,215 @@
             });
     }
 
+    function closeAddLeaveModal() {
+        const modal = document.getElementById('addLeaveModal');
+        const form = document.getElementById('leaveRequestForm');
+
+        if (form) {
+            form.reset();
+        }
+
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function syncLeaveDaysFromDates() {
+        const fromEl = document.getElementById('leaveFrom');
+        const toEl = document.getElementById('leaveTo');
+        const daysEl = document.getElementById('leaveDays');
+
+        if (!fromEl || !toEl || !daysEl || !fromEl.value || !toEl.value) {
+            return;
+        }
+
+        const start = new Date(fromEl.value);
+        const end = new Date(toEl.value);
+        const diff = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+        if (diff > 0) {
+            daysEl.value = diff;
+        }
+    }
+
     function openAddLeaveModal() {
-        const empOptions = employeeNames.map(name => `<option value="${name}">${name}</option>`).join('');
-        const body = `
-            <div class="space-y-4">
-                <label class="block text-sm text-slate-600">Employee
-                    <select id="leave_employee" class="mt-1 block w-full border border-slate-200 rounded p-2">${empOptions}</select>
-                </label>
-                <label class="block text-sm text-slate-600">Type
-                    <select id="leave_type" class="mt-1 block w-full border border-slate-200 rounded p-2"><option>Annual Leave</option><option>Sick Leave</option><option>Other</option></select>
-                </label>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="block text-sm text-slate-600">From<input id="leave_from" type="date" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
-                    <label class="block text-sm text-slate-600">To<input id="leave_to" type="date" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
-                </div>
-                <label class="block text-sm text-slate-600">Days<input id="leave_days" type="number" min="0" class="mt-1 block w-full border border-slate-200 rounded p-2" /></label>
-            </div>
-        `;
-        window.openModal('Add Leave', body, () => {
-            const employee = document.getElementById('leave_employee').value;
-            const type = document.getElementById('leave_type').value;
-            const from = document.getElementById('leave_from').value;
-            const to = document.getElementById('leave_to').value;
-            let days = Number(document.getElementById('leave_days').value) || 0;
-            if (!days && from && to) {
-                const diff = (new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24);
-                days = Math.max(1, Math.round(diff) + 1);
+        const modal = document.getElementById('addLeaveModal');
+        const fromEl = document.getElementById('leaveFrom');
+        const toEl = document.getElementById('leaveTo');
+
+        if (!modal) {
+            return;
+        }
+
+        if (fromEl && !fromEl.dataset.boundLeaveSync) {
+            fromEl.addEventListener('change', syncLeaveDaysFromDates);
+            fromEl.dataset.boundLeaveSync = '1';
+        }
+
+        if (toEl && !toEl.dataset.boundLeaveSync) {
+            toEl.addEventListener('change', syncLeaveDaysFromDates);
+            toEl.dataset.boundLeaveSync = '1';
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function getLeaveStatusBadge(status) {
+        const text = status || 'Pending';
+        if (text === 'Approved') {
+            return '<span class="inline-block px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-xs font-medium">Approved</span>';
+        }
+        if (text === 'Rejected') {
+            return '<span class="inline-block px-2 py-0.5 rounded bg-red-50 text-red-700 text-xs font-medium">Rejected</span>';
+        }
+        return '<span class="inline-block px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-xs font-medium">Pending</span>';
+    }
+
+    function submitLeaveRequest(event) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        const form = document.getElementById('leaveRequestForm');
+        if (!form) return false;
+
+        const type = document.getElementById('leaveType')?.value || '';
+        const from = document.getElementById('leaveFrom')?.value || '';
+        const to = document.getElementById('leaveTo')?.value || '';
+        let days = Number(document.getElementById('leaveDays')?.value || 0);
+
+        if (!type || !from || !to) {
+            if (window.showAlert) {
+                window.showAlert('error', 'Please fill all required leave fields.');
             }
-            if (!employee) { window.showAlert('error', 'Employee is required'); return false; }
-            leaves.push({ id: Date.now(), employee, type, from, to, days, status: 'Pending' });
-            window.closeModal();
-            window.showAlert('success', 'Leave request added');
-            return true;
+            return false;
+        }
+
+        if (new Date(to) < new Date(from)) {
+            if (window.showAlert) {
+                window.showAlert('error', 'To Date cannot be before From Date.');
+            }
+            return false;
+        }
+
+        if (!days) {
+            const diff = Math.floor((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24)) + 1;
+            days = Math.max(1, diff);
+        }
+
+        const formData = new FormData(form);
+
+        const loader = document.getElementById('leaveLoader');
+        const messageEl = document.getElementById('leaveLoaderText');
+        const submitBtn = document.getElementById('leaveSubmitBtn');
+
+        if (loader) {
+            if (messageEl) messageEl.textContent = 'Submitting leave request...';
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+        if (submitBtn) submitBtn.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(async response => {
+            if (response.ok) return response.json();
+            const data = await response.json().catch(() => ({}));
+            if (data.errors) {
+                const firstError = Object.values(data.errors)[0];
+                throw new Error(Array.isArray(firstError) ? firstError[0] : 'Validation failed');
+            }
+            throw new Error(data.message || 'Failed to submit leave request');
+        })
+        .then(data => {
+            if (loader) loader.classList.add('hidden');
+            if (submitBtn) submitBtn.disabled = false;
+
+            const leave = data.leave;
+            const leaveTable = document.getElementById('leaveTable');
+
+            if (leaveTable && leave) {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50';
+                row.id = `leave-row-${leave.id}`;
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm">${leave.user?.name || 'Employee'}</td>
+                    <td class="px-4 py-3 text-sm">${leave.leave_type || ''}</td>
+                    <td class="px-4 py-3 text-sm">${leave.from_date || ''}</td>
+                    <td class="px-4 py-3 text-sm">${leave.to_date || ''}</td>
+                    <td class="px-4 py-3 text-sm">${leave.days || 0}</td>
+                    <td class="px-4 py-3 text-sm">${getLeaveStatusBadge(leave.status)}</td>
+                    <td class="px-4 py-3 text-sm space-x-2">
+                        <button onclick="approveLeave(${leave.id})" class="px-2 py-1 bg-brand-50 text-brand-700 text-xs rounded hover:bg-brand-100">Approve</button>
+                        <button onclick="rejectLeave(${leave.id})" class="px-2 py-1 bg-red-50 text-red-700 text-xs rounded hover:bg-red-100">Reject</button>
+                    </td>
+                `;
+                leaveTable.prepend(row);
+            }
+
+            closeAddLeaveModal();
+
+            if (window.showAlert) {
+                window.showAlert('success', data.message || 'Leave request submitted successfully.');
+            }
+        })
+        .catch(error => {
+            if (loader) loader.classList.add('hidden');
+            if (submitBtn) submitBtn.disabled = false;
+            if (window.showAlert) {
+                window.showAlert('error', error.message || 'Failed to submit leave request. Please try again.');
+            }
         });
+
+        return false;
     }
 
     function approveLeave(id) {
-        const leave = leaves.find(l => l.id === id);
-        if (leave) leave.status = 'Approved';
-        window.showAlert('info', 'Leave status update will reflect after backend integration for leave records.');
+        updateLeaveStatus(id, 'Approved');
     }
 
     function rejectLeave(id) {
-        const leave = leaves.find(l => l.id === id);
-        if (leave) leave.status = 'Rejected';
-        window.showAlert('info', 'Leave status update will reflect after backend integration for leave records.');
+        updateLeaveStatus(id, 'Rejected');
+    }
+
+    function updateLeaveStatus(leaveId, status) {
+        const formData = new FormData();
+        formData.append('status', status);
+
+        const loader = document.getElementById('leaveLoader');
+        if (loader) {
+            if (document.getElementById('leaveLoaderText')) {
+                document.getElementById('leaveLoaderText').textContent = `${status === 'Approved' ? 'Approving' : 'Rejecting'} leave request...`;
+            }
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+
+        fetch(`/leaves/${leaveId}`, {
+            method: 'PUT',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (loader) loader.classList.add('hidden');
+            location.reload();
+        })
+        .catch(error => {
+            if (loader) loader.classList.add('hidden');
+            if (window.showAlert) {
+                window.showAlert('error', 'Failed to update leave status. Please try again.');
+            }
+        });
     }
 
     function toggleSidebar() {

@@ -19,6 +19,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\LeavesController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\SalesController;
@@ -165,6 +166,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/contracts/{contract}', [ContractController::class, 'show'])->name('contracts.show');
     Route::put('/contracts/{contract}', [ContractController::class, 'update'])->name('contracts.update');
     Route::delete('/contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
+
+    // Leaves (HRM)
+    Route::post('/leaves', [LeavesController::class, 'store'])->name('leaves.store');
+    Route::get('/leaves', [LeavesController::class, 'index'])->name('leaves.index');
+    Route::get('/leaves/{leave}', [LeavesController::class, 'show'])->name('leaves.show');
+    Route::put('/leaves/{leave}', [LeavesController::class, 'update'])->name('leaves.update');
+    Route::delete('/leaves/{leave}', [LeavesController::class, 'destroy'])->name('leaves.destroy');
 
     //Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');

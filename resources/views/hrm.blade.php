@@ -57,11 +57,13 @@
     @include('hrm.modals.salary')
     @include('hrm.modals.department')
     @include('hrm.modals.employee')
+    @include('hrm.modals.leave')
     @include('hrm.modals.bulk-import')
 
     @include('components.modal')
     <x-alert />
     @include('components.confirm')
+    <x-loading id="leaveLoader" size="lg" color="brand" full-page="false" message="Processing..." :show="false" />
     @include('hrm.scripts')
 </body>
 
