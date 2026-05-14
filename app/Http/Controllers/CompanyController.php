@@ -65,13 +65,14 @@ class CompanyController extends Controller
         // Determine who is viewing the page so we can apply the right company scope.
         $currentUser = Auth::user();
 
-        dd([
+        // If no user is authenticated, redirect to login.
+        /* dd([
             'user_id' => $currentUser?->id,
             'user_name' => $currentUser?->name,
             'role' => $currentUser?->role?->name,
             'company_id' => $currentUser?->company_id,
             'active_company_id' => session('active_company_id'),
-        ]);
+        ]); */
         
         // If no user is authenticated, redirect to login
         if (!$currentUser) {
