@@ -8,14 +8,22 @@ return new class extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('set null');
+            try {
+                $table->foreign('company_id')->references('id')->on('companies')->onDelete('set null');
+            } catch (\Exception $e) {
+                // Foreign key may already exist, skip silently
+            }
         });
     }
 
     public function down()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropForeign(['company_id']);
+            try {
+                $table->dropForeign(['company_id']);
+            } catch (\Exception $e) {
+                // Foreign key may not exist, skip silently
+            }
         });
     }
 };
