@@ -80,6 +80,8 @@ class CompanyController extends Controller
         }
         
         $isAdmin = $currentUser->role?->name === 'Admin';
+        $isManager = $currentUser->role?->name === 'Manager';
+        $isHr = $currentUser->role?->name === 'HR Manager';
         $activeCompanyId = session('active_company_id');
 
         // Start building a query for companies.
@@ -87,7 +89,7 @@ class CompanyController extends Controller
 
         // Admins can filter to one company from the session, or see all companies.
         // Normal users are always limited to their own assigned company.
-        if ($isAdmin) {
+        if ($isAdmin || $isManager || $isHr) {
             if (!empty($activeCompanyId)) {
                 $companiesQuery->where('id', $activeCompanyId);
             }
