@@ -37,10 +37,7 @@
     @include('components.sidebar')
 
     <main class="ml-0 lg:ml-64 pt-20 p-6">
-        <div class="mb-6">
-            <h1 class="text-3xl font-semibold font-display">Inventory & Procurement</h1>
-            <p class="text-sm text-slate-500 mt-1">Manage products, suppliers and purchase orders</p>
-        </div>
+        
 
         <div class="bg-white border-b border-slate-200 -mx-6 px-6 mb-6">
             <div class="flex gap-8">
