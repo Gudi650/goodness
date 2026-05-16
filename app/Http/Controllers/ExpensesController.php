@@ -145,7 +145,7 @@ class ExpensesController extends Controller
             $expense->checked_by = Auth::id();
             $expense->save();
 
-            return redirect()->route('finance')->with('success', 'Expense checked successfully. Awaiting final approval from CEO.');
+            return redirect()->route('finance')->with('success', 'Expense checked successfully. Awaiting approval from Manager before issuance from the CEO.');
         }
 
         /**
@@ -158,7 +158,7 @@ class ExpensesController extends Controller
             $expense->approved_at = Carbon::now();
             $expense->save();
 
-            return redirect()->route('finance')->with('success', 'Expense approved successfully.');
+            return redirect()->route('finance')->with('success', 'Expense approved successfully.Awaiting for issuance from the CEO.');
         }
 
         /**
@@ -178,6 +178,11 @@ class ExpensesController extends Controller
 
             return redirect()->route('finance')->with('success', 'Expense approved successfully.');
         }
+
+        //if the user is neither of the above then will return an error message saying that the user is not authorized to approve the expense
+        return redirect()->route('finance')->with('error', 'You are not authorized to approve this expense.');
+
+
 
         
 

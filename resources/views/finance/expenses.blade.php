@@ -1,4 +1,58 @@
 <div id="expensesPane" class="hidden">
+    <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-lg font-semibold font-display">Expenses</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-blue-500 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Expenses</p>
+                    <p class="text-2xl font-bold text-slate-800">{{ number_format($totalExpensesCount ?? 0) }}</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-blue-100">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-green-500 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Amount</p>
+                    <p class="text-2xl font-bold text-slate-800">TZS {{ number_format($totalExpensesAmount ?? 0, 2) }}</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-green-100">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-amber-500 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Pending Approvals</p>
+                    <p class="text-2xl font-bold text-slate-800">{{ number_format($pendingApprovals ?? 0) }}</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-amber-100">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c.866-1.5 2.945-2.625 5.303-2.625s4.437 1.125 5.303 2.625M3.75 4.5h16.5M3.75 12h16.5m-16.5 7.5h16.5" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-emerald-500 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Approved</p>
+                    <p class="text-2xl font-bold text-slate-800">{{ number_format($approvedCount ?? 0) }}</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-emerald-100">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
     <div class="overflow-x-auto">
         <table class="min-w-full">
             <thead class="bg-slate-50">

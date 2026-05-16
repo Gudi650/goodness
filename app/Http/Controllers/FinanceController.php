@@ -74,6 +74,13 @@ class FinanceController extends Controller
                 ];
             })
             ->all();
+
+        // Summary metrics for top cards
+        $expensesCollection = collect($expenses);
+        $totalExpensesCount = $expensesCollection->count();
+        $totalExpensesAmount = $expensesCollection->sum(fn ($e) => (float) ($e['net_amount'] ?? 0));
+        $pendingApprovals = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'draft')->count();
+        $approvedCount = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'approved')->count();
             
         $payments = Payment::query()
             ->orderByDesc('created_at')
@@ -128,6 +135,10 @@ class FinanceController extends Controller
             'payments' => $payments,
             'companies' => $companies,
             'departments' => $departments,
+            'totalExpensesCount' => $totalExpensesCount,
+            'totalExpensesAmount' => $totalExpensesAmount,
+            'pendingApprovals' => $pendingApprovals,
+            'approvedCount' => $approvedCount,
         ]);
     }
 
