@@ -3,7 +3,7 @@
         <h2 class="text-lg font-semibold font-display">Expenses</h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-blue-500 p-4">
             <div class="flex items-center justify-between">
                 <div>
@@ -36,6 +36,30 @@
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-amber-100">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c.866-1.5 2.945-2.625 5.303-2.625s4.437 1.125 5.303 2.625M3.75 4.5h16.5M3.75 12h16.5m-16.5 7.5h16.5" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-slate-500 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Drafted</p>
+                    <p class="text-2xl font-bold text-slate-800">{{ number_format($draftedCount ?? 0) }}</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-slate-100">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h8m-8 6h16" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-indigo-500 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Issued</p>
+                    <p class="text-2xl font-bold text-slate-800">{{ number_format($issuedCount ?? 0) }}</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-indigo-100">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
                 </svg>
             </div>
         </div>

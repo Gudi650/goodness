@@ -143,7 +143,7 @@
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-2 sm:flex-row sm:justify-end">
             <button type="button" onclick="window.closeModal && window.closeModal()" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">Cancel</button>
             <button type="submit" name="submit_mode" value="draft" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">Save as Draft</button>
-            <button type="submit" name="submit_mode" value="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700">Submit Expense</button>
+            <!-- <button type="submit" name="submit_mode" value="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700">Submit Expense</button> -->
         </div>
     </form>
 </div>

@@ -140,7 +140,7 @@ class ExpensesController extends Controller
 
         //now here if te user is a manager, we need to check if the expense belongs to his company
         //if is manager then change the status to checked
-        if ( $isManager && $user->company_id === $expense->company_id) {
+        if ( $isHr && $user->company_id === $expense->company_id) {
             $expense->status = 'checked';
             $expense->checked_by = Auth::id();
             $expense->save();
@@ -152,7 +152,7 @@ class ExpensesController extends Controller
          * if the user is HR manager, we need to check if the expense belongs to his company
          * if is HR manager then change the status to approved
          */
-        if ( $isHr && $user->company_id === $expense->company_id) {
+        if ( $isManager && $user->company_id === $expense->company_id) {
             $expense->status = 'approved';
             $expense->approved_by = Auth::id();
             $expense->approved_at = Carbon::now();
