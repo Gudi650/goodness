@@ -37,8 +37,7 @@ class ExpensesController extends Controller
         abort_unless($user && ($user->id === $expense->created_by || $user->role?->name === 'Admin'), 403);
 
         $validated = $request->validate([
-            'review_rating' => 'required|integer|min:1|max:5',
-            'review_feedback' => 'required|string|max:5000',
+            'review_feedback' => 'nullable|string|max:5000',
             'review_items' => 'nullable|array',
             'review_items.*.description' => 'required_with:review_items|string|max:255',
             'review_items.*.amount' => 'nullable|numeric|min:0',
@@ -74,7 +73,7 @@ class ExpensesController extends Controller
         }
 
         $expense->forceFill([
-            'review_rating' => $validated['review_rating'],
+
             'review_feedback' => $validated['review_feedback'],
             'review_items' => $reviewItems,
             'review_evidence_paths' => $reviewEvidence,
@@ -82,7 +81,7 @@ class ExpensesController extends Controller
         ])->save();
 
         return redirect()
-            ->route('expenses.review', $expense)
+            ->route('finance')
             ->with('success', 'Your expense review has been submitted successfully.');
     }
 

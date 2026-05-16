@@ -140,6 +140,8 @@ class FinanceController extends Controller
                     'checked_by_name' => $expense->checker?->name ?? '-',
                     'submitted_at' => $expense->submitted_at ? Carbon::parse($expense->submitted_at)->format('M d, Y h:i A') : '-',
                     'approved_at' => $expense->approved_at ? Carbon::parse($expense->approved_at)->format('M d, Y h:i A') : '-',
+                    'reviewed_at' => $expense->reviewed_at ? Carbon::parse($expense->reviewed_at)->format('M d, Y h:i A') : null,
+                    'review_feedback' => $expense->review_feedback,
                     'attachment_url' => $attachmentUrl,
                     'attachment_is_image' => $attachmentIsImage,
                 ];
@@ -262,10 +264,16 @@ class FinanceController extends Controller
 
     /**
      * Decide whether the submitting user can open the review page for this expense.
+     * Also check if the expense review is submited if so the review button should not be displayed
      */
     protected function canReviewExpense($expense, $user)
     {
         if (!$user) {
+            return false;
+        }
+
+        // if its already reviewed then it should return false.
+        if (!empty($expense['reviewed_at'])) {
             return false;
         }
 
