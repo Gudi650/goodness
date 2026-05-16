@@ -78,6 +78,10 @@ class FinanceController extends Controller
             $expense['can_review'] = $this->canReviewExpense($expense, $user);
         }
 
+        $reviewableExpenses = collect($expenses)->filter(fn ($expense) => !empty($expense['can_review']))->values();
+        $pendingReviewCount = $reviewableExpenses->count();
+        $firstPendingReviewExpenseId = $reviewableExpenses->first()['id'] ?? null;
+
         return view('finance', [
             'invoices' => $invoices,
             'expenses' => $expenses,
@@ -90,6 +94,8 @@ class FinanceController extends Controller
             'approvedCount' => $approvedCount,
             'draftedCount' => $draftedCount,
             'issuedCount' => $issuedCount,
+            'pendingReviewCount' => $pendingReviewCount,
+            'firstPendingReviewExpenseId' => $firstPendingReviewExpenseId,
         ]);
     }
 

@@ -203,8 +203,6 @@
                                     if (!is_array($existingItems) || count($existingItems) === 0) {
                                         $existingItems = [
                                             ['description' => '', 'amount' => '', 'note' => ''],
-                                            ['description' => '', 'amount' => '', 'note' => ''],
-                                            ['description' => '', 'amount' => '', 'note' => ''],
                                         ];
                                     }
                                 @endphp
