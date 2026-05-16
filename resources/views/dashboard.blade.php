@@ -190,10 +190,108 @@
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
                     <h3 class="font-semibold text-slate-900 mb-3">Quick Actions</h3>
-                    <div class="space-y-2">
-                        <a href="{{ route('finance') }}" class="block px-3 py-2 text-sm bg-brand-50 text-brand-700 rounded hover:bg-brand-100 transition-colors">→ Create Invoice</a>
-                        <a href="{{ route('finance') }}" class="block px-3 py-2 text-sm bg-slate-50 text-slate-700 rounded hover:bg-slate-100 transition-colors">→ Record Expense</a>
-                        <a href="{{ route('hrm') }}" class="block px-3 py-2 text-sm bg-slate-50 text-slate-700 rounded hover:bg-slate-100 transition-colors">→ Review Leaves</a>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <a href="{{ route('invoices.index') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25v10.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18.75V5.25A2.25 2.25 0 016.75 3h6.75L19.5 8.25z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v6.75a.75.75 0 00.75.75H19.5" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">Create Invoice</span>
+                                <span class="block text-xs text-slate-500">Raise a new sales invoice</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('finance') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 3.071-.879 4.242 0" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">Record Expense</span>
+                                <span class="block text-xs text-slate-500">Log a new expense</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('hrm') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">Review Leaves</span>
+                                <span class="block text-xs text-slate-500">Check pending requests</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('sales') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">New Order</span>
+                                <span class="block text-xs text-slate-500">Open a sales order</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('finance') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-3l3 3 3-3m-7.5-6h9" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">New Payment</span>
+                                <span class="block text-xs text-slate-500">Record a payment received</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('products.index') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25l-9-5.25-9 5.25m18 0l-9 5.25m9-5.25v9l-9 5.25m0-14.5L3 8.25m9 5.25v9m0-9l9-5.25" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">Add Product</span>
+                                <span class="block text-xs text-slate-500">Manage inventory items</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('inventory') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h7.125A2.25 2.25 0 0120 8.25v9A2.25 2.25 0 0117.625 19.5H6.375A2.25 2.25 0 014 17.25v-9A2.25 2.25 0 016.375 6H7.5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6V4.875A1.125 1.125 0 0110.125 3.75h3.75A1.125 1.125 0 0115 4.875V6" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">Add Supplier</span>
+                                <span class="block text-xs text-slate-500">Update supplier records</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('sales') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h10.5M8.25 12h10.5M8.25 17.25h10.5M4.5 6.75h.008v.008H4.5V6.75zm0 5.25h.008v.008H4.5V12zm0 5.25h.008v.008H4.5v-.008z" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">New Contract</span>
+                                <span class="block text-xs text-slate-500">Create a sales contract</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('inventory') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md sm:col-span-2">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75h10.5M9 12h10.5M9 17.25h10.5M4.5 6.75h.008v.008H4.5V6.75zm0 5.25h.008v.008H4.5V12zm0 5.25h.008v.008H4.5v-.008z" />
+                                </svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">New Purchase Order</span>
+                                <span class="block text-xs text-slate-500">Raise a supplier order</span>
+                            </span>
+                        </a>
                     </div>
                 </div>
 
