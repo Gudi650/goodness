@@ -57,7 +57,7 @@ class FinanceController extends Controller
             ->get();
 
         //function to get the expense details to be displayed from the expenses table
-        $expenses = $this->getExpenses($isAdmin, $activeCompanyId,$user,$isManager,$isHr,$isCEO);
+        $expenses = $this->getExpenses($isAdmin, $isAccountant, $user, $isCEO);
 
         // Summary metrics for top cards
         $expensesCollection = collect($expenses);
@@ -69,7 +69,7 @@ class FinanceController extends Controller
         $issuedCount = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'issued')->count();
 
        //get the payment details to be displayed from the payments table
-        $payments = $this->getPayments($isAdmin, $activeCompanyId,$user,$isManager,$isHr,$isCEO);
+        $payments = $this->getPayments($isAdmin,$user,$isCEO,$isAccountant);
 
 
         //function to check if the approve button should be displayed for the expense based on the user role and expense status
@@ -96,11 +96,11 @@ class FinanceController extends Controller
      * fuction to get the expense details to be displayed from the expenses table
      * but check if the user is admin or CEO, if admin then get all expenses, if not admin then get only the expenses of his company
      */
-    protected function getExpenses($isAdmin, $activeCompanyId, $user, $isManager, $isHr, $isCEO)
+    protected function getExpenses($isAdmin, $isAccountant, $user, $isCEO)
     {
         //get all when user is admin or CEO, otherwise get only the expenses of his company
         $expenses = Expense::with(['company', 'department', 'creator', 'approver', 'issuer', 'checker'])
-            ->when(!$isAdmin && !$isCEO && $user, fn($query) => $query->where('company_id', $user->company_id))
+            ->when(!$isAdmin && !$isCEO && !$isAccountant, fn($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
             ->get()
@@ -149,11 +149,11 @@ class FinanceController extends Controller
     }
 
     //function to get the payment details to be displayed from the payments table
-    protected function getPayments($isAdmin, $activeCompanyId, $user, $isManager, $isHr, $isCEO)
+    protected function getPayments($isAdmin, $user, $isCEO,$isAccountant)
     {
          $payments = Payment::query()
             ->orderByDesc('created_at')
-            ->when(!$isAdmin && !$isCEO && $user, fn($query) => $query->where('company_id', $user->company_id))
+            ->when(!$isAdmin && !$isCEO && !$isAccountant && $user, fn($query) => $query->where('company_id', $user->company_id))
             ->limit(100)
             ->get()
             ->map(function (Payment $payment) {
