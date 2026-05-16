@@ -291,7 +291,7 @@
                                                 </a>
 
                                                 <!--download button-->
-                                                <a href="{{ route('expenses.download', $expense['id']) }}">
+                                                <a href="{{ route('expenses.download', ['expense' => $expense['id']]) }}">
                                                     Download Attachment
                                                 </a>
                                             @endif
@@ -300,6 +300,66 @@
                                         <p class="mt-1 text-sm text-slate-500">No attachment uploaded.</p>
                                     @endif
                                 </div>
+
+                                @if (!empty($expense['reviewed_at']))
+                                    <div class="rounded-lg border border-brand-200 bg-brand-50/40 p-3 md:col-span-2 lg:col-span-4">
+                                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                                            <p class="text-xs font-semibold uppercase tracking-wide text-brand-700">Submitted Review</p>
+                                            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-700 border border-brand-200">
+                                                {{ $expense['reviewed_at'] }}
+                                            </span>
+                                        </div>
+
+                                        <div class="mt-4 grid gap-3 md:grid-cols-2">
+                                            <div class="rounded-md bg-white p-3 border border-brand-100">
+                                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Feedback</p>
+                                                <p class="mt-1 text-sm text-slate-700 leading-6 whitespace-pre-line">{{ $expense['review_feedback'] ?: 'No feedback provided.' }}</p>
+                                            </div>
+
+                                            <div class="rounded-md bg-white p-3 border border-brand-100">
+                                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Itemized Spending</p>
+                                                @if (!empty($expense['review_items']))
+                                                    <div class="mt-2 space-y-2">
+                                                        @foreach ($expense['review_items'] as $reviewItem)
+                                                            <div class="rounded-md bg-slate-50 p-2 text-sm text-slate-700">
+                                                                <div class="flex items-start justify-between gap-3">
+                                                                    <div>
+                                                                        <p class="font-medium text-slate-800">{{ $reviewItem['description'] ?? '-' }}</p>
+                                                                        @if (!empty($reviewItem['note']))
+                                                                            <p class="text-xs text-slate-500 mt-1">{{ $reviewItem['note'] }}</p>
+                                                                        @endif
+                                                                    </div>
+                                                                    @if (!empty($reviewItem['amount']))
+                                                                        <span class="whitespace-nowrap font-semibold text-brand-700">TZS {{ number_format((float) $reviewItem['amount'], 2) }}</span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <p class="mt-2 text-sm text-slate-500">No itemized spending was added.</p>
+                                                @endif
+                                            </div>
+
+                                            <div class="rounded-md bg-white p-3 border border-brand-100 md:col-span-2">
+                                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Evidence / Receipts</p>
+                                                @if (!empty($expense['review_evidence_paths']))
+                                                    <div class="mt-2 flex flex-wrap gap-2">
+                                                        @foreach ($expense['review_evidence_paths'] as $evidence)
+                                                            @if (!empty($evidence['path']))
+                                                                <a href="{{ asset('storage/' . $evidence['path']) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:border-brand-400 hover:text-brand-800">
+                                                                    <span class="truncate max-w-[14rem]">{{ $evidence['name'] ?? 'View evidence' }}</span>
+                                                                </a>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <p class="mt-2 text-sm text-slate-500">No evidence files were uploaded.</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </td>
                     </tr>

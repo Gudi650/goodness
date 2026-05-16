@@ -142,6 +142,8 @@ class FinanceController extends Controller
                     'approved_at' => $expense->approved_at ? Carbon::parse($expense->approved_at)->format('M d, Y h:i A') : '-',
                     'reviewed_at' => $expense->reviewed_at ? Carbon::parse($expense->reviewed_at)->format('M d, Y h:i A') : null,
                     'review_feedback' => $expense->review_feedback,
+                    'review_items' => $expense->review_items ?? [],
+                    'review_evidence_paths' => $expense->review_evidence_paths ?? [],
                     'attachment_url' => $attachmentUrl,
                     'attachment_is_image' => $attachmentIsImage,
                 ];
