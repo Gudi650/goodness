@@ -117,9 +117,11 @@
     <div class="p-4 border-t border-slate-200 bg-white sticky bottom-0">
         @php
             // Get the authenticated user's name for display in the sidebar.
-$userName = auth()->user()?->name ?? 'User';
+            $userName = auth()->user()?->name ?? 'User';
             // Show the first letter as a simple avatar initial.
             $userInitial = strtoupper(substr($userName, 0, 1));
+            //user roles
+            $userRole = auth()->user()?->role?->name ?? 'N/A';
         @endphp
         <div class="flex items-center gap-3 mb-4">
             <div
@@ -127,7 +129,7 @@ $userName = auth()->user()?->name ?? 'User';
                 {{ $userInitial }}</div>
             <div>
                 <p class="text-sm font-medium text-slate-800">{{ $userName }}</p>
-                <p class="text-xs text-slate-500">Administrator</p>
+                <p class="text-xs text-slate-500">{{ $userRole }}</p>
             </div>
         </div>
 
