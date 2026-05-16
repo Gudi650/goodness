@@ -124,6 +124,21 @@
                                     </svg>
                                 </button>
 
+                                @if($expense['can_review'])
+                                    <a href="{{ route('expenses.review', ['expense' => $expense['id']]) }}"
+                                       class="text-brand-600 hover:text-brand-800 transition-colors"
+                                       title="Review expense"
+                                       aria-label="Review expense">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M11.25 3.75h1.5A2.25 2.25 0 0 1 15 6v1.5c0 .414.336.75.75.75H17.25A2.25 2.25 0 0 1 19.5 10.5v7.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 18v-12A2.25 2.25 0 0 1 6.75 3.75h4.5Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12.75h6M9 15.75h6M9 9.75h3" />
+                                        </svg>
+                                    </a>
+                                @endif
+
                                 {{-- 
                                     now here check if this has to be visible by the following rules
                                     1. if issued then the button shouldnt be visible to anyone

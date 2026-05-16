@@ -113,6 +113,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
     Route::get('/expenses/{expense}/download', [ExpensesController::class, 'downloadAttachment'])->name('expenses.download');
     Route::patch('/expenses/{expense}/approve', [ExpensesController::class, 'approveExpense'])->name('expenses.approve');
+    Route::get('/expenses/{expense}/review', [ExpensesController::class, 'reviewExpense'])->name('expenses.review');
+    Route::patch('/expenses/{expense}/review', [ExpensesController::class, 'storeExpenseReview'])->name('expenses.review.store');
 
     // Payments Management
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
@@ -206,10 +208,10 @@ Route::middleware('auth')->group(function () {
         return view('reports');
     })->name('reports');
 
-    //messages page
-    Route::get('/messages', function () {
+    //communication page
+    Route::get('/communication', function () {
         return view('messages');
-    })->name('messages');
+    })->name('communication');
 
 });
 

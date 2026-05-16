@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'department_id',
     'created_by',
     'approved_by',
+    'approved_at',
     'issued_by',
     'checked_by',
     'status',
@@ -30,11 +31,28 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'notes',
     'submitted_at',
     'original_file_name',
-    ''
+    'review_rating',
+    'review_feedback',
+    'review_items',
+    'review_evidence_paths',
+    'reviewed_at',
 ])]
 class Expense extends Model
 {
     use HasFactory;
+
+    /**
+     * Attribute casts for date and review fields.
+     */
+    protected $casts = [
+        'expense_date' => 'date',
+        'submitted_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'reviewed_at' => 'datetime',
+        'vat_included' => 'boolean',
+        'review_items' => 'array',
+        'review_evidence_paths' => 'array',
+    ];
 
     /**
      * Get the company this expense belongs to.

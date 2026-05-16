@@ -75,6 +75,7 @@ class FinanceController extends Controller
         //function to check if the approve button should be displayed for the expense based on the user role and expense status
         foreach ($expenses as &$expense) {
             $expense['can_approve'] = $this->canApproveExpense($expense, $user, $isManager, $isCEO, $isAccountant);
+            $expense['can_review'] = $this->canReviewExpense($expense, $user);
         }
 
         return view('finance', [
@@ -132,6 +133,7 @@ class FinanceController extends Controller
                     'status' => $expense->status,
                     'description' => $expense->notes ?: '-',
                     'notes' => $expense->notes ?: '-',
+                    'creator_id' => $expense->created_by,
                     'creator_name' => $expense->creator?->name ?? '-',
                     'approved_by_name' => $expense->approver?->name ?? '-',
                     'issued_by_name' => $expense->issuer?->name ?? '-',
@@ -256,6 +258,20 @@ class FinanceController extends Controller
                 return false;
         }
 
+    }
+
+    /**
+     * Decide whether the submitting user can open the review page for this expense.
+     */
+    protected function canReviewExpense($expense, $user)
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return (int) ($expense['company_id'] ?? 0) === (int) $user->company_id
+            && (int) ($expense['creator_id'] ?? 0) === (int) $user->id
+            && in_array($expense['status'] ?? '', ['approved', 'issued'], true);
     }
 
 

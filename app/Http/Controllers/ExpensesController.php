@@ -13,6 +13,79 @@ class ExpensesController extends Controller
 {
     //
 
+    /**
+     * Show the expense review page for the creator.
+     */
+    public function reviewExpense(Expense $expense)
+    {
+        $user = Auth::user();
+
+        abort_unless($user && ($user->id === $expense->created_by || $user->role?->name === 'Admin'), 403);
+
+        $expense->load(['company', 'department', 'creator', 'checker', 'approver', 'issuer']);
+
+        return view('finance.reviewexpenses', compact('expense'));
+    }
+
+    /**
+     * Store the creator's feedback on how the expense money was used.
+     */
+    public function storeExpenseReview(Request $request, Expense $expense)
+    {
+        $user = Auth::user();
+
+        abort_unless($user && ($user->id === $expense->created_by || $user->role?->name === 'Admin'), 403);
+
+        $validated = $request->validate([
+            'review_rating' => 'required|integer|min:1|max:5',
+            'review_feedback' => 'required|string|max:5000',
+            'review_items' => 'nullable|array',
+            'review_items.*.description' => 'required_with:review_items|string|max:255',
+            'review_items.*.amount' => 'nullable|numeric|min:0',
+            'review_items.*.note' => 'nullable|string|max:500',
+            'review_evidence' => 'nullable|array',
+            'review_evidence.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+        ]);
+
+        $reviewItems = collect($validated['review_items'] ?? [])
+            ->filter(fn ($item) => filled($item['description'] ?? null) || filled($item['amount'] ?? null) || filled($item['note'] ?? null))
+            ->values()
+            ->map(function (array $item) {
+                return [
+                    'description' => $item['description'] ?? '',
+                    'amount' => isset($item['amount']) && $item['amount'] !== '' ? (float) $item['amount'] : null,
+                    'note' => $item['note'] ?? null,
+                ];
+            })
+            ->all();
+
+        $reviewEvidence = [];
+        if ($request->hasFile('review_evidence')) {
+            foreach ($request->file('review_evidence') as $evidenceFile) {
+                if (!$evidenceFile) {
+                    continue;
+                }
+
+                $reviewEvidence[] = [
+                    'path' => $evidenceFile->store('expense-review-evidence', 'public'),
+                    'name' => $evidenceFile->getClientOriginalName(),
+                ];
+            }
+        }
+
+        $expense->forceFill([
+            'review_rating' => $validated['review_rating'],
+            'review_feedback' => $validated['review_feedback'],
+            'review_items' => $reviewItems,
+            'review_evidence_paths' => $reviewEvidence,
+            'reviewed_at' => now(),
+        ])->save();
+
+        return redirect()
+            ->route('expenses.review', $expense)
+            ->with('success', 'Your expense review has been submitted successfully.');
+    }
+
      /**
      * Save a new expense record as draft or submitted.
      */
