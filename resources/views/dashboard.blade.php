@@ -191,9 +191,9 @@
                 <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
                     <h3 class="font-semibold text-slate-900 mb-3">Quick Actions</h3>
                     <div class="space-y-2">
-                        <a href="#" class="block px-3 py-2 text-sm bg-brand-50 text-brand-700 rounded hover:bg-brand-100 transition-colors">→ Create Invoice</a>
-                        <a href="#" class="block px-3 py-2 text-sm bg-slate-50 text-slate-700 rounded hover:bg-slate-100 transition-colors">→ Record Expense</a>
-                        <a href="#" class="block px-3 py-2 text-sm bg-slate-50 text-slate-700 rounded hover:bg-slate-100 transition-colors">→ Review Leaves</a>
+                        <a href="{{ route('finance') }}" class="block px-3 py-2 text-sm bg-brand-50 text-brand-700 rounded hover:bg-brand-100 transition-colors">→ Create Invoice</a>
+                        <a href="{{ route('finance') }}" class="block px-3 py-2 text-sm bg-slate-50 text-slate-700 rounded hover:bg-slate-100 transition-colors">→ Record Expense</a>
+                        <a href="{{ route('hrm') }}" class="block px-3 py-2 text-sm bg-slate-50 text-slate-700 rounded hover:bg-slate-100 transition-colors">→ Review Leaves</a>
                     </div>
                 </div>
 
