@@ -44,9 +44,7 @@ class FinanceController extends Controller
         $users = $usersQuery->get();
 
         //
-        $invoices = Invoice::with(['company', 'creator', 'items'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        $invoices = $this->getInvoices($isAdmin, $activeCompanyId, $user);
 
         //get the companies
         $companies = DB::table('companies')->pluck('name', 'id');
@@ -69,52 +67,8 @@ class FinanceController extends Controller
         $draftedCount = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'draft')->count();
         $issuedCount = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'issued')->count();
 
-        $payments = Payment::query()
-            ->orderByDesc('created_at')
-            ->limit(100)
-            ->get()
-            ->map(function (Payment $payment) {
-                $attachmentUrl = $payment->proof_of_payment_path ? asset('storage/' . $payment->proof_of_payment_path) : null;
-                $attachmentIsImage = false;
-
-                if ($payment->proof_of_payment_path) {
-                    $ext = strtolower(pathinfo($payment->proof_of_payment_path, PATHINFO_EXTENSION));
-                    $attachmentIsImage = in_array($ext, ['jpg', 'jpeg', 'png']);
-                }
-
-                $tzsEquivalent = $payment->currency === 'TZS'
-                    ? (float) $payment->amount
-                    : (float) ($payment->amount * $payment->exchange_rate);
-
-                return [
-                    'id' => $payment->id,
-                    'payment_reference' => $payment->payment_reference,
-                    'payment_date_value' => Carbon::parse($payment->payment_date)->format('Y-m-d'),
-                    'payment_date' => Carbon::parse($payment->payment_date)->format('M d, Y'),
-                    'company' => $payment->company,
-                    'payment_direction' => $payment->payment_direction,
-                    'party_name' => $payment->party_name,
-                    'payment_method' => $payment->payment_method,
-                    'reference_number' => $payment->reference_number ?: '-',
-                    'payment_category' => $payment->payment_category ?: '-',
-                    'linked_to' => $payment->linked_to ?: '-',
-                    'amount' => (float) $payment->amount,
-                    'currency' => $payment->currency,
-                    'exchange_rate' => (float) $payment->exchange_rate,
-                    'tzs_equivalent' => $tzsEquivalent,
-                    'payment_status' => $payment->payment_status,
-                    'notes' => $payment->notes ?: '-',
-                    'proof_of_payment_path' => $payment->proof_of_payment_path,
-                    'original_proof_filename' => $payment->original_proof_filename,
-                    'attachment_url' => $attachmentUrl,
-                    'attachment_is_image' => $attachmentIsImage,
-                    'edit_url' => route('payments.edit', $payment->id),
-                    'update_url' => route('payments.update', $payment->id),
-                    'delete_url' => route('payments.destroy', $payment->id),
-                    'download_url' => route('payments.download-proof', $payment->id),
-                ];
-            })
-            ->all();
+       //get the payment details to be displayed from the payments table
+        $payments = $this->getPayments($isAdmin, $activeCompanyId,$user,$isManager,$isHr,$isCEO);
 
         return view('finance', [
             'invoices' => $invoices,
@@ -186,6 +140,93 @@ class FinanceController extends Controller
 
     }
 
-    //function to get the 
+    //function to get the payment details to be displayed from the payments table
+    protected function getPayments($isAdmin, $activeCompanyId, $user, $isManager, $isHr, $isCEO)
+    {
+         $payments = Payment::query()
+            ->orderByDesc('created_at')
+            ->when(!$isAdmin && !$isCEO && $user, fn($query) => $query->where('company_id', $user->company_id))
+            ->limit(100)
+            ->get()
+            ->map(function (Payment $payment) {
+                $attachmentUrl = $payment->proof_of_payment_path ? asset('storage/' . $payment->proof_of_payment_path) : null;
+                $attachmentIsImage = false;
+
+                if ($payment->proof_of_payment_path) {
+                    $ext = strtolower(pathinfo($payment->proof_of_payment_path, PATHINFO_EXTENSION));
+                    $attachmentIsImage = in_array($ext, ['jpg', 'jpeg', 'png']);
+                }
+
+                $tzsEquivalent = $payment->currency === 'TZS'
+                    ? (float) $payment->amount
+                    : (float) ($payment->amount * $payment->exchange_rate);
+
+                return [
+                    'id' => $payment->id,
+                    'payment_reference' => $payment->payment_reference,
+                    'payment_date_value' => Carbon::parse($payment->payment_date)->format('Y-m-d'),
+                    'payment_date' => Carbon::parse($payment->payment_date)->format('M d, Y'),
+                    'company' => $payment->company,
+                    'payment_direction' => $payment->payment_direction,
+                    'party_name' => $payment->party_name,
+                    'payment_method' => $payment->payment_method,
+                    'reference_number' => $payment->reference_number ?: '-',
+                    'payment_category' => $payment->payment_category ?: '-',
+                    'linked_to' => $payment->linked_to ?: '-',
+                    'amount' => (float) $payment->amount,
+                    'currency' => $payment->currency,
+                    'exchange_rate' => (float) $payment->exchange_rate,
+                    'tzs_equivalent' => $tzsEquivalent,
+                    'payment_status' => $payment->payment_status,
+                    'notes' => $payment->notes ?: '-',
+                    'proof_of_payment_path' => $payment->proof_of_payment_path,
+                    'original_proof_filename' => $payment->original_proof_filename,
+                    'attachment_url' => $attachmentUrl,
+                    'attachment_is_image' => $attachmentIsImage,
+                    'edit_url' => route('payments.edit', $payment->id),
+                    'update_url' => route('payments.update', $payment->id),
+                    'delete_url' => route('payments.destroy', $payment->id),
+                    'download_url' => route('payments.download-proof', $payment->id),
+                ];
+            })
+            ->all();
+
+        return $payments;
+    }
+
+    //function to display the invoices details to be displayed from the invoices table
+    protected function getInvoices($isAdmin, $activeCompanyId, $user)
+    {
+        $invoices = Invoice::query()
+            ->with('company', 'creator', 'items')
+            ->when(!$isAdmin && $user, fn($query) => $query->where('company_id', $user->company_id))
+            ->latest()
+            ->limit(100)
+            ->get()
+            ->map(function (Invoice $invoice) {
+                return [
+                    'id' => $invoice->id,
+                    'display_id' => $invoice->invoice_number,
+                    'invoice_date' => Carbon::parse($invoice->invoice_date)->format('M d, Y'),
+                    'company_name' => $invoice->company?->name ?? '-',
+                    'amount' => (float) $invoice->amount,
+                    'status' => $invoice->status,
+                    'description' => $invoice->description ?: '-',
+                    'creator_name' => $invoice->creator?->name ?? '-',
+                    'items' => $invoice->items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'description' => $item->description,
+                            'quantity' => (int) $item->quantity,
+                            'unit_price' => (float) $item->unit_price,
+                            'total_price' => (float) ($item->quantity * $item->unit_price),
+                        ];
+                    })->all(),
+                ];
+            })
+            ->all();
+
+        return $invoices;
+    }
 
 }
