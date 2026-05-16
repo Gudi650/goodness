@@ -247,7 +247,7 @@
                                 <span class="block text-xs text-slate-500">Record a payment received</span>
                             </span>
                         </a>
-                        <a href="{{ route('products.index') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+                        <a href="{{ route('inventory') }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
                             <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25l-9-5.25-9 5.25m18 0l-9 5.25m9-5.25v9l-9 5.25m0-14.5L3 8.25m9 5.25v9m0-9l9-5.25" />
