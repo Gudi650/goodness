@@ -28,6 +28,7 @@ class FinanceController extends Controller
         $isManager = $user && $user->role && $user->role->name === 'Manager';
         $isHr = $user && $user->role && $user->role->name === 'HR Manager';
         $isCEO = $user && $user->role && $user->role->name === 'CEO';
+        $isAccountant = $user && $user->role && $user->role->name === 'Accountant';
 
         //get the active company id from the session
         $activeCompanyId = session('active_company_id');
@@ -73,7 +74,7 @@ class FinanceController extends Controller
 
         //function to check if the approve button should be displayed for the expense based on the user role and expense status
         foreach ($expenses as &$expense) {
-            $expense['can_approve'] = $this->canApproveExpense($expense, $user, $isManager, $isHr, $isCEO);
+            $expense['can_approve'] = $this->canApproveExpense($expense, $user, $isManager, $isCEO, $isAccountant);
         }
 
         return view('finance', [
@@ -237,20 +238,20 @@ class FinanceController extends Controller
     }
 
     //function to check if the approve button should be displayed for the expense based on the user role and expense status
-    protected function canApproveExpense($expense, $user, $isManager, $isHr, $isCEO)
+    protected function canApproveExpense($expense, $user, $isManager, $isCEO, $isAccountant)
     {
         //check to see if user is neither manager, HR nor CEO, if not then return false
-        if (!$isManager && !$isHr && !$isCEO) {
+        if ( !$isManager && !$isCEO && !$isAccountant) {
             return false;
         }
 
         switch ($expense['status'] ?? '') {
             case 'draft':
-                return $isHr && $user->company_id === $expense['company_id'];
-            case 'checked':
                 return $isManager && $user->company_id === $expense['company_id'];
+            case 'checked':
+                return $isCEO ;
             case 'approved':
-                return $isCEO;
+                return $isAccountant ;
             default:
                 return false;
         }

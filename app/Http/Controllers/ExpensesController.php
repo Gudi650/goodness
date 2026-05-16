@@ -136,55 +136,50 @@ class ExpensesController extends Controller
         $isManager = $user?->role?->name === 'Manager';
         $isCEO = $user?->role?->name === 'CEO';
         $isHr = $user?->role?->name === 'HR Manager';
+        $isAccountant = $user?->role?->name === 'Accountant';
         
 
-        //now here if te user is a manager, we need to check if the expense belongs to his company
-        //if is manager then change the status to checked
-        if ( $isHr && $user->company_id === $expense->company_id) {
-            $expense->status = 'checked';
-            $expense->checked_by = Auth::id();
-            $expense->save();
 
-            return redirect()->route('finance')->with('success', 'Expense checked successfully. Awaiting approval from Manager before issuance from the CEO.');
-        }
 
-        /**
-         * if the user is HR manager, we need to check if the expense belongs to his company
-         * if is HR manager then change the status to approved
-         */
-        if ( $isManager && $user->company_id === $expense->company_id) {
-            $expense->status = 'approved';
-            $expense->approved_by = Auth::id();
-            $expense->approved_at = Carbon::now();
-            $expense->save();
+            if ( $isManager && $user->company_id === $expense->company_id) {
+                $expense->status = 'checked';
+                $expense->checked_by = Auth::id();
+                $expense->save();
 
-            return redirect()->route('finance')->with('success', 'Expense approved successfully.Awaiting for issuance from the CEO.');
-        }
+                return redirect()->route('finance')->with('success', 'Expense checked successfully. Awaiting issue from accountant .');
+            }
 
-        /**
-         * if the user is CEO, we need to check if the expense is already checked by the manager, if not we will not allow the CEO to approve it
-         * if the expense is checked by the manager, then we will allow the CEO to approve it and change the status to approved
-         */
-        if ($isCEO) {
+            if ($isCEO) {
+
+                if ($expense->status !== 'checked') {
+                    return redirect()->route('finance')->with('error', 'Expense must be checked by the manager before it can be approved by the CEO.');
+                }
+
+                $expense->status = 'approved';
+                $expense->approved_by = Auth::id();
+                $expense->approved_at = Carbon::now();
+                $expense->save();
+
+                return redirect()->route('finance')->with('success', 'Expense approved successfully.');
+            }
+
+            if ($isAccountant) {
 
             if ($expense->status !== 'approved') {
-                return redirect()->route('finance')->with('error', 'Expense must be checked by the manager before it can be approved by the CEO.');
+                return redirect()->route('finance')->with('error', 'Expense must be approved by the CEO before it can be issued by the Accountant.');
             }
 
             $expense->status = 'issued';
-            $expense->approved_by = Auth::id();
-            $expense->approved_at = Carbon::now();
+            $expense->issued_by = Auth::id();
             $expense->save();
 
-            return redirect()->route('finance')->with('success', 'Expense approved successfully.');
+            return redirect()->route('finance')->with('success', 'Expense issued successfully.');
         }
 
         //if the user is neither of the above then will return an error message saying that the user is not authorized to approve the expense
         return redirect()->route('finance')->with('error', 'You are not authorized to approve this expense.');
 
 
-
-        
 
     }
 
