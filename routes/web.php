@@ -206,5 +206,10 @@ Route::middleware('auth')->group(function () {
         return view('reports');
     })->name('reports');
 
+    //messages page
+    Route::get('/messages', function () {
+        return view('messages');
+    })->name('messages');
+
 });
 
