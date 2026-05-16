@@ -110,6 +110,7 @@
                         <td class="px-4 py-3 text-sm">{{ $expense['description'] }}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="inline-flex items-center gap-6">
+
                                 <button type="button"
                                     onclick="toggleExpenseDetails('expense-details-{{ $expense['id'] }}', this)"
                                     class="text-slate-600 hover:text-slate-800 transition-colors" title="Show details"
@@ -122,6 +123,20 @@
                                             d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                 </button>
+
+                                {{-- 
+                                    now here check if this has to be visible by the following rules
+                                    1. if issued then the button shouldnt be visible to anyone
+                                    2. if user is neither admin,CEO,HR manager nor manager then the button shouldnt be visible
+                                    3. if manager or HR manager then the button should only be visible if the expense belongs to their company
+                                    4. if user is manager then the approve button shouldnt be visible if the expense is not checked yet, only after its checked by the HR manager
+                                    5. if user is HR manager then the approve button should only be visible if the expense is not approved yet, only after its checked by the manager
+                                    6. if user is CEO then the approve button should be visible if the expense is not approved yet, only after its checked by the manager
+
+                                    Then the best way to implement this is to do the checks in the controller and pass a variable to the view indicating whether the approve button should be shown or not, and then in the view just check that variable to decide whether to show the button or not
+                                --}}
+
+                                @if($expense['can_approve'])
 
                                 <form method="POST" action="{{ route('expenses.approve', ['expense' => $expense['id']]) }}">
                                     @csrf
@@ -136,6 +151,7 @@
                                         </svg>
                                     </button>
                                 </form>
+                                @endif
 
 
                                 <form id="delete-expense-form-{{ $expense['id'] }}" method="POST"
@@ -153,6 +169,7 @@
                                         </svg>
                                     </button>
                                 </form>
+
                                 <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
                                     title="Edit expense" aria-label="Edit expense">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -161,6 +178,7 @@
                                             d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
                                     </svg>
                                 </button>
+
                             </div>
                         </td>
                     </tr>

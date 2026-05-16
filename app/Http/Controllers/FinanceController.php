@@ -70,6 +70,12 @@ class FinanceController extends Controller
        //get the payment details to be displayed from the payments table
         $payments = $this->getPayments($isAdmin, $activeCompanyId,$user,$isManager,$isHr,$isCEO);
 
+
+        //function to check if the approve button should be displayed for the expense based on the user role and expense status
+        foreach ($expenses as &$expense) {
+            $expense['can_approve'] = $this->canApproveExpense($expense, $user, $isManager, $isHr, $isCEO);
+        }
+
         return view('finance', [
             'invoices' => $invoices,
             'expenses' => $expenses,
@@ -107,6 +113,7 @@ class FinanceController extends Controller
 
                 return [
                     'id' => $expense->id,
+                    'company_id' => $expense->company_id,
                     'display_id' => $expense->expense_number,
                     'expense_date' => Carbon::parse($expense->expense_date)->format('M d, Y'),
                     'company_name' => $expense->company?->name ?? '-',
@@ -228,5 +235,27 @@ class FinanceController extends Controller
 
         return $invoices;
     }
+
+    //function to check if the approve button should be displayed for the expense based on the user role and expense status
+    protected function canApproveExpense($expense, $user, $isManager, $isHr, $isCEO)
+    {
+        //check to see if user is neither manager, HR nor CEO, if not then return false
+        if (!$isManager && !$isHr && !$isCEO) {
+            return false;
+        }
+
+        switch ($expense['status'] ?? '') {
+            case 'draft':
+                return $isHr && $user->company_id === $expense['company_id'];
+            case 'checked':
+                return $isManager && $user->company_id === $expense['company_id'];
+            case 'approved':
+                return $isCEO;
+            default:
+                return false;
+        }
+
+    }
+
 
 }
