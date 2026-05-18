@@ -15,6 +15,7 @@
                     @php
                         $convUsers = $users ?? collect();
                         $selectedUser = $convUsers->firstWhere('id', $selectedThread ?? null);
+                        
                     @endphp
                     <div class="flex items-center gap-2">
                         <h2 class="truncate text-lg font-semibold text-slate-900">
@@ -57,40 +58,37 @@
         {{-- messaging view section is here --}}
         <div class="flex flex-1 flex-col bg-slate-50/60">
 
-            {{-- message section is here --}}
+            {{-- Dynamic messages loop --}}
             <div class="flex-1 space-y-4 overflow-y-auto p-4 scrollbar-hide">
-                {{-- receiver text --}}
-                <div class="flex justify-start">
-                    <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                        <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400">
-                            <span class="font-semibold">Mariam</span>
-                            <span class="mono">09:30</span>
+                @forelse($messages ?? [] as $msg)
+                    @if($msg->sender_id === Auth::id())
+                        {{-- sender text (YOU) --}}
+                        <div class="flex justify-end">
+                            <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm">
+                                <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100">
+                                    <span class="font-semibold">You</span>
+                                    <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
+                                </div>
+                                <p class="leading-6">{{ $msg->message }}</p>
+                            </div>
                         </div>
-                        <p class="leading-6">Good morning team. Payroll documents are ready for review.</p>
-                    </div>
-                </div>
-
-                {{-- sender text (YOU) --}}
-                <div class="flex justify-end">
-                    <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm">
-                        <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100">
-                            <span class="font-semibold">You</span>
-                            <span class="mono">09:33</span>
+                    @else
+                        {{-- receiver text --}}
+                        <div class="flex justify-start">
+                            <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                                <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400">
+                                    <span class="font-semibold">{{ $msg->sender->name ?? 'Unknown' }}</span>
+                                    <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
+                                </div>
+                                <p class="leading-6">{{ $msg->message }}</p>
+                            </div>
                         </div>
-                        <p class="leading-6">Please send the final version to finance and keep a copy in the shared folder.</p>
+                    @endif
+                @empty
+                    <div class="text-center text-slate-500 py-8">
+                        <p class="text-sm">No messages yet. Start the conversation!</p>
                     </div>
-                </div>
-
-                {{-- receiver text --}}
-                <div class="flex justify-start">
-                    <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                        <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400">
-                            <span class="font-semibold">Amina</span>
-                            <span class="mono">09:42</span>
-                        </div>
-                        <p class="leading-6">Done. I have also updated the employee benefit notes.</p>
-                    </div>
-                </div>
+                @endforelse
             </div>
 
             {{-- footer section --}}
@@ -105,9 +103,9 @@
 
                 <div class="flex items-end gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
                     {{-- sending the message section here --}}
-                    <form action="{{ route('messages.store', $selectedThread) }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 w-full">
+                    <form action="{{ route('messages.store', $selectedThread ?? Auth::id()) }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 w-full">
                         @csrf
-                        <input type="hidden" name="receiver_id" value="{{ $selectedThread ?? 1 }}">
+                        <input type="hidden" name="receiver_id" value="{{ $selectedThread ?? Auth::id() }}">
 
                         <button type="button" class="inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4">
