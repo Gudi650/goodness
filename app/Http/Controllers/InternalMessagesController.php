@@ -18,6 +18,11 @@ class InternalMessagesController extends Controller
             ->where('id', '!=', Auth::id())
             ->get();
 
+        //check if the user is CEO,Admin ir accountant, if so display all users of all companies
+        if ($this->isPrivilegedUser()) {
+            $users = User::where('id', '!=', Auth::id())->get();
+        }
+
         //dd($users);
         
         return view('messages.index', compact('users'));
@@ -62,4 +67,11 @@ class InternalMessagesController extends Controller
 
         return redirect()->back()->with('success', 'Message sent successfully!');
     }
+
+    //check if the logged in user is CEO, admin or Accountant
+    public function isPrivilegedUser()
+    {
+        $user = Auth::user();
+        return $user && $user->role && in_array($user->role->name, ['CEO', 'Admin', 'Accountant']);
+    }   
 }
