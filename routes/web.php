@@ -1,28 +1,28 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\HrmController;
-use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\BulkImportController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\ContractController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\HrmController;
 use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\PayrollController;
-use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\ContractController;
 use App\Http\Controllers\LeavesController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -69,7 +69,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // Group all protected routes with auth middleware
 // All routes in this group require the user to be logged in
 Route::middleware('auth')->group(function () {
-    
+
     // Main Dashboard - First page users see after login
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -104,11 +104,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
-
-    //Finance Management
+    // Finance Management
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
 
-    //expenses
+    // expenses
     Route::post('/expenses', [ExpensesController::class, 'storeExpense'])->name('expenses.store');
     Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
     Route::get('/expenses/{expense}/download', [ExpensesController::class, 'downloadAttachment'])->name('expenses.download');
@@ -123,7 +122,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/payments/{payment}/download-proof', [PaymentController::class, 'downloadProof'])->name('payments.download-proof');
-
 
     // HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
@@ -178,7 +176,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/leaves/{leave}', [LeavesController::class, 'update'])->name('leaves.update');
     Route::delete('/leaves/{leave}', [LeavesController::class, 'destroy'])->name('leaves.destroy');
 
-    //Inventory Management
+    // Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
 
     // Products (inventory)
@@ -193,7 +191,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
     Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
 
-    //download  attachements list
+    // download  attachements list
     Route::get('/suppliers/{supplier}/download/{type}', [SupplierController::class, 'downloadAttachment'])->name('suppliers.downloadAttachment');
 
     // Purchase Orders (inventory)
@@ -208,10 +206,9 @@ Route::middleware('auth')->group(function () {
         return view('reports');
     })->name('reports');
 
-    //communication page
+    // communication page
     Route::get('/communication', function () {
         return view('messages');
     })->name('communication');
 
 });
-
