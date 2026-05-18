@@ -49,6 +49,11 @@ class InternalMessagesController extends Controller
             } else {
                 $user->last_message_text = null;
             }
+            // unread messages sent to auth user from this user
+            $user->unread_count = InternalMessages::where('sender_id', $user->id)
+                ->where('receiver_id', Auth::id())
+                ->where('is_read', false)
+                ->count();
             return $user;
         })->sortByDesc(function ($u) {
             return $u->last_message_at ?? $u->created_at ?? null;
@@ -88,6 +93,11 @@ class InternalMessagesController extends Controller
             } else {
                 $user->last_message_text = null;
             }
+            // unread messages sent to auth user from this user
+            $user->unread_count = InternalMessages::where('sender_id', $user->id)
+                ->where('receiver_id', Auth::id())
+                ->where('is_read', false)
+                ->count();
             return $user;
         })->sortByDesc(function ($u) {
             return $u->last_message_at ?? $u->created_at ?? null;

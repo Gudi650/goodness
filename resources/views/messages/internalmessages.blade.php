@@ -17,7 +17,15 @@
 
             <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between gap-2">
-                    <p class="truncate text-sm font-semibold text-slate-900">{{ $user->name }}</p>
+                    <div class="flex items-center gap-2">
+                        <p class="truncate text-sm font-semibold text-slate-900">{{ $user->name }}</p>
+
+                        {{-- unread batch and the number as well --}}
+                        @if(!empty($user->unread_count) && $user->unread_count > 0)
+                            <span class="inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5">{{ $user->unread_count }}</span>
+                        @endif
+
+                    </div>
                     <span class="text-[11px] font-medium text-slate-500">
                         @if(!empty($user->last_message_at))
                             {{ \Carbon\Carbon::parse($user->last_message_at)->format('H:i') }}
