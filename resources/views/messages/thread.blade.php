@@ -71,6 +71,8 @@
                                     <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
                                 </div>
                                 <p class="leading-6">{{ $msg->message }}</p>
+
+                                {{-- added the attachment here --}}
                                 @if(!empty($msg->attachment_path))
                                     <div class="mt-2">
                                         @php $ext = strtolower(pathinfo($msg->attachment_name ?? $msg->attachment_path, PATHINFO_EXTENSION)); @endphp
@@ -86,6 +88,7 @@
                                         @endif
                                     </div>
                                 @endif
+
                             </div>
                         </div>
                     @else
@@ -97,6 +100,7 @@
                                     <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
                                 </div>
                                 <p class="leading-6">{{ $msg->message }}</p>
+                                {{-- added the attachment here --}}
                                 @if(!empty($msg->attachment_path))
                                     <div class="mt-2">
                                         @php $ext = strtolower(pathinfo($msg->attachment_name ?? $msg->attachment_path, PATHINFO_EXTENSION)); @endphp
@@ -124,6 +128,7 @@
 
             {{-- footer section --}}
             <div class="border-t border-slate-200 bg-white p-4">
+
                 <div class="mb-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">
                         <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -133,6 +138,7 @@
                 </div>
 
                 <div class="flex items-end gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+
                     {{-- sending the message section here --}}
                     <form action="{{ route('messages.store', $selectedThread ?? Auth::id()) }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 w-full">
                         @csrf
@@ -159,6 +165,7 @@
                         </button>
 
                     </form>
+
                 </div>
             </div>
 
