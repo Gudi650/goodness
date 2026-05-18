@@ -2,11 +2,13 @@
     <article data-thread-panel="internal-0" class="thread-panel flex h-full flex-col">
         <div class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 bg-white">
             <div class="flex min-w-0 items-center gap-3">
+
                 <button type="button" class="back-to-list-btn hidden h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 lg:hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                     </svg>
                 </button>
+
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
                         <h2 class="truncate text-lg font-semibold text-slate-900">Human Resources</h2>
@@ -14,8 +16,10 @@
                     </div>
                     <p class="mt-0.5 text-sm text-slate-500">3 people active, 18 messages today</p>
                 </div>
+
             </div>
 
+            {{-- right side of the tabs containing action keys--}}
             <div class="flex items-center gap-2">
 
                 <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50">
@@ -38,8 +42,12 @@
             </div>
         </div>
 
+        {{-- messaging view section is here --}}
         <div class="flex flex-1 flex-col bg-slate-50/60">
+
+            {{-- message section is here --}}
             <div class="flex-1 space-y-4 overflow-y-auto p-4 scrollbar-hide">
+                {{-- receiver text --}}
                 <div class="flex justify-start">
                     <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
                         <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400">
@@ -50,6 +58,7 @@
                     </div>
                 </div>
 
+                {{-- sender text (YOU) --}}
                 <div class="flex justify-end">
                     <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm">
                         <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100">
@@ -60,6 +69,7 @@
                     </div>
                 </div>
 
+                {{-- receiver text --}}
                 <div class="flex justify-start">
                     <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
                         <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400">
@@ -71,6 +81,7 @@
                 </div>
             </div>
 
+            {{-- footer section --}}
             <div class="border-t border-slate-200 bg-white p-4">
                 <div class="mb-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">
@@ -81,9 +92,10 @@
                 </div>
 
                 <div class="flex items-end gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                    {{-- sending the message section here --}}
                     <form action="{{ route('messages.store') }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 w-full">
                         @csrf
-                        <input type="hidden" name="receiver_id" value="1">
+                        <input type="hidden" name="receiver_id" value="{{ $selectedThread ?? 1 }}">
 
                         <button type="button" class="inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4">
@@ -99,9 +111,11 @@
                             </svg>
                             Send
                         </button>
+
                     </form>
                 </div>
             </div>
+
         </div>
     </article>
 

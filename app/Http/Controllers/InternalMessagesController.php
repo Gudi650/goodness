@@ -3,11 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\InternalMessages;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class InternalMessagesController extends Controller
 {
+
+    //function to show the individuals to message
+    public function index()
+    {
+
+        $users = User::where('company_id', Auth::user()->company_id)
+            ->where('id', '!=', Auth::id())
+            ->get();
+
+        //dd($users);
+        
+        return view('messages.index', compact('users'));
+    }
+
+    //function to show message thread
+    public function thread($threadId)
+    {
+        $messages = InternalMessages::where('thread_id', '=', $threadId, 'and')
+            ->where('company_id', Auth::user()->company_id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+        return view('messages.thread', compact('messages', 'threadId'));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

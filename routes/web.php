@@ -338,14 +338,21 @@ Route::middleware('auth')->group(function () {
         return view('reports');
     })->name('reports');
 
-    //communication page
-    Route::get('/communication', function () {
-        return view('messages');
-    })->name('communication');
+    //communication page - show messages via controller so view has data
+    Route::get('/communication', [InternalMessagesController::class, 'index'])->name('communication');
 
     // Internal Messages Store
     Route::post('/messages/store', [InternalMessagesController::class, 'store'])
         ->name('messages.store');
+
+    //function to show the individuals to message
+    Route::get('/messages', [InternalMessagesController::class, 'index'])
+        ->name('messages.index');
+
+    // Internal Messages Thread
+    Route::get('/messages/thread/{threadId}', [InternalMessagesController::class, 'thread'])
+        ->name('messages.thread');
+    
 
 });
 
