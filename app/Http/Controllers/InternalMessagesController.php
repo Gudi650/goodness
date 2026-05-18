@@ -57,14 +57,14 @@ class InternalMessagesController extends Controller
     {
         $validated = $request->validate([
             'message' => 'required|string|max:5000',
-            'attachment_path' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,gif|max:5120',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,txt,zip|max:5120',
         ]);
 
         $attachmentPath = null;
         $attachmentName = null;
 
-        if ($request->hasFile('attachment_path')) {
-            $file = $request->file('attachment_path');
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
             $attachmentName = $file->getClientOriginalName();
             $attachmentPath = $file->store('attachments/messages', 'public');
         }

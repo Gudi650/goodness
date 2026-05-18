@@ -52,6 +52,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
                     </svg>
                 </button>
+
             </div>
         </div>
 
@@ -70,6 +71,21 @@
                                     <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
                                 </div>
                                 <p class="leading-6">{{ $msg->message }}</p>
+                                @if(!empty($msg->attachment_path))
+                                    <div class="mt-2">
+                                        @php $ext = strtolower(pathinfo($msg->attachment_name ?? $msg->attachment_path, PATHINFO_EXTENSION)); @endphp
+                                        @if(in_array($ext, ['jpg','jpeg','png','gif']))
+                                            <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="block mt-2">
+                                                <img src="{{ asset('storage/' . $msg->attachment_path) }}" class="max-h-48 rounded" alt="{{ $msg->attachment_name ?? 'attachment' }}">
+                                            </a>
+                                        @else
+                                            <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="inline-flex items-center gap-2 rounded px-3 py-2 bg-slate-100 text-sm text-slate-700 mt-2" rel="noopener">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 text-slate-600"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8v8a4 4 0 0 1-4 4H8V7z"/></svg>
+                                                {{ $msg->attachment_name ?? basename($msg->attachment_path) }}
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @else
@@ -81,6 +97,21 @@
                                     <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
                                 </div>
                                 <p class="leading-6">{{ $msg->message }}</p>
+                                @if(!empty($msg->attachment_path))
+                                    <div class="mt-2">
+                                        @php $ext = strtolower(pathinfo($msg->attachment_name ?? $msg->attachment_path, PATHINFO_EXTENSION)); @endphp
+                                        @if(in_array($ext, ['jpg','jpeg','png','gif']))
+                                            <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="block mt-2">
+                                                <img src="{{ asset('storage/' . $msg->attachment_path) }}" class="max-h-48 rounded" alt="{{ $msg->attachment_name ?? 'attachment' }}">
+                                            </a>
+                                        @else
+                                            <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="inline-flex items-center gap-2 rounded px-3 py-2 bg-slate-100 text-sm text-slate-700 mt-2" rel="noopener">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 text-slate-600"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8v8a4 4 0 0 1-4 4H8V7z"/></svg>
+                                                {{ $msg->attachment_name ?? basename($msg->attachment_path) }}
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -107,11 +138,16 @@
                         @csrf
                         <input type="hidden" name="receiver_id" value="{{ $selectedThread ?? Auth::id() }}">
 
-                        <button type="button" class="inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200">
+                        <!--Chat attachment-->
+                        <label for="file-upload" class="inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m6.75 4.5a9 9 0 1 0-13.5 0l1.98-1.98a6.2 6.2 0 0 1 8.76 0l1.98 1.98Z" />
                             </svg>
-                        </button>
+                        </label>
+
+
+                        <input type="file" id="file-upload" name="attachment" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.txt,.zip">
+                        <div id="attachmentPreview" class="ml-3 flex items-center gap-2 text-sm text-slate-700"></div>
 
                         <textarea name="message" rows="2" placeholder="Write a message" class="max-h-32 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm text-slate-700 outline-none placeholder:text-slate-400" required></textarea>
 
@@ -125,6 +161,46 @@
                     </form>
                 </div>
             </div>
+
+            <script>
+                (function(){
+                    const fileInput = document.getElementById('file-upload');
+                    const preview = document.getElementById('attachmentPreview');
+
+                    function clearPreview(){
+                        preview.innerHTML = '';
+                    }
+
+                    fileInput.addEventListener('change', function(e){
+                        clearPreview();
+                        const file = this.files && this.files[0];
+                        if(!file) return;
+
+                        const name = document.createElement('div');
+                        name.className = 'inline-flex items-center gap-2 rounded px-3 py-1 bg-slate-100';
+                        const filename = document.createElement('span');
+                        filename.textContent = file.name;
+
+                        const removeBtn = document.createElement('button');
+                        removeBtn.type = 'button';
+                        removeBtn.className = 'text-sm text-slate-500 hover:text-slate-700';
+                        removeBtn.textContent = 'Remove';
+                        removeBtn.addEventListener('click', function(){ fileInput.value = ''; clearPreview(); });
+
+                        name.appendChild(filename);
+                        name.appendChild(removeBtn);
+                        preview.appendChild(name);
+
+                        if(file.type.startsWith('image/')){
+                            const img = document.createElement('img');
+                            img.className = 'max-h-20 rounded ml-2';
+                            img.src = URL.createObjectURL(file);
+                            img.onload = () => URL.revokeObjectURL(img.src);
+                            preview.appendChild(img);
+                        }
+                    });
+                })();
+            </script>
 
         </div>
     </article>
