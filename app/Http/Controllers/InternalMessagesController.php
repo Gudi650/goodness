@@ -27,13 +27,28 @@ class InternalMessagesController extends Controller
         // attach last message timestamp and text between auth user and each user, then sort by latest
         $users = $users->map(function ($user) {
             $latest = InternalMessages::where(function ($q) use ($user) {
-                $q->where('sender_id', Auth::id())->where('receiver_id', $user->id);
-            })->orWhere(function ($q) use ($user) {
-                $q->where('sender_id', $user->id)->where('receiver_id', Auth::id());
-            })->orderBy('created_at', 'desc')->first();
+                    $q->where('sender_id', Auth::id())
+                    ->where('receiver_id', $user->id);
+                    })
+                    ->orWhere(function ($q) use ($user) {
+                    $q->where('sender_id', $user->id)
+                    ->where('receiver_id', Auth::id());
+                    })
+                    ->orderBy('created_at', 'desc')
+                    ->first();
 
             $user->last_message_at = $latest ? $latest->created_at : null;
-            $user->last_message_text = $latest ? Str::limit($latest->message, 60) : null;
+            if ($latest) {
+                if (!empty($latest->message)) {
+                    $user->last_message_text = Str::limit($latest->message, 60);
+                } elseif (!empty($latest->attachment_name)) {
+                    $user->last_message_text = 'Attachment: ' . Str::limit($latest->attachment_name, 60);
+                } else {
+                    $user->last_message_text = null;
+                }
+            } else {
+                $user->last_message_text = null;
+            }
             return $user;
         })->sortByDesc(function ($u) {
             return $u->last_message_at ?? $u->created_at ?? null;
@@ -62,7 +77,17 @@ class InternalMessagesController extends Controller
             })->orderBy('created_at', 'desc')->first();
 
             $user->last_message_at = $latest ? $latest->created_at : null;
-            $user->last_message_text = $latest ? Str::limit($latest->message, 60) : null;
+            if ($latest) {
+                if (!empty($latest->message)) {
+                    $user->last_message_text = Str::limit($latest->message, 60);
+                } elseif (!empty($latest->attachment_name)) {
+                    $user->last_message_text = 'Attachment: ' . Str::limit($latest->attachment_name, 60);
+                } else {
+                    $user->last_message_text = null;
+                }
+            } else {
+                $user->last_message_text = null;
+            }
             return $user;
         })->sortByDesc(function ($u) {
             return $u->last_message_at ?? $u->created_at ?? null;
