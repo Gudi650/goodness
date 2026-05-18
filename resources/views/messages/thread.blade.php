@@ -1,4 +1,6 @@
+
 <div id="chatPane" class="flex max-h-[calc(100vh-16rem)] min-h-[20rem] flex-col bg-slate-50/60">
+
     <article data-thread-panel="internal-0" class="thread-panel flex h-full flex-col">
         <div class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 bg-white">
             <div class="flex min-w-0 items-center gap-3">
@@ -10,11 +12,21 @@
                 </button>
 
                 <div class="min-w-0">
+                    @php
+                        $convUsers = $users ?? collect();
+                        $selectedUser = $convUsers->firstWhere('id', $selectedThread ?? null);
+                    @endphp
                     <div class="flex items-center gap-2">
-                        <h2 class="truncate text-lg font-semibold text-slate-900">Human Resources</h2>
+                        <h2 class="truncate text-lg font-semibold text-slate-900">
+                            @if($selectedUser)
+                                {{ $selectedUser->name }}
+                            @else
+                                Select a conversation
+                            @endif
+                        </h2>
                         <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700">Internal</span>
                     </div>
-                    <p class="mt-0.5 text-sm text-slate-500">3 people active, 18 messages today</p>
+                    <p class="mt-0.5 text-sm text-slate-500">{{ isset($messages) ? $messages->count() : 0 }} messages</p>
                 </div>
 
             </div>
@@ -119,6 +131,7 @@
         </div>
     </article>
 
+    {{-- 
     <article data-thread-panel="internal-1" class="thread-panel hidden flex h-full flex-col">
         <div class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 bg-white">
             <div class="flex min-w-0 items-center gap-3">
@@ -199,4 +212,5 @@
         </div>
         <div class="flex flex-1 flex-col bg-slate-50/60"><div class="flex-1 space-y-4 overflow-y-auto p-4 scrollbar-hide"><div class="flex justify-start"><div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm"><div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400"><span class="font-semibold">Joseph</span><span class="mono">Yesterday</span></div><p class="leading-6">Thanks for the delivery update.</p></div></div><div class="flex justify-end"><div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm"><div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100"><span class="font-semibold">You</span><span class="mono">Yesterday</span></div><p class="leading-6">The parcel is out for delivery and should arrive before noon.</p></div></div></div><div class="border-t border-slate-200 bg-white p-4"><div class="mb-3 flex flex-wrap items-center gap-2 text-xs text-slate-500"><span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Online now</span><span class="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">Encryption enabled</span></div><div class="flex items-end gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"><button type="button" class="inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m6.75 4.5a9 9 0 1 0-13.5 0l1.98-1.98a6.2 6.2 0 0 1 8.76 0l1.98 1.98Z" /></svg></button><textarea rows="2" placeholder="Write a message" class="max-h-32 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm text-slate-700 outline-none placeholder:text-slate-400"></textarea><button type="button" class="inline-flex h-11 flex-none items-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="m6.75 12 4.5 4.5 6-12" /></svg>Send</button></div></div></div>
     </article>
+    --}}
 </div>

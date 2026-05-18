@@ -31,11 +31,26 @@ class InternalMessagesController extends Controller
     //function to show message thread
     public function thread($threadId)
     {
-        $messages = InternalMessages::where('thread_id', '=', $threadId, 'and')
-            ->where('company_id', Auth::user()->company_id)
+        $users = User::where('company_id', Auth::user()->company_id)
+            ->where('id', '!=', Auth::id())
+            ->get();
+
+        if ($this->isPrivilegedUser()) {
+            $users = User::where('id', '!=', Auth::id())->get();
+        }
+
+        $messages = InternalMessages::where(function ($q) use ($threadId) {
+            $q->where('sender_id', Auth::id())->where('receiver_id', $threadId);
+            })
+            ->orWhere(function ($q) use ($threadId) {
+            $q->where('sender_id', $threadId)->where('receiver_id', Auth::id());
+            })
             ->orderBy('created_at', 'asc')
             ->get();
-        return view('messages.thread', compact('messages', 'threadId'));
+
+        $selectedThread = $threadId;
+
+        return view('messages.index', compact('users', 'messages', 'selectedThread'));
     }
 
     public function store(Request $request)

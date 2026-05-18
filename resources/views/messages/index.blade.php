@@ -98,7 +98,9 @@
 
             <section class="xl:col-span-9">
                 <div class="bg-white">
+                    
                     @include('messages.thread')
+                    
                 </div>
             </section>
 
