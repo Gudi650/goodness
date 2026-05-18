@@ -19,6 +19,8 @@
             // Check whether the current user is an admin.
             $currentUser = auth()->user();
             $isAdmin = $currentUser?->role?->name === 'Admin';
+            $isCEO = $currentUser?->role?->name === 'CEO';
+            $isAccountant = $currentUser?->role?->name === 'Accountant';
 
             // Read the active company id from the session.
             $activeCompanyId = session('active_company_id');
@@ -35,7 +37,7 @@
                     name="company_id"
                     onchange="this.form.submit()"
                     class="block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none max-w-xs truncate">
-                    <option value="" @selected(is_null($activeCompanyId))>All companies</option>
+                    <option value="" @selected(is_null($activeCompanyId))>Goodness Group</option>
 
                     @forelse ($companyOptions as $company)
                         <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>{{ $company->name }}</option>
@@ -125,6 +127,7 @@
             '/sales': 'Sales & CRM',
             '/inventory': 'Inventory',
             '/reports': 'Reports & Analytics',
+            '/communication': 'Messages',
             '/login': 'Login'
         };
         const path = window.location.pathname;

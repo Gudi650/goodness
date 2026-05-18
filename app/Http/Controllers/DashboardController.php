@@ -36,6 +36,7 @@ class DashboardController extends Controller
         ));
     }
 
+    /// Helper methods to build the dashboard context and metrics
     private function dashboardContext(): array
     {
         $currentUser = Auth::user();

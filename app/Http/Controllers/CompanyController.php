@@ -30,8 +30,10 @@ class CompanyController extends Controller
         }
 
         $isAdmin = $user->role?->name === 'Admin';
+        $isCEO = $user->role?->name === 'CEO';
+        $isAccountant = $user->role?->name === 'Accountant';
 
-        if ($isAdmin) {
+        if ($isAdmin || $isCEO || $isAccountant) {
             // Admins can select any company, or leave it blank to view all companies.
             $validated = $request->validate([
                 'company_id' => 'nullable|exists:companies,id',
