@@ -56,7 +56,7 @@ class InternalMessagesController extends Controller
     public function store(Request $request, $threadId)
     {
         $validated = $request->validate([
-            'message' => 'required|string|max:5000',
+            'message' => 'string|max:5000',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,txt,zip|max:5120',
         ]);
 

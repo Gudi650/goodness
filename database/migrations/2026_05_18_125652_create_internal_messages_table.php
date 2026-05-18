@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('sender_id'); // Foreign key to users table
             $table->unsignedBigInteger('receiver_id'); // Foreign key to users table
-            $table->text('message');
+            $table->text('message')->nullable(); // Message content, can be null if only attachment is sent
 
             $table->unsignedBigInteger('company_id')->nullable(); // Optional company association
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('set null');
