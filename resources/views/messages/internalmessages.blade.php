@@ -2,8 +2,11 @@
 
     {{-- for loop through the users please --}}
     @foreach($users as $user)
+
+        @php $isActive = isset($selectedThread) && $selectedThread == $user->id; @endphp
+        
         <a href="{{ route('messages.thread', $user->id) }}" 
-            class="conversation-item flex w-full items-center gap-3 rounded-xl border border-brand-100 bg-brand-50 px-3 py-3 text-left transition-colors hover:bg-slate-100" 
+            class="conversation-item flex w-full items-center gap-3 rounded-xl border border-brand-100 px-3 py-3 text-left transition-colors hover:bg-slate-100{{ $isActive ? ' bg-slate-200 border-brand-300' : ' bg-brand-50' }}" 
             data-chat="{{ $user->id }}" 
             data-mode="internal"
         >

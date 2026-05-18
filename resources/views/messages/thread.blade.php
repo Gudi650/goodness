@@ -27,7 +27,7 @@
                         </h2>
                         <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700">Internal</span>
                     </div>
-                    <p class="mt-0.5 text-sm text-slate-500">{{ isset($messages) ? $messages->count() : 0 }} messages</p>
+                    <!--<p class="mt-0.5 text-sm text-slate-500">{{ isset($messages) ? $messages->count() : 0 }} messages</p> -->
                 </div>
 
             </div>
