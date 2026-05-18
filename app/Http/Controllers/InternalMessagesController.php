@@ -53,11 +53,10 @@ class InternalMessagesController extends Controller
         return view('messages.index', compact('users', 'messages', 'selectedThread'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $threadId)
     {
         $validated = $request->validate([
             'message' => 'required|string|max:5000',
-            'receiver_id' => 'required|integer|exists:users,id',
             'attachment_path' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,gif|max:5120',
         ]);
 
@@ -69,10 +68,11 @@ class InternalMessagesController extends Controller
             $attachmentName = $file->getClientOriginalName();
             $attachmentPath = $file->store('attachments/messages', 'public');
         }
+        
 
         InternalMessages::create([
             'sender_id' => Auth::id(),
-            'receiver_id' => $validated['receiver_id'],
+            'receiver_id' => $threadId,
             'message' => $validated['message'],
             'attachment_path' => $attachmentPath,
             'attachment_name' => $attachmentName,

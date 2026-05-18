@@ -342,7 +342,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/communication', [InternalMessagesController::class, 'index'])->name('communication');
 
     // Internal Messages Store
-    Route::post('/messages/store', [InternalMessagesController::class, 'store'])
+    Route::post('/messages/store/{threadId}', [InternalMessagesController::class, 'store'])
         ->name('messages.store');
 
     //function to show the individuals to message

@@ -105,7 +105,7 @@
 
                 <div class="flex items-end gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
                     {{-- sending the message section here --}}
-                    <form action="{{ route('messages.store') }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 w-full">
+                    <form action="{{ route('messages.store', $selectedThread) }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 w-full">
                         @csrf
                         <input type="hidden" name="receiver_id" value="{{ $selectedThread ?? 1 }}">
 
