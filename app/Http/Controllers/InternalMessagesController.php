@@ -6,6 +6,7 @@ use App\Models\InternalMessages;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class InternalMessagesController extends Controller
 {
@@ -23,8 +24,21 @@ class InternalMessagesController extends Controller
             $users = User::where('id', '!=', Auth::id())->get();
         }
 
-        //dd($users);
-        
+        // attach last message timestamp and text between auth user and each user, then sort by latest
+        $users = $users->map(function ($user) {
+            $latest = InternalMessages::where(function ($q) use ($user) {
+                $q->where('sender_id', Auth::id())->where('receiver_id', $user->id);
+            })->orWhere(function ($q) use ($user) {
+                $q->where('sender_id', $user->id)->where('receiver_id', Auth::id());
+            })->orderBy('created_at', 'desc')->first();
+
+            $user->last_message_at = $latest ? $latest->created_at : null;
+            $user->last_message_text = $latest ? Str::limit($latest->message, 60) : null;
+            return $user;
+        })->sortByDesc(function ($u) {
+            return $u->last_message_at ?? $u->created_at ?? null;
+        })->values();
+
         return view('messages.index', compact('users'));
     }
 
@@ -38,6 +52,21 @@ class InternalMessagesController extends Controller
         if ($this->isPrivilegedUser()) {
             $users = User::where('id', '!=', Auth::id())->get();
         }
+
+        // attach last message timestamp and text, then sort users by most recent conversation
+        $users = $users->map(function ($user) {
+            $latest = InternalMessages::where(function ($q) use ($user) {
+                $q->where('sender_id', Auth::id())->where('receiver_id', $user->id);
+            })->orWhere(function ($q) use ($user) {
+                $q->where('sender_id', $user->id)->where('receiver_id', Auth::id());
+            })->orderBy('created_at', 'desc')->first();
+
+            $user->last_message_at = $latest ? $latest->created_at : null;
+            $user->last_message_text = $latest ? Str::limit($latest->message, 60) : null;
+            return $user;
+        })->sortByDesc(function ($u) {
+            return $u->last_message_at ?? $u->created_at ?? null;
+        })->values();
 
         $messages = InternalMessages::where(function ($q) use ($threadId) {
             $q->where('sender_id', Auth::id())->where('receiver_id', $threadId);

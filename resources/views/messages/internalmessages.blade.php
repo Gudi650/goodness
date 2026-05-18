@@ -15,10 +15,14 @@
             <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between gap-2">
                     <p class="truncate text-sm font-semibold text-slate-900">{{ $user->name }}</p>
-                <span class="text-[11px] font-medium text-slate-500">09:42</span>
-            </div>
+                    <span class="text-[11px] font-medium text-slate-500">
+                        @if(!empty($user->last_message_at))
+                            {{ \Carbon\Carbon::parse($user->last_message_at)->format('H:i') }}
+                        @endif
+                    </span>
+                </div>
 
-            <p class="truncate text-sm text-slate-600">Message content...</p>
+            <p class="truncate text-sm text-slate-600">{{ $user->last_message_text ?? 'No messages yet' }}</p>
 
         </div>
     </a>
