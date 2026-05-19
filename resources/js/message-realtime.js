@@ -20,6 +20,15 @@ function getActiveMessageContainer() {
     return activePanel?.querySelector('.flex-1.space-y-4.overflow-y-auto.p-4') || null;
 }
 
+function scrollActiveChatToBottom() {
+    const container = getActiveMessageContainer();
+    if (!container) {
+        return;
+    }
+
+    container.scrollTop = container.scrollHeight;
+}
+
 function getActiveInternalThreadId() {
     const chatPane = getChatPane();
     const threadId = Number(chatPane?.dataset.selectedThread || 0);
@@ -127,7 +136,11 @@ function bindChatRealtime() {
 
         updateConversationPreview(payload);
     });
+
+    scrollActiveChatToBottom();
 }
+
+window.scrollActiveChatToBottom = scrollActiveChatToBottom;
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bindChatRealtime, { once: true });

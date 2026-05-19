@@ -44,13 +44,13 @@
     @include('components.topbar')
     @include('components.sidebar')
 
-    <main class="ml-0 lg:ml-64 pt-16 lg:pt-20 px-4 lg:p-6 min-h-screen bg-slate-50">
+    <main class="ml-0 lg:ml-64 pt-16 px-4 lg:p-6 h-[calc(100vh-4rem)] overflow-hidden bg-slate-50">
 
         @include('messages.tabs')
 
-        <div class="grid grid-cols-1 gap-4 xl:grid-cols-12">
-            <section class="xl:col-span-3">
-                <div id="internalModePane" data-mode-pane="internal" class="bg-white">
+        <div class="grid h-full min-h-0 grid-cols-1 gap-4 xl:grid-cols-12">
+            <section class="h-full min-h-0 xl:col-span-3">
+                <div id="internalModePane" data-mode-pane="internal" class="flex h-full min-h-0 flex-col bg-white">
                     <div class="border-b border-slate-200 p-4">
                         <div class="flex items-center justify-between gap-3">
                             <div>
@@ -68,12 +68,12 @@
                         </div>
                     </div>
 
-                    <div id="conversationList" class="max-h-[calc(100vh-16rem)] overflow-y-auto scrollbar-hide p-2 bg-white">
+                    <div id="conversationList" class="min-h-0 flex-1 overflow-y-auto scrollbar-hide p-2 bg-white">
                         @include('messages.internalmessages')
                     </div>
                 </div>
 
-                <div id="smsModePane" data-mode-pane="sms" class="hidden bg-white">
+                <div id="smsModePane" data-mode-pane="sms" class="hidden flex h-full min-h-0 flex-col bg-white">
                     <div class="border-b border-slate-200 p-4">
                         <div class="flex items-center justify-between gap-3">
                             <div>
@@ -91,14 +91,14 @@
                         </div>
                     </div>
 
-                    <div class="max-h-[calc(100vh-16rem)] overflow-y-auto scrollbar-hide p-2 bg-white">
+                    <div class="min-h-0 flex-1 overflow-y-auto scrollbar-hide p-2 bg-white">
                         @include('messages.smsmessages')
                     </div>
                 </div>
             </section>
 
-            <section class="xl:col-span-9">
-                <div class="bg-white">
+            <section class="h-full min-h-0 xl:col-span-9">
+                <div class="h-full min-h-0 bg-white">
                     
                     @include('messages.thread')
                     

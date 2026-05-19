@@ -46,6 +46,10 @@
         if (chatPane) {
             chatPane.dataset.selectedThread = mode === 'internal' ? String(index) : '';
         }
+
+        if (window.scrollActiveChatToBottom) {
+            window.scrollActiveChatToBottom();
+        }
     }
 
     function syncLayout() {
