@@ -244,30 +244,9 @@
 
                             const payload = await res.json();
 
-                            // append sent message to chat (right-aligned)
-                            const container = document.querySelector('#chatPane article.thread-panel .flex-1.space-y-4.overflow-y-auto.p-4');
-                            if(container){
-                                const wrapper = document.createElement('div');
-                                wrapper.className = 'flex justify-end';
-                                const time = new Date(payload.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                                let inner = `
-                                    <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm">
-                                        <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100">
-                                            <span class="font-semibold">You</span>
-                                            <span class="mono">${time}</span>
-                                        </div>
-                                        <p class="leading-6">${payload.message || ''}</p>
-                                    </div>
-                                `;
-
-                                if(payload.attachment_path){
-                                    const url = '/storage/' + payload.attachment_path;
-                                    inner = inner.replace('</p>', `</p>\n<div class="mt-2"><a href="${url}" target="_blank" class="inline-flex items-center gap-2 rounded px-3 py-2 bg-slate-100 text-sm text-slate-700 mt-2">${payload.attachment_name || 'attachment'}</a></div>`);
-                                }
-
-                                wrapper.innerHTML = inner;
-                                container.appendChild(wrapper);
-                                container.scrollTop = container.scrollHeight;
+                            // append sent message to chat (shared renderer)
+                            if(window.renderChatMessage){
+                                window.renderChatMessage(payload, 'outgoing');
                             }
 
                             // clear inputs

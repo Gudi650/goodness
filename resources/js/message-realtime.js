@@ -17,7 +17,7 @@ function getActiveThreadPanel() {
 
 function getActiveMessageContainer() {
     const activePanel = getActiveThreadPanel();
-    return activePanel?.querySelector('.flex-1.space-y-4.overflow-y-auto.p-4') || null;
+    return activePanel?.querySelector('.overflow-y-auto.p-4.scrollbar-hide') || activePanel?.querySelector('.overflow-y-auto.p-4') || null;
 }
 
 function scrollActiveChatToBottom() {
@@ -29,31 +29,23 @@ function scrollActiveChatToBottom() {
     container.scrollTop = container.scrollHeight;
 }
 
-function getActiveInternalThreadId() {
-    const chatPane = getChatPane();
-    const threadId = Number(chatPane?.dataset.selectedThread || 0);
-
-    return Number.isFinite(threadId) ? threadId : null;
-}
-
-function appendIncomingMessage(payload) {
-    const container = getActiveMessageContainer();
-    if (!container) {
-        return;
-    }
-
+function createMessageNode(payload, direction = 'incoming') {
     const wrapper = document.createElement('div');
-    wrapper.className = 'flex justify-start';
+    wrapper.className = direction === 'outgoing' ? 'flex justify-end' : 'flex justify-start';
 
     const bubble = document.createElement('div');
-    bubble.className = 'max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm';
+    bubble.className = direction === 'outgoing'
+        ? 'max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm'
+        : 'max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm';
 
     const header = document.createElement('div');
-    header.className = 'mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400';
+    header.className = direction === 'outgoing'
+        ? 'mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100'
+        : 'mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400';
 
     const senderName = document.createElement('span');
     senderName.className = 'font-semibold';
-    senderName.textContent = payload.sender_name || 'Unknown';
+    senderName.textContent = direction === 'outgoing' ? 'You' : (payload.sender_name || 'Unknown');
 
     const time = document.createElement('span');
     time.className = 'mono';
@@ -84,8 +76,24 @@ function appendIncomingMessage(payload) {
     }
 
     wrapper.appendChild(bubble);
-    container.appendChild(wrapper);
-    container.scrollTop = container.scrollHeight;
+    return wrapper;
+}
+
+function renderChatMessage(payload, direction = 'incoming') {
+    const container = getActiveMessageContainer();
+    if (!container) {
+        return;
+    }
+
+    container.appendChild(createMessageNode(payload, direction));
+    scrollActiveChatToBottom();
+}
+
+function getActiveInternalThreadId() {
+    const chatPane = getChatPane();
+    const threadId = Number(chatPane?.dataset.selectedThread || 0);
+
+    return Number.isFinite(threadId) ? threadId : null;
 }
 
 function updateConversationPreview(payload) {
@@ -130,7 +138,7 @@ function bindChatRealtime() {
         const senderId = Number(payload.sender_id || 0);
 
         if (activeThreadId && activeThreadId === senderId) {
-            appendIncomingMessage(payload);
+            renderChatMessage(payload, 'incoming');
             return;
         }
 
@@ -141,6 +149,7 @@ function bindChatRealtime() {
 }
 
 window.scrollActiveChatToBottom = scrollActiveChatToBottom;
+window.renderChatMessage = renderChatMessage;
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bindChatRealtime, { once: true });
