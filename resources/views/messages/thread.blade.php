@@ -60,72 +60,70 @@
         <div class="flex min-h-0 flex-1 flex-col bg-slate-50/60">
 
             {{-- Dynamic messages loop --}}
-            <div class="min-h-0 flex flex-1 flex-col overflow-y-auto overscroll-contain p-4 scrollbar-hide">
-                <div class="flex min-h-full flex-col justify-end space-y-4">
-                    @forelse($messages ?? [] as $msg)
-                        @if($msg->sender_id === Auth::id())
-                            {{-- sender text (YOU) --}}
-                            <div class="flex justify-end">
-                                <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm">
-                                    <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100">
-                                        <span class="font-semibold">You</span>
-                                        <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
-                                    </div>
-                                    <p class="leading-6">{{ $msg->message }}</p>
-
-                                    {{-- added the attachment here --}}
-                                    @if(!empty($msg->attachment_path))
-                                        <div class="mt-2">
-                                            @php $ext = strtolower(pathinfo($msg->attachment_name ?? $msg->attachment_path, PATHINFO_EXTENSION)); @endphp
-                                            @if(in_array($ext, ['jpg','jpeg','png','gif']))
-                                                <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="block mt-2">
-                                                    <img src="{{ asset('storage/' . $msg->attachment_path) }}" class="max-h-48 rounded" alt="{{ $msg->attachment_name ?? 'attachment' }}">
-                                                </a>
-                                            @else
-                                                <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="inline-flex items-center gap-2 rounded px-3 py-2 bg-slate-100 text-sm text-slate-700 mt-2" rel="noopener">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 text-slate-600"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8v8a4 4 0 0 1-4 4H8V7z"/></svg>
-                                                    {{ $msg->attachment_name ?? basename($msg->attachment_path) }}
-                                                </a>
-                                            @endif
-                                        </div>
-                                    @endif
-
+            <div class="min-h-0 flex flex-1 flex-col space-y-4 overflow-y-auto overscroll-contain p-4 scrollbar-hide">
+                @forelse($messages ?? [] as $msg)
+                    @if($msg->sender_id === Auth::id())
+                        {{-- sender text (YOU) --}}
+                        <div class="flex justify-end">
+                            <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm">
+                                <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100">
+                                    <span class="font-semibold">You</span>
+                                    <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
                                 </div>
-                            </div>
-                        @else
-                            {{-- receiver text --}}
-                            <div class="flex justify-start">
-                                <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                                    <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400">
-                                        <span class="font-semibold">{{ $msg->sender->name ?? 'Unknown' }}</span>
-                                        <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
+                                <p class="leading-6">{{ $msg->message }}</p>
+
+                                {{-- added the attachment here --}}
+                                @if(!empty($msg->attachment_path))
+                                    <div class="mt-2">
+                                        @php $ext = strtolower(pathinfo($msg->attachment_name ?? $msg->attachment_path, PATHINFO_EXTENSION)); @endphp
+                                        @if(in_array($ext, ['jpg','jpeg','png','gif']))
+                                            <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="block mt-2">
+                                                <img src="{{ asset('storage/' . $msg->attachment_path) }}" class="max-h-48 rounded" alt="{{ $msg->attachment_name ?? 'attachment' }}">
+                                            </a>
+                                        @else
+                                            <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="inline-flex items-center gap-2 rounded px-3 py-2 bg-slate-100 text-sm text-slate-700 mt-2" rel="noopener">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 text-slate-600"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8v8a4 4 0 0 1-4 4H8V7z"/></svg>
+                                                {{ $msg->attachment_name ?? basename($msg->attachment_path) }}
+                                            </a>
+                                        @endif
                                     </div>
-                                    <p class="leading-6">{{ $msg->message }}</p>
-                                    {{-- added the attachment here --}}
-                                    @if(!empty($msg->attachment_path))
-                                        <div class="mt-2">
-                                            @php $ext = strtolower(pathinfo($msg->attachment_name ?? $msg->attachment_path, PATHINFO_EXTENSION)); @endphp
-                                            @if(in_array($ext, ['jpg','jpeg','png','gif']))
-                                                <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="block mt-2">
-                                                    <img src="{{ asset('storage/' . $msg->attachment_path) }}" class="max-h-48 rounded" alt="{{ $msg->attachment_name ?? 'attachment' }}">
-                                                </a>
-                                            @else
-                                                <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="inline-flex items-center gap-2 rounded px-3 py-2 bg-slate-100 text-sm text-slate-700 mt-2" rel="noopener">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 text-slate-600"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8v8a4 4 0 0 1-4 4H8V7z"/></svg>
-                                                    {{ $msg->attachment_name ?? basename($msg->attachment_path) }}
-                                                </a>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
+                                @endif
+
                             </div>
-                        @endif
-                    @empty
-                        <div class="text-center text-slate-500 py-8">
-                            <p class="text-sm">No messages yet. Start the conversation!</p>
                         </div>
-                    @endforelse
-                </div>
+                    @else
+                        {{-- receiver text --}}
+                        <div class="flex justify-start">
+                            <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                                <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400">
+                                    <span class="font-semibold">{{ $msg->sender->name ?? 'Unknown' }}</span>
+                                    <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
+                                </div>
+                                <p class="leading-6">{{ $msg->message }}</p>
+                                {{-- added the attachment here --}}
+                                @if(!empty($msg->attachment_path))
+                                    <div class="mt-2">
+                                        @php $ext = strtolower(pathinfo($msg->attachment_name ?? $msg->attachment_path, PATHINFO_EXTENSION)); @endphp
+                                        @if(in_array($ext, ['jpg','jpeg','png','gif']))
+                                            <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="block mt-2">
+                                                <img src="{{ asset('storage/' . $msg->attachment_path) }}" class="max-h-48 rounded" alt="{{ $msg->attachment_name ?? 'attachment' }}">
+                                            </a>
+                                        @else
+                                            <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="inline-flex items-center gap-2 rounded px-3 py-2 bg-slate-100 text-sm text-slate-700 mt-2" rel="noopener">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 text-slate-600"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8v8a4 4 0 0 1-4 4H8V7z"/></svg>
+                                                {{ $msg->attachment_name ?? basename($msg->attachment_path) }}
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                @empty
+                    <div class="text-center text-slate-500 py-8">
+                        <p class="text-sm">No messages yet. Start the conversation!</p>
+                    </div>
+                @endforelse
             </div>
 
             {{-- footer section --}}
