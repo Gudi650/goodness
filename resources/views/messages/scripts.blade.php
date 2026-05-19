@@ -42,6 +42,10 @@
         threadPanels.forEach((panel) => {
             panel.classList.toggle('hidden', panel.dataset.threadPanel !== activeThreadKey);
         });
+
+        if (chatPane) {
+            chatPane.dataset.selectedThread = mode === 'internal' ? String(index) : '';
+        }
     }
 
     function syncLayout() {

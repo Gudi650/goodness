@@ -1,5 +1,5 @@
 
-<div id="chatPane" class="flex max-h-[calc(100vh-16rem)] min-h-[20rem] flex-col bg-slate-50/60">
+<div id="chatPane" data-auth-id="{{ Auth::id() }}" data-selected-thread="{{ $selectedThread ?? '' }}" class="flex max-h-[calc(100vh-16rem)] min-h-[20rem] flex-col bg-slate-50/60">
 
     <article data-thread-panel="internal-0" class="thread-panel flex h-full flex-col">
         <div class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 bg-white">
@@ -140,7 +140,7 @@
                 <div class="flex items-end gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
 
                     {{-- sending the message section here --}}
-                    <form action="{{ route('messages.store', $selectedThread ?? Auth::id()) }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 w-full">
+                    <form id="messageForm" action="{{ route('messages.store', $selectedThread ?? Auth::id()) }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 w-full">
                         @csrf
                         <input type="hidden" name="receiver_id" value="{{ $selectedThread ?? Auth::id() }}">
 
@@ -204,6 +204,84 @@
                             img.src = URL.createObjectURL(file);
                             img.onload = () => URL.revokeObjectURL(img.src);
                             preview.appendChild(img);
+                        }
+                    });
+                })();
+            </script>
+
+            <script>
+                (function(){
+                    const form = document.getElementById('messageForm');
+                    if(!form) return;
+
+                    form.addEventListener('submit', async function(e){
+                        e.preventDefault();
+
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        if(submitBtn) submitBtn.disabled = true;
+
+                        const fd = new FormData(form);
+                        const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+                        const csrf = tokenMeta ? tokenMeta.getAttribute('content') : '';
+
+                        try{
+                            const res = await fetch(form.action, {
+                                method: 'POST',
+                                body: fd,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': csrf,
+                                    'Accept': 'application/json'
+                                },
+                                credentials: 'same-origin'
+                            });
+
+                            if(!res.ok){
+                                const txt = await res.text();
+                                console.error('Send failed', res.status, txt);
+                                return;
+                            }
+
+                            const payload = await res.json();
+
+                            // append sent message to chat (right-aligned)
+                            const container = document.querySelector('#chatPane article.thread-panel .flex-1.space-y-4.overflow-y-auto.p-4');
+                            if(container){
+                                const wrapper = document.createElement('div');
+                                wrapper.className = 'flex justify-end';
+                                const time = new Date(payload.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                                let inner = `
+                                    <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm">
+                                        <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100">
+                                            <span class="font-semibold">You</span>
+                                            <span class="mono">${time}</span>
+                                        </div>
+                                        <p class="leading-6">${payload.message || ''}</p>
+                                    </div>
+                                `;
+
+                                if(payload.attachment_path){
+                                    const url = '/storage/' + payload.attachment_path;
+                                    inner = inner.replace('</p>', `</p>\n<div class="mt-2"><a href="${url}" target="_blank" class="inline-flex items-center gap-2 rounded px-3 py-2 bg-slate-100 text-sm text-slate-700 mt-2">${payload.attachment_name || 'attachment'}</a></div>`);
+                                }
+
+                                wrapper.innerHTML = inner;
+                                container.appendChild(wrapper);
+                                container.scrollTop = container.scrollHeight;
+                            }
+
+                            // clear inputs
+                            const textarea = form.querySelector('textarea[name="message"]');
+                            if(textarea) textarea.value = '';
+                            const fileInput = form.querySelector('input[type="file"]');
+                            if(fileInput) fileInput.value = '';
+                            const preview = document.getElementById('attachmentPreview');
+                            if(preview) preview.innerHTML = '';
+
+                        }catch(err){
+                            console.error(err);
+                        }finally{
+                            if(submitBtn) submitBtn.disabled = false;
                         }
                     });
                 })();

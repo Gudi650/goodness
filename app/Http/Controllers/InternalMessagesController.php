@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Events\MessageSent;
 
 class InternalMessagesController extends Controller
 {
@@ -134,7 +135,7 @@ class InternalMessagesController extends Controller
         }
         
 
-        InternalMessages::create([
+        $message = InternalMessages::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $threadId,
             'message' => $validated['message'],
@@ -143,6 +144,23 @@ class InternalMessagesController extends Controller
             'company_id' => Auth::user()->company_id,
             'is_read' => false,
         ]);
+
+        // broadcast the message to the receiver
+        event(new MessageSent($message));
+
+        // if the request expects JSON (AJAX), return the created message payload
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'id' => $message->id,
+                'sender_id' => $message->sender_id,
+                'receiver_id' => $message->receiver_id,
+                'message' => $message->message,
+                'attachment_path' => $message->attachment_path,
+                'attachment_name' => $message->attachment_name,
+                'created_at' => $message->created_at->toDateTimeString(),
+                'sender_name' => optional($message->sender)->name ?? Auth::user()->name,
+            ], 201);
+        }
 
         return redirect()->back()->with('success', 'Message sent successfully!');
     }
