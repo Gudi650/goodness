@@ -60,7 +60,7 @@
         <div class="flex min-h-0 flex-1 flex-col bg-slate-50/60">
 
             {{-- Dynamic messages loop --}}
-            <div class="min-h-0 flex flex-1 flex-col justify-end space-y-4 overflow-y-auto p-4 scrollbar-hide">
+            <div class="min-h-0 flex flex-1 flex-col space-y-4 overflow-y-auto overscroll-contain p-4 scrollbar-hide">
                 @forelse($messages ?? [] as $msg)
                     @if($msg->sender_id === Auth::id())
                         {{-- sender text (YOU) --}}
@@ -127,7 +127,7 @@
             </div>
 
             {{-- footer section --}}
-            <div class="border-t border-slate-200 bg-white p-4">
+            <div class="shrink-0 border-t border-slate-200 bg-white p-4">
 
                 <div class="mb-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">

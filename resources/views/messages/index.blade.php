@@ -40,15 +40,15 @@
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 overflow-x-hidden">
     @include('components.topbar')
     @include('components.sidebar')
 
-    <main class="ml-0 lg:ml-64 pt-16 px-4 lg:p-6 h-[calc(100vh-4rem)] overflow-hidden bg-slate-50">
+    <main class="ml-0 lg:ml-64 pt-20 px-4 pb-4 lg:px-6 lg:pt-20 lg:pb-6 h-[calc(100vh-4rem)] bg-slate-50 flex flex-col min-h-0 overflow-hidden">
 
         @include('messages.tabs')
 
-        <div class="grid h-full min-h-0 grid-cols-1 gap-4 xl:grid-cols-12">
+        <div class="grid flex-1 min-h-0 grid-cols-1 gap-4 xl:grid-cols-12 overflow-hidden">
             <section class="h-full min-h-0 xl:col-span-3">
                 <div id="internalModePane" data-mode-pane="internal" class="flex h-full min-h-0 flex-col bg-white">
                     <div class="border-b border-slate-200 p-4">
