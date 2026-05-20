@@ -17,6 +17,9 @@ class InternalMessages extends Model
         'attachment_path',
         'attachment_name',
         'is_read',
+        'delivered',
+        'seen',
+        'seen_at',
     ];
 
     //relationship to sender user

@@ -143,6 +143,9 @@ class InternalMessagesController extends Controller
             'attachment_name' => $attachmentName,
             'company_id' => Auth::user()->company_id,
             'is_read' => false,
+            'delivered' => true,
+            'seen' => false,
+            'seen_at' => null,
         ]);
 
         // broadcast the message to the receiver
@@ -159,6 +162,9 @@ class InternalMessagesController extends Controller
                 'attachment_name' => $message->attachment_name,
                 'created_at' => $message->created_at->toDateTimeString(),
                 'sender_name' => optional($message->sender)->name ?? Auth::user()->name,
+                'delivered' => $message->delivered,
+                'seen' => $message->seen,
+                'seen_at' => $message->seen_at,
             ], 201);
         }
 
