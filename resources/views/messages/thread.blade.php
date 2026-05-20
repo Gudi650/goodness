@@ -64,21 +64,30 @@
                 @forelse($messages ?? [] as $msg)
                     @if($msg->sender_id === Auth::id())
                         {{-- sender text (YOU) --}}
-                        <div class="flex justify-end">
-                            <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm">
+                        <div class="flex justify-end" data-message-id="{{ $msg->id }}">
+                            <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm" data-message-bubble>
                                 <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-brand-100">
                                     <span class="font-semibold">You</span>
                                     <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
                                 </div>
                                 <p class="leading-6">{{ $msg->message }}</p>
 
-                                <div class="mt-1 flex items-center justify-end gap-0.5 text-sky-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
-                                    </svg>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 -ml-1 opacity-90">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
-                                    </svg>
+                                @php
+                                    $messageStatus = $msg->seen ? 'seen' : ($msg->delivered ? 'delivered' : 'sent');
+                                @endphp
+                                <div class="message-ticks mt-1 flex items-center justify-end gap-0.5" data-message-ticks data-message-status="{{ $messageStatus }}">
+                                    @if($messageStatus === 'seen')
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 text-sky-300" data-tick-single>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
+                                        </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 -ml-1 text-sky-300" data-tick-double>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
+                                        </svg>
+                                    @else
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 text-slate-300" data-tick-single>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
+                                        </svg>
+                                    @endif
                                 </div>
 
                                 {{-- added the attachment here --}}
@@ -102,8 +111,8 @@
                         </div>
                     @else
                         {{-- receiver text --}}
-                        <div class="flex justify-start">
-                            <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                        <div class="flex justify-start" data-message-id="{{ $msg->id }}">
+                            <div class="max-w-[82%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm" data-message-bubble>
                                 <div class="mb-1 flex items-center justify-between gap-4 text-[11px] text-slate-400">
                                     <span class="font-semibold">{{ $msg->sender->name ?? 'Unknown' }}</span>
                                     <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
@@ -256,8 +265,10 @@
                             const payload = await res.json();
 
                             // append sent message to chat (shared renderer)
-                            if(window.renderChatMessage){
-                                window.renderChatMessage(payload, 'outgoing');
+                                if(window.renderChatMessage){
+                                    window.renderChatMessage({ ...payload, status: 'sent' }, 'outgoing');
+                                }
+                                window.renderChatMessage({ ...payload, status: 'sent' }, 'outgoing');
                             }
 
                             // clear inputs

@@ -22,7 +22,7 @@
 
                         {{-- unread batch and the number as well --}}
                         @if(!empty($user->unread_count) && $user->unread_count > 0)
-                            <span class="inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5">{{ $user->unread_count }}</span>
+                            <span data-unread-badge class="inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5">{{ $user->unread_count }}</span>
                         @endif
 
                     </div>

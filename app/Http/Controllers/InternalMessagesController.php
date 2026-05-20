@@ -160,7 +160,7 @@ class InternalMessagesController extends Controller
             'attachment_name' => $attachmentName,
             'company_id' => Auth::user()->company_id,
             'is_read' => false,
-            'delivered' => true,
+            'delivered' => false,
             'seen' => false,
             'seen_at' => null,
         ]);
@@ -184,6 +184,8 @@ class InternalMessagesController extends Controller
                 'seen_at' => $message->seen_at,
             ], 201);
         }
+
+        //
 
         return redirect()->back()->with('success', 'Message sent successfully!');
     }

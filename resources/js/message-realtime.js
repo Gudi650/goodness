@@ -38,6 +38,9 @@ function scrollActiveChatToBottom() {
 function createMessageNode(payload, direction = 'incoming') {
     const wrapper = document.createElement('div');
     wrapper.className = direction === 'outgoing' ? 'flex justify-end' : 'flex justify-start';
+    if (payload.id) {
+        wrapper.dataset.messageId = String(payload.id);
+    }
 
     const bubble = document.createElement('div');
     bubble.className = direction === 'outgoing'
@@ -63,14 +66,23 @@ function createMessageNode(payload, direction = 'incoming') {
 
     const status = document.createElement('div');
     status.className = direction === 'outgoing'
-        ? 'mt-1 flex items-center justify-end gap-0.5 text-sky-300'
+        ? 'message-ticks mt-1 flex items-center justify-end gap-0.5'
         : 'mt-2 flex items-center justify-end gap-1.5 text-slate-400';
+    if (payload.id) {
+        status.dataset.messageTicks = 'true';
+    }
 
     if (direction === 'outgoing') {
-        status.innerHTML = [
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>',
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 -ml-1 opacity-90"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>'
-        ].join('');
+        const statusState = payload.status || (payload.seen ? 'seen' : (payload.delivered ? 'delivered' : 'sent'));
+
+        if (statusState === 'seen') {
+            status.innerHTML = [
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 text-sky-300" data-tick-single><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>',
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 -ml-1 text-sky-300" data-tick-double><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>'
+            ].join('');
+        } else {
+            status.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 text-slate-300" data-tick-single><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>';
+        }
     }
 
     header.appendChild(senderName);
@@ -111,6 +123,42 @@ function renderChatMessage(payload, direction = 'incoming') {
     scrollActiveChatToBottom();
 }
 
+function updateMessageTicks(messageId, statusState) {
+    const messageNode = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (!messageNode) {
+        return;
+    }
+
+    const ticks = messageNode.querySelector('[data-message-ticks]');
+    if (!ticks) {
+        return;
+    }
+
+    ticks.dataset.messageStatus = statusState;
+    ticks.classList.remove('text-slate-300', 'text-sky-300');
+
+    if (statusState === 'seen') {
+        ticks.classList.add('text-sky-300');
+        ticks.innerHTML = [
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 text-sky-300" data-tick-single><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>',
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 -ml-1 text-sky-300" data-tick-double><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>'
+        ].join('');
+        return;
+    }
+
+    ticks.classList.add('text-slate-300');
+    ticks.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 text-slate-300" data-tick-single><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>';
+}
+
+function markMessageSeen(payload) {
+    const messageId = Number(payload.id || 0);
+    if (!messageId) {
+        return;
+    }
+
+    updateMessageTicks(messageId, 'seen');
+}
+
 //get the active threadID of the active chat room we are in
 function getActiveInternalThreadId() {
     const chatPane = getChatPane();
@@ -138,14 +186,39 @@ function updateConversationPreview(payload) {
         timeEl.textContent = formatTime(payload.created_at);
     }
 
-    const badge = conversation.querySelector('span.inline-flex');
+    const badge = conversation.querySelector('[data-unread-badge]');
     if (badge) {
         const count = Number.parseInt(badge.textContent || '0', 10) || 0;
         badge.textContent = String(count + 1);
         badge.classList.remove('hidden');
+        badge.dataset.unreadBadge = 'true';
+        return;
+    }
+
+    const newBadge = document.createElement('span');
+    newBadge.dataset.unreadBadge = 'true';
+    newBadge.className = 'inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5';
+    newBadge.textContent = '1';
+
+    const nameContainer = conversation.querySelector('.flex.items-center.gap-2');
+    if (nameContainer) {
+        nameContainer.appendChild(newBadge);
     }
 }
 
+function clearConversationUnreadBadge(senderId) {
+    const conversation = document.querySelector(`#internalConversationList a[data-chat="${senderId}"]`);
+    if (!conversation) {
+        return;
+    }
+
+    const badge = conversation.querySelector('[data-unread-badge]');
+    if (badge) {
+        badge.remove();
+    }
+}
+
+//render now the messages in the chatroom
 function bindChatRealtime() {
     const chatPane = getChatPane();
     if (!chatPane || !window.Echo) {
@@ -160,25 +233,33 @@ function bindChatRealtime() {
     window.Echo.private(`chat.${authId}`).listen('MessageSent', (payload) => {
         const activeThreadId = getActiveInternalThreadId();
         const senderId = Number(payload.sender_id || 0);
+        const receiverId = Number(payload.receiver_id || 0);
 
-        if (activeThreadId && activeThreadId === senderId) {
-            renderChatMessage(payload, 'incoming');
-            updateConversationPreview(payload);
+        if (senderId === authId) {
+            if (payload.id) {
+                updateMessageTicks(payload.id, payload.seen ? 'seen' : 'delivered');
+            }
             return;
         }
-
-        /*
-        const receiverId = Number(payload.receiver_id || 0);
 
         if (activeThreadId && (activeThreadId === senderId || activeThreadId === receiverId)) {
             const direction = senderId === authId ? 'outgoing' : 'incoming';
             renderChatMessage(payload, direction);
             return;
-        }   */
-
-        //console.log(activeThreadId, senderId, receiverId);
+        }
 
         updateConversationPreview(payload);
+    });
+
+    window.Echo.private(`chat.${authId}`).listen('MessageSeen', (payload) => {
+        markMessageSeen(payload);
+
+        const senderId = Number(payload.sender_id || 0);
+        const receiverId = Number(payload.receiver_id || 0);
+
+        if (receiverId === authId && senderId) {
+            clearConversationUnreadBadge(senderId);
+        }
     });
 
     scrollActiveChatToBottom();
