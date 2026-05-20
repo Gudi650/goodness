@@ -61,10 +61,25 @@ function createMessageNode(payload, direction = 'incoming') {
     message.className = 'leading-6';
     message.textContent = payload.message || '';
 
+    const status = document.createElement('div');
+    status.className = direction === 'outgoing'
+        ? 'mt-1 flex items-center justify-end gap-0.5 text-sky-300'
+        : 'mt-2 flex items-center justify-end gap-1.5 text-slate-400';
+
+    if (direction === 'outgoing') {
+        status.innerHTML = [
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>',
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 -ml-1 opacity-90"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>'
+        ].join('');
+    }
+
     header.appendChild(senderName);
     header.appendChild(time);
     bubble.appendChild(header);
     bubble.appendChild(message);
+    if (direction === 'outgoing') {
+        bubble.appendChild(status);
+    }
 
     if (payload.attachment_path) {
         const attachmentWrap = document.createElement('div');
