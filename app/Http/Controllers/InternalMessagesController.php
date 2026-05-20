@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Events\MessageSent;
+use App\Events\MessageSeen;
 
 class InternalMessagesController extends Controller
 {
@@ -66,6 +67,22 @@ class InternalMessagesController extends Controller
     //function to show message thread
     public function thread($threadId)
     {
+        $unseenMessages = InternalMessages::where('sender_id', $threadId)
+            ->where('receiver_id', Auth::id())
+            ->where('is_read', false)
+            ->get();
+
+        foreach ($unseenMessages as $message) {
+            $message->update([
+                'is_read' => true,
+                'delivered' => true,
+                'seen' => true,
+                'seen_at' => now(),
+            ]);
+
+            event(new MessageSeen($message));
+        }
+
         $users = User::where('company_id', Auth::user()->company_id)
             ->where('id', '!=', Auth::id())
             ->get();
