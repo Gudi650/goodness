@@ -62,7 +62,7 @@
             {{-- Dynamic messages loop --}}
             <div class="min-h-0 flex flex-1 flex-col space-y-4 overflow-y-auto overscroll-contain p-4 scrollbar-hide">
                 @forelse($messages ?? [] as $msg)
-                    @if($msg->sender_id === Auth::id())
+                    @if($msg->sender_id == Auth::id())
                         {{-- sender text (YOU) --}}
                         <div class="flex justify-end" data-message-id="{{ $msg->id }}">
                             <div class="max-w-[82%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-sm text-white shadow-sm" data-message-bubble>
