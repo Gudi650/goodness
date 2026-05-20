@@ -100,6 +100,7 @@
                                     <span class="mono">{{ $msg->created_at->format('H:i') }}</span>
                                 </div>
                                 <p class="leading-6">{{ $msg->message }}</p>
+
                                 {{-- added the attachment here --}}
                                 @if(!empty($msg->attachment_path))
                                     <div class="mt-2">
@@ -116,6 +117,7 @@
                                         @endif
                                     </div>
                                 @endif
+                                
                             </div>
                         </div>
                     @endif

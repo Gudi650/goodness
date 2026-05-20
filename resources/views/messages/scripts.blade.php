@@ -14,6 +14,11 @@
         sms: 0
     };
 
+    const initialSelectedThread = Number(chatPane?.dataset.selectedThread || 0);
+    if (Number.isFinite(initialSelectedThread) && initialSelectedThread > 0) {
+        selectedConversation.internal = initialSelectedThread;
+    }
+
     let currentMode = 'internal';
     let mobileView = 'list';
 
@@ -38,10 +43,18 @@
             item.classList.toggle('bg-brand-50', selected);
         });
 
-        const activeThreadKey = `${mode}-${index}`;
-        threadPanels.forEach((panel) => {
-            panel.classList.toggle('hidden', panel.dataset.threadPanel !== activeThreadKey);
-        });
+        if (mode !== 'internal') {
+            const activeThreadKey = `${mode}-${index}`;
+            threadPanels.forEach((panel) => {
+                panel.classList.toggle('hidden', panel.dataset.threadPanel !== activeThreadKey);
+            });
+        } else {
+            threadPanels.forEach((panel) => {
+                if (panel.dataset.threadPanel?.startsWith('internal-')) {
+                    panel.classList.remove('hidden');
+                }
+            });
+        }
 
         if (chatPane) {
             chatPane.dataset.selectedThread = mode === 'internal' ? String(index) : '';

@@ -7,19 +7,23 @@ function formatTime(ts) {
     }
 }
 
+//get main chat pane element
 function getChatPane() {
     return document.getElementById('chatPane');
 }
 
+//get active thread panel element
 function getActiveThreadPanel() {
     return document.querySelector('#chatPane article.thread-panel:not(.hidden)');
 }
 
+//now tehe active message container inside the active thread panel
 function getActiveMessageContainer() {
     const activePanel = getActiveThreadPanel();
     return activePanel?.querySelector('.overflow-y-auto.p-4.scrollbar-hide') || activePanel?.querySelector('.overflow-y-auto.p-4') || null;
 }
 
+//make the active message container scroll to bottom
 function scrollActiveChatToBottom() {
     const container = getActiveMessageContainer();
     if (!container) {
@@ -29,6 +33,8 @@ function scrollActiveChatToBottom() {
     container.scrollTop = container.scrollHeight;
 }
 
+//here this function looks at the message and alighns and gives styling depending if its outgoing or incoming
+//Also adds header (sender name + time), message text, and optional attachment link.
 function createMessageNode(payload, direction = 'incoming') {
     const wrapper = document.createElement('div');
     wrapper.className = direction === 'outgoing' ? 'flex justify-end' : 'flex justify-start';
@@ -79,6 +85,7 @@ function createMessageNode(payload, direction = 'incoming') {
     return wrapper;
 }
 
+//renders new incoming text in the chatroom
 function renderChatMessage(payload, direction = 'incoming') {
     const container = getActiveMessageContainer();
     if (!container) {
@@ -89,6 +96,7 @@ function renderChatMessage(payload, direction = 'incoming') {
     scrollActiveChatToBottom();
 }
 
+//get the active threadID of the active chat room we are in
 function getActiveInternalThreadId() {
     const chatPane = getChatPane();
     const threadId = Number(chatPane?.dataset.selectedThread || 0);
@@ -96,6 +104,7 @@ function getActiveInternalThreadId() {
     return Number.isFinite(threadId) ? threadId : null;
 }
 
+//this updates the preview text,timestamp and unread badge for the conversation lists
 function updateConversationPreview(payload) {
     const senderId = payload.sender_id;
     const conversation = document.querySelector(`#internalConversationList a[data-chat="${senderId}"]`);
@@ -139,8 +148,20 @@ function bindChatRealtime() {
 
         if (activeThreadId && activeThreadId === senderId) {
             renderChatMessage(payload, 'incoming');
+            updateConversationPreview(payload);
             return;
         }
+
+        /*
+        const receiverId = Number(payload.receiver_id || 0);
+
+        if (activeThreadId && (activeThreadId === senderId || activeThreadId === receiverId)) {
+            const direction = senderId === authId ? 'outgoing' : 'incoming';
+            renderChatMessage(payload, direction);
+            return;
+        }   */
+
+        //console.log(activeThreadId, senderId, receiverId);
 
         updateConversationPreview(payload);
     });
