@@ -1,6 +1,12 @@
 <div id="addExpenseModal" class="hidden">
     <form action="{{ route('expenses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="showExpenseCreateLoader()">
         @csrf
+        @php
+            $currentUser = auth()->user();
+            $currentCompanyId = $currentUser?->company_id;
+            $currentCompanyName = $currentUser?->company?->name ?? 'Current company';
+            $canChooseCompany = in_array($currentUser?->role?->name, ['Admin', 'CEO', 'Accountant']);
+        @endphp
 
         <section class="rounded-lg border border-slate-100 bg-white p-4 shadow-sm">
             <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-700">Expense Details</h3>
@@ -15,14 +21,19 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-                    <select id="expenseCompany" name="company_id" required class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
-                        <option value="">Select company...</option>
-                        @if (isset($companies))
-                            @foreach ($companies as $id => $name)
-                                <option value="{{ $id }}">{{ $name }}</option>
-                            @endforeach
-                        @endif
-                    </select>
+                    @if ($canChooseCompany)
+                        <select id="expenseCompany" name="company_id" required class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
+                            <option value="">Select company...</option>
+                            @if (isset($companies))
+                                @foreach ($companies as $id => $name)
+                                    <option value="{{ $id }}" @selected((string) $currentCompanyId === (string) $id)>{{ $name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    @else
+                        <input type="hidden" name="company_id" value="{{ $currentCompanyId }}">
+                        <input type="text" value="{{ $currentCompanyName }}" readonly class="w-full cursor-not-allowed rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-600">
+                    @endif
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Department</label>
