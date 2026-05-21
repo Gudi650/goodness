@@ -26,14 +26,14 @@
                         @endif
 
                     </div>
-                    <span class="text-[11px] font-medium text-slate-500">
+                    <span class="text-[11px] font-medium text-slate-500" data-conversation-time>
                         @if(!empty($user->last_message_at))
                             {{ \Carbon\Carbon::parse($user->last_message_at)->format('H:i') }}
                         @endif
                     </span>
                 </div>
 
-            <p class="truncate text-sm text-slate-600">{{ $user->last_message_text ?? 'No messages yet' }}</p>
+            <p class="truncate text-sm text-slate-600" data-conversation-preview>{{ $user->last_message_text ?? 'No messages yet' }}</p>
 
         </div>
     </a>

@@ -356,6 +356,10 @@ Route::middleware('auth')->group(function () {
     // AJAX poll endpoint for the active thread
     Route::get('/messages/thread/{threadId}/poll', [InternalMessagesController::class, 'poll'])
         ->name('messages.thread.poll');
+
+    // AJAX poll endpoint for the conversation list summary
+    Route::get('/messages/conversations/poll', [InternalMessagesController::class, 'pollConversations'])
+        ->name('messages.conversations.poll');
     
 
 });

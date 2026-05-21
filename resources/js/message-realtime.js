@@ -1,6 +1,14 @@
 function formatTime(ts) {
+    if (!ts) {
+        return '';
+    }
+
     try {
-        const date = new Date(ts);
+        const normalized = typeof ts === 'string' && ts.includes(' ') && !ts.includes('T') ? ts.replace(' ', 'T') : ts;
+        const date = new Date(normalized);
+        if (Number.isNaN(date.getTime())) {
+            return ts || '';
+        }
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch (error) {
         return ts || '';
@@ -239,6 +247,73 @@ function updateConversationPreview(payload) {
     }
 }
 
+function getConversationListContainer() {
+    return document.getElementById('internalConversationList');
+}
+
+function getConversationItem(conversationId) {
+    return document.querySelector(`#internalConversationList a[data-chat="${conversationId}"]`);
+}
+
+function syncConversationSummary(conversation) {
+    const conversationItem = getConversationItem(conversation.id);
+    if (!conversationItem) {
+        return;
+    }
+
+    const preview = conversationItem.querySelector('[data-conversation-preview]');
+    if (preview) {
+        preview.textContent = conversation.last_message_text || 'No messages yet';
+    }
+
+    const timeEl = conversationItem.querySelector('[data-conversation-time]');
+    if (timeEl) {
+        timeEl.textContent = formatTime(conversation.last_message_at);
+    }
+
+    const unreadCount = Number(conversation.unread_count || 0);
+    const badge = conversationItem.querySelector('[data-unread-badge]');
+
+    if (unreadCount > 0) {
+        if (badge) {
+            badge.textContent = String(unreadCount);
+        } else {
+            const nameContainer = conversationItem.querySelector('.flex.items-center.gap-2');
+            if (nameContainer) {
+                const newBadge = document.createElement('span');
+                newBadge.dataset.unreadBadge = 'true';
+                newBadge.className = 'inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5';
+                newBadge.textContent = String(unreadCount);
+                nameContainer.appendChild(newBadge);
+            }
+        }
+    } else if (badge) {
+        badge.remove();
+    }
+}
+
+function syncConversationList(conversations, conversationCount) {
+    const list = getConversationListContainer();
+    if (!list || !Array.isArray(conversations)) {
+        return;
+    }
+
+    conversations.forEach((conversation) => {
+        const item = getConversationItem(conversation.id);
+        if (!item) {
+            return;
+        }
+
+        syncConversationSummary(conversation);
+        list.appendChild(item);
+    });
+
+    const countEl = document.getElementById('listCount');
+    if (countEl && Number.isFinite(Number(conversationCount))) {
+        countEl.textContent = String(conversationCount);
+    }
+}
+
 function clearConversationUnreadBadge(senderId) {
     const conversation = document.querySelector(`#internalConversationList a[data-chat="${senderId}"]`);
     if (!conversation) {
@@ -338,6 +413,43 @@ async function pollActiveThreadMessages() {
 
 pollActiveThreadMessages.inFlight = false;
 
+async function pollConversationSummaries() {
+    const chatPane = getChatPane();
+    if (!chatPane) {
+        return;
+    }
+
+    const pollUrl = chatPane.dataset.conversationsPollUrl;
+    if (!pollUrl || pollConversationSummaries.inFlight) {
+        return;
+    }
+
+    pollConversationSummaries.inFlight = true;
+
+    try {
+        const response = await fetch(pollUrl, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            return;
+        }
+
+        const payload = await response.json();
+        syncConversationList(payload.conversations || [], payload.conversation_count);
+    } catch (error) {
+        console.error('Conversation polling failed', error);
+    } finally {
+        pollConversationSummaries.inFlight = false;
+    }
+}
+
+pollConversationSummaries.inFlight = false;
+
 function startThreadPolling() {
     // A short interval keeps the UI responsive without depending on websocket realtime.
     const pollDelay = 2500;
@@ -346,11 +458,19 @@ function startThreadPolling() {
     window.setInterval(pollActiveThreadMessages, pollDelay);
 }
 
+function startConversationPolling() {
+    const pollDelay = 4000;
+
+    pollConversationSummaries();
+    window.setInterval(pollConversationSummaries, pollDelay);
+}
+
 //render now the messages in the chatroom
 function bindChatRealtime() {
     // Realtime is kept here for later, but the page now runs in AJAX mode by default.
     if (window.__ENABLE_CHAT_REALTIME__ !== true) {
         startThreadPolling();
+        startConversationPolling();
         return;
     }
 

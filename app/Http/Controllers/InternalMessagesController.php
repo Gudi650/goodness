@@ -13,21 +13,17 @@ use App\Events\MessageSeen;
 class InternalMessagesController extends Controller
 {
 
-    //function to show the individuals to message
-    public function index()
+    private function conversationUsers()
     {
-
         $users = User::where('company_id', Auth::user()->company_id)
             ->where('id', '!=', Auth::id())
             ->get();
 
-        //check if the user is CEO,Admin ir accountant, if so display all users of all companies
         if ($this->isPrivilegedUser()) {
             $users = User::where('id', '!=', Auth::id())->get();
         }
 
-        // attach last message timestamp and text between auth user and each user, then sort by latest
-        $users = $users->map(function ($user) {
+        return $users->map(function ($user) {
             $latest = InternalMessages::where(function ($q) use ($user) {
                     $q->where('sender_id', Auth::id())
                     ->where('receiver_id', $user->id);
@@ -51,15 +47,22 @@ class InternalMessagesController extends Controller
             } else {
                 $user->last_message_text = null;
             }
-            // unread messages sent to auth user from this user
+
             $user->unread_count = InternalMessages::where('sender_id', $user->id)
                 ->where('receiver_id', Auth::id())
                 ->where('is_read', false)
                 ->count();
+
             return $user;
         })->sortByDesc(function ($u) {
             return $u->last_message_at ?? $u->created_at ?? null;
         })->values();
+    }
+
+    //function to show the individuals to message
+    public function index()
+    {
+        $users = $this->conversationUsers();
 
         return view('messages.index', compact('users'));
     }
@@ -80,46 +83,10 @@ class InternalMessagesController extends Controller
                 'seen_at' => now(),
             ]);
 
-            event(new MessageSeen($message));
+           // event(new MessageSeen($message));
         }
 
-        $users = User::where('company_id', Auth::user()->company_id)
-            ->where('id', '!=', Auth::id())
-            ->get();
-
-        if ($this->isPrivilegedUser()) {
-            $users = User::where('id', '!=', Auth::id())->get();
-        }
-
-        // attach last message timestamp and text, then sort users by most recent conversation
-        $users = $users->map(function ($user) {
-            $latest = InternalMessages::where(function ($q) use ($user) {
-                $q->where('sender_id', Auth::id())->where('receiver_id', $user->id);
-            })->orWhere(function ($q) use ($user) {
-                $q->where('sender_id', $user->id)->where('receiver_id', Auth::id());
-            })->orderBy('created_at', 'desc')->first();
-
-            $user->last_message_at = $latest ? $latest->created_at : null;
-            if ($latest) {
-                if (!empty($latest->message)) {
-                    $user->last_message_text = Str::limit($latest->message, 60);
-                } elseif (!empty($latest->attachment_name)) {
-                    $user->last_message_text = 'Attachment: ' . Str::limit($latest->attachment_name, 60);
-                } else {
-                    $user->last_message_text = null;
-                }
-            } else {
-                $user->last_message_text = null;
-            }
-            // unread messages sent to auth user from this user
-            $user->unread_count = InternalMessages::where('sender_id', $user->id)
-                ->where('receiver_id', Auth::id())
-                ->where('is_read', false)
-                ->count();
-            return $user;
-        })->sortByDesc(function ($u) {
-            return $u->last_message_at ?? $u->created_at ?? null;
-        })->values();
+        $users = $this->conversationUsers();
 
         $messages = InternalMessages::where(function ($q) use ($threadId) {
             $q->where('sender_id', Auth::id())->where('receiver_id', $threadId);
@@ -133,6 +100,25 @@ class InternalMessagesController extends Controller
         $selectedThread = $threadId;
 
         return view('messages.index', compact('users', 'messages', 'selectedThread'));
+    }
+
+    public function pollConversations()
+    {
+        $users = $this->conversationUsers();
+
+        return response()->json([
+            'conversations' => $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'last_message_at' => optional($user->last_message_at)->toDateTimeString(),
+                    'last_message_text' => $user->last_message_text,
+                    'unread_count' => (int) $user->unread_count,
+                ];
+            })->values(),
+            'conversation_count' => $users->count(),
+            'unread_total' => $users->sum('unread_count'),
+        ]);
     }
 
     /**

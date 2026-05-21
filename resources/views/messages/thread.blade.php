@@ -8,6 +8,7 @@
     data-selected-thread="{{ $selectedThread ?? '' }}"
     data-last-message-id="{{ $latestMessageId }}"
     data-poll-url="{{ isset($selectedThread) ? route('messages.thread.poll', $selectedThread) : '' }}"
+    data-conversations-poll-url="{{ route('messages.conversations.poll') }}"
     class="flex h-full min-h-0 flex-col overflow-hidden bg-slate-50/60"
 >
 
@@ -292,6 +293,10 @@
                                 window.replacePendingChatMessage(pendingId, { ...payload, status: 'sent' });
                             } else if(window.renderChatMessage){
                                 window.renderChatMessage({ ...payload, status: 'sent' }, 'outgoing');
+                            }
+
+                            if (window.pollConversationSummaries) {
+                                window.pollConversationSummaries();
                             }
 
                             // clear inputs
