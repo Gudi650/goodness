@@ -27,9 +27,10 @@
 
             // Normal users are always tied to their own company.
             $currentCompany = $currentUser?->company;
+
         @endphp
 
-        @if ($isAdmin)
+        @if ($isAdmin || $isCEO || $isAccountant)
             {{-- Admin selector: can switch between companies or see all companies. --}}
             <form action="{{ route('active-company.store') }}" method="POST" class="flex items-center">
                 @csrf
