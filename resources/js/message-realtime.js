@@ -133,15 +133,26 @@ function renderPendingChatMessage(payload) {
     renderChatMessage({ ...payload, status: 'sending' }, 'outgoing');
 }
 
+function setChatPaneLastMessageId(messageId) {
+    const chatPane = getChatPane();
+    if (!chatPane || !messageId) {
+        return;
+    }
+
+    chatPane.dataset.lastMessageId = String(messageId);
+}
+
 function replacePendingChatMessage(tempId, payload) {
     const pendingNode = document.querySelector(`[data-temp-message-id="${tempId}"]`);
     if (!pendingNode) {
         renderChatMessage({ ...payload, status: payload.status || 'sent' }, 'outgoing');
+        setChatPaneLastMessageId(payload.id);
         return;
     }
 
     const replacement = createMessageNode({ ...payload, status: payload.status || 'sent' }, 'outgoing');
     pendingNode.replaceWith(replacement);
+    setChatPaneLastMessageId(payload.id);
     scrollActiveChatToBottom();
 }
 
@@ -240,8 +251,109 @@ function clearConversationUnreadBadge(senderId) {
     }
 }
 
+async function pollActiveThreadMessages() {
+    // Polling is the temporary AJAX fallback while websocket realtime stays disabled.
+    if (window.__ENABLE_CHAT_REALTIME__ === true) {
+        return;
+    }
+
+    const chatPane = getChatPane();
+    if (!chatPane) {
+        return;
+    }
+
+    const threadId = Number(chatPane.dataset.selectedThread || 0);
+    if (!threadId) {
+        return;
+    }
+
+    const pollUrl = chatPane.dataset.pollUrl;
+    if (!pollUrl) {
+        return;
+    }
+
+    if (pollActiveThreadMessages.inFlight) {
+        return;
+    }
+
+    const lastMessageId = Number(chatPane.dataset.lastMessageId || 0);
+    pollActiveThreadMessages.inFlight = true;
+
+    try {
+        const response = await fetch(`${pollUrl}?since_id=${lastMessageId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            return;
+        }
+
+        const payload = await response.json();
+        const messages = Array.isArray(payload.messages) ? payload.messages : [];
+
+        if (!messages.length) {
+            return;
+        }
+
+        let newestId = lastMessageId;
+        const activeThreadId = Number(chatPane.dataset.selectedThread || 0);
+
+        messages.forEach((message) => {
+            const messageId = Number(message.id || 0);
+            if (!messageId) {
+                return;
+            }
+
+            const existingNode = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (existingNode) {
+                newestId = Math.max(newestId, messageId);
+                return;
+            }
+
+            const direction = Number(message.sender_id || 0) === Number(chatPane.dataset.authId || 0) ? 'outgoing' : 'incoming';
+            renderChatMessage(message, direction);
+            newestId = Math.max(newestId, messageId);
+        });
+
+        if (newestId > lastMessageId) {
+            setChatPaneLastMessageId(newestId);
+        }
+
+        // The thread is open, so any incoming messages from the active conversation should disappear from unread counts.
+        if (activeThreadId) {
+            clearConversationUnreadBadge(activeThreadId);
+        }
+
+        scrollActiveChatToBottom();
+    } catch (error) {
+        console.error('Thread polling failed', error);
+    } finally {
+        pollActiveThreadMessages.inFlight = false;
+    }
+}
+
+pollActiveThreadMessages.inFlight = false;
+
+function startThreadPolling() {
+    // A short interval keeps the UI responsive without depending on websocket realtime.
+    const pollDelay = 2500;
+
+    pollActiveThreadMessages();
+    window.setInterval(pollActiveThreadMessages, pollDelay);
+}
+
 //render now the messages in the chatroom
 function bindChatRealtime() {
+    // Realtime is kept here for later, but the page now runs in AJAX mode by default.
+    if (window.__ENABLE_CHAT_REALTIME__ !== true) {
+        startThreadPolling();
+        return;
+    }
+
     const chatPane = getChatPane();
     if (!chatPane || !window.Echo) {
         return;

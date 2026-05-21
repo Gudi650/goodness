@@ -135,6 +135,56 @@ class InternalMessagesController extends Controller
         return view('messages.index', compact('users', 'messages', 'selectedThread'));
     }
 
+    /**
+     * Poll the active thread for new messages.
+     * This keeps the old realtime code untouched while AJAX is the active path.
+     */
+    public function poll(Request $request, $threadId)
+    {
+        $sinceId = (int) $request->query('since_id', 0);
+
+        $messages = InternalMessages::where(function ($q) use ($threadId) {
+            $q->where('sender_id', Auth::id())
+              ->where('receiver_id', $threadId);
+        })->orWhere(function ($q) use ($threadId) {
+            $q->where('sender_id', $threadId)
+              ->where('receiver_id', Auth::id());
+        })->when($sinceId > 0, function ($q) use ($sinceId) {
+            $q->where('id', '>', $sinceId);
+        })->orderBy('id', 'asc')->get();
+
+        foreach ($messages as $message) {
+            // If the other user sent it while this thread is open, mark it seen immediately.
+            if ((int) $message->sender_id === (int) $threadId && (int) $message->receiver_id === (int) Auth::id() && !$message->seen) {
+                $message->update([
+                    'is_read' => true,
+                    'delivered' => true,
+                    'seen' => true,
+                    'seen_at' => now(),
+                ]);
+            }
+        }
+
+        return response()->json([
+            'messages' => $messages->map(function ($message) {
+                return [
+                    'id' => $message->id,
+                    'sender_id' => $message->sender_id,
+                    'receiver_id' => $message->receiver_id,
+                    'message' => $message->message,
+                    'attachment_path' => $message->attachment_path,
+                    'attachment_name' => $message->attachment_name,
+                    'created_at' => optional($message->created_at)->toDateTimeString(),
+                    'sender_name' => optional($message->sender)->name ?? null,
+                    'delivered' => $message->delivered,
+                    'seen' => $message->seen,
+                    'seen_at' => optional($message->seen_at)->toDateTimeString(),
+                ];
+            })->values(),
+            'latest_id' => $messages->isNotEmpty() ? $messages->last()->id : $sinceId,
+        ]);
+    }
+
     public function store(Request $request, $threadId)
     {
         $validated = $request->validate([

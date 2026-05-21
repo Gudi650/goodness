@@ -1,5 +1,15 @@
+@php
+    $latestMessageId = isset($messages) && $messages->isNotEmpty() ? $messages->last()->id : 0;
+@endphp
 
-<div id="chatPane" data-auth-id="{{ Auth::id() }}" data-selected-thread="{{ $selectedThread ?? '' }}" class="flex h-full min-h-0 flex-col overflow-hidden bg-slate-50/60">
+<div
+    id="chatPane"
+    data-auth-id="{{ Auth::id() }}"
+    data-selected-thread="{{ $selectedThread ?? '' }}"
+    data-last-message-id="{{ $latestMessageId }}"
+    data-poll-url="{{ isset($selectedThread) ? route('messages.thread.poll', $selectedThread) : '' }}"
+    class="flex h-full min-h-0 flex-col overflow-hidden bg-slate-50/60"
+>
 
     <article data-thread-panel="internal-0" class="thread-panel flex h-full min-h-0 flex-col">
         <div class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 bg-white">
@@ -277,6 +287,7 @@
 
                             const payload = await res.json();
 
+                            // Replace the temporary bubble with the real database record.
                             if(window.replacePendingChatMessage){
                                 window.replacePendingChatMessage(pendingId, { ...payload, status: 'sent' });
                             } else if(window.renderChatMessage){
