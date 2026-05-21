@@ -107,7 +107,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>Settings</span>
+                <span class="hidden lg:inline">Settings</span>
             </a>
 
             {{-- Logout Form - submits POST request to /logout endpoint --}}
