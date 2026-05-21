@@ -241,8 +241,21 @@
                         if(submitBtn) submitBtn.disabled = true;
 
                         const fd = new FormData(form);
+                        const messageField = form.querySelector('textarea[name="message"]');
+                        const fileField = form.querySelector('input[type="file"]');
+                        const pendingId = `pending-${Date.now()}-${Math.random().toString(16).slice(2)}`;
                         const tokenMeta = document.querySelector('meta[name="csrf-token"]');
                         const csrf = tokenMeta ? tokenMeta.getAttribute('content') : '';
+
+                        if (window.renderPendingChatMessage) {
+                            window.renderPendingChatMessage({
+                                tempId: pendingId,
+                                message: messageField ? messageField.value : '',
+                                attachment_name: fileField?.files?.[0]?.name || '',
+                                created_at: new Date().toISOString(),
+                                sender_name: 'You'
+                            });
+                        }
 
                         try{
                             const res = await fetch(form.action, {
@@ -264,23 +277,24 @@
 
                             const payload = await res.json();
 
-                            // append sent message to chat (shared renderer)
-                                if(window.renderChatMessage){
-                                    window.renderChatMessage({ ...payload, status: 'sent' }, 'outgoing');
-                                }
+                            if(window.replacePendingChatMessage){
+                                window.replacePendingChatMessage(pendingId, { ...payload, status: 'sent' });
+                            } else if(window.renderChatMessage){
                                 window.renderChatMessage({ ...payload, status: 'sent' }, 'outgoing');
                             }
 
                             // clear inputs
-                            const textarea = form.querySelector('textarea[name="message"]');
-                            if(textarea) textarea.value = '';
-                            const fileInput = form.querySelector('input[type="file"]');
-                            if(fileInput) fileInput.value = '';
+                            if(messageField) messageField.value = '';
+                            if(fileField) fileField.value = '';
                             const preview = document.getElementById('attachmentPreview');
                             if(preview) preview.innerHTML = '';
 
                         }catch(err){
                             console.error(err);
+                            const pendingNode = document.querySelector(`[data-temp-message-id="${pendingId}"]`);
+                            if (pendingNode) {
+                                pendingNode.remove();
+                            }
                         }finally{
                             if(submitBtn) submitBtn.disabled = false;
                         }

@@ -41,6 +41,9 @@ function createMessageNode(payload, direction = 'incoming') {
     if (payload.id) {
         wrapper.dataset.messageId = String(payload.id);
     }
+    if (payload.tempId) {
+        wrapper.dataset.tempMessageId = String(payload.tempId);
+    }
 
     const bubble = document.createElement('div');
     bubble.className = direction === 'outgoing'
@@ -75,7 +78,10 @@ function createMessageNode(payload, direction = 'incoming') {
     if (direction === 'outgoing') {
         const statusState = payload.status || (payload.seen ? 'seen' : (payload.delivered ? 'delivered' : 'sent'));
 
-        if (statusState === 'seen') {
+        if (statusState === 'sending') {
+            status.innerHTML = '<span class="inline-flex items-center gap-1 text-slate-200"><svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" class="opacity-25"></circle><path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg><span class="text-[10px] font-medium uppercase tracking-wide">Sending</span></span>';
+            bubble.classList.add('opacity-70');
+        } else if (statusState === 'seen') {
             status.innerHTML = [
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 text-sky-300" data-tick-single><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>',
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-3 w-3 -ml-1 text-sky-300" data-tick-double><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" /></svg>'
@@ -120,6 +126,22 @@ function renderChatMessage(payload, direction = 'incoming') {
     }
 
     container.appendChild(createMessageNode(payload, direction));
+    scrollActiveChatToBottom();
+}
+
+function renderPendingChatMessage(payload) {
+    renderChatMessage({ ...payload, status: 'sending' }, 'outgoing');
+}
+
+function replacePendingChatMessage(tempId, payload) {
+    const pendingNode = document.querySelector(`[data-temp-message-id="${tempId}"]`);
+    if (!pendingNode) {
+        renderChatMessage({ ...payload, status: payload.status || 'sent' }, 'outgoing');
+        return;
+    }
+
+    const replacement = createMessageNode({ ...payload, status: payload.status || 'sent' }, 'outgoing');
+    pendingNode.replaceWith(replacement);
     scrollActiveChatToBottom();
 }
 
@@ -267,6 +289,8 @@ function bindChatRealtime() {
 
 window.scrollActiveChatToBottom = scrollActiveChatToBottom;
 window.renderChatMessage = renderChatMessage;
+window.renderPendingChatMessage = renderPendingChatMessage;
+window.replacePendingChatMessage = replacePendingChatMessage;
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bindChatRealtime, { once: true });
