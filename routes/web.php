@@ -23,6 +23,7 @@ use App\Http\Controllers\InternalMessagesController;
 use App\Http\Controllers\LeavesController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesController;
 use App\Models\InternalMessages;
 use Illuminate\Support\Facades\Route;
@@ -334,9 +335,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Reports & Analytics
-    Route::get('/reports', function () {
-        return view('reports');
-    })->name('reports');
+    Route::get('/reports', [ReportController::class, 'expenses'])->name('reports');
 
     //communication page - show messages via controller so view has data
     Route::get('/communication', [InternalMessagesController::class, 'index'])->name('communication');
