@@ -30,6 +30,7 @@
           <select id="report_type" name="report_type" class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm bg-white">
             <option value="expenses" @selected(($reportType ?? 'expenses') === 'expenses')>Expenses</option>
             <option value="income" @selected(($reportType ?? '') === 'income')>Income</option>
+            <option value="balance" @selected(($reportType ?? '') === 'balance')>Balance Sheet</option>
           </select>
         </div>
 
@@ -89,6 +90,87 @@
         </div>
       @endif
     </div>
+
+    @if (($reportType ?? 'expenses') === 'balance')
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs uppercase tracking-wide text-slate-500">Assets</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($balance['assets'] ?? 0, 2) }}</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs uppercase tracking-wide text-slate-500">Liabilities</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($balance['liabilities'] ?? 0, 2) }}</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs uppercase tracking-wide text-slate-500">Equity</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($balance['equity'] ?? 0, 2) }}</p>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-lg overflow-hidden mb-6">
+        <div class="p-4 border-b border-slate-200">
+          <h3 class="text-lg font-semibold">Assets Breakdown</h3>
+          <p class="text-sm text-slate-500">Cash and Accounts Receivable</p>
+        </div>
+        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-3 bg-slate-50 rounded">
+            <p class="text-sm text-slate-500">Cash</p>
+            <p class="mt-1 text-lg font-semibold">TZS {{ number_format($balance['cash'] ?? 0, 2) }}</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded">
+            <p class="text-sm text-slate-500">Receivables</p>
+            <p class="mt-1 text-lg font-semibold">TZS {{ number_format($balance['receivables'] ?? 0, 2) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-lg overflow-hidden mb-6">
+        <div class="p-4 border-b border-slate-200">
+          <h3 class="text-lg font-semibold">Liabilities Breakdown</h3>
+          <p class="text-sm text-slate-500">Accounts Payable</p>
+        </div>
+        <div class="p-4">
+          <p class="text-sm text-slate-500">Total Payables</p>
+          <p class="mt-1 text-lg font-semibold">TZS {{ number_format($balance['payables'] ?? $balance['liabilities'] ?? 0, 2) }}</p>
+        </div>
+      </div>
+    @endif
+
+    @if (($reportType ?? 'expenses') === 'pnl' || ($reportType ?? '') === 'pl' || ($reportType ?? '') === 'profit')
+      <div class="bg-white border border-slate-200 rounded-lg p-4 mb-6">
+        <h3 class="text-lg font-semibold mb-3">Profit & Loss (last 12 months)</h3>
+        <canvas id="pnlChart" height="120"></canvas>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <div class="p-4 border-b border-slate-200">
+          <h3 class="text-lg font-semibold">P&L Table</h3>
+          <p class="text-sm text-slate-500">Revenue, Expenses and Profit by month.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+              <tr>
+                <th class="px-4 py-3 text-left">Month</th>
+                <th class="px-4 py-3 text-right">Revenue</th>
+                <th class="px-4 py-3 text-right">Expenses</th>
+                <th class="px-4 py-3 text-right">Profit</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @foreach (($plLabels ?? []) as $i => $label)
+                <tr>
+                  <td class="px-4 py-3">{{ $label }}</td>
+                  <td class="px-4 py-3 text-right">TZS {{ number_format($plRevenue[$i] ?? 0, 2) }}</td>
+                  <td class="px-4 py-3 text-right">TZS {{ number_format($plExpenses[$i] ?? 0, 2) }}</td>
+                  <td class="px-4 py-3 text-right">TZS {{ number_format(($plProfit[$i] ?? 0), 2) }}</td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    @endif
     @if ($selectedScope === 'all' && ($reportType ?? 'expenses') === 'expenses')
       <div class="bg-white border border-slate-200 rounded-lg overflow-hidden mb-6">
         <div class="p-4 border-b border-slate-200">
@@ -244,6 +326,33 @@
 
     scopeSelect.addEventListener('change', toggleCompanyField);
     toggleCompanyField();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    (function(){
+      const reportType = '{{ $reportType ?? 'expenses' }}';
+      if (['pnl','pl','profit'].includes(reportType)) {
+        const labels = {!! json_encode($plLabels ?? []) !!};
+        const revenue = {!! json_encode($plRevenue ?? []) !!};
+        const expenses = {!! json_encode($plExpenses ?? []) !!};
+        const profit = {!! json_encode($plProfit ?? []) !!};
+
+        const ctx = document.getElementById('pnlChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Revenue', data: revenue, backgroundColor: 'rgba(56,189,248,0.6)' },
+              { label: 'Expenses', data: expenses, backgroundColor: 'rgba(249,115,22,0.6)' },
+              { label: 'Profit', data: profit, type: 'line', borderColor: 'rgba(34,197,94,0.9)', backgroundColor: 'rgba(34,197,94,0.2)', tension: 0.3 }
+            ]
+          },
+          options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ ticks:{ callback: v => 'TZS ' + Number(v).toLocaleString() } } } }
+        });
+      }
+    })();
   </script>
 
   @include('components.modal')

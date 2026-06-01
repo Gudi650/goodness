@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\Payment;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -156,6 +158,104 @@ class ReportController extends Controller
             });
         }
 
+        // --- Balance Sheet ---
+        // NOTE: This is a simplified balance sheet using available tables:
+        // Assets = Cash (payments in - payments out) + Accounts Receivable (unpaid invoices)
+        // Liabilities = Accounts Payable (non-draft expenses)
+        // Equity = Assets - Liabilities
+        $balance = [
+            'cash' => 0.0,
+            'receivables' => 0.0,
+            'payables' => 0.0,
+            'assets' => 0.0,
+            'liabilities' => 0.0,
+            'equity' => 0.0,
+        ];
+
+        // Payments: cash in/out (use tzs equivalent if currency differs)
+        $paymentsQuery = Payment::query();
+        if ($selectedScope === 'company' && $selectedCompanyId) {
+            $paymentsQuery->where('company_id', $selectedCompanyId);
+        } elseif (! $canSeeAllCompanies && $user) {
+            $paymentsQuery->where('company_id', $user->company_id);
+        }
+
+        $payments = $paymentsQuery->get();
+        $cashIn = $payments->filter(fn($p) => strtolower($p->payment_direction ?? '') === 'in')->sum(fn($p) => (float) ($p->amount * ($p->exchange_rate ?? 1)));
+        $cashOut = $payments->filter(fn($p) => strtolower($p->payment_direction ?? '') === 'out')->sum(fn($p) => (float) ($p->amount * ($p->exchange_rate ?? 1)));
+        $cash = $cashIn - $cashOut;
+
+        // Receivables: invoices not fully paid (status != 'paid')
+        $invoicesReceivableQuery = Invoice::query();
+        if ($selectedScope === 'company' && $selectedCompanyId) {
+            $invoicesReceivableQuery->where('company_id', $selectedCompanyId);
+        } elseif (! $canSeeAllCompanies && $user) {
+            $invoicesReceivableQuery->where('company_id', $user->company_id);
+        }
+        $receivables = $invoicesReceivableQuery->where('status', '!=', 'paid')->sum('total_amount');
+
+        // Payables: expenses which are issued/approved/checked (exclude drafts)
+        $expensesPayableQuery = Expense::query();
+        if ($selectedScope === 'company' && $selectedCompanyId) {
+            $expensesPayableQuery->where('company_id', $selectedCompanyId);
+        } elseif (! $canSeeAllCompanies && $user) {
+            $expensesPayableQuery->where('company_id', $user->company_id);
+        }
+        $expensesForPayables = $expensesPayableQuery->get();
+        $payables = $expensesForPayables->filter(fn($e) => !in_array(($e->status ?? ''), ['draft']))->sum(fn($e) => (float) ($e->net_amount ?? 0));
+
+        $assets = (float) $cash + (float) $receivables;
+        $liabilities = (float) $payables;
+        $equity = $assets - $liabilities;
+
+        $balance = [
+            'cash' => $cash,
+            'receivables' => (float) $receivables,
+            'payables' => (float) $payables,
+            'assets' => $assets,
+            'liabilities' => $liabilities,
+            'equity' => $equity,
+        ];
+
+        // --- Profit & Loss (monthly series for last 12 months) ---
+        $months = [];
+        $labels = [];
+        $revenueSeries = [];
+        $expenseSeries = [];
+        $profitSeries = [];
+
+        $end = Carbon::now()->endOfMonth();
+        $start = Carbon::now()->startOfMonth()->subMonths(11);
+
+        // fetch invoices and expenses in range with scope filtering
+        $invoicesRangeQuery = Invoice::query()->whereBetween('invoice_date', [$start->toDateString(), $end->toDateString()], 'and');
+        if ($selectedScope === 'company' && $selectedCompanyId) {
+            $invoicesRangeQuery->where('company_id', $selectedCompanyId);
+        } elseif (! $canSeeAllCompanies && $user) {
+            $invoicesRangeQuery->where('company_id', $user->company_id);
+        }
+        $invoicesRange = $invoicesRangeQuery->get()->groupBy(fn($inv) => Carbon::parse($inv->invoice_date)->format('Y-m'));
+
+        $expensesRangeQuery = Expense::query()->whereBetween('expense_date', [$start->toDateString(), $end->toDateString()], 'and');
+        if ($selectedScope === 'company' && $selectedCompanyId) {
+            $expensesRangeQuery->where('company_id', $selectedCompanyId);
+        } elseif (! $canSeeAllCompanies && $user) {
+            $expensesRangeQuery->where('company_id', $user->company_id);
+        }
+        $expensesRange = $expensesRangeQuery->get()->groupBy(fn($e) => Carbon::parse($e->expense_date)->format('Y-m'));
+
+        $cursor = $start->copy();
+        while ($cursor->lte($end)) {
+            $key = $cursor->format('Y-m');
+            $labels[] = $cursor->format('M Y');
+            $monthRevenue = (float) ($invoicesRange[$key] ?? collect())->sum(fn($i) => (float) ($i->total_amount ?? 0));
+            $monthExpense = (float) ($expensesRange[$key] ?? collect())->sum(fn($e) => (float) ($e->net_amount ?? 0));
+            $revenueSeries[] = $monthRevenue;
+            $expenseSeries[] = $monthExpense;
+            $profitSeries[] = $monthRevenue - $monthExpense;
+            $cursor->addMonth();
+        }
+
         $selectedCompanyName = $selectedScope === 'company'
             ? ($companies->firstWhere('id', $selectedCompanyId)?->name ?? 'Selected Company')
             : 'All Companies';
@@ -173,6 +273,12 @@ class ReportController extends Controller
             'incomeRows' => $incomeRows,
             'incomeTotals' => $incomeTotals,
             'companyIncomeBreakdown' => $companyIncomeBreakdown,
+            // Profit & Loss series
+            'plLabels' => $labels,
+            'plRevenue' => $revenueSeries,
+            'plExpenses' => $expenseSeries,
+            'plProfit' => $profitSeries,
+            'balance' => $balance,
         ]);
     }
 }
