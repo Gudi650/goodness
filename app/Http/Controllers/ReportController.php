@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\Expense;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,7 @@ class ReportController extends Controller
             ->get(['id', 'name']);
 
         $selectedScope = $request->string('scope')->toString() ?: 'all';
+        $reportType = $request->string('report_type')->toString() ?: 'expenses';
         $selectedCompanyId = $request->integer('company_id');
 
         if (! $canSeeAllCompanies) {
@@ -94,6 +96,66 @@ class ReportController extends Controller
                 ];
             });
 
+        // --- Income / Invoices report ---
+        $incomeRows = collect();
+        $incomeTotals = ['invoice_count' => 0, 'subtotal' => 0.0, 'tax' => 0.0, 'total' => 0.0];
+        $companyIncomeBreakdown = collect();
+
+        if ($reportType === 'income') {
+            $invoicesQuery = Invoice::query()
+                ->with(['company', 'creator'])
+                ->orderByDesc('invoice_date')
+                ->orderByDesc('id');
+
+            if ($selectedScope === 'company' && $selectedCompanyId) {
+                $invoicesQuery->where('company_id', $selectedCompanyId);
+            } elseif (! $canSeeAllCompanies && $user) {
+                $invoicesQuery->where('company_id', $user->company_id);
+            }
+
+            $invoices = $invoicesQuery->limit(250)->get();
+
+            $incomeRows = $invoices->map(function (Invoice $inv) {
+                return [
+                    'invoice_number' => $inv->invoice_number,
+                    'invoice_date' => $inv->invoice_date ? Carbon::parse($inv->invoice_date)->format('M d, Y') : '-',
+                    'company_name' => $inv->company?->name ?? '-',
+                    'client' => $inv->client_name ?: '-',
+                    'status' => $inv->status ?: '-',
+                    'subtotal' => (float) ($inv->subtotal ?? 0),
+                    'tax' => (float) ($inv->tax_amount ?? 0),
+                    'total' => (float) ($inv->total_amount ?? 0),
+                ];
+            });
+
+            $incomeTotals = [
+                'invoice_count' => $invoices->count(),
+                'subtotal' => (float) $invoices->sum('subtotal'),
+                'tax' => (float) $invoices->sum('tax_amount'),
+                'total' => (float) $invoices->sum('total_amount'),
+            ];
+
+            $companyIncomeQuery = Invoice::query()
+                ->selectRaw('company_id, COUNT(*) as invoice_count, COALESCE(SUM(subtotal),0) as subtotal, COALESCE(SUM(tax_amount),0) as tax, COALESCE(SUM(total_amount),0) as total')
+                ->with('company:id,name');
+
+            if ($selectedScope === 'company' && $selectedCompanyId) {
+                $companyIncomeQuery->where('company_id', $selectedCompanyId);
+            } elseif (! $canSeeAllCompanies && $user) {
+                $companyIncomeQuery->where('company_id', $user->company_id);
+            }
+
+            $companyIncomeBreakdown = $companyIncomeQuery->groupBy('company_id')->get()->map(function ($item) {
+                return [
+                    'company_name' => $item->company?->name ?? '-',
+                    'invoice_count' => (int) $item->invoice_count,
+                    'subtotal' => (float) $item->subtotal,
+                    'tax' => (float) $item->tax,
+                    'total' => (float) $item->total,
+                ];
+            });
+        }
+
         $selectedCompanyName = $selectedScope === 'company'
             ? ($companies->firstWhere('id', $selectedCompanyId)?->name ?? 'Selected Company')
             : 'All Companies';
@@ -104,9 +166,13 @@ class ReportController extends Controller
             'selectedCompanyId' => $selectedCompanyId,
             'selectedCompanyName' => $selectedCompanyName,
             'canSeeAllCompanies' => $canSeeAllCompanies,
+            'reportType' => $reportType,
             'expenseRows' => $expenseRows,
             'companyBreakdown' => $companyBreakdown,
             'totals' => $totals,
+            'incomeRows' => $incomeRows,
+            'incomeTotals' => $incomeTotals,
+            'companyIncomeBreakdown' => $companyIncomeBreakdown,
         ]);
     }
 }
