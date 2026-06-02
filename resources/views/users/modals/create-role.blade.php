@@ -12,8 +12,20 @@
             @csrf
 
             <div>
+                <label for="role_template" class="block text-sm text-slate-600 mb-1">Choose Role</label>
+                <select id="role_template" class="w-full px-4 py-2 border border-slate-200 rounded-md bg-white">
+                    <option value="">-- Select common role or choose Other --</option>
+                    <option value="CEO">CEO</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Accountant">Accountant</option>
+                    <option value="HR Manager">HR Manager</option>
+                </select>
+            </div>
+
+            <div class="mt-3">
                 <label for="role_name" class="block text-sm text-slate-600 mb-1">Role Name</label>
                 <input id="role_name" name="name" type="text" required class="w-full px-4 py-2 border border-slate-200 rounded-md bg-white" placeholder="e.g. Manager" />
+                <p id="role_name_help" class="text-xs text-slate-500 mt-1 hidden">Choose "Other" above to enter a custom role name.</p>
             </div>
 
             <div>
@@ -28,6 +40,39 @@
         </form>
     </div>
 </div>
+
+<script>
+    (function(){
+        var template = document.getElementById('role_template');
+        var nameInput = document.getElementById('role_name');
+        var help = document.getElementById('role_name_help');
+        function update(){
+            if(!template) return;
+            var v = template.value;
+            if(!v){
+                nameInput.value = '';
+                nameInput.readOnly = false;
+                help.classList.remove('hidden');
+            } else if(v === 'other'){
+                nameInput.value = '';
+                nameInput.readOnly = false;
+                nameInput.focus();
+                help.classList.add('hidden');
+            } else {
+                nameInput.value = v;
+                nameInput.readOnly = true;
+                help.classList.add('hidden');
+            }
+        }
+        if(template) template.addEventListener('change', update);
+        // initialize
+        if(document.readyState === 'loading'){
+            document.addEventListener('DOMContentLoaded', update);
+        } else {
+            update();
+        }
+    })();
+</script>
 
 <x-loading id="createRoleLoader" message="Creating role..." :show="false" fullPage />
     </div>
