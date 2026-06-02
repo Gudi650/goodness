@@ -160,10 +160,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/hrm','index')->name('hrm');
         Route::post('/employees','store')->name('employees.store');
         Route::delete('/employees/{user}','destroy')->name('employees.destroy');
-        Route::post('/departments','storeDepartment')->name('departments.store');
-        Route::put('/departments/{department}','updateDepartment')->name('departments.update');
-        Route::delete('/departments/{department}','destroyDepartment')->name('departments.destroy');
 
+    });
+
+    //group the department routes
+    Route::controller(DepartmentController::class)->group(function () {
+        Route::post('/departments', 'store')->name('departments.store');
+        Route::put('/departments/{department}', 'update')->name('departments.update');
+        Route::delete('/departments/{department}', 'destroy')->name('departments.destroy');
     });
 
     /* Bulk Import
