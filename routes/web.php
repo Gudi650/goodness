@@ -114,6 +114,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/invoices', 'store')->name('invoices.store');
         Route::post('/invoices/draft', 'saveDraft')->name('invoices.draft');
         Route::get('/invoices', 'index')->name('invoices.index');
+        Route::get('/invoices/{invoice}/download', 'download')->name('invoices.download');
         Route::get('/invoices/{invoice}', 'show')->name('invoices.show');
         Route::put('/invoices/{invoice}', 'update')->name('invoices.update');
         Route::delete('/invoices/{invoice}', 'destroy')->name('invoices.destroy');

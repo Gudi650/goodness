@@ -27,6 +27,15 @@
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
                             <div class="flex items-center justify-center gap-6">
+                                <a href="{{ route('invoices.download', $invoice->id) }}"
+                                    class="text-emerald-600 hover:text-emerald-800 transition-colors"
+                                    title="Download invoice PDF" aria-label="Download invoice PDF">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 3v12m0 0-4-4m4 4 4-4M4.5 20.25h15" />
+                                    </svg>
+                                </a>
                                 <button type="button" onclick="toggleInvoiceDetails('{{ $invoice->id }}')"
                                     class="text-slate-600 hover:text-slate-800 transition-colors"
                                     title="View invoice details" aria-label="View invoice details">
