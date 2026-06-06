@@ -20,7 +20,7 @@ class VirtualAccountsController extends Controller
             'card_number' => 'nullable|string|max:255',
             'company_id' => 'required|exists:companies,id',
             'currency' => 'required|string|size:3',
-            'initial_balance' => 'required|numeric|min:0',
+            'balance' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'status' => 'nullable|string|in:active,inactive'
         ]);

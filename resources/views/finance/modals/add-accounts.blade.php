@@ -87,7 +87,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-slate-600">Initial Balance</label>
-                <input type="number" name="initial_balance"
+                <input type="number" name="balance"
                     class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="0">
             </div>
