@@ -31,4 +31,12 @@ class Company extends Model
     {
         return $this->hasMany(Department::class);
     }
+
+    /**
+     * Get all virtual accounts that belong to this company.
+     */
+    public function virtualAccounts(): HasMany
+    {
+        return $this->hasMany(VirtualAccounts::class);
+    }
 }

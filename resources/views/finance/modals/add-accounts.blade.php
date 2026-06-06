@@ -1,8 +1,9 @@
 <div id="addAccountModal" class="hidden">
     <!-- Form -->
-    <form class="space-y-4">
+    <form action="{{ route('virtualaccounts.store') }}" method="POST" class="space-y-4">
+        @csrf
         <div>
-            <label class="block text-sm font-medium text-slate-600">Bank Name</label>
+            <label name="bank_name" class="block text-sm font-medium text-slate-600">Bank Name</label>
             <select
                 class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
                 <option value="">Select a bank</option>
@@ -20,36 +21,55 @@
 
         <div>
             <label class="block text-sm font-medium text-slate-600">Account Name</label>
-            <input type="text"
+            <input type="text" name="account_name"
                 class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
                 placeholder="e.g. Main Operating Account">
         </div>
 
         <div>
             <label class="block text-sm font-medium text-slate-600">Account Number</label>
-            <input type="text"
+            <input type="text" name="account_number"
                 class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
                 placeholder="ACC-0009">
         </div>
 
         <div>
             <label class="block text-sm font-medium text-slate-600">Card Number</label>
-            <input type="text"
+            <input type="text" name="card_number"
                 class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
                 placeholder="4111 2222 3333 4444">
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-slate-600">Company</label>
-            <input type="text"
-                class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
-                placeholder="Goodness Group">
+            <label class="block text-sm font-medium text-slate-600">Account Type</label>
+            <select name="account_type"
+                class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
+                <option value="savings">Savings</option>
+                <option value="checking">Checking</option>
+            </select>
         </div>
+
+
+
+        <div>
+            <label class="block text-sm font-medium text-slate-600">Company</label>
+            <select name="company_id"
+                class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
+                required>
+                <option value="">Select a company</option>
+                @if (isset($companies))
+                    @foreach ($companies as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+
 
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-slate-600">Currency</label>
-                <select
+                <select name="currency"
                     class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
                     <option>TZS</option>
                     <option>USD</option>
@@ -57,7 +77,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-slate-600">Initial Balance</label>
-                <input type="number"
+                <input type="number" name="initial_balance"
                     class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="0">
             </div>
@@ -65,7 +85,8 @@
 
         <div>
             <label class="block text-sm font-medium text-slate-600">Description</label>
-            <textarea class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
+            <textarea name="description"
+                class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
                 rows="3" placeholder="Short description of the account"></textarea>
         </div>
 
@@ -76,6 +97,23 @@
             <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save
                 Account</button>
         </div>
+
     </form>
 
 </div>
+
+<x-loading id="virtualAccountCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+
+    // Show loading indicator on form submit
+    document.querySelector('#addAccountModal form').addEventListener('submit', function () {
+        document.getElementById('virtualAccountCreateLoader').classList.remove('hidden');
+    });
+
+    function showExpenseCreateLoader() {
+        const loader = document.getElementById('expenseCreateLoader');
+        if (loader) loader.classList.remove('hidden');
+    }
+
+</script>

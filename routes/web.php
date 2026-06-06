@@ -25,6 +25,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\VirtualAccountsController;
 use App\Models\InternalMessages;
 use Illuminate\Support\Facades\Route;
 
@@ -145,6 +146,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/payments/{payment}/download-proof', 'downloadProof')->name('payments.download-proof');
     });
 
+    //Virtual accounts management
+     Route::controller(VirtualAccountsController::class)->group(function () {
+        Route::post('/accounts', 'store')->name('virtualaccounts.store');
+     });
+
 
     /* HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
@@ -158,9 +164,13 @@ Route::middleware('auth')->group(function () {
     Route::controller(HrmController::class)->group(function (){
 
         Route::get('/hrm','index')->name('hrm');
-        Route::post('/employees','store')->name('employees.store');
-        Route::delete('/employees/{user}','destroy')->name('employees.destroy');
 
+    });
+
+    //group the usercontroller routes for employees
+    Route::controller(UserController::class)->group(function () {
+        Route::post('/employees', 'store')->name('employees.store');
+        Route::delete('/employees/{user}', 'destroy')->name('employees.destroy');
     });
 
     //group the department routes
