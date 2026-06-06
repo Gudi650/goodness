@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('expenses', function (Blueprint $table) {
             //
-            $table->foreignId('bank_id')->after('department_id')->constrained('virtual_accounts')->nullOnDelete();
+            $table->foreignId('bank_id')->nullable()->after('department_id')->constrained('virtual_accounts')->nullOnDelete();
         });
     }
 
