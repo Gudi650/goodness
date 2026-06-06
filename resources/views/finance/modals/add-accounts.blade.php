@@ -1,10 +1,11 @@
 <div id="addAccountModal" class="hidden">
     <!-- Form -->
-    <form action="{{ route('virtualaccounts.store') }}" method="POST" class="space-y-4">
+    <form action="{{ route('virtualaccounts.store') }}" method="POST" class="space-y-4" onsubmit="showVirtualAccountCreateLoader()">
         @csrf
         <div>
-            <label name="bank_name" class="block text-sm font-medium text-slate-600">Bank Name</label>
+            <label  class="block text-sm font-medium text-slate-600">Bank Name</label>
             <select
+                name="bank_name"
                 class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
                 <option value="">Select a bank</option>
                 <option value="CRDB">CRDB Bank</option>
@@ -46,6 +47,15 @@
                 class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
                 <option value="savings">Savings</option>
                 <option value="checking">Checking</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-slate-600">Status</label>
+            <select name="status"
+                class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
             </select>
         </div>
 
@@ -111,8 +121,8 @@
         document.getElementById('virtualAccountCreateLoader').classList.remove('hidden');
     });
 
-    function showExpenseCreateLoader() {
-        const loader = document.getElementById('expenseCreateLoader');
+    function showVirtualAccountCreateLoader() {
+        const loader = document.getElementById('virtualAccountCreateLoader');
         if (loader) loader.classList.remove('hidden');
     }
 

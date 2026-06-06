@@ -1,4 +1,5 @@
 <script>
+    //rendering the button with onclick function ready to go
     function renderButton(label, onclick) {
         return `<button onclick="${onclick}" class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">
                     ${label}
@@ -77,6 +78,7 @@
 
     }
 
+    // Helper to get form fields either from modal or main page (for expenses which have dynamic modal fields)
     function getExpenseField(id) {
         const modalBody = document.getElementById('modal-body');
         if (modalBody) {
@@ -251,6 +253,7 @@
         }
     }
 
+    //function to open add payment modal
     function openAddPaymentModal() {
         // Use the dedicated payment modal shell so the richer layout and dynamic fields work correctly.
         if (typeof window.openPaymentModal === 'function') {

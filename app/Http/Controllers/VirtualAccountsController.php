@@ -11,7 +11,6 @@ class VirtualAccountsController extends Controller
     public function store(Request $request)
     {
 
-
         //validated datas
         $validatedData = $request->validate([
             'bank_name' => 'required|string|max:255',
@@ -21,9 +20,9 @@ class VirtualAccountsController extends Controller
             'card_number' => 'nullable|string|max:255',
             'company_id' => 'required|exists:companies,id',
             'currency' => 'required|string|size:3',
-            'balance' => 'required|numeric|min:0',
+            'initial_balance' => 'required|numeric|min:0',
             'description' => 'nullable|string',
-            'status' => 'required|string|in:active,inactive'
+            'status' => 'nullable|string|in:active,inactive'
         ]);
 
         //put a try and catch block to handle the error when savind datas in the db
