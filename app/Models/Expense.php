@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'review_items',
     'review_evidence_paths',
     'reviewed_at',
+    'bank_id',
 ])]
 class Expense extends Model
 {
@@ -100,5 +101,13 @@ class Expense extends Model
     public function checker(): BelongsTo
     {
         return $this->belongsTo(User::class, 'checked_by');
+    }
+
+    /**
+     * Get the bank account associated with this expense.
+     */
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(VirtualAccounts::class, 'bank_id');
     }
 }

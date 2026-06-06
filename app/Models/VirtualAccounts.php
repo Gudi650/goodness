@@ -25,4 +25,10 @@ class VirtualAccounts extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    //relationship with expenses
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class, 'bank_id');
+    }
 }

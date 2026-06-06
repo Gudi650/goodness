@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Expense;
+use App\Models\VirtualAccounts;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -106,6 +107,7 @@ class ExpensesController extends Controller
             'net_amount' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
             'submit_mode' => 'nullable|in:draft,submit',
+            'bank_id' => 'required|exists:virtual_accounts,id',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
@@ -120,12 +122,24 @@ class ExpensesController extends Controller
         $mode = $validated['submit_mode'] ?? 'submit';
         $status = $mode === 'draft' ? 'draft' : 'submitted';
 
+        //check if the bank submitted is of same company and also check if the bank has sufficient money as well
+        if (isset($validated['bank_id'])) {
+            $bankId = $validated['bank_id'];
+            $companyId = $validated['company_id'];
+            $amount = $validated['amount'];
+
+            if (!$this->validateBankForExpense($bankId, $companyId, $amount)) {
+                return redirect()->back()->with('error', 'Invalid bank account or insufficient funds for this expense.');
+            }
+        }
+
         $expense = new Expense();
         $expense->forceFill([
             'expense_number' => $validated['expense_number'],
             'expense_date' => $validated['expense_date'],
             'company_id' => (int) $validated['company_id'],
             'department_id' => (int) $validated['department_id'],
+            'bank_id' => $validated['bank_id'],
             'created_by' => Auth::id(),
             'status' => $status,
             'category' => $validated['category'],
@@ -254,6 +268,27 @@ class ExpensesController extends Controller
 
 
     }
+
+
+    //check if the bank submitted is of same company and also check if the bank has sufficient money as well
+    protected function validateBankForExpense($bankId, $companyId, $amount)
+    {
+        $bankAccount = VirtualAccounts::where('id', $bankId)
+            ->where('company_id', $companyId)
+            ->first();
+
+        if (!$bankAccount) {
+            return false; // Bank account does not belong to the company
+        }
+
+        if ($bankAccount->balance < $amount) {
+            return false; // Insufficient funds in the bank account
+        }
+
+        return true; // Bank account is valid and has sufficient funds
+    }
+        
+
 
 
 }
