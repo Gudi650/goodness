@@ -77,7 +77,7 @@ class InvoiceController extends Controller
             ]);
         }
 
-        return redirect('/invoices')->with('success', 'Invoice sent successfully! Invoice #' . $invoice->invoice_number . ' has been created.');
+        return redirect()->route('finance')->with('success', 'Invoice sent successfully! Invoice #' . $invoice->invoice_number . ' has been created.');
     }
 
     /**
@@ -261,7 +261,7 @@ class InvoiceController extends Controller
             ]);
         }
 
-        return redirect('/invoices')->with('success', 'Invoice saved as draft! Invoice #' . $invoice->invoice_number . ' is ready for editing.');
+        return redirect()->route('finance')->with('success', 'Invoice saved as draft! Invoice #' . $invoice->invoice_number . ' is ready for editing.');
     }
 
     /**

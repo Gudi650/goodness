@@ -9,6 +9,7 @@
                 <tr>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Invoice</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Company</th>
+                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left">Invoice Type</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Amount</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Status</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Actions</th>
@@ -19,6 +20,7 @@
                     <tr class="align-top">
                         <td class="px-4 py-3 text-sm font-medium">{{ $invoice['invoice_number'] }}</td>
                         <td class="px-4 py-3 text-sm">{{ $invoice['company_name'] ?? 'N/A' }}</td>
+                        <td class="px-4 py-3 text-sm">{{ ucfirst($invoice['invoice_type'] ?? 'N/A') }}</td>
                         <td class="px-4 py-3 text-sm text-right mono">TZS {{ number_format($invoice['total_amount']) }}
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
@@ -100,6 +102,8 @@
                                             {{ $invoice['client_email'] ?: 'No email provided' }}</p>
                                         <p class="text-slate-600">Phone:
                                             {{ $invoice['client_phone'] ?: 'No phone provided' }}</p>
+                                        <p class="text-slate-600">Invoice Type:
+                                            {{ ucfirst($invoice['invoice_type'] ?? 'N/A') }}</p>
                                     </div>
                                     <div class="rounded-lg bg-slate-50 p-3">
                                         <p class="text-xs uppercase tracking-wide text-slate-500">Dates</p>
@@ -117,6 +121,7 @@
                                         <p class="text-slate-900 font-semibold">Total: TZS
                                             {{ number_format($invoice['total_amount']) }}</p>
                                     </div>
+                                    
                                 </div>
 
                                 <div class="mt-4">

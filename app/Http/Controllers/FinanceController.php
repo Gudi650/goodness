@@ -235,6 +235,7 @@ class FinanceController extends Controller
                     'invoice_number' => $invoice->invoice_number,
                     'display_id' => $invoice->invoice_number,
                     'company_id' => $invoice->company_id,
+                    'invoice_type' => $invoice->invoice_type,
                     'invoice_date' => Carbon::parse($invoice->invoice_date)->format('M d, Y'),
                     'invoice_date_raw' => $invoice->invoice_date,
                     'due_date' => $invoice->due_date ? Carbon::parse($invoice->due_date)->format('M d, Y') : null,
