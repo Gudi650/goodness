@@ -1,7 +1,23 @@
 <div id="addAccountModal" class="hidden">
-    <!-- Modal Box -->
     <!-- Form -->
     <form class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-slate-600">Bank Name</label>
+            <select
+                class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500">
+                <option value="">Select a bank</option>
+                <option value="CRDB">CRDB Bank</option>
+                <option value="NMB">NMB Bank</option>
+                <option value="NBC">NBC Bank</option>
+                <option value="Stanbic">Stanbic Bank</option>
+                <option value="Exim">Exim Bank</option>
+                <option value="KCB">KCB Bank</option>
+                <option value="Equity">Equity Bank</option>
+                <option value="StandardChartered">Standard Chartered Bank</option>
+                <option value="DTB">Diamond Trust Bank (DTB)</option>
+            </select>
+        </div>
+
         <div>
             <label class="block text-sm font-medium text-slate-600">Account Name</label>
             <input type="text"
