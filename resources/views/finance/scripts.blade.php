@@ -10,6 +10,7 @@
             invoices: document.getElementById('invoicesPane'),
             expenses: document.getElementById('expensesPane'),
             payments: document.getElementById('paymentsPane'),
+            accounts: document.getElementById('accountsPane'),
         };
 
         Object.entries(panes).forEach(([tab, pane]) => {
@@ -272,6 +273,12 @@
         if (tab === 'expenses') {
             sectionTitle.textContent = 'Expenses';
             actionButton.innerHTML = renderButton('Add Expense', 'openAddExpenseModal()');
+            return;
+        }
+
+        if (tab === 'accounts') {
+            sectionTitle.textContent = 'Virtual Accounts Management';
+            actionButton.innerHTML = renderButton('Add Account', 'openAddAccountModal()');
             return;
         }
 

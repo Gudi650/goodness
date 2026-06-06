@@ -54,6 +54,7 @@
                 <button onclick="switchTab('invoices', this)" class="tab-btn py-4 text-sm font-medium text-slate-700 border-brand-600 cursor-pointer">Invoices</button>
                 <button onclick="switchTab('expenses', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Expenses</button>
                 <button onclick="switchTab('payments', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Payments</button>
+                <button onclick="switchTab('accounts', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Accounts</button>
             </div>
         </div>
 
@@ -69,6 +70,8 @@
                 @include('finance.invoices', ['invoices' => $invoices])
                 @include('finance.expenses', ['expenses' => $expenses])
                 @include('finance.payments', ['payments' => $payments])
+                {{--@include('finance.accounts', ['accounts' => $accounts]) --}}
+                @include('finance.accounts')
             </div>
         </div>
     </main>
