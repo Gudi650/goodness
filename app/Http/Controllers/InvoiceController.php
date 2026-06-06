@@ -24,6 +24,7 @@ class InvoiceController extends Controller
             'client_phone' => 'nullable|string',
             'client_address' => 'nullable|string',
             'invoice_date' => 'required|date',
+            'invoice_type' => 'required|in:income,expense',
             'due_date' => 'required|date|after_or_equal:invoice_date',
             'status' => 'required|in:draft,pending,paid,overdue',
             'payment_method' => 'nullable|in:cash,bank,mobile,cheque',
@@ -62,6 +63,7 @@ class InvoiceController extends Controller
             'total_amount' => $validated['total_amount'],
             'notes' => $validated['notes'],
             'created_by' => Auth::id(),
+            'invoice_type' => $validated['invoice_type'],
         ]);
 
         foreach ($validated['items'] as $item) {
@@ -164,6 +166,7 @@ class InvoiceController extends Controller
             'discount_amount' => $validated['discount_amount'],
             'total_amount' => $validated['total_amount'],
             'notes' => $validated['notes'],
+            'invoice_type' => $validated['invoice_type'],
         ]);
 
         $invoice->items()->delete();
@@ -191,7 +194,7 @@ class InvoiceController extends Controller
     {
         Invoice::query()->whereKey($invoice->id)->delete();
 
-        return back()->with('success', 'Salary record updated.');
+        return back()->with('success', 'Invoice deleted successfully.');
     }
 
     /**
@@ -207,6 +210,7 @@ class InvoiceController extends Controller
             'client_phone' => 'nullable|string',
             'client_address' => 'nullable|string',
             'invoice_date' => 'required|date',
+            'invoice_type' => 'required|in:income,expense',
             'due_date' => 'nullable|date|after_or_equal:invoice_date',
             'payment_method' => 'nullable|in:cash,bank,mobile,cheque',
             'subtotal' => 'required|numeric|min:0',
@@ -243,6 +247,7 @@ class InvoiceController extends Controller
             'total_amount' => $validated['total_amount'],
             'notes' => $validated['notes'],
             'created_by' => Auth::id(),
+            'invoice_type' => $validated['invoice_type'],
         ]);
 
         foreach ($validated['items'] as $item) {

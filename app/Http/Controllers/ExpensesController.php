@@ -221,10 +221,10 @@ class ExpensesController extends Controller
         //check it the usser is the manager of the company or an admin
         $user = Auth::user();
 
-        $isAdmin = $user?->role?->name === 'Admin';
+        //$isAdmin = $user?->role?->name === 'Admin';
         $isManager = $user?->role?->name === 'Manager';
         $isCEO = $user?->role?->name === 'CEO';
-        $isHr = $user?->role?->name === 'HR Manager';
+        //$isHr = $user?->role?->name === 'HR Manager';
         $isAccountant = $user?->role?->name === 'Accountant';
         
 
@@ -235,7 +235,7 @@ class ExpensesController extends Controller
                 $expense->checked_by = Auth::id();
                 $expense->save();
 
-                return redirect()->route('finance')->with('success', 'Expense checked successfully. Awaiting issue from accountant .');
+                return redirect()->route('finance')->with('success', 'Expense checked successfully. Awaiting checking from CEO .');
             }
 
             if ($isCEO) {
@@ -253,23 +253,37 @@ class ExpensesController extends Controller
             }
 
             if ($isAccountant) {
+                if ($expense->status !== 'approved') {
+                    return redirect()->route('finance')->with('error', 'Expense must be approved by the CEO before it can be issued by the Accountant.');
+                }
 
-            if ($expense->status !== 'approved') {
-                return redirect()->route('finance')->with('error', 'Expense must be approved by the CEO before it can be issued by the Accountant.');
+                try {
+                    DB::transaction(function () use ($expense) {
+                    
+                        // Deduct from bank account
+                        $this->deductAmountFromBankAccount($expense->bank_id, $expense->amount);
+
+                        // Record transaction
+                        $this->recordBankTransaction($expense->bank_id, $expense->company_id, $expense->amount, $expense->id);
+
+                        // Mark expense as issued
+                        $expense->status = 'issued';
+                        $expense->issued_by = Auth::id();
+                        $expense->save();
+                        
+                    });
+
+                    return redirect()->route('finance')->with('success', 'Expense issued successfully, balance deducted and transaction recorded.');
+                } catch (\Exception $e) {
+                    \Log::error('Failed to issue expense: '.$e->getMessage(), [
+                        'expense_id' => $expense->id,
+                        'bank_id'    => $expense->bank_id,
+                        'amount'     => $expense->amount,
+                    ]);
+
+                    return redirect()->route('finance')->with('error', 'Failed to issue expense. Please try again.');
+                }
             }
-
-            $expense->status = 'issued';
-            $expense->issued_by = Auth::id();
-            $expense->save();
-
-            //now here after issuing the bank account balance should be deducted with the expense amount
-            $this->deductAmountFromBankAccount($expense->bank_id, $expense->amount);
-
-            //store the transaction in the transactions table as well for record keeping and future reference, this will be helpful for generating financial reports and also for auditing purposes
-            $this->recordBankTransaction($expense->bank_id, $expense->company_id, $expense->amount, $expense->id);
-
-            return redirect()->route('finance')->with('success', 'Expense issued successfully, Expense is deducted from the bank account balance as well.');
-        }
 
         //if the user is neither of the above then will return an error message saying that the user is not authorized to approve the expense
         return redirect()->route('finance')->with('error', 'You are not authorized to approve this expense.');
@@ -319,7 +333,7 @@ class ExpensesController extends Controller
             'balance_after' => VirtualAccounts::find($bankId)->balance,
             'affecting_balance' => -$amount,
             'expense_id' => $expenseId,
-            'transaction_type' => 'expense_payment',
+            'transaction_type' => 'expense',
         ]);
     }
         

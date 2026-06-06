@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'total_amount',
     'notes',
     'created_by',
+    'invoice_type',
 ])]
 class Invoice extends Model
 {

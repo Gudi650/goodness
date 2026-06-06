@@ -66,6 +66,15 @@
                         <option value="cheque">Cheque</option>
                     </select>
                 </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Invoice type</label>
+                    <select id="invoiceType" name="invoice_type" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+
             </div>
 
             <div class="pt-4 border-t border-slate-200">
