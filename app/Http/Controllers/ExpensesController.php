@@ -131,6 +131,8 @@ class ExpensesController extends Controller
             if (!$this->validateBankForExpense($bankId, $companyId, $amount)) {
                 return redirect()->back()->with('error', 'Invalid bank account or insufficient funds for this expense.');
             }
+
+
         }
 
         $expense = new Expense();
@@ -259,7 +261,10 @@ class ExpensesController extends Controller
             $expense->issued_by = Auth::id();
             $expense->save();
 
-            return redirect()->route('finance')->with('success', 'Expense issued successfully.');
+            //now here after issuing the bank account balance should be deducted with the expense amount
+            $this->deductAmountFromBankAccount($expense->bank_id, $expense->amount);
+
+            return redirect()->route('finance')->with('success', 'Expense issued successfully, Expense is deducted from the bank account balance as well.');
         }
 
         //if the user is neither of the above then will return an error message saying that the user is not authorized to approve the expense
@@ -287,6 +292,22 @@ class ExpensesController extends Controller
 
         return true; // Bank account is valid and has sufficient funds
     }
+
+    //if it passes the validation then we will deduct the amount from the bank account balance
+    protected function deductAmountFromBankAccount($bankId, $amount)
+    {
+
+        $bankAccount = VirtualAccounts::find($bankId);
+
+        if ($bankAccount) {
+            $bankAccount->balance -= $amount;
+            $bankAccount->save();
+        }
+
+    }
+
+    //now store the transcation in the transactions table as well for record keeping and future reference, this will be helpful for generating financial reports and also for auditing purposes
+    
         
 
 
