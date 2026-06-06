@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankTransactions;
 use Illuminate\Http\Request;
 use App\Models\Expense;
 use App\Models\VirtualAccounts;
@@ -264,6 +265,9 @@ class ExpensesController extends Controller
             //now here after issuing the bank account balance should be deducted with the expense amount
             $this->deductAmountFromBankAccount($expense->bank_id, $expense->amount);
 
+            //store the transaction in the transactions table as well for record keeping and future reference, this will be helpful for generating financial reports and also for auditing purposes
+            $this->recordBankTransaction($expense->bank_id, $expense->company_id, $expense->amount, $expense->id);
+
             return redirect()->route('finance')->with('success', 'Expense issued successfully, Expense is deducted from the bank account balance as well.');
         }
 
@@ -307,7 +311,17 @@ class ExpensesController extends Controller
     }
 
     //now store the transcation in the transactions table as well for record keeping and future reference, this will be helpful for generating financial reports and also for auditing purposes
-    
+    protected function recordBankTransaction($bankId, $companyId, $amount, $expenseId)
+    {
+        BankTransactions::create([
+            'bank_id' => $bankId,
+            'company_id' => $companyId,
+            'balance_after' => VirtualAccounts::find($bankId)->balance,
+            'affecting_balance' => -$amount,
+            'expense_id' => $expenseId,
+            'transaction_type' => 'expense_payment',
+        ]);
+    }
         
 
 
