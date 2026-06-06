@@ -6,6 +6,7 @@ use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use App\Models\VirtualAccounts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -82,6 +83,10 @@ class FinanceController extends Controller
         $pendingReviewCount = $reviewableExpenses->count();
         $firstPendingReviewExpenseId = $reviewableExpenses->first()['id'] ?? null;
 
+        //get the details of the virtual accounts to be displayed from the virtual_accounts table
+        $virtualAccounts = $this->getVirtualAccounts($isAdmin,$isCEO, $isAccountant, $user);
+
+
         return view('finance', [
             'invoices' => $invoices,
             'expenses' => $expenses,
@@ -96,6 +101,7 @@ class FinanceController extends Controller
             'issuedCount' => $issuedCount,
             'pendingReviewCount' => $pendingReviewCount,
             'firstPendingReviewExpenseId' => $firstPendingReviewExpenseId,
+            'virtualAccounts' => $virtualAccounts,
         ]);
     }
 
@@ -306,6 +312,58 @@ class FinanceController extends Controller
             && (int) ($expense['creator_id'] ?? 0) === (int) $user->id
             && in_array($expense['status'] ?? '', ['approved', 'issued'], true);
     }
+
+    /**
+     * Getting the details of the virtual accounts to be displayed from the virtual_accounts table
+    */
+    protected function getVirtualAccounts($isAdmin,$isCEO, $isAccountant, $user)
+    {
+
+        //check if the user can view the virtual accounts, if not then return empty array
+        if (!$this->canViewVirtualAccounts($user, $isAdmin, $isCEO, $isAccountant)) {
+            return [];
+        }
+
+
+        $virtualAccounts = VirtualAccounts::query()
+            ->with('company')
+            ->when(!$isAdmin && !$isCEO && $user, fn($query) => $query->where('company_id', $user->company_id))
+            ->latest()
+            ->limit(100)
+            ->get()
+            ->map(function (VirtualAccounts $account) {
+                return [
+                    'id' => $account->id,
+                    'bank_name' => $account->bank_name,
+                    'account_name' => $account->account_name,
+                    'account_number' => $account->account_number,
+                    'account_type' => $account->account_type,
+                    'card_number' => $account->card_number ?: '-',
+                    'company_name' => $account->company?->name ?? '-',
+                    'currency' => $account->currency,
+                    'balance' => (float) $account->balance,
+                    'description' => $account->description ?: '-',
+                    'status' => $account->status,
+                    'created_at' => $account->created_at?->format('M d, Y h:i A'),
+                ];
+            })
+            ->all();
+
+        return $virtualAccounts;
+        
+    }
+
+    /**
+     * function to check who can view the virtual accounts, only admin ,CEO and accountant can view the virtual accounts, and if the user is not admin then he can only view the virtual accounts of his company
+     */
+        protected function canViewVirtualAccounts($user, $isAdmin, $isCEO, $isAccountant)
+        {
+            if (!$user) {
+                return false;
+            }
+    
+            return $isAdmin || $isCEO || $isAccountant;
+        }
 
 
 }

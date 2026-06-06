@@ -70,8 +70,7 @@
                 @include('finance.invoices', ['invoices' => $invoices])
                 @include('finance.expenses', ['expenses' => $expenses])
                 @include('finance.payments', ['payments' => $payments])
-                {{--@include('finance.accounts', ['accounts' => $accounts]) --}}
-                @include('finance.accounts')
+                @include('finance.accounts',['virtualAccounts' => $virtualAccounts])
             </div>
         </div>
     </main>
