@@ -12,10 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            
+
             $table->enum('invoice_type', ['income', 'expense'])
                   ->after('invoice_number')
                   ->default('income');
+
+            //add the bank id as well 
+            $table->foreignId('bank_id')->nullable()->after('department_id')->constrained('virtual_accounts')->nullOnDelete();
 
         });
     }
@@ -27,6 +30,8 @@ return new class extends Migration
     {
         Schema::table('invoices', function (Blueprint $table) {
             $table->dropColumn('invoice_type');
+            $table->dropForeign(['bank_id']);
+            $table->dropColumn('bank_id');
         });
     }
 };

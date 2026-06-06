@@ -74,6 +74,17 @@
                         <option value="expense">Expense</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Bank</label>
+                    <select id="bank_id" name="bank_id" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                        <option value="">Select bank...</option>
+                        @foreach ($virtualAccounts as $account)
+                            <option value="{{ $account['id'] }}" @selected(isset($currentBankId) && (string) $currentBankId === (string) $account['id'])>
+                                {{ $account['account_name'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
             </div>
 
@@ -182,11 +193,16 @@
 
         <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
             <button type="button" onclick="closeInvoiceModal()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium">Cancel</button>
+
             <button type="button" onclick="saveInvoiceAsDraft()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">Save as Draft</button>
-            <button type="button" onclick="sendInvoice()" class="flex items-center gap-2 px-4 py-2 rounded-md bg-brand-600 hover:bg-brand-700 text-white transition-colors text-sm font-medium">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                Send Invoice
-            </button>
+
+            {{-- 
+                <button type="button" onclick="sendInvoice()" class="flex items-center gap-2 px-4 py-2 rounded-md bg-brand-600 hover:bg-brand-700 text-white transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    Send Invoice
+                </button>
+             --}}
+             
         </div>
     </div>
 </div>

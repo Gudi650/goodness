@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'notes',
     'created_by',
     'invoice_type',
+    'bank_id',
+
 ])]
 class Invoice extends Model
 {
@@ -53,5 +55,11 @@ class Invoice extends Model
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    //relationship with the bank
+    public function bank(): BelongsTo
+    {
+        return $this->belongsTo(VirtualAccounts::class);
     }
 }

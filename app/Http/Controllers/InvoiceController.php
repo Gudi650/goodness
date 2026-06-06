@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankTransactions;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\VirtualAccounts;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +17,8 @@ class InvoiceController extends Controller
     /**
      * Store a newly created invoice in storage.
      */
-    public function store(Request $request)
+
+    /*public function store(Request $request)
     {
         $validated = $request->validate([
             'invoice_number' => 'required|string|unique:invoices',
@@ -78,7 +82,7 @@ class InvoiceController extends Controller
         }
 
         return redirect()->route('finance')->with('success', 'Invoice sent successfully! Invoice #' . $invoice->invoice_number . ' has been created.');
-    }
+    } */
 
     /**
      * Get invoices for the finance page.
@@ -136,6 +140,8 @@ class InvoiceController extends Controller
             'client_phone' => 'nullable|string',
             'client_address' => 'nullable|string',
             'invoice_date' => 'required|date',
+            'invoice_type' => 'required|in:income,expense',
+            'bank_id' => 'required|exists:virtual_accounts,id',
             'due_date' => 'required|date|after_or_equal:invoice_date',
             'status' => 'required|in:draft,pending,paid,overdue',
             'payment_method' => 'nullable|in:cash,bank,mobile,cheque',
@@ -167,9 +173,11 @@ class InvoiceController extends Controller
             'total_amount' => $validated['total_amount'],
             'notes' => $validated['notes'],
             'invoice_type' => $validated['invoice_type'],
+            'bank_id' => $validated['bank_id'],
         ]);
 
         $invoice->items()->delete();
+
         foreach ($validated['items'] as $item) {
             InvoiceItem::create([
                 'invoice_id' => $invoice->id,
@@ -205,6 +213,7 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'invoice_number' => 'required|string|unique:invoices',
             'company_id' => 'required',
+            'bank_id' => 'required|exists:virtual_accounts,id',
             'client_name' => 'required|string',
             'client_email' => 'nullable|email',
             'client_phone' => 'nullable|string',
@@ -230,6 +239,18 @@ class InvoiceController extends Controller
             return back()->withErrors(['company_id' => 'Please select a valid company.']);
         }
 
+        //check if the bank submitted is of same company and also check if the bank has sufficient money as well
+        if (isset($validated['bank_id']) ) {
+            $bankId = $validated['bank_id'];
+            $companyId = $validated['company_id'];
+            $amount = $validated['total_amount'];
+            $invoice_type = $validated['invoice_type'];
+
+            if (!$this->validateBankForInvoice($bankId, $companyId, $amount, $invoice_type)) {
+                return redirect()->back()->with('error', 'Invalid bank account or insufficient funds for this expense.');
+            }
+        }
+
         $invoice = Invoice::create([
             'invoice_number' => $validated['invoice_number'],
             'company_id' => $resolvedCompanyId,
@@ -248,6 +269,7 @@ class InvoiceController extends Controller
             'notes' => $validated['notes'],
             'created_by' => Auth::id(),
             'invoice_type' => $validated['invoice_type'],
+            'bank_id' => $validated['bank_id'],
         ]);
 
         foreach ($validated['items'] as $item) {
@@ -260,6 +282,13 @@ class InvoiceController extends Controller
                 'total_price' => $item['total_price'],
             ]);
         }
+
+        //check if the invoice type is expense or income then either add or deduct money from the virtual account balance
+        $this->updateVirtualAccountBalance($invoice);
+
+        //now save the transaction in the transactions table
+        $this->saveTransaction($invoice);
+           
 
         return redirect()->route('finance')->with('success', 'Invoice saved as draft! Invoice #' . $invoice->invoice_number . ' is ready for editing.');
     }
@@ -285,4 +314,68 @@ class InvoiceController extends Controller
 
         return $company?->id;
     }
+
+    /**
+     * check if the invoice is expense or income
+     */
+    protected function isInvoiceIncome(Invoice $invoice): bool
+    {
+        return $invoice->invoice_type === 'income';
+    }
+
+    /**
+     * deduct or add money from the virtual account based on the invoice type
+     */
+    protected function updateVirtualAccountBalance(Invoice $invoice): void
+    {
+        if ($this->isInvoiceIncome($invoice)) {
+            // For income invoices, add the total amount to the virtual account balance
+            DB::table('virtual_accounts')
+                ->where('company_id', $invoice->company_id)
+                ->increment('balance', $invoice->total_amount);
+        } else {
+            // For expense invoices, deduct the total amount from the virtual account balance
+            DB::table('virtual_accounts')
+                ->where('company_id', $invoice->company_id)
+                ->decrement('balance', $invoice->total_amount);
+        }
+    }
+
+    /**
+     * save into transactions table when an invoice is created
+     */
+    protected function saveTransaction(Invoice $invoice): void
+    {
+
+        BankTransactions::create([
+            'bank_id' => $invoice->bank_id,
+            'company_id' => $invoice->company_id,
+            'balance_after' => VirtualAccounts::find($invoice->bank_id)->balance,
+            'affecting_balance' => -$invoice->total_amount,
+            'expense_id' => $invoice->id,
+            'transaction_type' => 'expense',
+        ]);
+
+    }
+
+    /**
+     * Make sure that the bank selected if in the same company selected
+     */
+    protected function validateBankForInvoice($bankId, $companyId, $amount, $invoice_type)
+    {
+        $bankAccount = VirtualAccounts::where('id', $bankId)
+            ->where('company_id', $companyId)
+            ->first();
+
+        if (!$bankAccount) {
+            return false; // Bank account does not belong to the company
+        }
+
+        if ($invoice_type == "expense" && $bankAccount->balance < $amount) {
+            return false; 
+        }
+
+        return true; // Bank account is valid and has sufficient funds
+    }
+
 }

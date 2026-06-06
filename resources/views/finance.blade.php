@@ -67,7 +67,7 @@
         <!-- Content Container -->
         <div class="bg-white border border-slate-200 rounded-lg p-4">
             <div id="tabContent" class="space-y-6">
-                @include('finance.invoices', ['invoices' => $invoices])
+                @include('finance.invoices', ['invoices' => $invoices, 'virtualAccounts' => $virtualAccounts])
                 @include('finance.expenses', ['expenses' => $expenses])
                 @include('finance.payments', ['payments' => $payments])
                 @include('finance.accounts', ['virtualAccounts' => $virtualAccounts])
