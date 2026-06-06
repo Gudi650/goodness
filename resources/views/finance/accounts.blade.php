@@ -63,56 +63,48 @@
                     </td>
                 </tr>
                 <tr id="acc1" class="hidden bg-slate-50">
-                    {{-- 
-                    <td colspan="7" class="px-6 py-4">
-                        <p><strong>Account Number:</strong> ACC-0001</p>
-                        <p><strong>Card Number:</strong> 4111 1111 1111 1111</p>
-                        <p><strong>Remaining Balance:</strong> TZS 85,000,000</p>
-                        <p><strong>Description:</strong> Primary operating account for Goodness Group</p>
-                        <div class="mt-3">
-                            <a href="#" class="text-green-600 hover:underline">View Transactions</a>
-                        </div>
-                    </td>
-                     --}}
 
                     <td colspan="9" class="px-4 py-4">
-                            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Account Number</p>
-                                    <p class="mt-1 text-sm text-slate-700">xxxxxxxxxxxxx</p>
-                                </div>
-                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Card Number:</p>
-                                    <p class="mt-1 text-sm text-slate-700">4111 1111 1111 1111</p>
-                                </div>
-                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Remaining Balance:</p>
-                                    <p class="mt-1 text-sm text-slate-700">123456789</p>
-                                </div>
-                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Description :
-                                    </p>
-                                    <p class="mt-1 text-sm text-slate-700">Primary operating account for Goodness Group</p>
-                                </div>
-                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Incoming:</p>
-                                    <p class="mt-1 text-sm text-slate-700">123456789</p>
-                                </div>
-                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Outgoing:</p>
-                                    <p class="mt-1 text-sm text-slate-700">123456789</p>
-                                </div>
-                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Bank Statement:
-                                    </p>
-                                    <p class="mt-1 text-sm text-slate-700">Download</p>
-                                </div>
-                                
-                                <div
-                                    class="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2 lg:col-span-4">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Attachment
-                                    </p>
-                                    {{-- 
+                        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Account Number
+                                </p>
+                                <p class="mt-1 text-sm text-slate-700">xxxxxxxxxxxxx</p>
+                            </div>
+                            <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Card Number:</p>
+                                <p class="mt-1 text-sm text-slate-700">4111 1111 1111 1111</p>
+                            </div>
+                            <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Remaining
+                                    Balance:</p>
+                                <p class="mt-1 text-sm text-slate-700">123456789</p>
+                            </div>
+                            <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Description :
+                                </p>
+                                <p class="mt-1 text-sm text-slate-700">Primary operating account for Goodness Group</p>
+                            </div>
+                            <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Incoming:
+                                </p>
+                                <p class="mt-1 text-sm text-slate-700">123456789</p>
+                            </div>
+                            <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Outgoing:
+                                </p>
+                                <p class="mt-1 text-sm text-slate-700">123456789</p>
+                            </div>
+                            <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Bank Statement:
+                                </p>
+                                <p class="mt-1 text-sm text-slate-700">Download</p>
+                            </div>
+
+                            <div class="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2 lg:col-span-4">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Attachment
+                                </p>
+                                {{-- 
                                     @if ($expense['attachment_url'])
                                         <div class="mt-2">
                                             @if ($expense['attachment_is_image'])
@@ -143,15 +135,13 @@
                                     @endif
                                      --}}
 
-                                     <p class="mt-1 text-sm text-slate-500">Attachment handling coming soon.</p>
-                                </div>
-
-                                
+                                <p class="mt-1 text-sm text-slate-500">Attachment handling coming soon.</p>
                             </div>
-                        </td>
-                </tr>
 
-                <!-- Add more accounts in same pattern -->
+
+                        </div>
+                    </td>
+                </tr>
 
             </tbody>
         </table>

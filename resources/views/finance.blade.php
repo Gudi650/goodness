@@ -80,6 +80,7 @@
     @include('finance.modals.add-invoice')
     @include('finance.modals.add-expense')
     @include('finance.modals.add-payment')
+    @include('finance.modals.add-accounts')
 
     <!-- Shared Components -->
     @include('components.modal')

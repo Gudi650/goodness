@@ -5,6 +5,7 @@
                 </button>`;
     }
 
+    // Toggle visibility of content panes based on active tab
     function togglePane(activeTab) {
         const panes = {
             invoices: document.getElementById('invoicesPane'),
@@ -19,6 +20,7 @@
         });
     }
 
+    //open add invoice modal
     function openAddInvoiceModal() {
         const body = document.getElementById('addInvoiceModal').innerHTML;
 
@@ -45,8 +47,10 @@
             window.showAlert('success', 'Invoice added successfully');
             return true;
         });
+
     }
 
+    //open add expense modal
     function openAddExpenseModal() {
         const body = document.getElementById('addExpenseModal').innerHTML;
 
@@ -58,6 +62,19 @@
 
         // Use requestAnimationFrame to ensure form is initialized after DOM is rendered
         requestAnimationFrame(initializeExpenseModalForm);
+    }
+
+
+    //open add account modal
+    function openAddAccountModal() {
+        const body = document.getElementById('addAccountModal').innerHTML;
+
+        window.openModal('Add Account', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+
     }
 
     function getExpenseField(id) {
@@ -241,6 +258,7 @@
         }
     }
 
+    //switch tab navigation
     function switchTab(tab, btnEl) {
         // Get all tab buttons
         const tabBtns = document.querySelectorAll('.tab-btn');
@@ -286,6 +304,7 @@
         actionButton.innerHTML = renderButton('Add Payment', 'openAddPaymentModal()');
     }
 
+    //function to delete the invoice with confirmation
     function deleteInvoice(id) {
         if (typeof window.openConfirm !== 'function') {
             return;
@@ -331,4 +350,5 @@
     document.addEventListener('DOMContentLoaded', () => {
         switchTab('invoices', document.querySelector('.tab-btn'));
     });
+
 </script>
