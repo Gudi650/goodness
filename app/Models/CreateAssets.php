@@ -29,7 +29,7 @@ class CreateAssets extends Model
     }
 
     //defining the relationship with the asset category model
-    public function assetsCategory()
+    public function category()
     {
         return $this->belongsTo(AssetsCategories::class);
     }

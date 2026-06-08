@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AssetsCategories;
+use App\Models\CreateAssets;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\LiabilityCategory;
@@ -91,6 +92,9 @@ class FinanceController extends Controller
         //get the liabilities categories to be displayed from the liability_categories table
         $liabilityCategories = $this->getLiabilityCategories();
 
+        //get the assets details to be displayed from the create_assets table
+        $assetsDetails = $this->getAssetsDetails();
+
         return view('finance', [
             'invoices' => $invoices,
             'expenses' => $expenses,
@@ -108,6 +112,7 @@ class FinanceController extends Controller
             'virtualAccounts' => $virtualAccounts,
             'assetsCategories' => $assetsCategories,
             'liabilityCategories' => $liabilityCategories,
+            'assetsDetails' => $assetsDetails,
         ]);
     }
 
@@ -411,6 +416,37 @@ class FinanceController extends Controller
                 ->all();
     
             return $LiabilityCategories;
+        }
+
+        /**
+         * function to get the assets details to be displayed from the create_assets table
+         */
+        public function getAssetsDetails()
+        {
+            $assetsDetails = CreateAssets::query()
+                ->with('company', 'category')
+                ->latest()
+                ->get()
+                ->map(function (CreateAssets $asset) {
+                    return [
+                        'id' => $asset->id,
+                        'code' => $asset->code,
+                        'name' => $asset->name,
+                        'company_name' => $asset->company?->name ?? '-',
+                        'category_name' => $asset->category?->category ?? '-',
+                        'type' => $asset->type,
+                        'term' => $asset->term,
+                        'original_value' => (float) $asset->original_value,
+                        'current_value' => (float) $asset->current_value,
+                        'depreciation_value' => (float) $asset->depreciation_value,
+                        'acquired' => $asset->acquired ? Carbon::parse($asset->acquired)->format('M d, Y') : '-',
+                        'status' => $asset->status,
+                        'created_at' => $asset->created_at?->format('M d, Y h:i A'),
+                    ];
+                })
+                ->all();
+    
+            return $assetsDetails;
         }
 
 }
