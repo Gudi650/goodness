@@ -15,6 +15,7 @@ use App\Http\Controllers\InternalMessagesController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LeavesController;
+use App\Http\Controllers\LiabilityCategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PayrollController;
@@ -152,6 +153,11 @@ Route::middleware('auth')->group(function () {
     // Assets management
     Route::controller(AssetsCategoriesController::class)->group(function () {
         Route::post('/assets/categories', 'store')->name('assets.categories.store');
+    });
+
+    //Liability managements
+    Route::controller(LiabilityCategoryController::class)->group(function () {
+        Route::post('/liabilities/categories', 'store')->name('liabilities.categories.store');
     });
 
     /* HRM Management

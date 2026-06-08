@@ -1,7 +1,9 @@
 <!-- Liability Category Modal -->
 <div id="addLiabilityCategoryModal" class="hidden ">
 
-    <form id="liabilityCategoryForm" class="space-y-4">
+    <form action="{{ route('liabilities.categories.store') }}" method="POST" id="liabilityCategoryForm" class="space-y-4">
+        @csrf
+        
       <div>
         <label class="block text-sm font-medium text-slate-700">Category</label>
         <input type="text" name="category" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder=" eg: Operationals,Payroll, Emergency " required>
