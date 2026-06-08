@@ -2,15 +2,8 @@
 <div id="addAssetsModal" class="hidden">
 
     <!-- Form -->
-    <form id="assetForm" class="space-y-4">
-        {{-- 
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Asset Code</label>
-                <input type="text" name="code"
-                    class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500"
-                    required>
-            </div>
-         --}}
+    <form action="{{ route('assets.store') }}" method="POST" id="assetForm" class="space-y-4">
+        @csrf
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Asset Name</label>
@@ -21,7 +14,7 @@
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Company</label>
-            <select name="company"
+            <select name="company_id"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
                 <option value="">Select Company</option>
                 @if (isset($companies))
@@ -34,7 +27,7 @@
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Type</label>
-            <select name="category"
+            <select name="type"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
                 <option value="">Select Type</option>
                 <option>Fixed Asset</option>
@@ -63,14 +56,13 @@
                 <option value="">Select Category</option>
                 @if (isset($assetsCategories))
                     @foreach ($assetsCategories as $category)
-                        <option value="{{ $category['id'] }}" >{{ $category['category'] }}
+                        <option value="{{ $category['id'] }}">{{ $category['category'] }}
                         </option>
                     @endforeach
                 @endif
             </select>
         </div>
 
-        {{-- 
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-slate-700">Original Value</label>
@@ -83,7 +75,14 @@
                     class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
             </div>
         </div>
-         --}}
+
+        {{-- depriciation value --}}
+        <div>
+            <label class="block text-sm font-medium text-slate-700">Depreciation Value(%)</label>
+            <input type="number" name="depreciation_value"
+                class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
+        </div>
+
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Acquisition Date</label>
