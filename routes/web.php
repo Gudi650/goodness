@@ -1,32 +1,32 @@
 <?php
 
+use App\Http\Controllers\AssetsCategoriesController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\HrmController;
-use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\BulkImportController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\ContractController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\FinanceController;
-use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\PayrollController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\ContractController;
+use App\Http\Controllers\HrmController;
 use App\Http\Controllers\InternalMessagesController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LeavesController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VirtualAccountsController;
-use App\Models\InternalMessages;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard
@@ -73,7 +73,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // Group all protected routes with auth middleware
 // All routes in this group require the user to be logged in
 Route::middleware('auth')->group(function () {
-    
+
     // Main Dashboard - First page users see after login
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -121,12 +121,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/invoices/{invoice}', 'destroy')->name('invoices.destroy');
     });
 
-
-
-    //Finance Management
+    // Finance Management
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
 
-    //expenses
+    // expenses
     Route::controller(ExpensesController::class)->group(function () {
         Route::post('/expenses', 'storeExpense')->name('expenses.store');
         Route::delete('/expenses/{expense}', 'destroy')->name('expenses.destroy');
@@ -146,11 +144,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/payments/{payment}/download-proof', 'downloadProof')->name('payments.download-proof');
     });
 
-    //Virtual accounts management
-     Route::controller(VirtualAccountsController::class)->group(function () {
+    // Virtual accounts management
+    Route::controller(VirtualAccountsController::class)->group(function () {
         Route::post('/accounts', 'store')->name('virtualaccounts.store');
-     });
+    });
 
+    // Assets management
+    Route::controller(AssetsCategoriesController::class)->group(function () {
+        Route::post('/assets/categories', 'store')->name('assets.categories.store');
+    });
 
     /* HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
@@ -160,20 +162,20 @@ Route::middleware('auth')->group(function () {
     Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy'); */
 
-    //group the hrm management
-    Route::controller(HrmController::class)->group(function (){
+    // group the hrm management
+    Route::controller(HrmController::class)->group(function () {
 
-        Route::get('/hrm','index')->name('hrm');
+        Route::get('/hrm', 'index')->name('hrm');
 
     });
 
-    //group the usercontroller routes for employees
+    // group the usercontroller routes for employees
     Route::controller(UserController::class)->group(function () {
         Route::post('/employees', 'store')->name('employees.store');
         Route::delete('/employees/{user}', 'destroy')->name('employees.destroy');
     });
 
-    //group the department routes
+    // group the department routes
     Route::controller(DepartmentController::class)->group(function () {
         Route::post('/departments', 'store')->name('departments.store');
         Route::put('/departments/{department}', 'update')->name('departments.update');
@@ -182,10 +184,10 @@ Route::middleware('auth')->group(function () {
 
     /* Bulk Import
         Route::post('/bulk-import/preview', [BulkImportController::class, 'previewImport'])->name('bulk-import.preview');
-        Route::post('/bulk-import/confirm', [BulkImportController::class, 'confirmImport'])->name('bulk-import.confirm'); 
+        Route::post('/bulk-import/confirm', [BulkImportController::class, 'confirmImport'])->name('bulk-import.confirm');
     */
 
-    //group bulk import routes
+    // group bulk import routes
     Route::controller(BulkImportController::class)->group(function () {
         Route::post('/bulk-import/preview', 'previewImport')->name('bulk-import.preview');
         Route::post('/bulk-import/confirm', 'confirmImport')->name('bulk-import.confirm');
@@ -198,7 +200,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/payroll/{salary}', [PayrollController::class, 'destroy'])->name('payroll.destroy');
     */
 
-    //group payroll routes
+    // group payroll routes
     Route::controller(PayrollController::class)->group(function () {
         Route::get('/payroll', 'index')->name('payroll.index');
         Route::post('/payroll', 'store')->name('payroll.store');
@@ -213,7 +215,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.update.preferences');
     */
 
-    //group routes of account settings
+    // group routes of account settings
     Route::controller(SettingsController::class)->group(function () {
         Route::get('/settings', 'index')->name('settings');
         Route::put('/settings/profile', 'updateProfile')->name('settings.update.profile');
@@ -230,7 +232,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
         Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
         Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
-    
+
 
     //group the customers routes
     Route::controller(CustomerController::class)->group(function () {
@@ -241,7 +243,7 @@ Route::middleware('auth')->group(function () {
     });
     */
 
-    //group the customers routes
+    // group the customers routes
     Route::controller(CustomerController::class)->group(function () {
         Route::post('/customers', 'store')->name('customers.store');
         Route::get('/customers/{customer}', 'show')->name('customers.show');
@@ -256,7 +258,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     */
 
-    //group orders routes
+    // group orders routes
     Route::controller(OrderController::class)->group(function () {
         Route::post('/orders', 'store')->name('orders.store');
         Route::get('/orders/{order}', 'show')->name('orders.show');
@@ -271,7 +273,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
     */
 
-    //contract group routes
+    // contract group routes
     Route::controller(ContractController::class)->group(function () {
         Route::post('/contracts', 'store')->name('contracts.store');
         Route::get('/contracts/{contract}', 'show')->name('contracts.show');
@@ -287,7 +289,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/leaves/{leave}', [LeavesController::class, 'destroy'])->name('leaves.destroy');
     */
 
-    //leaves group routes
+    // leaves group routes
     Route::controller(LeavesController::class)->group(function () {
         Route::post('/leaves', 'store')->name('leaves.store');
         Route::get('/leaves', 'index')->name('leaves.index');
@@ -296,7 +298,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/leaves/{leave}', 'destroy')->name('leaves.destroy');
     });
 
-    //Inventory Management
+    // Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
 
     /* Products (inventory)
@@ -307,7 +309,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     */
 
-    //group the products routes
+    // group the products routes
     Route::controller(ProductController::class)->group(function () {
         Route::get('/products', 'index')->name('products.index');
         Route::get('/products/{product}', 'show')->name('products.show');
@@ -322,14 +324,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
     */
 
-    //group the suppliers routes
+    // group the suppliers routes
     Route::controller(SupplierController::class)->group(function () {
         Route::post('/suppliers', 'store')->name('suppliers.store');
         Route::put('/suppliers/{supplier}', 'update')->name('suppliers.update');
         Route::delete('/suppliers/{supplier}', 'destroy')->name('suppliers.destroy');
     });
 
-    //download  attachements list
+    // download  attachements list
     Route::get('/suppliers/{supplier}/download/{type}', [SupplierController::class, 'downloadAttachment'])->name('suppliers.downloadAttachment');
 
     /* Purchase Orders (inventory)
@@ -340,7 +342,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/purchase-orders/{purchaseOrder}/download', [PurchaseOrderController::class, 'downloadAttachment'])->name('purchase-orders.download');
     */
 
-    //group purchase orders routes
+    // group purchase orders routes
     Route::controller(PurchaseOrderController::class)->group(function () {
         Route::get('/purchase-orders/{purchaseOrder}', 'show')->name('purchase-orders.show');
         Route::post('/purchase-orders', 'store')->name('purchase-orders.store');
@@ -352,14 +354,14 @@ Route::middleware('auth')->group(function () {
     // Reports & Analytics
     Route::get('/reports', [ReportController::class, 'expenses'])->name('reports');
 
-    //communication page - show messages via controller so view has data
+    // communication page - show messages via controller so view has data
     Route::get('/communication', [InternalMessagesController::class, 'index'])->name('communication');
 
     // Internal Messages Store
     Route::post('/messages/store/{threadId}', [InternalMessagesController::class, 'store'])
         ->name('messages.store');
 
-    //function to show the individuals to message
+    // function to show the individuals to message
     Route::get('/messages', [InternalMessagesController::class, 'index'])
         ->name('messages.index');
 
@@ -374,7 +376,5 @@ Route::middleware('auth')->group(function () {
     // AJAX poll endpoint for the conversation list summary
     Route::get('/messages/conversations/poll', [InternalMessagesController::class, 'pollConversations'])
         ->name('messages.conversations.poll');
-    
 
 });
-

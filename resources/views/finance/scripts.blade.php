@@ -113,6 +113,28 @@
         });
     }
 
+    //open add category assets modal
+    function openAddAssetsCategoryModal() {
+        const body = document.getElementById('addAssetsCategoryModal').innerHTML;
+
+        window.openModal('Add Asset Category', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
+    //open add category liabilities modal
+    function openAddLiabilityCategoryModal() {
+        const body = document.getElementById('addLiabilityCategoryModal').innerHTML;
+
+        window.openModal('Add Liability Category', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
     // Helper to get form fields either from modal or main page (for expenses which have dynamic modal fields)
     function getExpenseField(id) {
         const modalBody = document.getElementById('modal-body');
@@ -353,7 +375,7 @@
          if (tab === 'liabilities') {
             sectionTitle.textContent = 'Liabilities';
             actionButton.innerHTML = renderButton('Add Liability', 'openAddLiabilityModal()'); 
-              sectionButton.innerHTML = renderSectionButton('Add Categories', 'openAddLiabilityCategoryModal()');
+            sectionButton.innerHTML = renderSectionButton('Add Categories', 'openAddLiabilityCategoryModal()');
             sectionButton.classList.remove('hidden');
             return;
         }

@@ -92,6 +92,8 @@
     @include('finance.modals.add-accounts')
     @include('finance.modals.add-assets')
     @include('finance.modals.add-liabilities') 
+    @include('finance.modals.add-assets-category') 
+    @include('finance.modals.add-liabilities-category') 
 
     <!-- Shared Components -->
     @include('components.modal')

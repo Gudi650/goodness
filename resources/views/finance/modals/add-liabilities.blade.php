@@ -36,7 +36,7 @@
             <label class="block text-sm font-medium text-slate-700">Type</label>
             <select name="category"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
-                <option value="">Select Category</option>
+                <option value="">Select Type</option>
                 <option>Long-term Loan</option>
                 <option>Current Liability</option>
                 <option>Long-term Liability</option>

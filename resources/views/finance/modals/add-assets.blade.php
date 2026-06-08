@@ -60,7 +60,7 @@
             <select name="category_id" id="assetCategorySelect"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-green-500">
                 <!-- Options populated from categories table -->
-                <option value="">Select Category</option>
+                <option value="">Select Type</option>
                 <option value="1">Operational</option>
                 <option value="2">Investment</option>
                 <option value="3">Financial</option>
