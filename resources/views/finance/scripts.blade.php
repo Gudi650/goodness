@@ -13,6 +13,8 @@
             expenses: document.getElementById('expensesPane'),
             payments: document.getElementById('paymentsPane'),
             accounts: document.getElementById('accountsPane'),
+            assets: document.getElementById('assetsPane'),
+            liabilities: document.getElementById('liabilitiesPane')
         };
 
         Object.entries(panes).forEach(([tab, pane]) => {
@@ -300,6 +302,18 @@
         if (tab === 'accounts') {
             sectionTitle.textContent = 'Virtual Accounts Management';
             actionButton.innerHTML = renderButton('Add Account', 'openAddAccountModal()');
+            return;
+        }
+
+         if (tab === 'assets') {
+            sectionTitle.textContent = 'Assets';
+            actionButton.innerHTML = renderButton('Add Asset', 'openAddAssetModal()');
+            return;
+        }
+
+         if (tab === 'liabilities') {
+            sectionTitle.textContent = 'Liabilities';
+            actionButton.innerHTML = renderButton('Add Liability', 'openAddLiabilityModal()'); 
             return;
         }
 

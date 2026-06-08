@@ -55,6 +55,8 @@
                 <button onclick="switchTab('expenses', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Expenses</button>
                 <button onclick="switchTab('payments', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Payments</button>
                 <button onclick="switchTab('accounts', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Accounts</button>
+                <button onclick="switchTab('assets', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Assets</button>
+                <button onclick="switchTab('liabilities', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Liabilities</button>
             </div>
         </div>
 
@@ -71,6 +73,8 @@
                 @include('finance.expenses', ['expenses' => $expenses])
                 @include('finance.payments', ['payments' => $payments])
                 @include('finance.accounts', ['virtualAccounts' => $virtualAccounts])
+                @include('finance.assets')
+                @include('finance.liabilities')
             </div>
         </div>
     </main>
