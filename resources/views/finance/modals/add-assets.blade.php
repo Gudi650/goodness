@@ -78,8 +78,24 @@
             class="px-4 py-2 border border-slate-300 rounded hover:bg-slate-100">Cancel</button>
 
         <button type="submit" class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">Save Asset</button>
-        
+
       </div>
     </form>
-  </div>
+
 </div>
+
+<x-loading id="AssetCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+
+    // Show loading indicator on form submit
+    document.querySelector('#addAssetModal form').addEventListener('submit', function () {
+        document.getElementById('AssetCreateLoader').classList.remove('hidden');
+    });
+
+    function showAssetCreateLoader() {
+        const loader = document.getElementById('AssetCreateLoader');
+        if (loader) loader.classList.remove('hidden');
+    }
+
+</script>

@@ -102,3 +102,19 @@
     </form>
 
 </div>
+
+<x-loading id="LiabilityCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+
+    // Show loading indicator on form submit
+    document.querySelector('#addLiabilityModal form').addEventListener('submit', function () {
+        document.getElementById('LiabilityCreateLoader').classList.remove('hidden');
+    });
+
+    function showLiabilityCreateLoader() {
+        const loader = document.getElementById('LiabilityCreateLoader');
+        if (loader) loader.classList.remove('hidden');
+    }
+
+</script>
