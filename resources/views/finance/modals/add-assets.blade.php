@@ -24,11 +24,11 @@
             <select name="company"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
                 <option value="">Select Company</option>
-                <option>Goodness Group</option>
-                <option>Goodness Agro Vet</option>
-                <option>Goodness Logistics</option>
-                <option>Goodness Properties</option>
-                <option>Goodness Trading</option>
+                @if (isset($companies))
+                    @foreach ($companies as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                @endif
             </select>
         </div>
 
@@ -36,7 +36,7 @@
             <label class="block text-sm font-medium text-slate-700">Type</label>
             <select name="category"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
-                <option value="">Select Category</option>
+                <option value="">Select Type</option>
                 <option>Fixed Asset</option>
                 <option>Current Asset</option>
                 <option>Intangible Asset</option>
@@ -60,13 +60,17 @@
             <select name="category_id" id="assetCategorySelect"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-green-500">
                 <!-- Options populated from categories table -->
-                <option value="">Select Type</option>
-                <option value="1">Operational</option>
-                <option value="2">Investment</option>
-                <option value="3">Financial</option>
+                <option value="">Select Category</option>
+                @if (isset($assetsCategories))
+                    @foreach ($assetsCategories as $category)
+                        <option value="{{ $category['id'] }}" >{{ $category['category'] }}
+                        </option>
+                    @endforeach
+                @endif
             </select>
         </div>
 
+        {{-- 
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-slate-700">Original Value</label>
@@ -79,6 +83,7 @@
                     class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
             </div>
         </div>
+         --}}
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Acquisition Date</label>

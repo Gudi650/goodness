@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssetsCategories;
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\LiabilityCategory;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\VirtualAccounts;
-use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Carbon;
 
 class FinanceController extends Controller
 {
@@ -21,22 +21,22 @@ class FinanceController extends Controller
     public function index()
     {
 
-        //get the current logged in user
+        // get the current logged in user
         $user = Auth::user();
 
-        //get teh role of the user
+        // get teh role of the user
         $isAdmin = $user && $user->role && $user->role->name === 'Admin';
         $isManager = $user && $user->role && $user->role->name === 'Manager';
         $isHr = $user && $user->role && $user->role->name === 'HR Manager';
         $isCEO = $user && $user->role && $user->role->name === 'CEO';
         $isAccountant = $user && $user->role && $user->role->name === 'Accountant';
 
-        //get the active company id from the session
+        // get the active company id from the session
         $activeCompanyId = session('active_company_id');
 
         $usersQuery = User::with('role', 'company', 'department');
 
-        if ($isAdmin && !empty($activeCompanyId)) {
+        if ($isAdmin && ! empty($activeCompanyId)) {
             $usersQuery->where('company_id', $activeCompanyId);
         } elseif ($user) {
             $usersQuery->where('company_id', $user->company_id);
@@ -48,7 +48,7 @@ class FinanceController extends Controller
         //
         $invoices = $this->getInvoices($isAdmin, $activeCompanyId, $user);
 
-        //get the companies
+        // get the companies
         $companies = DB::table('companies')->pluck('name', 'id');
 
         // Get departments with company mapping for dependent dropdowns in modals.
@@ -57,7 +57,7 @@ class FinanceController extends Controller
             ->orderBy('name')
             ->get();
 
-        //function to get the expense details to be displayed from the expenses table
+        // function to get the expense details to be displayed from the expenses table
         $expenses = $this->getExpenses($isAdmin, $isAccountant, $user, $isCEO);
 
         // Summary metrics for top cards
@@ -69,23 +69,27 @@ class FinanceController extends Controller
         $draftedCount = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'draft')->count();
         $issuedCount = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'issued')->count();
 
-       //get the payment details to be displayed from the payments table
-        $payments = $this->getPayments($isAdmin,$user,$isCEO,$isAccountant);
+        // get the payment details to be displayed from the payments table
+        $payments = $this->getPayments($isAdmin, $user, $isCEO, $isAccountant);
 
-
-        //function to check if the approve button should be displayed for the expense based on the user role and expense status
+        // function to check if the approve button should be displayed for the expense based on the user role and expense status
         foreach ($expenses as &$expense) {
             $expense['can_approve'] = $this->canApproveExpense($expense, $user, $isManager, $isCEO, $isAccountant);
             $expense['can_review'] = $this->canReviewExpense($expense, $user);
         }
 
-        $reviewableExpenses = collect($expenses)->filter(fn ($expense) => !empty($expense['can_review']))->values();
+        $reviewableExpenses = collect($expenses)->filter(fn ($expense) => ! empty($expense['can_review']))->values();
         $pendingReviewCount = $reviewableExpenses->count();
         $firstPendingReviewExpenseId = $reviewableExpenses->first()['id'] ?? null;
 
-        //get the details of the virtual accounts to be displayed from the virtual_accounts table
-        $virtualAccounts = $this->getVirtualAccounts($isAdmin,$isCEO, $isAccountant, $user);
+        // get the details of the virtual accounts to be displayed from the virtual_accounts table
+        $virtualAccounts = $this->getVirtualAccounts($isAdmin, $isCEO, $isAccountant, $user);
 
+        //get the assets categories to be displayed from the assets_categories table
+        $assetsCategories = $this->getAssetsCategories();
+
+        //get the liabilities categories to be displayed from the liability_categories table
+        $liabilityCategories = $this->getLiabilityCategories();
 
         return view('finance', [
             'invoices' => $invoices,
@@ -102,6 +106,8 @@ class FinanceController extends Controller
             'pendingReviewCount' => $pendingReviewCount,
             'firstPendingReviewExpenseId' => $firstPendingReviewExpenseId,
             'virtualAccounts' => $virtualAccounts,
+            'assetsCategories' => $assetsCategories,
+            'liabilityCategories' => $liabilityCategories,
         ]);
     }
 
@@ -111,14 +117,14 @@ class FinanceController extends Controller
      */
     protected function getExpenses($isAdmin, $isAccountant, $user, $isCEO)
     {
-        //get all when user is admin or CEO, otherwise get only the expenses of his company
+        // get all when user is admin or CEO, otherwise get only the expenses of his company
         $expenses = Expense::with(['company', 'department', 'creator', 'approver', 'issuer', 'checker'])
-            ->when(!$isAdmin && !$isCEO && !$isAccountant, fn($query) => $query->where('company_id', $user->company_id))
+            ->when(! $isAdmin && ! $isCEO && ! $isAccountant, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
             ->get()
             ->map(function (Expense $expense) {
-                $attachmentUrl = $expense->attachment_path ? asset('storage/' . $expense->attachment_path) : null;
+                $attachmentUrl = $expense->attachment_path ? asset('storage/'.$expense->attachment_path) : null;
                 $attachmentIsImage = false;
                 if ($expense->attachment_path) {
                     $ext = strtolower(pathinfo($expense->attachment_path, PATHINFO_EXTENSION));
@@ -166,16 +172,16 @@ class FinanceController extends Controller
 
     }
 
-    //function to get the payment details to be displayed from the payments table
-    protected function getPayments($isAdmin, $user, $isCEO,$isAccountant)
+    // function to get the payment details to be displayed from the payments table
+    protected function getPayments($isAdmin, $user, $isCEO, $isAccountant)
     {
-         $payments = Payment::query()
+        $payments = Payment::query()
             ->orderByDesc('created_at')
-            ->when(!$isAdmin && !$isCEO && !$isAccountant && $user, fn($query) => $query->where('company_id', $user->company_id))
+            ->when(! $isAdmin && ! $isCEO && ! $isAccountant && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->limit(100)
             ->get()
             ->map(function (Payment $payment) {
-                $attachmentUrl = $payment->proof_of_payment_path ? asset('storage/' . $payment->proof_of_payment_path) : null;
+                $attachmentUrl = $payment->proof_of_payment_path ? asset('storage/'.$payment->proof_of_payment_path) : null;
                 $attachmentIsImage = false;
 
                 if ($payment->proof_of_payment_path) {
@@ -220,12 +226,12 @@ class FinanceController extends Controller
         return $payments;
     }
 
-    //function to display the invoices details to be displayed from the invoices table
+    // function to display the invoices details to be displayed from the invoices table
     protected function getInvoices($isAdmin, $activeCompanyId, $user)
     {
         $invoices = Invoice::query()
             ->with('company', 'creator', 'items')
-            ->when(!$isAdmin && $user, fn($query) => $query->where('company_id', $user->company_id))
+            ->when(! $isAdmin && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
             ->get()
@@ -273,11 +279,11 @@ class FinanceController extends Controller
         return $invoices;
     }
 
-    //function to check if the approve button should be displayed for the expense based on the user role and expense status
+    // function to check if the approve button should be displayed for the expense based on the user role and expense status
     protected function canApproveExpense($expense, $user, $isManager, $isCEO, $isAccountant)
     {
-        //check to see if user is neither manager, HR nor CEO, if not then return false
-        if ( !$isManager && !$isCEO && !$isAccountant) {
+        // check to see if user is neither manager, HR nor CEO, if not then return false
+        if (! $isManager && ! $isCEO && ! $isAccountant) {
             return false;
         }
 
@@ -285,9 +291,9 @@ class FinanceController extends Controller
             case 'draft':
                 return $isManager && $user->company_id === $expense['company_id'];
             case 'checked':
-                return $isCEO ;
+                return $isCEO;
             case 'approved':
-                return $isAccountant ;
+                return $isAccountant;
             default:
                 return false;
         }
@@ -300,12 +306,12 @@ class FinanceController extends Controller
      */
     protected function canReviewExpense($expense, $user)
     {
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         // if its already reviewed then it should return false.
-        if (!empty($expense['reviewed_at'])) {
+        if (! empty($expense['reviewed_at'])) {
             return false;
         }
 
@@ -316,19 +322,18 @@ class FinanceController extends Controller
 
     /**
      * Getting the details of the virtual accounts to be displayed from the virtual_accounts table
-    */
-    protected function getVirtualAccounts($isAdmin,$isCEO, $isAccountant, $user)
+     */
+    protected function getVirtualAccounts($isAdmin, $isCEO, $isAccountant, $user)
     {
 
-        //check if the user can view the virtual accounts, if not then return empty array
-        if (!$this->canViewVirtualAccounts($user, $isAdmin, $isCEO, $isAccountant)) {
+        // check if the user can view the virtual accounts, if not then return empty array
+        if (! $this->canViewVirtualAccounts($user, $isAdmin, $isCEO, $isAccountant)) {
             return [];
         }
 
-
         $virtualAccounts = VirtualAccounts::query()
             ->with('company')
-            ->when(!$isAdmin && !$isCEO && $user, fn($query) => $query->where('company_id', $user->company_id))
+            ->when(! $isAdmin && ! $isCEO && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
             ->get()
@@ -351,20 +356,61 @@ class FinanceController extends Controller
             ->all();
 
         return $virtualAccounts;
-        
+
     }
 
     /**
      * function to check who can view the virtual accounts, only admin ,CEO and accountant can view the virtual accounts, and if the user is not admin then he can only view the virtual accounts of his company
      */
-        protected function canViewVirtualAccounts($user, $isAdmin, $isCEO, $isAccountant)
-        {
-            if (!$user) {
-                return false;
-            }
-    
-            return $isAdmin || $isCEO || $isAccountant;
+    protected function canViewVirtualAccounts($user, $isAdmin, $isCEO, $isAccountant)
+    {
+        if (! $user) {
+            return false;
         }
 
+        return $isAdmin || $isCEO || $isAccountant;
+    }
+
+    /**
+     * function to get the assets categories 
+     */
+        public function getAssetsCategories()
+        {
+            $AssetsCategories = AssetsCategories::query()
+                ->latest()
+                ->get()
+                ->map(function (AssetsCategories $category) {
+                    return [
+                        'id' => $category->id,
+                        'category' => $category->category,
+                        'description' => $category->description ?: '-',
+                        'created_at' => $category->created_at?->format('M d, Y h:i A'),
+                    ];
+                })
+                ->all();
+    
+            return $AssetsCategories;
+        }
+
+        /**
+         * function to get the liabilities categories
+         */
+        public function getLiabilityCategories()
+        {
+            $LiabilityCategories = LiabilityCategory::query()
+                ->latest()
+                ->get()
+                ->map(function (LiabilityCategory $category) {
+                    return [
+                        'id' => $category->id,
+                        'category' => $category->category,
+                        'description' => $category->description ?: '-',
+                        'created_at' => $category->created_at?->format('M d, Y h:i A'),
+                    ];
+                })
+                ->all();
+    
+            return $LiabilityCategories;
+        }
 
 }
