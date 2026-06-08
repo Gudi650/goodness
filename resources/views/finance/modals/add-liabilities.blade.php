@@ -3,12 +3,15 @@
 
     <!-- Form -->
     <form id="liabilityForm" class="space-y-4">
+
+        {{-- 
         <div>
             <label class="block text-sm font-medium text-slate-700">Liability Code</label>
             <input type="text" name="code"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500"
                 required>
         </div>
+        --}}
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Liability Name</label>
@@ -30,7 +33,7 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-slate-700">Category</label>
+            <label class="block text-sm font-medium text-slate-700">Type</label>
             <select name="category"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
                 <option value="">Select Category</option>
@@ -47,6 +50,19 @@
                 <option value="">Select Term</option>
                 <option>Short-term</option>
                 <option>Long-term</option>
+            </select>
+        </div>
+
+        <!-- Category & Sub-category -->
+        <div>
+            <label class="block text-sm font-medium text-slate-700">Category</label>
+            <select name="category_id" id="assetCategorySelect"
+                class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-green-500">
+                <!-- Options populated from categories table -->
+                <option value="">Select Category</option>
+                <option value="1">Operational</option>
+                <option value="2">Investment</option>
+                <option value="3">Financial</option>
             </select>
         </div>
 
@@ -106,9 +122,8 @@
 <x-loading id="LiabilityCreateLoader" fullPage="true" class="hidden" />
 
 <script>
-
     // Show loading indicator on form submit
-    document.querySelector('#addLiabilityModal form').addEventListener('submit', function () {
+    document.querySelector('#addLiabilityModal form').addEventListener('submit', function() {
         document.getElementById('LiabilityCreateLoader').classList.remove('hidden');
     });
 
@@ -116,5 +131,4 @@
         const loader = document.getElementById('LiabilityCreateLoader');
         if (loader) loader.classList.remove('hidden');
     }
-
 </script>

@@ -63,7 +63,13 @@
         <!-- Action Button Row -->
         <div class="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center lg:justify-between">
             <h2 id="sectionTitle" class="text-lg font-semibold">Invoices</h2>
-            <div id="actionButton" class="w-full lg:w-auto"></div>
+
+            <div class="flex gap-6">
+                <div id="sectionButton" class="w-full lg:w-auto hidden">Take it</div>
+
+                <div id="actionButton" class="w-full lg:w-auto "></div> 
+            </div>
+
         </div>
 
         <!-- Content Container -->
