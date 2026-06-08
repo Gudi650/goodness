@@ -80,6 +80,32 @@
 
     }
 
+    //open add assets modal
+    function openAddAssetsModal() {
+        const body = document.getElementById('addAssetsModal').innerHTML;
+
+        //for now we should know if this is called or what , we will console log to check if this is called or not
+        console.log('openAddAssetsModal called');
+
+        window.openModal('Add Asset', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+
+    }
+
+    //open add liabilities modal
+    function openAddLiabilityModal() {
+        const body = document.getElementById('addLiabilitiesModal').innerHTML;
+
+        window.openModal('Add Liability', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
     // Helper to get form fields either from modal or main page (for expenses which have dynamic modal fields)
     function getExpenseField(id) {
         const modalBody = document.getElementById('modal-body');
@@ -307,7 +333,7 @@
 
          if (tab === 'assets') {
             sectionTitle.textContent = 'Assets';
-            actionButton.innerHTML = renderButton('Add Asset', 'openAddAssetModal()');
+            actionButton.innerHTML = renderButton('Add Asset', 'openAddAssetsModal()');
             return;
         }
 
