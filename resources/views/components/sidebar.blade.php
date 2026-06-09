@@ -82,6 +82,15 @@
             </svg>
             Inventory
         </a>
+        <a href="/far"
+            class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
+            data-path="/far">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5h9m-9 4h9m-9 4h9m-9 4h9M5 5h.01M5 9h.01M5 13h.01M5 17h.01" />
+            </svg>
+            Fixed Asset Register
+        </a>
         <a href="/reports"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/reports">
@@ -117,11 +126,11 @@
     <div class="p-4 border-t border-slate-200 bg-white sticky bottom-0">
         @php
             // Get the authenticated user's name for display in the sidebar.
-            $userName = auth()->user()?->name ?? 'User';
-            // Show the first letter as a simple avatar initial.
-            $userInitial = strtoupper(substr($userName, 0, 1));
-            //user roles
-            $userRole = auth()->user()?->role?->name ?? 'N/A';
+$userName = auth()->user()?->name ?? 'User';
+// Show the first letter as a simple avatar initial.
+$userInitial = strtoupper(substr($userName, 0, 1));
+//user roles
+$userRole = auth()->user()?->role?->name ?? 'N/A';
         @endphp
         <div class="flex items-center gap-3 mb-4">
             <div
