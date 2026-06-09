@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AssetsCategories;
 use App\Models\CreateAssets;
+use App\Models\CreateLiability;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\LiabilityCategory;
@@ -86,14 +87,17 @@ class FinanceController extends Controller
         // get the details of the virtual accounts to be displayed from the virtual_accounts table
         $virtualAccounts = $this->getVirtualAccounts($isAdmin, $isCEO, $isAccountant, $user);
 
-        //get the assets categories to be displayed from the assets_categories table
+        // get the assets categories to be displayed from the assets_categories table
         $assetsCategories = $this->getAssetsCategories();
 
-        //get the liabilities categories to be displayed from the liability_categories table
+        // get the liabilities categories to be displayed from the liability_categories table
         $liabilityCategories = $this->getLiabilityCategories();
 
-        //get the assets details to be displayed from the create_assets table
+        // get the assets details to be displayed from the create_assets table
         $assetsDetails = $this->getAssetsDetails();
+
+        //get the liailities details to be displayed from the create_liabilities table
+        $liabilitiesDetails = $this->getLiabilitiesDetails();
 
         return view('finance', [
             'invoices' => $invoices,
@@ -113,6 +117,7 @@ class FinanceController extends Controller
             'assetsCategories' => $assetsCategories,
             'liabilityCategories' => $liabilityCategories,
             'assetsDetails' => $assetsDetails,
+            'liabilitiesDetails' => $liabilitiesDetails,
         ]);
     }
 
@@ -377,76 +382,107 @@ class FinanceController extends Controller
     }
 
     /**
-     * function to get the assets categories 
+     * function to get the assets categories
      */
-        public function getAssetsCategories()
-        {
-            $AssetsCategories = AssetsCategories::query()
-                ->latest()
-                ->get()
-                ->map(function (AssetsCategories $category) {
-                    return [
-                        'id' => $category->id,
-                        'category' => $category->category,
-                        'description' => $category->description ?: '-',
-                        'created_at' => $category->created_at?->format('M d, Y h:i A'),
-                    ];
-                })
-                ->all();
-    
-            return $AssetsCategories;
-        }
+    public function getAssetsCategories()
+    {
+        $AssetsCategories = AssetsCategories::query()
+            ->latest()
+            ->get()
+            ->map(function (AssetsCategories $category) {
+                return [
+                    'id' => $category->id,
+                    'category' => $category->category,
+                    'description' => $category->description ?: '-',
+                    'created_at' => $category->created_at?->format('M d, Y h:i A'),
+                ];
+            })
+            ->all();
 
-        /**
-         * function to get the liabilities categories
-         */
-        public function getLiabilityCategories()
-        {
-            $LiabilityCategories = LiabilityCategory::query()
-                ->latest()
-                ->get()
-                ->map(function (LiabilityCategory $category) {
-                    return [
-                        'id' => $category->id,
-                        'category' => $category->category,
-                        'description' => $category->description ?: '-',
-                        'created_at' => $category->created_at?->format('M d, Y h:i A'),
-                    ];
-                })
-                ->all();
-    
-            return $LiabilityCategories;
-        }
+        return $AssetsCategories;
+    }
 
-        /**
-         * function to get the assets details to be displayed from the create_assets table
-         */
-        public function getAssetsDetails()
-        {
-            $assetsDetails = CreateAssets::query()
-                ->with('company', 'category')
-                ->latest()
-                ->get()
-                ->map(function (CreateAssets $asset) {
-                    return [
-                        'id' => $asset->id,
-                        'code' => $asset->code,
-                        'name' => $asset->name,
-                        'company_name' => $asset->company?->name ?? '-',
-                        'category_name' => $asset->category?->category ?? '-',
-                        'type' => $asset->type,
-                        'term' => $asset->term,
-                        'original_value' => (float) $asset->original_value,
-                        'current_value' => (float) $asset->current_value,
-                        'depreciation_value' => (float) $asset->depreciation_value,
-                        'acquired' => $asset->acquired ? Carbon::parse($asset->acquired)->format('M d, Y') : '-',
-                        'status' => $asset->status,
-                        'created_at' => $asset->created_at?->format('M d, Y h:i A'),
-                    ];
-                })
-                ->all();
-    
-            return $assetsDetails;
-        }
+    /**
+     * function to get the liabilities categories
+     */
+    public function getLiabilityCategories()
+    {
+        $LiabilityCategories = LiabilityCategory::query()
+            ->latest()
+            ->get()
+            ->map(function (LiabilityCategory $category) {
+                return [
+                    'id' => $category->id,
+                    'category' => $category->category,
+                    'description' => $category->description ?: '-',
+                    'created_at' => $category->created_at?->format('M d, Y h:i A'),
+                ];
+            })
+            ->all();
 
+        return $LiabilityCategories;
+    }
+
+    /**
+     * function to get the assets details to be displayed from the create_assets table
+     */
+    public function getAssetsDetails()
+    {
+        $assetsDetails = CreateAssets::query()
+            ->with('company', 'category')
+            ->latest()
+            ->get()
+            ->map(function (CreateAssets $asset) {
+                return [
+                    'id' => $asset->id,
+                    'code' => $asset->code,
+                    'name' => $asset->name,
+                    'company_name' => $asset->company?->name ?? '-',
+                    'category_name' => $asset->category?->category ?? '-',
+                    'type' => $asset->type,
+                    'term' => $asset->term,
+                    'original_value' => (float) $asset->original_value,
+                    'current_value' => (float) $asset->current_value,
+                    'depreciation_value' => (float) $asset->depreciation_value,
+                    'acquired' => $asset->acquired ? Carbon::parse($asset->acquired)->format('M d, Y') : '-',
+                    'status' => $asset->status,
+                    'created_at' => $asset->created_at?->format('M d, Y h:i A'),
+                ];
+            })
+            ->all();
+
+        return $assetsDetails;
+    }
+
+    /**
+     * function to get the liabilities details to be displayed from the create_liabilities table
+     */
+    public function getLiabilitiesDetails()
+    {
+        $liabilitiesDetails = CreateLiability::query()
+            ->with('company', 'category')
+            ->latest()
+            ->get()
+            ->map(function (CreateLiability $liability) {
+                return [
+                    'id' => $liability->id,
+                    'code' => $liability->code,
+                    'name' => $liability->name,
+                    'company_name' => $liability->company?->name ?? '-',
+                    'category_name' => $liability->category?->category ?? '-',
+                    'type' => $liability->type,
+                    'term' => $liability->term,
+                    'original_amount' => (float) $liability->original_amount,
+                    'current_amount' => (float) $liability->current_amount,
+                    'creditor' => $liability->creditor ?: '-',
+                    'interest_rate' => (float) $liability->interest_rate,
+                    'due_date' => $liability->due_date ? Carbon::parse($liability->due_date)->format('M d, Y') : '-',
+                    'status' => $liability->status,
+                    'created_at' => $liability->created_at?->format('M d, Y h:i A'),
+                ];
+            })
+            ->all();
+
+        return $liabilitiesDetails;
+    }
 }

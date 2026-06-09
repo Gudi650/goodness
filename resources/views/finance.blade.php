@@ -80,7 +80,7 @@
                 @include('finance.payments', ['payments' => $payments])
                 @include('finance.accounts', ['virtualAccounts' => $virtualAccounts])
                 @include('finance.assets',['assetsCategories' => $assetsCategories, 'assetsDetails' => $assetsDetails])
-                @include('finance.liabilities', ['liabilityCategories' => $liabilityCategories])
+                @include('finance.liabilities', ['liabilityCategories' => $liabilityCategories, 'liabilitiesDetails' => $liabilitiesDetails])
             </div>
         </div>
     </main>
