@@ -6,6 +6,7 @@ use App\Http\Controllers\BulkImportController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\CreateAssetsController;
+use App\Http\Controllers\CreateLiabilityController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
@@ -164,6 +165,11 @@ Route::middleware('auth')->group(function () {
     // Assets management
     Route::controller(CreateAssetsController::class)->group(function () {
         Route::post('/assets', 'store')->name('assets.store');
+    });
+
+    //Liability managements
+    Route::controller(CreateLiabilityController::class)->group(function () {
+        Route::post('/liabilities', 'store')->name('liabilities.store');
     });
 
     /* HRM Management

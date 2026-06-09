@@ -2,7 +2,8 @@
 <div id="addLiabilitiesModal" class="hidden">
 
     <!-- Form -->
-    <form id="liabilityForm" class="space-y-4">
+    <form action="{{ route('liabilities.store') }}" method="POST" id="liabilityForm" class="space-y-4">
+        @csrf
 
         {{-- 
         <div>
@@ -22,7 +23,7 @@
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Company</label>
-            <select name="company"
+            <select name="company_id"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
                 <option value="">Select Company</option>
                 @if (isset($companies))
@@ -35,7 +36,7 @@
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Type</label>
-            <select name="category"
+            <select name="type"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
                 <option value="">Select Type</option>
                 <option>Long-term Loan</option>
@@ -83,8 +84,8 @@
                     class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700">Outstanding Amount</label>
-                <input type="number" name="outstanding_amount"
+                <label class="block text-sm font-medium text-slate-700">Current Amount</label>
+                <input type="number" name="current_amount"
                     class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
             </div>
         </div>
