@@ -169,110 +169,108 @@
                             </td>
                         </tr>
                         <tr id="fixedassets-details-{{ $asset['id'] }}" class="hidden bg-slate-50/70">
-                            <td colspan="5" class="px-4 py-4">
-                                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                                    <div class="flex items-start justify-between gap-4 flex-wrap">
-                                        <div>
-                                            <h4 class="text-sm font-semibold text-slate-900">Fixed Asset Details - 
-                                                {{ $asset['name'] }}
-                                                {{-- $invoice['invoice_number'] --}}
-                                            </h4>
-                                            <p class="text-xs text-slate-500 mt-1">Created At:
-                                                {{ $asset['created_at'] }}
-                                                {{-- $invoice['created_at'] --}}</p>
-                                        </div>
-                                        <div>
-                                            <span
-                                                class="inline-flex items-center px-2 py-1 rounded-full bg-brand-50 text-brand-700 font-medium text-xs">
-                                                {{ ucfirst($asset['status']) }}
-                                            </span>
-                                        </div>
-                                    </div>
+                            <td colspan="9" class="px-4 py-4">
+                            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
-                                        <div class="rounded-lg bg-slate-50 p-3">
-                                            <p class="text-xs uppercase tracking-wide text-slate-500">Client</p>
-                                            <p class="mt-1 font-medium text-slate-900">Name: {{-- $invoice['client_name'] --}}
-                                            </p>
-                                            <p class="text-slate-600">Email:
-                                                {{-- $invoice['client_email']?:'Noemailprovided' --}}</p>
-                                            <p class="text-slate-600">Phone:
-                                                {{-- $invoice['client_phone'] ?: 'No phone provided' --}}</p>
-                                            <p class="text-slate-600">Invoice Type:
-                                                {{-- ucfirst($invoice['invoice_type'] ?? 'N/A') --}}</p>
-                                        </div>
-                                        <div class="rounded-lg bg-slate-50 p-3">
-                                            <p class="text-xs uppercase tracking-wide text-slate-500">Dates</p>
-                                            <p class="mt-1 text-slate-700">Recorded: {{-- $invoice['invoice_date'] --}}</p>
-                                            <p class="text-slate-700">Due: {{-- $invoice['due_date'] ?: 'N/A' --}}</p>
-                                            <p class="text-slate-700">Payment:
-                                                {{-- ucfirst($invoice['payment_method'] ?: 'N/A') --}}</p>
-                                        </div>
-                                        <div class="rounded-lg bg-slate-50 p-3">
-                                            <p class="text-xs uppercase tracking-wide text-slate-500">Totals</p>
-                                            <p class="mt-1 text-slate-700">Subtotal: TZS
-                                                {{-- number_format($invoice['subtotal']) --}}</p>
-                                            <p class="text-slate-700">Tax: TZS {{-- number_format($invoice['tax_amount']) --}}
-                                            </p>
-                                            <p class="text-slate-900 font-semibold">Total: TZS
-                                                {{-- number_format($invoice['total_amount']) --}}</p>
-                                        </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Code:
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset['code'] }}
+                                    </p>
+                                </div>
 
-                                    </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Category:
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset->category->category ?? '-' }}
+                                    </p>
+                                </div>
 
-                                    {{-- 
-                                <div class="mt-4">
-                                    <p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Items</p>
-                                    <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                                        <table class="min-w-full text-sm">
-                                            <thead class="bg-slate-50">
-                                                <tr>
-                                                    <th class="px-3 py-2 text-left font-medium text-slate-600">#</th>
-                                                    <th class="px-3 py-2 text-left font-medium text-slate-600">
-                                                        Description</th>
-                                                    <th class="px-3 py-2 text-right font-medium text-slate-600">Qty</th>
-                                                    <th class="px-3 py-2 text-right font-medium text-slate-600">Unit
-                                                        Price</th>
-                                                    <th class="px-3 py-2 text-right font-medium text-slate-600">Total
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="divide-y divide-slate-100 bg-white">
-                                                @forelse ($invoice['items'] as $item)
-                                                    <tr>
-                                                        <td class="px-3 py-2 text-slate-500">{{ $item['item_number'] }}
-                                                        </td>
-                                                        <td class="px-3 py-2 text-slate-700">{{ $item['description'] }}
-                                                        </td>
-                                                        <td class="px-3 py-2 text-right text-slate-700">
-                                                            {{ $item['quantity'] }}</td>
-                                                        <td class="px-3 py-2 text-right text-slate-700">TZS
-                                                            {{ number_format($item['unit_price']) }}</td>
-                                                        <td class="px-3 py-2 text-right text-slate-900 font-medium">TZS
-                                                            {{ number_format($item['total_price']) }}</td>
-                                                    </tr>
-                                                @empty
-                                                    <tr>
-                                                        <td colspan="5"
-                                                            class="px-3 py-4 text-center text-slate-500">No items
-                                                            found.</td>
-                                                    </tr>
-                                                @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>  
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Type:
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ number_format($asset['value'], 2) }}
+                                        {{ $asset['currency'] }}
+                                    </p>
+                                </div>
 
-                                {{-- notes 
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Term:
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset['term'] }}
+                                    </p>
+                                </div>
 
-                                @if ($invoice['notes'])
-                                    <div class="mt-4 rounded-lg bg-slate-50 p-3">
-                                        <p class="text-xs uppercase tracking-wide text-slate-500">Notes</p>
-                                        <p class="mt-1 text-sm text-slate-700 whitespace-pre-line">
-                                            {{ $invoice['notes'] }}</p>
-                                    </div>
-                                @endif
-                                --}}
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Status:
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset['status'] }}
+                                    </p>
+                                </div>
+
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Original Value: TZS
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ ucfirst($asset['original_value']) }}
+                                    </p>
+                                </div>
+
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Depreciation value: TZS
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ ucfirst($asset['depreciation_value']) }}
+                                    </p>
+                                </div>
+
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Current Value: TZS
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset['current_value'] }}
+                                    </p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Acquired: 
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset['acquired'] }}
+                                    </p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Created At: 
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset['created_at'] }} 
+                                    </p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Updated At: 
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset['updated_at'] ?? 'N/A' }}
+                                    </p>
+                                </div>
+
+                            </div>
+                        </td>
 
                                 </div>
                             </td>
@@ -308,7 +306,6 @@
     @include('components.confirm')
 
     <script>
-
         function toggleFarDetails(id) {
             console.log('Toggling details for asset ID:', id);
 
@@ -316,7 +313,9 @@
 
             if (detailsRow) {
                 detailsRow.classList.toggle('hidden');
-                console.log(`Details row for asset ID ${id} is now ${detailsRow.classList.contains('hidden') ? 'hidden' : 'visible'}.`);
+                console.log(
+                    `Details row for asset ID ${id} is now ${detailsRow.classList.contains('hidden') ? 'hidden' : 'visible'}.`
+                );
             }
         }
 
@@ -338,7 +337,6 @@
             }
         }
         */
-
     </script>
 
 </body>
