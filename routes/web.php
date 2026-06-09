@@ -11,6 +11,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\FAR;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\InternalMessagesController;
@@ -370,9 +371,7 @@ Route::middleware('auth')->group(function () {
     });
 
     //FAR management
-    Route::get('/far', function () {
-        return view('far');
-    })->name('far');
+    Route::get('/far', [FAR::class, 'index'])->name('far');
 
 
 
