@@ -118,7 +118,7 @@
 
         </div>
 
-        {{-- 
+        {{-- here we will put the summary as well 
         <!-- Summary -->
         <div class="mt-8 p-6 bg-white border rounded shadow-sm">
             <h3 class="text-md font-semibold mb-2">Summary</h3>
@@ -128,6 +128,7 @@
                 <li class="font-bold">Net Book Value: <span class="mono">TZS 535,000,000</span></li>
             </ul>
         </div>
+
          --}}
 
     </main>
