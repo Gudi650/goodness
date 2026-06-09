@@ -50,30 +50,35 @@
                                             d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                 </button>
-                                <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
-                                    title="Edit invoice" aria-label="Edit invoice"
-                                    onclick="openEditInvoiceModal({{ $invoice['id'] }})">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
-                                    </svg>
-                                </button>
-                                {{--  
-                                <form action="{{ route('invoices.destroy', $invoice['id']) }}" method="POST"
-                                    onsubmit="return confirm('Delete invoice {{ $invoice['invoice_number'] }}?');"
-                                    class="inline-flex">
-                                    @csrf
-                                    @method('DELETE') --}}
-                                    <button type="button" onclick="deleteInvoice({{ $invoice['id'] }})" title="Delete"  class="text-red-600 hover:text-red-700 transition-colors"
-                                        title="Delete invoice" aria-label="Delete invoice">
+                                {{-- editing buttons as well --}}
+                                {{-- 
+                                    <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
+                                        title="Edit invoice" aria-label="Edit invoice"
+                                        onclick="openEditInvoiceModal({{ $invoice['id'] }})">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21.75H8.084a2.25 2.25 0 0 1-2.245-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.875c0-1.035-.84-1.875-1.875-1.875h-3.75C9.09 3 8.25 3.84 8.25 4.875v.518" />
+                                                d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
                                         </svg>
                                     </button>
-                                {{--</form> --}}
+                                 --}}
+
+                                {{--  
+                                    <form action="{{ route('invoices.destroy', $invoice['id']) }}" method="POST"
+                                        onsubmit="return confirm('Delete invoice {{ $invoice['invoice_number'] }}?');"
+                                        class="inline-flex">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" onclick="deleteInvoice({{ $invoice['id'] }})" title="Delete"  class="text-red-600 hover:text-red-700 transition-colors"
+                                            title="Delete invoice" aria-label="Delete invoice">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21.75H8.084a2.25 2.25 0 0 1-2.245-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.875c0-1.035-.84-1.875-1.875-1.875h-3.75C9.09 3 8.25 3.84 8.25 4.875v.518" />
+                                            </svg>
+                                        </button>
+                                    </form> 
+                                 --}}
                             </div>
                         </td>
                     </tr>
