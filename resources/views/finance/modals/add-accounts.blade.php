@@ -34,12 +34,14 @@
                 placeholder="ACC-0009">
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-slate-600">Card Number</label>
-            <input type="text" name="card_number"
-                class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
-                placeholder="4111 2222 3333 4444">
-        </div>
+        {{-- 
+            <div>
+                <label class="block text-sm font-medium text-slate-600">Card Number</label>
+                <input type="text" name="card_number"
+                    class="mt-1 w-full border border-slate-300 rounded px-3 py-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="4111 2222 3333 4444">
+            </div>
+         --}}
 
         <div>
             <label class="block text-sm font-medium text-slate-600">Account Type</label>
