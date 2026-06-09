@@ -206,35 +206,46 @@
         syncDepartments();
     }
 
+
+    //binding the categories with respective subcategries
     function bindExpenseCategoryOptions() {
-        const map = {
-            Operational: ['Rent', 'Utilities', 'Internet', 'Office Supplies', 'Cleaning'],
-            Payroll: ['Salaries', 'Overtime', 'Allowances', 'Statutory (NSSF/PAYE)'],
-            Travel: ['Fuel', 'Transport', 'Accommodation', 'Per Diem'],
-            Procurement: ['Stock Purchase', 'Equipment', 'Raw Materials'],
-            Marketing: ['Advertising', 'Events', 'Branding'],
-            Maintenance: ['Vehicle', 'Equipment', 'Building'],
-            Miscellaneous: ['Other'],
-        };
+        // liabilities data injected from Laravel
+        const map = @json($liabilitiesDetails);
+        console.log("Liabilities data:", map);
 
         const category = getExpenseField('expenseCategory');
         const subCategory = getExpenseField('expenseSubCategory');
-        if (!category || !subCategory) return;
+        
+        if (!category || !subCategory) {
+            console.log("Category or SubCategory field not found");
+            return;
+        }
 
         const syncSubCategories = () => {
-            const options = map[category.value] || [];
+            const selectedId = category.value;
+            console.log("Selected category value:", selectedId);
+
+            // Match by id instead of category_name
+            const selectedCategory = map.find(liability => liability.id == selectedId);
+            console.log("Matched category object:", selectedCategory);
+
             subCategory.innerHTML = '<option value="">Select sub-category...</option>';
-            options.forEach(item => {
+            if (selectedCategory) {
+                console.log("Sub-category name:", selectedCategory.name);
                 const opt = document.createElement('option');
-                opt.value = item;
-                opt.textContent = item;
+                opt.value = selectedCategory.id;
+                opt.textContent = selectedCategory.name;
                 subCategory.appendChild(opt);
-            });
+            }
         };
 
         category.addEventListener('change', syncSubCategories);
         syncSubCategories();
     }
+
+
+
+
 
     function bindExpenseVatCalculations() {
         const amountInput = getExpenseField('expenseAmount');
@@ -245,7 +256,8 @@
         const vatRateWrap = getExpenseField('expenseVatRateWrap');
         const vatAmountWrap = getExpenseField('expenseVatAmountWrap');
 
-        if (!amountInput || !vatToggle || !vatRate || !vatAmount || !netAmount || !vatRateWrap || !vatAmountWrap) return;
+        if (!amountInput || !vatToggle || !vatRate || !vatAmount || !netAmount || !vatRateWrap || !vatAmountWrap)
+            return;
 
         const recalc = () => {
             const gross = parseFloat(amountInput.value) || 0;
@@ -288,7 +300,8 @@
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = e => {
-                    preview.innerHTML = `<div class="flex items-center gap-3"><img src="${e.target.result}" alt="preview" class="w-12 h-12 object-cover rounded border border-slate-200"><span class="text-slate-700">${file.name}</span></div>`;
+                    preview.innerHTML =
+                        `<div class="flex items-center gap-3"><img src="${e.target.result}" alt="preview" class="w-12 h-12 object-cover rounded border border-slate-200"><span class="text-slate-700">${file.name}</span></div>`;
                 };
                 reader.readAsDataURL(file);
                 return;
@@ -322,17 +335,17 @@
     function switchTab(tab, btnEl) {
         // Get all tab buttons
         const tabBtns = document.querySelectorAll('.tab-btn');
-        
+
         // Remove active state from all buttons
         tabBtns.forEach(btn => {
-            btn.classList.remove('text-slate-700', 'border-brand-600','border-b-2');
+            btn.classList.remove('text-slate-700', 'border-brand-600', 'border-b-2');
             btn.classList.add('text-slate-500');
         });
 
         // Add active state to clicked button
         if (btnEl) {
             btnEl.classList.remove('text-slate-500');
-            btnEl.classList.add('text-slate-700', 'border-brand-600','border-b-2');
+            btnEl.classList.add('text-slate-700', 'border-brand-600', 'border-b-2');
         }
 
         // Toggle content panes
@@ -346,7 +359,7 @@
             sectionTitle.textContent = 'Invoices';
             actionButton.innerHTML = renderButton('Add Invoice', 'openInvoiceModal()');
             sectionButton.classList.add('hidden');
-            
+
             return;
         }
 
@@ -364,7 +377,7 @@
             return;
         }
 
-         if (tab === 'assets') {
+        if (tab === 'assets') {
             sectionTitle.textContent = 'Assets';
             actionButton.innerHTML = renderButton('Add Asset', 'openAddAssetsModal()');
             sectionButton.classList.remove('hidden');
@@ -372,9 +385,9 @@
             return;
         }
 
-         if (tab === 'liabilities') {
+        if (tab === 'liabilities') {
             sectionTitle.textContent = 'Liabilities';
-            actionButton.innerHTML = renderButton('Add Liability', 'openAddLiabilityModal()'); 
+            actionButton.innerHTML = renderButton('Add Liability', 'openAddLiabilityModal()');
             sectionButton.innerHTML = renderSectionButton('Add Categories', 'openAddLiabilityCategoryModal()');
             sectionButton.classList.remove('hidden');
             return;
@@ -431,5 +444,4 @@
     document.addEventListener('DOMContentLoaded', () => {
         switchTab('invoices', document.querySelector('.tab-btn'));
     });
-
 </script>

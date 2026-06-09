@@ -90,6 +90,15 @@
                     <select id="expenseCategory" name="category" required
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="">Select category...</option>
+
+                        @if (isset($liabilityCategories))
+                            @foreach ($liabilityCategories as $category)
+                                <option value="{{ $category['id'] }}">{{ $category['category'] }}
+                                </option>
+                            @endforeach
+                        @endif
+
+                        {{-- 
                         <option value="Operational">Operational</option>
                         <option value="Payroll">Payroll</option>
                         <option value="Travel">Travel</option>
@@ -97,6 +106,8 @@
                         <option value="Marketing">Marketing</option>
                         <option value="Maintenance">Maintenance</option>
                         <option value="Miscellaneous">Miscellaneous</option>
+                         --}}
+
                     </select>
                 </div>
                 <div>
