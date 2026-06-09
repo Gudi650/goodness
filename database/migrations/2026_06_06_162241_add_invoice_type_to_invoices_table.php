@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::table('invoices', function (Blueprint $table) {
 
             $table->enum('invoice_type', ['income', 'expense'])
-                  ->after('invoice_number')
-                  ->default('income');
+                ->after('invoice_number')
+                ->default('income');
 
-            //add the bank id as well 
+            // add the bank id as well
             $table->foreignId('bank_id')->nullable()->after('company_id')->constrained('virtual_accounts')->nullOnDelete();
 
         });
