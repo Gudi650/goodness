@@ -26,4 +26,21 @@ class FAR extends Controller
         return $fixedAssets;
     }
 
+    //calculating the depreciation value and current value of the fixed asset of the selected asset and display them in the FAR page
+        public function calculateDepreciation($assetId)
+        {
+            $asset = CreateAssets::find($assetId);
+    
+            if (!$asset) {
+                return redirect()->back()->with('error', 'Asset not found');
+            }
+
+            /**
+             * check the acquisition date and the current dat
+             */
+    
+            
+        }
+
+
 }

@@ -57,6 +57,7 @@
                 <button onclick="switchTab('accounts', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Accounts</button>
                 <button onclick="switchTab('assets', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Assets</button>
                 <button onclick="switchTab('liabilities', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Liabilities</button>
+                <button onclick="switchTab('items', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Items</button>
             </div>
         </div>
 
@@ -81,6 +82,7 @@
                 @include('finance.accounts', ['virtualAccounts' => $virtualAccounts])
                 @include('finance.assets',['assetsCategories' => $assetsCategories, 'assetsDetails' => $assetsDetails])
                 @include('finance.liabilities', ['liabilityCategories' => $liabilityCategories, 'liabilitiesDetails' => $liabilitiesDetails])
+                @include('finance.items')
             </div>
         </div>
     </main>
@@ -94,6 +96,8 @@
     @include('finance.modals.add-liabilities') 
     @include('finance.modals.add-assets-category') 
     @include('finance.modals.add-liabilities-category') 
+    @include('finance.modals.add-items-category')
+    @include('finance.modals.add-items')
 
     <!-- Shared Components -->
     @include('components.modal')

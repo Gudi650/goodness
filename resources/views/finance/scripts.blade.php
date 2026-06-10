@@ -21,7 +21,8 @@
             payments: document.getElementById('paymentsPane'),
             accounts: document.getElementById('accountsPane'),
             assets: document.getElementById('assetsPane'),
-            liabilities: document.getElementById('liabilitiesPane')
+            liabilities: document.getElementById('liabilitiesPane'),
+            items: document.getElementById('itemsPane'),
         };
 
         Object.entries(panes).forEach(([tab, pane]) => {
@@ -134,6 +135,29 @@
             hideFooter: true
         });
     }
+
+    //open add category items modal
+    function openAddItemCategoryModal() {
+        const body = document.getElementById('addItemCategoryModal').innerHTML;
+
+        window.openModal('Add Item Category', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
+    //open add items modal
+    function openAddItemModal() {
+        const body = document.getElementById('addItemsModal').innerHTML;
+
+        window.openModal('Add Items', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
 
     // Helper to get form fields either from modal or main page (for expenses which have dynamic modal fields)
     function getExpenseField(id) {
@@ -389,6 +413,13 @@
             sectionTitle.textContent = 'Liabilities';
             actionButton.innerHTML = renderButton('Add Liability', 'openAddLiabilityModal()');
             sectionButton.innerHTML = renderSectionButton('Add Categories', 'openAddLiabilityCategoryModal()');
+            sectionButton.classList.remove('hidden');
+            return;
+        }
+        if (tab === 'items') {
+            sectionTitle.textContent = 'Items';
+            actionButton.innerHTML = renderButton('Add Item', 'openAddItemModal()');
+            sectionButton.innerHTML = renderSectionButton('Add Categories', 'openAddItemCategoryModal()');
             sectionButton.classList.remove('hidden');
             return;
         }

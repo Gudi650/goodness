@@ -89,7 +89,7 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Category</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Asset Name</th>
                         <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Original Cost</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Current Value</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Net Book Value</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Acquired Date</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Depreciation Percentage</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Status</th>
@@ -251,12 +251,22 @@
 
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                        Current Value: TZS
+                                        Net Book Value: TZS
                                     </p>
                                     <p class="mt-1 text-sm text-slate-700">
                                         {{ $asset['current_value'] }}
                                     </p>
                                 </div>
+
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Accumulated Depreciation: TZS
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">
+                                        {{ $asset['current_value'] }}
+                                    </p>
+                                </div>
+
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
                                         Acquired: 

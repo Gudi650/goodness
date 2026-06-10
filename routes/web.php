@@ -173,6 +173,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/liabilities', 'store')->name('liabilities.store');
     });
 
+    //Finance items
+    Route::get('/items', function () {
+        return view('finance.items');
+    })->name('finance-items');
+
     /* HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
     Route::post('/employees', [UserController::class, 'store'])->name('employees.store');
