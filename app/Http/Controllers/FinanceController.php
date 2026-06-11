@@ -198,6 +198,7 @@ class FinanceController extends Controller
                     'review_evidence_paths' => $expense->review_evidence_paths ?? [],
                     'attachment_url' => $attachmentUrl,
                     'attachment_is_image' => $attachmentIsImage,
+                    'term' => $expense->term,
                 ];
             })
             ->all();
