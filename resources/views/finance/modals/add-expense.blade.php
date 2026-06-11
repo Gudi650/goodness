@@ -2,6 +2,7 @@
     <form action="{{ route('expenses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4"
         onsubmit="showExpenseCreateLoader()">
         @csrf
+
         @php
             $currentUser = auth()->user();
             $currentCompanyId = $currentUser?->company_id;
@@ -127,6 +128,16 @@
                     <input type="text" id="expenseReference" name="reference_number"
                         placeholder="Receipt / Cheque / M-Pesa Txn ID"
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
+                </div>
+                <!-- Long Term / Short Term -->
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700">Classification</label>
+                    <select id="expenseTerm" name="term"
+                        class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
+                        <option value="">Select classification...</option>
+                        <option value="short_term">Short Term</option>
+                        <option value="long_term">Long Term</option>
+                    </select>
                 </div>
             </div>
         </section>

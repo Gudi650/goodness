@@ -233,13 +233,13 @@
 
     //binding the categories with respective subcategries
     function bindExpenseCategoryOptions() {
-        // items data injected froms Laravel
+        // items data injected from Laravel
         const map = @json($items);
         console.log("Items data:", map);
 
         const category = getExpenseField('expenseCategory');
         const subCategory = getExpenseField('expenseSubCategory');
-        
+
         if (!category || !subCategory) {
             console.log("Category or SubCategory field not found");
             return;
@@ -249,23 +249,26 @@
             const selectedId = category.value;
             console.log("Selected category value:", selectedId);
 
-            // Match by id instead of category_name
-            const selectedCategory = map.find(item => item.category_id == selectedId);
-            console.log("Matched category object:", selectedCategory);
+            // Use filter instead of find → returns all items in that category
+            const selectedItems = map.filter(item => item.category_id == selectedId);
+            console.log("Matched items:", selectedItems);
 
+            // Reset subCategory dropdown
             subCategory.innerHTML = '<option value="">Select sub-category...</option>';
-            if (selectedCategory) {
-                console.log("Sub-category name:", selectedCategory.name);
+
+            // Loop through all matched items and add them as options
+            selectedItems.forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = selectedCategory.id;
-                opt.textContent = selectedCategory.item_name;
+                opt.value = item.id;
+                opt.textContent = item.item_name;
                 subCategory.appendChild(opt);
-            }
+            });
         };
 
         category.addEventListener('change', syncSubCategories);
         syncSubCategories();
     }
+
 
 
 
