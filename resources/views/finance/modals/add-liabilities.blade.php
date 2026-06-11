@@ -2,7 +2,7 @@
 <div id="addLiabilitiesModal" class="hidden">
 
     <!-- Form -->
-    <form action="{{ route('liabilities.store') }}" method="POST" id="liabilityForm" class="space-y-4">
+    <form action="{{ route('liabilities.store') }}" method="POST" id="liabilityForm" class="space-y-4" onsubmit="showLiabilityCreateLoader()">
         @csrf
 
         {{-- 

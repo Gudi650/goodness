@@ -2,7 +2,7 @@
 <div id="addAssetsModal" class="hidden">
 
     <!-- Form -->
-    <form action="{{ route('assets.store') }}" method="POST" id="assetForm" class="space-y-4">
+    <form action="{{ route('assets.store') }}" method="POST" id="assetForm" class="space-y-4" onsubmit="showAssetCreateLoader()">
         @csrf
 
         <div>

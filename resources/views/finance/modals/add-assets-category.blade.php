@@ -1,7 +1,7 @@
 <!-- Asset Category Modal -->
 <div id="addAssetsCategoryModal" class="hidden ">
 
-    <form action="{{ route('assets.categories.store') }}" method="POST" id="assetCategoryForm" class="space-y-4">
+    <form action="{{ route('assets.categories.store') }}" method="POST" id="assetCategoryForm" class="space-y-4" onsubmit="showAssetsCategoryCreateLoader()">
         @csrf
       <div>
         <label class="block text-sm font-medium text-slate-700">Category</label>
@@ -22,3 +22,14 @@
     </form>
 
 </div>
+
+<x-loading id="assetsCategoryCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+    function showAssetsCategoryCreateLoader() {
+        const loader = document.getElementById('assetsCategoryCreateLoader');
+        if (loader) {
+            loader.classList.remove('hidden');
+        }
+    }
+</script>

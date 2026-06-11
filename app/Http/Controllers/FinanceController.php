@@ -104,8 +104,6 @@ class FinanceController extends Controller
         //get the finance items and its categores to be displayed in the items page
         $items = FinanceItems::with('category')->get();
 
-        //dd($items);
-
         //get the finance items category to be displayed in the items page
         $itemsCategories = ItemsCategory::all();
 

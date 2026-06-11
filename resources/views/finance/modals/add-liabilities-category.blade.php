@@ -1,7 +1,7 @@
 <!-- Liability Category Modal -->
 <div id="addLiabilityCategoryModal" class="hidden ">
 
-    <form action="{{ route('liabilities.categories.store') }}" method="POST" id="liabilityCategoryForm" class="space-y-4">
+    <form action="{{ route('liabilities.categories.store') }}" method="POST" id="liabilityCategoryForm" class="space-y-4" onsubmit="showLiabilityCategoryCreateLoader()">
         @csrf
         
       <div>
@@ -23,3 +23,14 @@
     </form>
 
 </div>
+
+<x-loading id="liabilityCategoryCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+    function showLiabilityCategoryCreateLoader() {
+        const loader = document.getElementById('liabilityCategoryCreateLoader');
+        if (loader) {
+            loader.classList.remove('hidden');
+        }
+    }
+</script>
