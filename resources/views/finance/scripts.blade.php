@@ -233,9 +233,9 @@
 
     //binding the categories with respective subcategries
     function bindExpenseCategoryOptions() {
-        // liabilities data injected from Laravel
-        const map = @json($liabilitiesDetails);
-        console.log("Liabilities data:", map);
+        // items data injected froms Laravel
+        const map = @json($items);
+        console.log("Items data:", map);
 
         const category = getExpenseField('expenseCategory');
         const subCategory = getExpenseField('expenseSubCategory');
@@ -250,7 +250,7 @@
             console.log("Selected category value:", selectedId);
 
             // Match by id instead of category_name
-            const selectedCategory = map.find(liability => liability.id == selectedId);
+            const selectedCategory = map.find(item => item.category_id == selectedId);
             console.log("Matched category object:", selectedCategory);
 
             subCategory.innerHTML = '<option value="">Select sub-category...</option>';
@@ -258,7 +258,7 @@
                 console.log("Sub-category name:", selectedCategory.name);
                 const opt = document.createElement('option');
                 opt.value = selectedCategory.id;
-                opt.textContent = selectedCategory.name;
+                opt.textContent = selectedCategory.item_name;
                 subCategory.appendChild(opt);
             }
         };

@@ -24,6 +24,7 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
+
                     @if ($canChooseCompany)
                         <select id="expenseCompany" name="company_id" required
                             class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
@@ -40,6 +41,7 @@
                         <input type="text" value="{{ $currentCompanyName }}" readonly
                             class="w-full cursor-not-allowed rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-600">
                     @endif
+
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Bank </label>
@@ -59,6 +61,7 @@
                     <select id="expenseDepartment" name="department_id" required
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="">Select department...</option>
+
                         @if (isset($departments))
                             @foreach ($departments as $key => $department)
                                 @if (is_object($department))
@@ -69,6 +72,7 @@
                                 @endif
                             @endforeach
                         @endif
+
                     </select>
                 </div>
                 <div class="md:col-span-2 hidden">
@@ -91,22 +95,12 @@
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="">Select category...</option>
 
-                        @if (isset($liabilityCategories))
-                            @foreach ($liabilityCategories as $category)
-                                <option value="{{ $category['id'] }}">{{ $category['category'] }}
+                        @if (isset($itemsCategories))
+                            @foreach ($itemsCategories as $category)
+                                <option value="{{ $category['id'] }}">{{ $category['category_name'] }}
                                 </option>
                             @endforeach
                         @endif
-
-                        {{-- 
-                        <option value="Operational">Operational</option>
-                        <option value="Payroll">Payroll</option>
-                        <option value="Travel">Travel</option>
-                        <option value="Procurement">Procurement</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Miscellaneous">Miscellaneous</option>
-                         --}}
 
                     </select>
                 </div>
