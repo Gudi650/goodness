@@ -25,6 +25,8 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\balanceSheet as BalanceSheetReportController;
+use App\Http\Controllers\IncomeStatement as IncomeStatementReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SettingsController;
@@ -377,6 +379,12 @@ Route::middleware('auth')->group(function () {
 
     //FAR management
     Route::get('/far', [FAR::class, 'index'])->name('far');
+
+    // Dedicated financial statement previews and exports
+    Route::get('/balance-sheet', [BalanceSheetReportController::class, 'index'])->name('balance-sheet');
+    Route::get('/balance-sheet/export', [BalanceSheetReportController::class, 'exportPdf'])->name('balance-sheet.export');
+    Route::get('/income-statement', [IncomeStatementReportController::class, 'index'])->name('income-statement');
+    Route::get('/income-statement/export', [IncomeStatementReportController::class, 'exportPdf'])->name('income-statement.export');
 
 
 

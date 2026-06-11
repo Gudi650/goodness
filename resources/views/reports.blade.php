@@ -57,6 +57,18 @@
       </div>
     </form>
 
+    @if (($reportType ?? 'expenses') === 'balance')
+      <div class="flex flex-wrap gap-3 mb-6">
+        <a href="{{ route('balance-sheet') }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Balance Sheet</a>
+        <a href="{{ route('balance-sheet.export') }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Balance Sheet PDF</a>
+      </div>
+    @elseif (($reportType ?? 'expenses') === 'income')
+      <div class="flex flex-wrap gap-3 mb-6">
+        <a href="{{ route('income-statement') }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Income Statement</a>
+        <a href="{{ route('income-statement.export') }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Income Statement PDF</a>
+      </div>
+    @endif
+
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
       <div class="bg-white border border-slate-200 rounded-lg p-4">
         <p class="text-xs uppercase tracking-wide text-slate-500">Scope</p>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            color: #333;
+            font-size: 14px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #7b3fa3;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #7b3fa3;
+            font-size: 20px;
+            font-weight: bold;
+            border-bottom: 2px solid #7b3fa3;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px 0;
+        }
+
+        .desc {
+            padding-left: 40px;
+        }
+
+        .amount {
+            text-align: right;
+        }
+
+        .total {
+            font-weight: bold;
+        }
+
+        .final {
+            color: #7b3fa3;
+            font-size: 22px;
+            font-weight: bold;
+            border-top: 2px solid #7b3fa3;
+            border-bottom: 2px solid #7b3fa3;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Income Statement - {{ $data['period'] }}</h1>
+
+<div class="section-title">Revenue</div>
+
+<table>
+    @foreach($data['revenue'] as $item)
+    <tr>
+        <td class="desc">{{ $item['name'] }}</td>
+        <td class="amount">${{ number_format($item['amount'], 2) }}</td>
+    </tr>
+    @endforeach
+
+    <tr class="total">
+        <td class="desc">Total Revenue</td>
+        <td class="amount">${{ number_format($totalRevenue, 2) }}</td>
+    </tr>
+</table>
+
+
+<div class="section-title">Cost of Goods Sold (COGS)</div>
+
+<table>
+    @foreach($data['cogs'] as $item)
+    <tr>
+        <td class="desc">{{ $item['name'] }}</td>
+        <td class="amount">(${{ number_format($item['amount'], 2) }})</td>
+    </tr>
+    @endforeach
+
+    <tr class="total">
+        <td class="desc">Total COGS</td>
+        <td class="amount">(${{ number_format($totalCogs, 2) }})</td>
+    </tr>
+</table>
+
+
+<div class="section-title">Operating Expenses</div>
+
+<table>
+    @foreach($data['operating_expenses'] as $item)
+    <tr>
+        <td class="desc">{{ $item['name'] }}</td>
+        <td class="amount">(${{ number_format($item['amount'], 2) }})</td>
+    </tr>
+    @endforeach
+
+    <tr class="total">
+        <td class="desc">Total Operating Expenses</td>
+        <td class="amount">(${{ number_format($totalOperatingExpenses, 2) }})</td>
+    </tr>
+</table>
+
+
+<div class="section-title">Operating Income</div>
+
+<table>
+    <tr>
+        <td class="desc">Gross Profit</td>
+        <td class="amount">${{ number_format($grossProfit, 2) }}</td>
+    </tr>
+
+    <tr>
+        <td class="desc">Operating Expenses</td>
+        <td class="amount">(${{ number_format($totalOperatingExpenses, 2) }})</td>
+    </tr>
+
+    <tr class="total">
+        <td class="desc">Operating Income</td>
+        <td class="amount">${{ number_format($operatingIncome, 2) }}</td>
+    </tr>
+</table>
+
+
+<div class="section-title">Other Items</div>
+
+<table>
+    @foreach($data['other_items'] as $item)
+    <tr>
+        <td class="desc">{{ $item['name'] }}</td>
+
+        <td class="amount">
+            @if($item['amount'] < 0)
+                (${{ number_format(abs($item['amount']), 2) }})
+            @else
+                ${{ number_format($item['amount'], 2) }}
+            @endif
+        </td>
+    </tr>
+    @endforeach
+</table>
+
+
+<table style="margin-top:30px;">
+    <tr class="total">
+        <td>Pre-Tax Income</td>
+        <td class="amount">${{ number_format($preTaxIncome, 2) }}</td>
+    </tr>
+
+    <tr class="total">
+        <td>Income Tax Expense</td>
+        <td class="amount">(${{ number_format($data['tax_expense'], 2) }})</td>
+    </tr>
+
+    <tr class="final">
+        <td>Net Income</td>
+        <td class="amount">${{ number_format($netIncome, 2) }}</td>
+    </tr>
+</table>
+
+</body>
+</html>

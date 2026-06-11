@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+
+        body{
+            font-family: DejaVu Sans;
+            font-size: 12px;
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:0;
+        }
+
+        .subtitle{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th, td{
+            border:1px solid #000;
+            padding:6px;
+        }
+
+        th{
+            background:#f0f0f0;
+        }
+
+        .section{
+            font-weight:bold;
+            font-style:italic;
+            background:#fafafa;
+        }
+
+        .subcategory{
+            font-weight:bold;
+        }
+
+        .amount{
+            text-align:right;
+        }
+
+        .total{
+            font-weight:bold;
+            background:#f5f5f5;
+        }
+
+    </style>
+</head>
+
+<body>
+
+@if(!empty($showActions))
+<div style="text-align:right; margin: 0 0 18px 0;">
+    <a href="{{ route('balance-sheet.export') }}" style="display:inline-block; padding:10px 14px; background:#111827; color:#fff; text-decoration:none; border-radius:6px; font-size:14px;">
+        Generate PDF
+    </a>
+</div>
+@endif
+
+<h2>Balance Sheet</h2>
+
+<p class="subtitle">
+    As at {{ now()->format('d M Y') }}
+</p>
+
+<table>
+
+    <tr>
+        <th width="70%">Particulars</th>
+        <th width="30%">Amount</th>
+    </tr>
+
+    <tr class="section">
+        <td colspan="2">Assets</td>
+    </tr>
+
+    <tr class="subcategory">
+        <td colspan="2">Non-Current Assets</td>
+    </tr>
+
+    @foreach($assets['non_current'] as $item)
+    <tr>
+        <td>{{ $item['name'] }}</td>
+        <td class="amount">
+            {{ number_format($item['amount'],2) }}
+        </td>
+    </tr>
+    @endforeach
+
+    <tr class="subcategory">
+        <td colspan="2">Current Assets</td>
+    </tr>
+
+    @foreach($assets['current'] as $item)
+    <tr>
+        <td>{{ $item['name'] }}</td>
+        <td class="amount">
+            {{ number_format($item['amount'],2) }}
+        </td>
+    </tr>
+    @endforeach
+
+    <tr class="total">
+        <td>Total Assets</td>
+        <td class="amount">
+            {{ number_format($totalAssets,2) }}
+        </td>
+    </tr>
+
+    <tr class="section">
+        <td colspan="2">Equity and Liabilities</td>
+    </tr>
+
+    <tr class="subcategory">
+        <td colspan="2">Equity</td>
+    </tr>
+
+    @foreach($equityLiabilities['equity'] as $item)
+    <tr>
+        <td>{{ $item['name'] }}</td>
+        <td class="amount">
+            {{ number_format($item['amount'],2) }}
+        </td>
+    </tr>
+    @endforeach
+
+    <tr class="subcategory">
+        <td colspan="2">Non-Current Liabilities</td>
+    </tr>
+
+    @foreach($equityLiabilities['non_current_liabilities'] as $item)
+    <tr>
+        <td>{{ $item['name'] }}</td>
+        <td class="amount">
+            {{ number_format($item['amount'],2) }}
+        </td>
+    </tr>
+    @endforeach
+
+    <tr class="subcategory">
+        <td colspan="2">Current Liabilities</td>
+    </tr>
+
+    @foreach($equityLiabilities['current_liabilities'] as $item)
+    <tr>
+        <td>{{ $item['name'] }}</td>
+        <td class="amount">
+            {{ number_format($item['amount'],2) }}
+        </td>
+    </tr>
+    @endforeach
+
+    <tr class="total">
+        <td>Total Equity and Liabilities</td>
+        <td class="amount">
+            {{ number_format($totalEquityAndLiabilities,2) }}
+        </td>
+    </tr>
+
+</table>
+
+</body>
+</html>
