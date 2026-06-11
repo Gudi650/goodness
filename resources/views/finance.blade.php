@@ -43,6 +43,7 @@
     @include('components.sidebar')
 
     <main class="ml-0 lg:ml-64 pt-20 p-6">
+        
         <div class="mb-6">
             <h1 class="text-2xl font-semibold">Finance</h1>
             <p class="text-sm text-slate-500">Invoices, expenses and payments</p>

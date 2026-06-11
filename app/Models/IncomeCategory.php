@@ -14,7 +14,7 @@ class IncomeCategory extends Model
 
 
     //relationship with income items
-    public function incomeItems()
+    public function items()
     {
         return $this->hasMany(IncomeItem::class, 'category_id');
     }

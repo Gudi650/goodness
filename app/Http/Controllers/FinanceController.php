@@ -7,6 +7,7 @@ use App\Models\CreateAssets;
 use App\Models\CreateLiability;
 use App\Models\Expense;
 use App\Models\FinanceItems;
+use App\Models\IncomeItem;
 use App\Models\Invoice;
 use App\Models\ItemsCategory;
 use App\Models\LiabilityCategory;
@@ -104,8 +105,6 @@ class FinanceController extends Controller
         //get the finance items and its categores to be displayed in the items page
         $items = FinanceItems::with('category')->get();
 
-        //dd($items);
-
         // Create a lightweight array for JS
         $itemData = $items->map(function ($item) {
             return [
@@ -116,6 +115,9 @@ class FinanceController extends Controller
                 'category_name' => $item->category ? $item->category->category_name : null,
             ];
         }); 
+
+        //get the income items and its categores to be displayed in the items page
+        $incomeItems = IncomeItem::with('category')->get();
 
         //get the finance items category to be displayed in the items page
         $itemsCategories = ItemsCategory::all();
@@ -142,6 +144,7 @@ class FinanceController extends Controller
             'items' => $items,
             'itemsCategories' => $itemsCategories,
             'itemData' => $itemData,
+            'incomeItems' => $incomeItems,
         ]);
     }
 
@@ -510,4 +513,18 @@ class FinanceController extends Controller
 
         return $liabilitiesDetails;
     }
+
+
+    //get the income items and its categores to be displayed in the items page
+    public function getItems()
+    {
+        $IncomeItems = IncomeItem::with('category')
+            ->latest()
+            ->get();
+ 
+        return $IncomeItems;
+    }
+
+
+
 }
