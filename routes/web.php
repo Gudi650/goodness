@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AssetsCategoriesController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\balanceSheet as BalanceSheetReportController;
+use App\Http\Controllers\balanceSheet;
 use App\Http\Controllers\BulkImportController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
@@ -15,6 +17,8 @@ use App\Http\Controllers\FAR;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FinanceItemsController;
 use App\Http\Controllers\HrmController;
+use App\Http\Controllers\IncomeStatement as IncomeStatementReportController;
+use App\Http\Controllers\incomeStatement;
 use App\Http\Controllers\InternalMessagesController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvoiceController;
@@ -27,8 +31,6 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\balanceSheet as BalanceSheetReportController;
-use App\Http\Controllers\IncomeStatement as IncomeStatementReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SettingsController;
@@ -394,12 +396,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/far', [FAR::class, 'index'])->name('far');
 
     // Dedicated financial statement previews and exports
-    Route::get('/balance-sheet', [BalanceSheetReportController::class, 'index'])->name('balance-sheet');
-    Route::get('/balance-sheet/export', [BalanceSheetReportController::class, 'exportPdf'])->name('balance-sheet.export');
-    Route::get('/income-statement', [IncomeStatementReportController::class, 'index'])->name('income-statement');
-    Route::get('/income-statement/export', [IncomeStatementReportController::class, 'exportPdf'])->name('income-statement.export');
+    Route::get('/balance-sheet', [balancesheet::class, 'index'])->name('balance-sheet');
+    Route::get('/balance-sheet/export', [balancesheet::class, 'exportPdf'])->name('balance-sheet.export');
+    Route::get('/income-statement', [incomeStatement::class, 'index'])->name('income-statement');
+    Route::get('/income-statement/export', [incomeStatement::class, 'exportPdf'])->name('income-statement.export');
 
-
+ 
 
     // Reports & Analytics
     Route::get('/reports', [ReportController::class, 'expenses'])->name('reports');
