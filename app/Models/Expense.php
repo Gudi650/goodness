@@ -38,6 +38,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'reviewed_at',
     'bank_id',
     'term',
+    'description',
+    'sub_category_id',
+
 ])]
 class Expense extends Model
 {

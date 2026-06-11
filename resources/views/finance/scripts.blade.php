@@ -259,7 +259,7 @@
             // Loop through all matched items and add them as options
             selectedItems.forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = item.item_name; // Assuming you want to use item_name as the value.
+                opt.value = item.id; // Assuming you want to use item id as the value.
                 opt.textContent = item.item_name;
                 subCategory.appendChild(opt);
             });
