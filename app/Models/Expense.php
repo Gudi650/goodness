@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'review_evidence_paths',
     'reviewed_at',
     'bank_id',
+    'term',
 ])]
 class Expense extends Model
 {

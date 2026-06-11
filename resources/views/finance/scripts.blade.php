@@ -234,7 +234,7 @@
     //binding the categories with respective subcategries
     function bindExpenseCategoryOptions() {
         // items data injected from Laravel
-        const map = @json($items);
+        const map = @json($itemData);
         console.log("Items data:", map);
 
         const category = getExpenseField('expenseCategory');
@@ -246,11 +246,11 @@
         }
 
         const syncSubCategories = () => {
-            const selectedId = category.value;
-            console.log("Selected category value:", selectedId);
+            const selectedName = category.value;
+            console.log("Selected category value:", selectedName);
 
             // Use filter instead of find → returns all items in that category
-            const selectedItems = map.filter(item => item.category_id == selectedId);
+            const selectedItems = map.filter(item => item.category_name == selectedName);
             console.log("Matched items:", selectedItems);
 
             // Reset subCategory dropdown
@@ -259,7 +259,7 @@
             // Loop through all matched items and add them as options
             selectedItems.forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = item.id;
+                opt.value = item.item_name; // Assuming you want to use item_name as the value.
                 opt.textContent = item.item_name;
                 subCategory.appendChild(opt);
             });
@@ -268,10 +268,6 @@
         category.addEventListener('change', syncSubCategories);
         syncSubCategories();
     }
-
-
-
-
 
 
     function bindExpenseVatCalculations() {

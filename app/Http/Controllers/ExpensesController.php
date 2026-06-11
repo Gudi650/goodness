@@ -110,6 +110,7 @@ class ExpensesController extends Controller
             'submit_mode' => 'nullable|in:draft,submit',
             'bank_id' => 'required|exists:virtual_accounts,id',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'term' => 'nullable|string|max:255',
         ]);
 
         $attachmentPath = null;
@@ -158,6 +159,7 @@ class ExpensesController extends Controller
             'original_file_name' => $originalFileName,
             'notes' => $validated['notes'] ?? null,
             'submitted_at' => $status === 'submitted' ? now() : null,
+            'term' => $validated['term'] ?? null,
         ]);
         $expense->save();
 

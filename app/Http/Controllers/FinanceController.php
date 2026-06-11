@@ -104,6 +104,19 @@ class FinanceController extends Controller
         //get the finance items and its categores to be displayed in the items page
         $items = FinanceItems::with('category')->get();
 
+        //dd($items);
+
+        // Create a lightweight array for JS
+        $itemData = $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'item_name' => $item->item_name,
+                'description' => $item->description,
+                'category_id' => $item->category_id,
+                'category_name' => $item->category ? $item->category->category_name : null,
+            ];
+        }); 
+
         //get the finance items category to be displayed in the items page
         $itemsCategories = ItemsCategory::all();
 
@@ -128,6 +141,7 @@ class FinanceController extends Controller
             'liabilitiesDetails' => $liabilitiesDetails,
             'items' => $items,
             'itemsCategories' => $itemsCategories,
+            'itemData' => $itemData,
         ]);
     }
 

@@ -98,7 +98,7 @@
 
                         @if (isset($itemsCategories))
                             @foreach ($itemsCategories as $category)
-                                <option value="{{ $category['id'] }}">{{ $category['category_name'] }}
+                                <option value="{{ $category['category_name'] }}">{{ $category['category_name'] }}
                                 </option>
                             @endforeach
                         @endif
