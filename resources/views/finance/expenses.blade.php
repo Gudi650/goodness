@@ -246,6 +246,11 @@
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['reference_number'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Term
+                                    </p>
+                                    <p class="mt-1 text-sm text-slate-700">{{ $expense['term'] }}</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white p-3">
                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Sub-category
                                     </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['sub_category'] }}</p>

@@ -1,11 +1,11 @@
 <!-- Items Category Modal -->
 <div id="addItemCategoryModal" class="hidden ">
 
-    <form action="" method="POST" id="itemCategoryForm" class="space-y-4">
+    <form action="{{ route('items.categories.store') }}" method="POST" id="itemCategoryForm" class="space-y-4" onsubmit="showItemsCategoryCreateLoader()">
         @csrf
       <div>
         <label class="block text-sm font-medium text-slate-700">Category</label>
-        <input type="text" name="category" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="eg: Operationals,Investments, Financial " required>
+        <input type="text" name="category_name" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="eg: Operationals,Investments, Financial " required>
       </div>
 
       <div>
@@ -22,3 +22,13 @@
     </form>
 
 </div>
+<x-loading id="itemsCategoryCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+    function showItemsCategoryCreateLoader() {
+        const loader = document.getElementById('itemsCategoryCreateLoader');
+        if (loader) {
+            loader.classList.remove('hidden');
+        }
+    }
+</script>

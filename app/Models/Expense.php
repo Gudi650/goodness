@@ -37,6 +37,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'review_evidence_paths',
     'reviewed_at',
     'bank_id',
+    'term',
+    'description',
+    'sub_category_id',
+
 ])]
 class Expense extends Model
 {
@@ -109,5 +113,13 @@ class Expense extends Model
     public function bankAccount(): BelongsTo
     {
         return $this->belongsTo(VirtualAccounts::class, 'bank_id');
+    }
+
+    /**
+     * Get the finance item associated with this expense.
+     */
+    public function financeItem(): BelongsTo
+    {
+        return $this->belongsTo(FinanceItems::class, 'sub_category_id');
     }
 }

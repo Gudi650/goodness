@@ -13,10 +13,12 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\FAR;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\FinanceItemsController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\InternalMessagesController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ItemsCategoryController;
 use App\Http\Controllers\LeavesController;
 use App\Http\Controllers\LiabilityCategoryController;
 use App\Http\Controllers\OrderController;
@@ -175,10 +177,21 @@ Route::middleware('auth')->group(function () {
         Route::post('/liabilities', 'store')->name('liabilities.store');
     });
 
-    //Finance items
+    /*Finance items
     Route::get('/items', function () {
         return view('finance.items');
     })->name('finance-items');
+    */
+
+    //route to store the new item category in the database
+    Route::controller(ItemsCategoryController::class)->group(function () {
+        Route::post('/items/categories', 'store')->name('items.categories.store');
+    });
+
+    //routes to store the new item and category in the database
+    Route::controller(FinanceItemsController::class)->group(function () {
+        Route::post('/items', 'store')->name('items.store');
+    });
 
     /* HRM Management
     Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
