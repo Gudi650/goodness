@@ -25,6 +25,17 @@
             </select>
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-slate-700">Item Type</label>
+
+            <select name="type" class="mt-1 block w-full border rounded px-3 py-2">
+                <option value="general">Material</option>
+                <option value="asset">Asset</option>
+                <option value="liability">Liability</option>
+            </select>
+
+        </div>
+
         <div class="md:col-span-2">
             <label class="block text-sm font-medium text-slate-700">Notes</label>
             <textarea name="description" rows="2" class="mt-1 block w-full border rounded px-3 py-2"></textarea>

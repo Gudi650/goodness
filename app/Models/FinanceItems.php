@@ -11,6 +11,7 @@ class FinanceItems extends Model
         'item_name',
         'description',
         'category_id',
+        'type',
     ];
 
     //relationship with the items_categories table

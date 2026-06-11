@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('item_name');
             $table->text('description')->nullable();
+
             //foreign key to the items_categories table
             $table->unsignedBigInteger('category_id')->nullable();
             $table->foreign('category_id')->references('id')->on('items_categories')->onDelete('set null');
+            
             $table->timestamps();
         });
     }

@@ -14,12 +14,13 @@ class FinanceItemsController extends Controller
             'item_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:items_categories,id',
+            'type' => 'required|string',
         ]);
 
-        //dd($request->all());
+        dd($request->all());
 
         //create the new item in the db
-        FinanceItems::create($request->only('item_name', 'description', 'category_id'));
+        FinanceItems::create($request->only('item_name', 'description', 'category_id','type'));
 
         //redirect back with success message
         return redirect()->back()->with('success', 'Item added successfully');

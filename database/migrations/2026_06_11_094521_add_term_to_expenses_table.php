@@ -28,8 +28,16 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->dropColumn('term');
-            $table->dropIndex(['term']);
+            
+            Schema::table('expenses', function (Blueprint $table) {
+            $table->dropIndex('expenses_term_index');
+        });
+
+        Schema::table('expenses', function (Blueprint $table) {
+                $table->dropColumn('term');
+            });
+            
         });
     }
+
 };
