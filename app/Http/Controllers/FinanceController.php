@@ -6,7 +6,9 @@ use App\Models\AssetsCategories;
 use App\Models\CreateAssets;
 use App\Models\CreateLiability;
 use App\Models\Expense;
+use App\Models\FinanceItems;
 use App\Models\Invoice;
+use App\Models\ItemsCategory;
 use App\Models\LiabilityCategory;
 use App\Models\Payment;
 use App\Models\User;
@@ -99,6 +101,12 @@ class FinanceController extends Controller
         //get the liailities details to be displayed from the create_liabilities table
         $liabilitiesDetails = $this->getLiabilitiesDetails();
 
+        //get the finance items and its categores to be displayed in the items page
+        $items = FinanceItems::with('category')->get();
+
+        //get the finance items category to be displayed in the items page
+        $itemsCategories = ItemsCategory::all();
+
         return view('finance', [
             'invoices' => $invoices,
             'expenses' => $expenses,
@@ -118,6 +126,8 @@ class FinanceController extends Controller
             'liabilityCategories' => $liabilityCategories,
             'assetsDetails' => $assetsDetails,
             'liabilitiesDetails' => $liabilitiesDetails,
+            'items' => $items,
+            'itemsCategories' => $itemsCategories,
         ]);
     }
 
