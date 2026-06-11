@@ -114,4 +114,12 @@ class Expense extends Model
     {
         return $this->belongsTo(VirtualAccounts::class, 'bank_id');
     }
+
+    /**
+     * Get the finance item associated with this expense.
+     */
+    public function financeItem(): BelongsTo
+    {
+        return $this->belongsTo(FinanceItems::class, 'sub_category_id');
+    }
 }

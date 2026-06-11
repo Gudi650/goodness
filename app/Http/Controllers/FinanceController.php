@@ -152,7 +152,7 @@ class FinanceController extends Controller
     protected function getExpenses($isAdmin, $isAccountant, $user, $isCEO)
     {
         // get all when user is admin or CEO, otherwise get only the expenses of his company
-        $expenses = Expense::with(['company', 'department', 'creator', 'approver', 'issuer', 'checker'])
+        $expenses = Expense::with(['company','financeItem', 'department', 'creator', 'approver', 'issuer', 'checker'])
             ->when(! $isAdmin && ! $isCEO && ! $isAccountant, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
@@ -173,7 +173,7 @@ class FinanceController extends Controller
                     'company_name' => $expense->company?->name ?? '-',
                     'department_name' => $expense->department?->name ?? '-',
                     'category' => $expense->category,
-                    'sub_category' => $expense->sub_category ?: '-',
+                    'sub_category' => $expense->financeItem?->item_name ?? '-',
                     'payment_method' => $expense->payment_method,
                     'reference_number' => $expense->reference_number ?: '-',
                     'amount' => (float) $expense->net_amount,
@@ -183,7 +183,7 @@ class FinanceController extends Controller
                     'vat_amount' => (float) $expense->vat_amount,
                     'net_amount' => (float) $expense->net_amount,
                     'status' => $expense->status,
-                    'description' => $expense->notes ?: '-',
+                    'description' => $expense->description ?: '-',
                     'notes' => $expense->notes ?: '-',
                     'creator_id' => $expense->created_by,
                     'creator_name' => $expense->creator?->name ?? '-',
