@@ -83,8 +83,17 @@ class DatabaseSeeder extends Seeder
             IncomeItemsSeeder::class,
         ]);
 
+        $this->call([
+            AssetCategorySeeder::class,
+        ]);
+
+        $this->call([
+            AssetCategorySeeder::class,
+            LiabilityCategorySeeder::class,
+        ]);
 
     }
+
 }
 
 

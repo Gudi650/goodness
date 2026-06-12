@@ -62,6 +62,7 @@
         Generate PDF
     </a>
 </div>
+
 @endif
 
 <h2>Balance Sheet</h2>

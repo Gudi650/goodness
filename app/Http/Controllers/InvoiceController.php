@@ -211,7 +211,7 @@ class InvoiceController extends Controller
     public function saveDraft(Request $request)
     {
 
-        //dd($request->all());
+        dd($request->all());
 
         $validated = $request->validate([
             'invoice_number' => 'required|string|unique:invoices',

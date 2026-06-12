@@ -20,7 +20,7 @@
                     <td class="px-4 py-3 font-mono text-xs text-slate-500">{{ $liability['code'] }}</td>
                     <td class="px-4 py-3 font-medium text-slate-800">{{ $liability['name'] }}</td>
                     <td class="px-4 py-3">
-                        @if ($liability['term'] === 'Long-term')
+                        @if (!empty($liability['term'] === 'Long-term'))
                             <span
                                 class="inline-flex px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-700 border border-purple-200">{{ $liability['term'] }}</span>
                         @else
