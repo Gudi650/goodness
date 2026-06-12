@@ -87,8 +87,13 @@ class DatabaseSeeder extends Seeder
             AssetCategorySeeder::class,
         ]);
 
+        $this->call([
+            AssetCategorySeeder::class,
+            LiabilityCategorySeeder::class,
+        ]);
+
     }
-    
+
 }
 
 
