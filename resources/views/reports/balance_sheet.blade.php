@@ -65,6 +65,26 @@
 @endif
 
 <h2>Balance Sheet</h2>
+<div style="padding:16px; border-bottom:1px solid #e2e8f0;">
+    <table style="border:none; width:100%;">
+        <tr>
+            <td style="width:50px; border:none; vertical-align:middle;">
+                <img src="{{ public_path('favicon.png') }}"
+                     alt="Logo"
+                     style="width:40px; height:40px;">
+            </td>
+
+            <td style="border:none; vertical-align:middle;">
+                <div style="font-weight:bold; font-size:14px;">
+                    Goodness Group
+                </div>
+                <div style="font-size:12px; color:#666;">
+                    Enterprise
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
 
 <p class="subtitle">
     As at {{ now()->format('d M Y') }}
