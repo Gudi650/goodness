@@ -29,7 +29,7 @@
           <label for="report_type" class="block text-sm font-medium text-slate-700 mb-1">Report type</label>
           <select id="report_type" name="report_type" class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm bg-white">
             <option value="expenses" @selected(($reportType ?? 'expenses') === 'expenses')>Expenses</option>
-            <option value="income" @selected(($reportType ?? '') === 'income')>Income</option>
+            <option value="income" @selected(($reportType ?? '') === 'income')>Income Statement</option>
             <option value="balance" @selected(($reportType ?? '') === 'balance')>Balance Sheet</option>
           </select>
         </div>
