@@ -18,8 +18,8 @@ class IncomeStatement extends Controller
             'period' => 'Q1 2025',
 
             'other_items' => [
-                ['name' => 'Interest income', 'amount' => 1000],
-                ['name' => 'Legal settlement loss', 'amount' => -2000],
+                ['name' => 'Interest income', 'amount' => 0],
+                ['name' => 'Legal settlement loss', 'amount' => -0],
             ],
 
             'tax_expense' => 0,
@@ -123,6 +123,11 @@ class IncomeStatement extends Controller
     {
         //fetch expenses from the database
         $expenses = Expense::where('status', 'draft')->get();
+
+        //if empty return an empty collection
+        if ($expenses->isEmpty()) {
+            return collect();
+        }
 
         return $expenses;
     }

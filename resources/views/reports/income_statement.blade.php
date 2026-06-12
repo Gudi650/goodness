@@ -174,9 +174,9 @@
 
         <td class="amount">
             @if($item['amount'] < 0)
-                (${{ number_format(abs($item['amount']), 2) }})
+                (Tsh{{ number_format(abs($item['amount']), 2) }})
             @else
-                ${{ number_format($item['amount'], 2) }}
+                Tsh{{ number_format($item['amount'], 2) }}
             @endif
         </td>
     </tr>
