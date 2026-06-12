@@ -18,7 +18,7 @@ class IncomeItemsSeeder extends Seeder
 
         $categories = [
 
-            'Sales Revenue' => [
+            'Sales ' => [
                 'Equipment Sales',
                 'Spare Parts Sales',
                 'Product Sales',
@@ -26,7 +26,7 @@ class IncomeItemsSeeder extends Seeder
                 'Accessories Sales',
             ],
 
-            'Service Revenue' => [
+            'Service ' => [
                 'Installation Services',
                 'Repair Services',
                 'Maintenance Services',
@@ -39,21 +39,21 @@ class IncomeItemsSeeder extends Seeder
                 'Commission Income',
             ],
 
-            'Rental Revenue' => [
+            'Rental ' => [
                 'Equipment Rental Income',
                 'Vehicle Rental Income',
                 'Facility Rental Income',
                 'Storage Rental Income',
             ],
 
-            'Financial Income' => [
+            'Financial ' => [
                 'Interest Income',
                 'Dividend Income',
                 'Foreign Exchange Gain',
                 'Investment Income',
             ],
 
-            'Other Income' => [
+            'Others' => [
                 'Gain on Sale of Assets',
                 'Insurance Claim Income',
                 'Government Grant Income',
