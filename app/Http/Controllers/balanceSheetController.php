@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
-class balancesheet extends Controller
+class balanceSheetController extends Controller
 {
     private function reportData(): array
     {
