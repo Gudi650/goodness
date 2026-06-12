@@ -15,6 +15,7 @@ class ReportController extends Controller
 {
     public function expenses(Request $request)
     {
+        
         $user = Auth::user();
 
         $isAdmin = $user && $user->role && $user->role->name === 'Admin';
@@ -29,6 +30,9 @@ class ReportController extends Controller
         $selectedScope = $request->string('scope')->toString() ?: 'all';
         $reportType = $request->string('report_type')->toString() ?: 'expenses';
         $selectedCompanyId = $request->integer('company_id');
+        $startDate = $request->string('start_date')->toString();
+        $endDate = $request->string('end_date')->toString();
+        $period = $request->string('period')->toString();
 
         if (! $canSeeAllCompanies) {
             $selectedScope = 'company';
@@ -48,6 +52,26 @@ class ReportController extends Controller
             $expensesQuery->where('company_id', $selectedCompanyId);
         } elseif (! $canSeeAllCompanies && $user) {
             $expensesQuery->where('company_id', $user->company_id);
+        }
+        if($period=='custome'){
+            if ($startDate) {
+                $expensesQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+            }
+            if ($endDate) {
+                $expensesQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+            }
+        }else if($period=='this_month'){
+            $expensesQuery->where('created_at', '>=', Carbon::now()->startOfMonth());
+            $expensesQuery->where('created_at', '<=', Carbon::now()->endOfMonth());
+        }else if($period=='last_month'){
+            $expensesQuery->where('created_at', '>=', Carbon::now()->subMonth()->startOfMonth());
+            $expensesQuery->where('created_at', '<=', Carbon::now()->subMonth()->endOfMonth());
+        }else if($period=='this_year'){ 
+            $expensesQuery->where('created_at', '>=', Carbon::now()->startOfYear());
+            $expensesQuery->where('created_at', '<=', Carbon::now()->endOfYear());
+        }else if($period=='last_year'){
+            $expensesQuery->where('created_at', '>=', Carbon::now()->subYear()->startOfYear());
+            $expensesQuery->where('created_at', '<=', Carbon::now()->subYear()->endOfYear());
         }
 
         $expenses = $expensesQuery->limit(250)->get();

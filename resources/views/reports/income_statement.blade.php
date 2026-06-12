@@ -72,7 +72,7 @@
 @endif
 
 <h1>Income Statement - {{ $data['period'] }}</h1>
-<div style="padding:16px; border-bottom:1px solid #e2e8f0;">
+<div style="padding:16px; border-bottom:1px solid #e2e8f0; display: flex; align-items: middle; flex-direction: row;">
     <table style="border:none; width:100%;">
         <tr>
             <td style="width:50px; border:none; vertical-align:middle;">
