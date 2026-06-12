@@ -43,7 +43,7 @@ class IncomeStatement extends Controller
         $totalCOGS = $totalExpensesByCategory->get('Cost of Goods Sold (COGS)', collect())->sum() ?? 0;
 
         //get the total of operating expenses category
-        $totalOperatingExpenses = $totalExpensesByCategory->get('Operating Expenses', collect())->sum() ?? 0;
+        $totalOperatingExpenses = $totalExpensesByCategory->get('Operational', collect())->sum() ?? 0;
 
         //gross profit is the difference between total revenue and total COGS
         $grossProfit = $totalRevenue - $totalCOGS;
