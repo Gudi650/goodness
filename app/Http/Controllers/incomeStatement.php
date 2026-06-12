@@ -145,8 +145,4 @@ class IncomeStatement extends Controller
             });
     }
 
-    //function 
-
-
-
 }
