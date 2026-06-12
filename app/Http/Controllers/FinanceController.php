@@ -7,6 +7,7 @@ use App\Models\CreateAssets;
 use App\Models\CreateLiability;
 use App\Models\Expense;
 use App\Models\FinanceItems;
+use App\Models\IncomeCategory;
 use App\Models\IncomeItem;
 use App\Models\Invoice;
 use App\Models\ItemsCategory;
@@ -122,6 +123,11 @@ class FinanceController extends Controller
         //get the finance items category to be displayed in the items page
         $itemsCategories = ItemsCategory::all();
 
+        //get the income categories only to be displayed in the items page
+        $incomeCategories = $this->getIncomeCategories();
+
+        //dd($incomeCategories);
+
         return view('finance', [
             'invoices' => $invoices,
             'expenses' => $expenses,
@@ -145,6 +151,7 @@ class FinanceController extends Controller
             'itemsCategories' => $itemsCategories,
             'itemData' => $itemData,
             'incomeItems' => $incomeItems,
+            'incomeCategories' => $incomeCategories,
         ]);
     }
 
@@ -521,8 +528,16 @@ class FinanceController extends Controller
         $IncomeItems = IncomeItem::with('category')
             ->latest()
             ->get();
- 
         return $IncomeItems;
+    }
+
+    //get just the income categories
+    public function getIncomeCategories()
+    {
+        $IncomeCategories = IncomeCategory::query()
+            ->latest()
+            ->get();
+        return $IncomeCategories;
     }
 
 

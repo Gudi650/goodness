@@ -91,7 +91,7 @@
                     <label class="block text-sm font-medium text-slate-700 mb-2">Category</label>
                     <select id="category_id" name="category_id" class="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                         <option value="">Select category...</option>
-                        @foreach ($incomeItems as $category)
+                        @foreach ($incomeCategories as $category)
                             <option value="{{ $category['id'] }}" @selected(isset($currentCategoryId) && (string) $currentCategoryId === (string) $category['id'])>
                                 {{ $category['category_name'] }}
                             </option>
