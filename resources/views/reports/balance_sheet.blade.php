@@ -58,7 +58,7 @@
 
 @if(!empty($showActions))
 <div style="text-align:right; margin: 0 0 18px 0;">
-    <a href="{{ route('balance-sheet.export') }}" style="display:inline-block; padding:10px 14px; background:#111827; color:#fff; text-decoration:none; border-radius:6px; font-size:14px;">
+    <a href="{{ route('balance_sheet') }}" style="display:inline-block; padding:10px 14px; background:#111827; color:#fff; text-decoration:none; border-radius:6px; font-size:14px;">
         Generate PDF
     </a>
 </div>
