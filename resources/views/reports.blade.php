@@ -37,7 +37,7 @@
         <div class="w-full lg:w-56">
           <label for="scope" class="block text-sm font-medium text-slate-700 mb-1">Report scope</label>
           <select id="scope" name="scope" class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm bg-white">
-            <option value="all" @selected($selectedScope === 'all')>All companies</option>
+            <option value="all" @selected($selectedScope === 'all')>Goodness Group</option>
             <option value="company" @selected($selectedScope === 'company')>Single company</option>
           </select>
         </div>
