@@ -88,6 +88,6 @@ class balanceSheet extends Controller
 
         $pdf->setPaper('a4', 'portrait');
 
-        return $pdf->download('balance-sheet.pdf');
+        return $pdf->download('balance_sheet.pdf');
     }
 }
