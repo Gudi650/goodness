@@ -210,6 +210,9 @@ class InvoiceController extends Controller
      */
     public function saveDraft(Request $request)
     {
+
+        //dd($request->all());
+
         $validated = $request->validate([
             'invoice_number' => 'required|string|unique:invoices',
             'company_id' => 'required',
@@ -232,7 +235,10 @@ class InvoiceController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.total_price' => 'required|numeric|min:0',
+            'category' => 'required|string',
         ]);
+
+        //dd($validated);
 
         $resolvedCompanyId = $this->resolveCompanyId($validated['company_id']);
         if (!$resolvedCompanyId) {
@@ -270,6 +276,7 @@ class InvoiceController extends Controller
             'created_by' => Auth::id(),
             'invoice_type' => $validated['invoice_type'],
             'bank_id' => $validated['bank_id'],
+            'category' => $validated['category'],
         ]);
 
         foreach ($validated['items'] as $item) {

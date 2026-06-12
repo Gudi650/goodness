@@ -71,11 +71,19 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
             'role_id' => $employeeRole->id,
         ]);
-        */
+        
 
         $this->call([
             FinanceItemsSeeder::class,
         ]);
+        */
+
+        $this->call([
+            FinanceItemsSeeder::class,
+            IncomeItemsSeeder::class,
+        ]);
+
+
     }
 }
 
