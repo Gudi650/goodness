@@ -396,7 +396,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/far', [FAR::class, 'index'])->name('far');
 
     // Dedicated financial statement previews and exports
-    Route::get('/balance_sheet', [balancesheet::class, 'index'])->name('balance_sheet');
+    Route::get('/balance-sheet', [balancesheet::class, 'index'])->name('balance-sheet');
     Route::get('/balance_sheet', [balancesheet::class, 'exportPdf'])->name('balance_sheet');
     Route::get('/income-statement', [incomeStatement::class, 'index'])->name('income-statement');
     Route::get('/income-statement-export', [incomeStatement::class, 'exportPdf'])->name('income-statement-export');
