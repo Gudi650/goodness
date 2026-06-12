@@ -4,6 +4,7 @@ use App\Http\Controllers\AssetsCategoriesController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\balanceSheet as BalanceSheetReportController;
 use App\Http\Controllers\balanceSheet;
+use App\Http\Controllers\balanceSheetController;
 use App\Http\Controllers\BulkImportController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
@@ -396,8 +397,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/far', [FAR::class, 'index'])->name('far');
 
     // Dedicated financial statement previews and exports
-    Route::get('/balance-sheet', [balancesheet::class, 'index'])->name('balance-sheet');
-    Route::get('/balance_sheet', [balancesheet::class, 'exportPdf'])->name('balance_sheet');
+    Route::get('/balance-sheet', [balanceSheetController::class, 'index'])->name('balance-sheet');
+    Route::get('/balance_sheet', [balanceSheetController::class, 'exportPdf'])->name('balance_sheet');
     Route::get('/income-statement', [incomeStatement::class, 'index'])->name('income-statement');
     Route::get('/income-statement-export', [incomeStatement::class, 'exportPdf'])->name('income-statement-export');
  
