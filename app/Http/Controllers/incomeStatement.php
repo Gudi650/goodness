@@ -55,7 +55,10 @@ class IncomeStatement extends Controller
 
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
 
-        $netIncome = $preTaxIncome - $data['tax_expense'];
+        //tax expense is calculated as a percentage of pre-tax income, for example 30%
+        $taxExpense = $preTaxIncome * 0.18;
+
+        $netIncome = $preTaxIncome - $taxExpense;
 
         return [
             'data' => $data,
@@ -69,6 +72,7 @@ class IncomeStatement extends Controller
             'totalRevenuesByCategory' => $totalRevenuesByCategory,
             'totalExpensesByCategory' => $totalExpensesByCategory,
             'totalExpenses' => $totalExpenses,
+            'taxExpense' => $taxExpense,
         ];
     }
 

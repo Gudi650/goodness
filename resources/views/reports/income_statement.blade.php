@@ -189,7 +189,7 @@
 
     <tr class="total">
         <td>Income Tax Expense</td>
-        <td class="amount">Tsh({{ number_format($data['tax_expense'], 2) }})</td>
+        <td class="amount">Tsh({{ number_format($taxExpense, 2) }})</td>
     </tr>
 
     <tr class="final">
