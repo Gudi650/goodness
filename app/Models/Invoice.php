@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'created_by',
     'invoice_type',
     'bank_id',
+    'category',
 
 ])]
 class Invoice extends Model
