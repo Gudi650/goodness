@@ -98,7 +98,7 @@ class CurrentLiabilitiesService
     {
         //get the accured expenses from the liabilities table
         $accruedExpenses = CreateLiability::whereHas('category', function ($query) {
-                $query->where('name', 'Accrued Expenses');
+                $query->where('category', 'Accrued Expenses');
             })
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0)
@@ -120,7 +120,7 @@ class CurrentLiabilitiesService
     {
         //get the interest payables from the liabilities table
         $interestPayables = CreateLiability::whereHas('category', function ($query) {
-            $query->where('name', 'Interest Payables');
+            $query->where('category', 'Interest Payables');
         })
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0)

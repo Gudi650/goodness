@@ -42,7 +42,7 @@ class NonCurrentAssetsService
     {
         //get the investment assets from the assets table
         $investmentAssets = CreateAssets::whereHas('category', function ($query) {
-            $query->where('name', 'Investment Assets');
+            $query->where('category', 'Investment Assets');
         })
             ->where('current_amount', '>', 0)
             ->get()
@@ -61,7 +61,7 @@ class NonCurrentAssetsService
     {
         //get the property, plant and equipment assets from the assets table
         $ppeAssets = CreateAssets::whereHas('category', function ($query) {
-            $query->where('name', 'Property, Plant & Equipment');
+            $query->where('category', 'Property, Plant & Equipment');
         })
             ->where('current_amount', '>', 0)
             ->get()
@@ -80,7 +80,7 @@ class NonCurrentAssetsService
     {
         //get the vehicles assets from the assets table
         $vehicleAssets = CreateAssets::whereHas('category', function ($query) {
-            $query->where('name', 'Vehicle Assets');
+            $query->where('category', 'Vehicle Assets');
         })
             ->where('current_amount', '>', 0)
             ->get()
@@ -99,7 +99,7 @@ class NonCurrentAssetsService
     {
         //get the intangible assets from the assets table
         $intangibleAssets = CreateAssets::whereHas('category', function ($query) {
-            $query->where('name', 'Intangible Assets');
+            $query->where('category', 'Intangible Assets');
         })
             ->where('current_amount', '>', 0)
             ->get()

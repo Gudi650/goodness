@@ -33,7 +33,7 @@ class NonCurrentLiabilitiesService
         //get the long term loans from the liabilities table
         $longTermLoans = CreateLiability::where('term', 'Long-term')
             ->whereHas('category', function ($query) {
-                $query->where('name', 'Loans & Borrowings');
+                $query->where('category', 'Loans & Borrowings');
             })
             ->where('due_date', '>', now())
             ->where('current_amount', '>', 0)
