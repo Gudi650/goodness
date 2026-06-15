@@ -43,7 +43,13 @@ class NonCurrentAssetsService
         //get the investment assets from the assets table
         $investmentAssets = CreateAssets::where('category', 'investment')
             ->where('current_amount', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => $asset->name,
+                    'amount' => $asset->current_amount,
+                ];
+            });
 
         return $investmentAssets;
     }
@@ -54,8 +60,14 @@ class NonCurrentAssetsService
         //get the property, plant and equipment assets from the assets table
         $ppeAssets = CreateAssets::where('category', 'Property Assets')
             ->where('current_amount', '>', 0)
-            ->get();
- 
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => $asset->name,
+                    'amount' => $asset->current_amount,
+                ];
+            });
+
         return $ppeAssets;
     }
 
@@ -65,7 +77,13 @@ class NonCurrentAssetsService
         //get the vehicles assets from the assets table
         $vehicleAssets = CreateAssets::where('category', 'Vehicle Assets')
             ->where('current_amount', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => $asset->name,
+                    'amount' => $asset->current_amount,
+                ];
+            });
 
         return $vehicleAssets;
     }
@@ -76,7 +94,13 @@ class NonCurrentAssetsService
         //get the intangible assets from the assets table
         $intangibleAssets = CreateAssets::where('category', 'Intangible Assets')
             ->where('current_amount', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => $asset->name,
+                    'amount' => $asset->current_amount,
+                ];
+            });
 
         return $intangibleAssets;
     }
@@ -86,7 +110,13 @@ class NonCurrentAssetsService
     {
         //get the inventory assets from the assets table wher stock is greater than 0
         $inventoryAssets = Product::where('stock', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => $asset->name,
+                    'amount' => $asset->current_amount,
+                ];
+            });
 
         return $inventoryAssets;
         

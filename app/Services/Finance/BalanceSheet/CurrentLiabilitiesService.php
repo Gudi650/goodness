@@ -41,7 +41,13 @@ class CurrentLiabilitiesService
     {
         //get the salaries from the salaries table
         $salaries = Salary::where('effective_date', '<=', now())
-            ->get();
+            ->get()
+            ->map(function ($salary) {
+                return [
+                    'name' => $salary->employee_id,
+                    'amount' => $salary->amount,
+                ];
+            });
 
         //return the salaries
         return $salaries;
@@ -55,7 +61,13 @@ class CurrentLiabilitiesService
         //get the expenses where vat_included is true and the amount is greater than 0
         $payableVAT = Expense::where('vat_included', true)
             ->where('amount', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'name' => $expense->expense_number,
+                    'amount' => $expense->vat_amount,
+                ];
+            });
 
         return $payableVAT;
     }
@@ -68,7 +80,13 @@ class CurrentLiabilitiesService
             ->where('category', 'Loans & Borrowings')
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'name' => $loan->name,
+                    'amount' => $loan->current_amount,
+                ];
+            });
 
         return $shortTermLoans;
     }
@@ -80,7 +98,13 @@ class CurrentLiabilitiesService
         $accruedExpenses = CreateLiability::where('category', 'Accrued Expenses')
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($liability) {
+                return [
+                    'name' => $liability->name,
+                    'amount' => $liability->current_amount,
+                ];
+            });
 
         return $accruedExpenses;
     }
@@ -92,7 +116,13 @@ class CurrentLiabilitiesService
         $interestPayables = CreateLiability::where('category', 'Interest Payables')
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($liability) {
+                return [
+                    'name' => $liability->name,
+                    'amount' => $liability->current_amount,
+                ];
+            });
 
         return $interestPayables;
     }

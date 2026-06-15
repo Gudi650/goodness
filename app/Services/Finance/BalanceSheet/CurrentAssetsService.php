@@ -38,7 +38,13 @@ class CurrentAssetsService
     {
         //get the cash and bank balances from the virtual bank table
         $cashAndBankBalances = VirtualAccounts::where('balance', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($account) {
+                return [
+                    'name' => $account->account_name,
+                    'amount' => $account->balance,
+                ];
+            });
 
         //return in an array format
         return $cashAndBankBalances;
@@ -49,7 +55,13 @@ class CurrentAssetsService
     {
         //get the inventory assets from the products table
         $inventoryAssets = Product::where('stock_quantity', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'name' => $product->name,
+                    'amount' => $product->stock_quantity * $product->cost_price,
+                ];
+            });
 
         return $inventoryAssets;
     }

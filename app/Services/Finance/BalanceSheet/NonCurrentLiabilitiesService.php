@@ -35,7 +35,13 @@ class NonCurrentLiabilitiesService
             ->where('category', 'Loans & Borrowings')
             ->where('due_date', '>', now())
             ->where('current_amount', '>', 0)
-            ->get();
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'name' => $loan->name,
+                    'amount' => $loan->current_amount,
+                ];
+            });
 
         return $longTermLoans;
     }
