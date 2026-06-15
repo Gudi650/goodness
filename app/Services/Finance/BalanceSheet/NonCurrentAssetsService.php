@@ -41,7 +41,9 @@ class NonCurrentAssetsService
     protected function getInvestmentAssets()
     {
         //get the investment assets from the assets table
-        $investmentAssets = CreateAssets::where('category', 'investment')
+        $investmentAssets = CreateAssets::whereHas('category', function ($query) {
+            $query->where('name', 'Investment Assets');
+        })
             ->where('current_amount', '>', 0)
             ->get()
             ->map(function ($asset) {
@@ -58,7 +60,9 @@ class NonCurrentAssetsService
     protected function getPropertyAssets()
     {
         //get the property, plant and equipment assets from the assets table
-        $ppeAssets = CreateAssets::where('category', 'Property Assets')
+        $ppeAssets = CreateAssets::whereHas('category', function ($query) {
+            $query->where('name', 'Property, Plant & Equipment');
+        })
             ->where('current_amount', '>', 0)
             ->get()
             ->map(function ($asset) {
@@ -75,7 +79,9 @@ class NonCurrentAssetsService
     protected function getVehicleAssets()
     {
         //get the vehicles assets from the assets table
-        $vehicleAssets = CreateAssets::where('category', 'Vehicle Assets')
+        $vehicleAssets = CreateAssets::whereHas('category', function ($query) {
+            $query->where('name', 'Vehicle Assets');
+        })
             ->where('current_amount', '>', 0)
             ->get()
             ->map(function ($asset) {
@@ -92,7 +98,9 @@ class NonCurrentAssetsService
     protected function getIntangibleAssets()
     {
         //get the intangible assets from the assets table
-        $intangibleAssets = CreateAssets::where('category', 'Intangible Assets')
+        $intangibleAssets = CreateAssets::whereHas('category', function ($query) {
+            $query->where('name', 'Intangible Assets');
+        })
             ->where('current_amount', '>', 0)
             ->get()
             ->map(function ($asset) {

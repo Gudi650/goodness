@@ -77,7 +77,9 @@ class CurrentLiabilitiesService
     {
         //get the short term loans from the liabilities table
         $shortTermLoans = CreateLiability::where('term', 'Short-term')
-            ->where('category', 'Loans & Borrowings')
+            ->whereHas('category', function ($query) {
+                $query->where('name', 'Loans & Borrowings');
+            })
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0)
             ->get()
@@ -95,7 +97,9 @@ class CurrentLiabilitiesService
     protected function getAccruedExpenses()
     {
         //get the accured expenses from the liabilities table
-        $accruedExpenses = CreateLiability::where('category', 'Accrued Expenses')
+        $accruedExpenses = CreateLiability::whereHas('category', function ($query) {
+                $query->where('name', 'Accrued Expenses');
+            })
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0)
             ->get()
@@ -107,13 +111,17 @@ class CurrentLiabilitiesService
             });
 
         return $accruedExpenses;
+
+        
     }
 
     //get the interest payables as well here
     protected function getInterestPayables()
     {
         //get the interest payables from the liabilities table
-        $interestPayables = CreateLiability::where('category', 'Interest Payables')
+        $interestPayables = CreateLiability::whereHas('category', function ($query) {
+            $query->where('name', 'Interest Payables');
+        })
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0)
             ->get()
