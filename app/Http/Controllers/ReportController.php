@@ -67,7 +67,8 @@ class ReportController extends Controller
         $expensesQuery = Expense::query()
             ->with(['company', 'department', 'creator', 'approver', 'issuer', 'checker'])
             ->orderByDesc('expense_date')
-            ->orderByDesc('id');
+            ->orderByDesc('id')
+            ->whereBetween('created_at', [$startDate, $endDate]);
 
         if ($selectedScope === 'company' && $selectedCompanyId) {
             $expensesQuery->where('company_id', $selectedCompanyId);

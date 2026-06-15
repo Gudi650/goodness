@@ -6,6 +6,7 @@ use App\Http\Controllers\balanceSheet as BalanceSheetReportController;
 use App\Http\Controllers\balanceSheet;
 use App\Http\Controllers\balanceSheetController;
 use App\Http\Controllers\BulkImportController;
+use App\Http\Controllers\CashFlowController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\CreateAssetsController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\trialbalanceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VirtualAccountsController;
 use Illuminate\Support\Facades\Route;
@@ -401,7 +403,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/balance_sheet', [balanceSheetController::class, 'exportPdf'])->name('balance_sheet');
     Route::get('/income-statement', [incomeStatement::class, 'index'])->name('income-statement');
     Route::get('/income-statement-export', [incomeStatement::class, 'exportPdf'])->name('income-statement-export');
- 
+    Route::get('/trial-balance', [trialbalanceController::class, 'index'])->name('trial-balance');
+    Route::get('/trial-balance-export', [trialbalanceController::class, 'exportPdf'])->name('trial-balance-export');
+    Route::get('/cash-flow', [cashflowController::class, 'index'])->name('cash-flow');
+    Route::get('/cash-flow-export', [cashflowController::class, 'exportPdf'])->name('cash-flow-export');
 
     // Reports & Analytics
     Route::post('/reports', [ReportController::class, 'expenses'])->name('reports');

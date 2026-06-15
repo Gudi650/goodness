@@ -32,6 +32,10 @@
             <option value="expenses" @selected(($reportType ?? 'expenses') === 'expenses')>Expenses</option>
             <option value="income" @selected(($reportType ?? '') === 'income')>Income Statement</option>
             <option value="balance" @selected(($reportType ?? '') === 'balance')>Balance Sheet</option>
+            <!-- #trial balance -->
+            <option value="trial" @selected(($reportType ?? '') === 'trial')>Trial Balance</option>
+            <!-- #cash flow -->
+            <option value="cashflow" @selected(($reportType ?? '') === 'cashflow')>Cash Flow Statement</option>
           </select>
         </div>
 
@@ -133,6 +137,17 @@
       <div class="flex flex-wrap gap-3 mb-6">
         <a href="/income-statement" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Income Statement</a>
         <a href="/income-statement-export" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Income Statement PDF</a>
+      </div>
+
+    @elseif (($reportType ?? '') === 'trial')
+      <div class="flex flex-wrap gap-3 mb-6">
+        <a href="/trial-balance" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Trial Balance</a>
+        <a href="/trial-balance-export" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Trial Balance PDF</a>
+      </div>
+    @elseif (($reportType ?? '') === 'cashflow')
+      <div class="flex flex-wrap gap-3 mb-6">
+        <a href="/cash-flow" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Cash Flow Statement</a>
+        <a href="/cash-flow-export" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Cash Flow Statement PDF</a>
       </div>
     @endif
 
