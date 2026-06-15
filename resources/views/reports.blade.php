@@ -23,7 +23,8 @@
       <p class="text-sm text-slate-500">View financial reports by company or across all companies.</p>
     </div>
 
-    <form method="GET" action="{{ route('reports') }}" class="bg-white border border-slate-200 rounded-lg p-4 mb-6">
+    <form method="POST" action="{{ route('reports') }}" class="bg-white border border-slate-200 rounded-lg p-4 mb-6">
+      @csrf
       <div class="flex flex-col lg:flex-row gap-4 items-end">
         <div class="w-full lg:w-56">
           <label for="report_type" class="block text-sm font-medium text-slate-700 mb-1">Report type</label>
@@ -49,6 +50,72 @@
               <option value="{{ $company->id }}" @selected((int) $selectedCompanyId === (int) $company->id)>{{ $company->name }}</option>
             @endforeach
           </select>
+        </div>
+         {{-- Date Range --}}
+        <div class="w-full lg:w-auto">
+            <label for="date_filter" class="block text-sm font-medium text-slate-700 mb-1">
+                Period
+            </label>
+
+            <select
+                id="date_filter"
+                name="date_filter"
+                class="w-full lg:w-52 px-3 py-2 border border-slate-200 rounded-md text-sm bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+            >
+                <option value="this_month" @selected(($dateFilter ?? 'this_month') === 'this_month')>
+                    This Month
+                </option>
+
+                <option value="last_month" @selected(($dateFilter ?? '') === 'last_month')>
+                    Last Month
+                </option>
+
+                <option value="this_quarter" @selected(($dateFilter ?? '') === 'this_quarter')>
+                    This Quarter
+                </option>
+
+                <option value="this_year" @selected(($dateFilter ?? '') === 'this_year')>
+                    This Financial Year
+                </option>
+
+                <option value="custom" @selected(($dateFilter ?? '') === 'custom')>
+                    Custom Range
+                </option>
+            </select>
+        </div>
+
+        {{-- Custom Date Range --}}
+        <div
+            id="customDateFields"
+            class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto {{ ($dateFilter ?? '') === 'custom' ? '' : 'hidden' }}"
+        >
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-slate-700 mb-1">
+                    From
+                </label>
+
+                <input
+                    type="date"
+                    id="start_date"
+                    name="start_date"
+                    value="{{ $startDate ?? '' }}"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                >
+            </div>
+
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-slate-700 mb-1">
+                    To
+                </label>
+
+                <input
+                    type="date"
+                    id="end_date"
+                    name="end_date"
+                    value="{{ $endDate ?? '' }}"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                >
+            </div>
         </div>
 
         <div class="ml-auto">
@@ -366,7 +433,24 @@
       }
     })();
   </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dateFilter = document.getElementById('date_filter');
+        const customFields = document.getElementById('customDateFields');
 
+        function toggleCustomDates() {
+            if (dateFilter.value === 'custom') {
+                customFields.classList.remove('hidden');
+            } else {
+                customFields.classList.add('hidden');
+            }
+        }
+
+        dateFilter.addEventListener('change', toggleCustomDates);
+
+        toggleCustomDates();
+    });
+</script>
   @include('components.modal')
   @include('components.alert')
   @include('components.confirm')

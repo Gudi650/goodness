@@ -404,7 +404,8 @@ Route::middleware('auth')->group(function () {
  
 
     // Reports & Analytics
-    Route::get('/reports', [ReportController::class, 'expenses'])->name('reports');
+    Route::post('/reports', [ReportController::class, 'expenses'])->name('reports');
+    Route::get('/reports', [ReportController::class, 'expenses'])->name('reports-get');
 
     // communication page - show messages via controller so view has data
     Route::get('/communication', [InternalMessagesController::class, 'index'])->name('communication');
