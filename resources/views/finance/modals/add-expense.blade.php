@@ -45,11 +45,13 @@
                     @endif
 
                 </div>
+                
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Bank </label>
                     <select id="expenseBank" name="bank_id" required
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="">Select bank...</option>
+
                         @foreach ($virtualAccounts as $account)
                             <option value="{{ $account['id'] }}" @selected(isset($currentBankId) && (string) $currentBankId === (string) $account['id'])>
                                 {{ $account['account_name'] }}
@@ -58,6 +60,7 @@
 
                     </select>
                 </div>
+                
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Department</label>
                     <select id="expenseDepartment" name="department_id" required
@@ -96,6 +99,7 @@
 
                     <select id="expenseCategory" name="category" required
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
+
                         <option value="">Select category...</option>
 
                         @if (isset($itemsCategories))

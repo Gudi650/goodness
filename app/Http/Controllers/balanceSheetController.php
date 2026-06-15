@@ -78,7 +78,7 @@ class balanceSheetController extends Controller
 
         //get the current assets data from service file
         $currentAssets = app(CurrentAssetsService::class)->getCurrentAssets();
-        //dd($currentAssets);
+        dd($currentAssets);
 
 
         //get the non current assets data from service file

@@ -109,7 +109,7 @@
 
             {{-- Category heading --}}
             <tr>
-                <td><strong>{{ ucfirst(str_replace('_', ' ', $type)) }}</strong></td>
+                <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                 <td class="amount">
                     {{ number_format($items->sum('amount'), 2) }}
                 </td>
@@ -123,7 +123,7 @@
 
         @foreach ($currentAssets as $type => $items)
             <tr>
-                <td><strong>{{ ucfirst(str_replace('_', ' ', $type)) }}</strong></td>
+                <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                 <td class="amount">
                     {{ number_format($items->sum('amount'), 2) }}
                 </td>
@@ -168,7 +168,7 @@
             </tr> --}}
 
             <tr>
-                <td><strong>{{ ucfirst(str_replace('_', ' ', $type)) }}</strong></td>
+                <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                 <td class="amount">
                     {{ number_format($items->sum('amount'), 2) }}
                 </td>
@@ -182,7 +182,7 @@
 
         @foreach ($currentLiabilities as $type => $items)
             <tr>
-                <td><strong>{{ ucfirst(str_replace('_', ' ', $type)) }}</strong></td>
+                <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                 <td class="amount">
                     {{ number_format($items->sum('amount'), 2) }}
                 </td>
