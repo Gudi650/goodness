@@ -122,7 +122,7 @@ class IncomeStatement extends Controller
     protected function getExpenses()
     {
         //fetch expenses from the database
-        $expenses = Expense::where('status', 'draft')->get();
+        $expenses = Expense::where('status', 'issued')->get();
 
         //if empty return an empty collection
         if ($expenses->isEmpty()) {
