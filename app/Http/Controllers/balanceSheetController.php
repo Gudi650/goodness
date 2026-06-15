@@ -2,6 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CreateLiability;
+use App\Models\Expense;
+use App\Models\Salary;
+use App\Services\Finance\BalanceSheet\CurrentAssetsService;
+use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
+use App\Services\Finance\BalanceSheet\NonCurrentAssetsService;
+use App\Services\Finance\BalanceSheet\NonCurrentLiabilitiesService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
@@ -60,6 +67,24 @@ class balanceSheetController extends Controller
         $totalCurrentLiabilities = collect($equityLiabilities['current_liabilities'])->sum('amount');
         $totalEquityAndLiabilities = $totalEquity + $totalNonCurrentLiabilities + $totalCurrentLiabilities;
 
+
+        //get the Non current liabilities data from service file
+        $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
+        //dd($nonCurrentLiabilities);
+
+        //get the current liabilities data from service file
+        $currentLiabilities = app(CurrentLiabilitiesService::class)->getCurrentLiabilities();
+        //dd($currentLiabilities);
+
+        //get the current assets data from service file
+        $currentAssets = app(CurrentAssetsService::class)->getCurrentAssets();
+        //dd($currentAssets);
+
+
+        //get the non current assets data from service file
+        $nonCurrentAssets = app(NonCurrentAssetsService::class)->getNonCurrentAssets();
+        //dd($nonCurrentAssets);
+
         return [
             'assets' => $assets,
             'equityLiabilities' => $equityLiabilities,
@@ -70,7 +95,17 @@ class balanceSheetController extends Controller
             'totalNonCurrentLiabilities' => $totalNonCurrentLiabilities,
             'totalCurrentLiabilities' => $totalCurrentLiabilities,
             'totalEquityAndLiabilities' => $totalEquityAndLiabilities,
+            'nonCurrentLiabilities' => $nonCurrentLiabilities,
+            'currentLiabilities' => $currentLiabilities,
+            'nonCurrentAssets' => $nonCurrentAssets,
+            'currentAssets' => $currentAssets,
+
         ];
+
+
+
+
+
     }
 
     public function index()
@@ -90,4 +125,45 @@ class balanceSheetController extends Controller
 
         return $pdf->download('balance_sheet.pdf');
     }
+
+
+
+    //function to get the salaries and wages for the balance sheet report from the salaries table
+    protected function getSalaries()
+    {
+        //get the salaries from the salaries table
+        $salaries = Salary::where('effective_date', '<=', now())
+            ->get();
+
+        //return the salaries
+        return $salaries;
+    }
+
+    //get the Payable VAT from the expenses table
+    protected function getPayableVAT()
+    {
+
+        //get the payable VAT from the expenses table
+        //get the expenses where vat_included is true and the amount is greater than 0
+        $payableVAT = Expense::where('vat_included', true)
+            ->where('amount', '>', 0)
+            ->get();
+
+        return $payableVAT;
+    }
+
+    //get the short Term Loans from the Liabilities table
+    protected function getShortTermLoans()
+    {
+        //get the short term loans from the liabilities table
+        $shortTermLoans = CreateLiability::where('term', 'Short-term')
+            ->where('category', 'Loans & Borrowings')
+            ->where('due_date', '<=', now())
+            ->where('current_amount', '>', 0)
+            ->get();
+
+        return $shortTermLoans;
+    }
+
+
 }
