@@ -85,6 +85,9 @@ class balanceSheetController extends Controller
         $nonCurrentAssets = app(NonCurrentAssetsService::class)->getNonCurrentAssets();
         //dd($nonCurrentAssets);
 
+        dd($currentAssets, $nonCurrentAssets, $currentLiabilities, $nonCurrentLiabilities, $equityLiabilities);
+
+
         return [
             'assets' => $assets,
             'equityLiabilities' => $equityLiabilities,
