@@ -15,7 +15,6 @@ class ReportController extends Controller
 {
     public function expenses(Request $request)
     {
-        
         $user = Auth::user();
 
         $isAdmin = $user && $user->role && $user->role->name === 'Admin';
@@ -43,6 +42,28 @@ class ReportController extends Controller
             $selectedCompanyId = (int) ($companies->first()->id ?? 0);
         }
 
+        // --- REUSABLE DATE FILTER FUNCTION ---
+        // This applies the correct filters dynamically to any model query based on its specific date column
+        $applyDateFilters = function ($query, $dateColumn) use ($period, $startDate, $endDate) {
+            if ($period == 'custom' || $period == 'custome') { // Handles both spellings just in case!
+                if ($startDate) {
+                    $query->where($dateColumn, '>=', Carbon::parse($startDate)->startOfDay());
+                }
+                if ($endDate) {
+                    $query->where($dateColumn, '<=', Carbon::parse($endDate)->endOfDay());
+                }
+            } else if ($period == 'this_month') {
+                $query->whereBetween($dateColumn, [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
+            } else if ($period == 'last_month') {
+                $query->whereBetween($dateColumn, [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()]);
+            } else if ($period == 'this_year') {
+                $query->whereBetween($dateColumn, [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
+            } else if ($period == 'last_year') {
+                $query->whereBetween($dateColumn, [Carbon::now()->subYear()->startOfYear(), Carbon::now()->subYear()->endOfYear()]);
+            }
+        };
+
+        // --- 1. EXPENSES QUERY ---
         $expensesQuery = Expense::query()
             ->with(['company', 'department', 'creator', 'approver', 'issuer', 'checker'])
             ->orderByDesc('expense_date')
@@ -53,26 +74,9 @@ class ReportController extends Controller
         } elseif (! $canSeeAllCompanies && $user) {
             $expensesQuery->where('company_id', $user->company_id);
         }
-        if($period=='custome'){
-            if ($startDate) {
-                $expensesQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
-            }
-            if ($endDate) {
-                $expensesQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
-            }
-        }else if($period=='this_month'){
-            $expensesQuery->where('created_at', '>=', Carbon::now()->startOfMonth());
-            $expensesQuery->where('created_at', '<=', Carbon::now()->endOfMonth());
-        }else if($period=='last_month'){
-            $expensesQuery->where('created_at', '>=', Carbon::now()->subMonth()->startOfMonth());
-            $expensesQuery->where('created_at', '<=', Carbon::now()->subMonth()->endOfMonth());
-        }else if($period=='this_year'){ 
-            $expensesQuery->where('created_at', '>=', Carbon::now()->startOfYear());
-            $expensesQuery->where('created_at', '<=', Carbon::now()->endOfYear());
-        }else if($period=='last_year'){
-            $expensesQuery->where('created_at', '>=', Carbon::now()->subYear()->startOfYear());
-            $expensesQuery->where('created_at', '<=', Carbon::now()->subYear()->endOfYear());
-        }
+        
+        // Apply date filters to primary expenses list (switching to 'expense_date' matches your order priority)
+        $applyDateFilters($expensesQuery, 'expense_date');
 
         $expenses = $expensesQuery->limit(250)->get();
 
@@ -98,6 +102,7 @@ class ReportController extends Controller
             'net_amount' => (float) $expenses->sum('net_amount'),
         ];
 
+        // --- 2. COMPANY BREAKDOWN QUERY ---
         $companyBreakdownQuery = Expense::query()
             ->selectRaw('company_id, COUNT(*) as expense_count, COALESCE(SUM(amount), 0) as gross_amount, COALESCE(SUM(vat_amount), 0) as vat_amount, COALESCE(SUM(net_amount), 0) as net_amount')
             ->with('company:id,name');
@@ -107,6 +112,9 @@ class ReportController extends Controller
         } elseif (! $canSeeAllCompanies && $user) {
             $companyBreakdownQuery->where('company_id', $user->company_id);
         }
+        
+        // BUG FIX: Added date filters here
+        $applyDateFilters($companyBreakdownQuery, 'expense_date');
 
         $companyBreakdown = $companyBreakdownQuery
             ->groupBy('company_id')
@@ -122,7 +130,7 @@ class ReportController extends Controller
                 ];
             });
 
-        // --- Income / Invoices report ---
+        // --- 3. INCOME / INVOICES REPORT ---
         $incomeRows = collect();
         $incomeTotals = ['invoice_count' => 0, 'subtotal' => 0.0, 'tax' => 0.0, 'total' => 0.0];
         $companyIncomeBreakdown = collect();
@@ -138,6 +146,9 @@ class ReportController extends Controller
             } elseif (! $canSeeAllCompanies && $user) {
                 $invoicesQuery->where('company_id', $user->company_id);
             }
+            
+            // BUG FIX: Added date filters here
+            $applyDateFilters($invoicesQuery, 'invoice_date');
 
             $invoices = $invoicesQuery->limit(250)->get();
 
@@ -170,6 +181,9 @@ class ReportController extends Controller
             } elseif (! $canSeeAllCompanies && $user) {
                 $companyIncomeQuery->where('company_id', $user->company_id);
             }
+            
+            // BUG FIX: Added date filters here
+            $applyDateFilters($companyIncomeQuery, 'invoice_date');
 
             $companyIncomeBreakdown = $companyIncomeQuery->groupBy('company_id')->get()->map(function ($item) {
                 return [
@@ -182,49 +196,40 @@ class ReportController extends Controller
             });
         }
 
-        // --- Balance Sheet ---
-        // NOTE: This is a simplified balance sheet using available tables:
-        // Assets = Cash (payments in - payments out) + Accounts Receivable (unpaid invoices)
-        // Liabilities = Accounts Payable (non-draft expenses)
-        // Equity = Assets - Liabilities
-        $balance = [
-            'cash' => 0.0,
-            'receivables' => 0.0,
-            'payables' => 0.0,
-            'assets' => 0.0,
-            'liabilities' => 0.0,
-            'equity' => 0.0,
-        ];
-
-        // Payments: cash in/out (use tzs equivalent if currency differs)
+        // --- 4. BALANCE SHEET ---
         $paymentsQuery = Payment::query();
         if ($selectedScope === 'company' && $selectedCompanyId) {
             $paymentsQuery->where('company_id', $selectedCompanyId);
         } elseif (! $canSeeAllCompanies && $user) {
             $paymentsQuery->where('company_id', $user->company_id);
         }
+        // BUG FIX: Date filter added (assumed column: 'created_at' or 'payment_date')
+        $applyDateFilters($paymentsQuery, 'created_at');
 
         $payments = $paymentsQuery->get();
         $cashIn = $payments->filter(fn($p) => strtolower($p->payment_direction ?? '') === 'in')->sum(fn($p) => (float) ($p->amount * ($p->exchange_rate ?? 1)));
         $cashOut = $payments->filter(fn($p) => strtolower($p->payment_direction ?? '') === 'out')->sum(fn($p) => (float) ($p->amount * ($p->exchange_rate ?? 1)));
         $cash = $cashIn - $cashOut;
 
-        // Receivables: invoices not fully paid (status != 'paid')
         $invoicesReceivableQuery = Invoice::query();
         if ($selectedScope === 'company' && $selectedCompanyId) {
             $invoicesReceivableQuery->where('company_id', $selectedCompanyId);
         } elseif (! $canSeeAllCompanies && $user) {
             $invoicesReceivableQuery->where('company_id', $user->company_id);
         }
+        // BUG FIX: Date filter added
+        $applyDateFilters($invoicesReceivableQuery, 'invoice_date');
         $receivables = $invoicesReceivableQuery->where('status', '!=', 'paid')->sum('total_amount');
 
-        // Payables: expenses which are issued/approved/checked (exclude drafts)
         $expensesPayableQuery = Expense::query();
         if ($selectedScope === 'company' && $selectedCompanyId) {
             $expensesPayableQuery->where('company_id', $selectedCompanyId);
         } elseif (! $canSeeAllCompanies && $user) {
             $expensesPayableQuery->where('company_id', $user->company_id);
         }
+        // BUG FIX: Date filter added
+        $applyDateFilters($expensesPayableQuery, 'expense_date');
+        
         $expensesForPayables = $expensesPayableQuery->get();
         $payables = $expensesForPayables->filter(fn($e) => !in_array(($e->status ?? ''), ['draft']))->sum(fn($e) => (float) ($e->net_amount ?? 0));
 
@@ -241,7 +246,7 @@ class ReportController extends Controller
             'equity' => $equity,
         ];
 
-        // --- Profit & Loss (monthly series for last 12 months) ---
+        // --- 5. PROFIT & LOSS (Remains trailing 12 months intentionally) ---
         $months = [];
         $labels = [];
         $revenueSeries = [];
@@ -251,7 +256,6 @@ class ReportController extends Controller
         $end = Carbon::now()->endOfMonth();
         $start = Carbon::now()->startOfMonth()->subMonths(11);
 
-        // fetch invoices and expenses in range with scope filtering
         $invoicesRangeQuery = Invoice::query()->whereBetween('invoice_date', [$start->toDateString(), $end->toDateString()], 'and');
         if ($selectedScope === 'company' && $selectedCompanyId) {
             $invoicesRangeQuery->where('company_id', $selectedCompanyId);
@@ -297,7 +301,6 @@ class ReportController extends Controller
             'incomeRows' => $incomeRows,
             'incomeTotals' => $incomeTotals,
             'companyIncomeBreakdown' => $companyIncomeBreakdown,
-            // Profit & Loss series
             'plLabels' => $labels,
             'plRevenue' => $revenueSeries,
             'plExpenses' => $expenseSeries,
