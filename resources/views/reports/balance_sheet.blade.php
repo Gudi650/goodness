@@ -70,7 +70,7 @@
         <table style="border:none; width:100%;">
             <tr>
                 <td style="width:50px; border:none; vertical-align:middle;">
-                    <img src="" alt="Logo" style="width:40px; height:40px;">
+                    <img src="{{ public_path('favicon.png') }}" alt="Logo" style="width:40px; height:40px;">
                 </td>
 
                 <td style="border:none; vertical-align:middle;">
@@ -133,7 +133,11 @@
         <tr class="total">
             <td>Total Assets</td>
             <td class="amount">
-                {{ number_format($totalAssets, 2) }}
+                {{  number_format(
+                    collect($nonCurrentAssets)->flatten(1)->sum('amount') +
+                    collect($currentAssets)->flatten(1)->sum('amount'),
+                    2) 
+                }}
             </td>
         </tr>
 
@@ -192,7 +196,11 @@
         <tr class="total">
             <td>Total Equity and Liabilities</td>
             <td class="amount">
-                {{ number_format($totalEquityAndLiabilities, 2) }}
+                {{ number_format(
+                    collect($nonCurrentLiabilities)->flatten(1)->sum('amount')
+                    + collect($currentLiabilities)->flatten(1)->sum('amount'),
+                    2) 
+                }}
             </td>
         </tr>
 
