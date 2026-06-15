@@ -54,7 +54,7 @@ class CurrentAssetsService
     protected function getInventoryAssets()
     {
         //get the inventory assets from the products table
-        $inventoryAssets = Product::where('stock_quantity', '>', 0)
+        $inventoryAssets = Product::where('stock', '>', 0)
             ->get()
             ->map(function ($product) {
                 return [
