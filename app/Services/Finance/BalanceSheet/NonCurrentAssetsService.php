@@ -44,12 +44,12 @@ class NonCurrentAssetsService
         $investmentAssets = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', 'Investment Assets');
         })
-            ->where('current_amount', '>', 0)
+            ->where('current_value', '>', 0)
             ->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->current_amount,
+                    'amount' => $asset->current_value,
                 ];
             });
 
@@ -63,12 +63,12 @@ class NonCurrentAssetsService
         $ppeAssets = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', 'Property, Plant & Equipment');
         })
-            ->where('current_amount', '>', 0)
+            ->where('current_value', '>', 0)
             ->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->current_amount,
+                    'amount' => $asset->current_value,
                 ];
             });
 
@@ -82,12 +82,12 @@ class NonCurrentAssetsService
         $vehicleAssets = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', 'Vehicle Assets');
         })
-            ->where('current_amount', '>', 0)
+            ->where('current_value', '>', 0)
             ->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->current_amount,
+                    'amount' => $asset->current_value,
                 ];
             });
 
@@ -101,12 +101,12 @@ class NonCurrentAssetsService
         $intangibleAssets = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', 'Intangible Assets');
         })
-            ->where('current_amount', '>', 0)
+            ->where('current_value', '>', 0)
             ->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->current_amount,
+                    'amount' => $asset->current_value,
                 ];
             });
 
@@ -122,7 +122,7 @@ class NonCurrentAssetsService
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->current_amount,
+                    'amount' => $asset->current_value,
                 ];
             });
 

@@ -59,7 +59,7 @@ class CurrentAssetsService
             ->map(function ($product) {
                 return [
                     'name' => $product->name,
-                    'amount' => $product->stock_quantity * $product->cost_price,
+                    'amount' => $product->stock * $product->cost_per_unit,
                 ];
             });
 
