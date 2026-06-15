@@ -40,6 +40,7 @@ class CurrentAssetsService
         $cashAndBankBalances = VirtualAccounts::where('balance', '>', 0)
             ->get();
 
+        //return in an array format
         return $cashAndBankBalances;
     }
 

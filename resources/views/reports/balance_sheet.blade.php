@@ -106,11 +106,12 @@
         <td colspan="2">Non-Current Assets</td>
     </tr>
 
-    @foreach($assets['non_current'] as $item)
+    {{-- loop through non current assets --}}
+    @foreach($nonCurrentAssets as $item)
     <tr>
         <td>{{ $item['name'] }}</td>
         <td class="amount">
-            {{ number_format($item['amount'],2) }}
+            {{ number_format(collect($item)->sum('amount'), 2) }}
         </td>
     </tr>
     @endforeach
@@ -119,11 +120,11 @@
         <td colspan="2">Current Assets</td>
     </tr>
 
-    @foreach($assets['current'] as $item)
+    @foreach($currentAssets as $item)
     <tr>
         <td>{{ $item['name'] }}</td>
         <td class="amount">
-            {{ number_format($item['amount'],2) }}
+            {{ number_format(collect($item)->sum('amount'), 2) }}
         </td>
     </tr>
     @endforeach
@@ -131,7 +132,7 @@
     <tr class="total">
         <td>Total Assets</td>
         <td class="amount">
-            {{ number_format($totalAssets,2) }}
+            {{ number_format($totalAssets, 2) }}
         </td>
     </tr>
 
@@ -147,7 +148,7 @@
     <tr>
         <td>{{ $item['name'] }}</td>
         <td class="amount">
-            {{ number_format($item['amount'],2) }}
+            {{ number_format(collect($item)->sum('amount'), 2) }}
         </td>
     </tr>
     @endforeach
@@ -156,11 +157,11 @@
         <td colspan="2">Non-Current Liabilities</td>
     </tr>
 
-    @foreach($equityLiabilities['non_current_liabilities'] as $item)
+    @foreach($nonCurrentLiabilities as $item)
     <tr>
         <td>{{ $item['name'] }}</td>
         <td class="amount">
-            {{ number_format($item['amount'],2) }}
+            {{ number_format(collect($item)->sum('amount'), 2) }}
         </td>
     </tr>
     @endforeach
@@ -169,11 +170,11 @@
         <td colspan="2">Current Liabilities</td>
     </tr>
 
-    @foreach($equityLiabilities['current_liabilities'] as $item)
+    @foreach($currentLiabilities as $item)
     <tr>
         <td>{{ $item['name'] }}</td>
         <td class="amount">
-            {{ number_format($item['amount'],2) }}
+            {{ number_format(collect($item)->sum('amount'), 2) }}
         </td>
     </tr>
     @endforeach

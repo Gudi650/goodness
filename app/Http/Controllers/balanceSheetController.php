@@ -70,16 +70,20 @@ class balanceSheetController extends Controller
 
         //get the Non current liabilities data from service file
         $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
+        //dd($nonCurrentLiabilities);
 
         //get the current liabilities data from service file
         $currentLiabilities = app(CurrentLiabilitiesService::class)->getCurrentLiabilities();
+        //dd($currentLiabilities);
 
         //get the current assets data from service file
         $currentAssets = app(CurrentAssetsService::class)->getCurrentAssets();
+        //dd($currentAssets);
 
 
         //get the non current assets data from service file
         $nonCurrentAssets = app(NonCurrentAssetsService::class)->getNonCurrentAssets();
+        //dd($nonCurrentAssets);
 
         return [
             'assets' => $assets,
@@ -95,7 +99,7 @@ class balanceSheetController extends Controller
             'currentLiabilities' => $currentLiabilities,
             'nonCurrentAssets' => $nonCurrentAssets,
             'currentAssets' => $currentAssets,
-            
+
         ];
 
 
