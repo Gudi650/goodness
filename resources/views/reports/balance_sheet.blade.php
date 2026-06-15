@@ -70,7 +70,7 @@
         <table style="border:none; width:100%;">
             <tr>
                 <td style="width:50px; border:none; vertical-align:middle;">
-                    <img src="{{ public_path('favicon.png') }}" alt="Logo" style="width:40px; height:40px;">
+                    <img src="" alt="Logo" style="width:40px; height:40px;">
                 </td>
 
                 <td style="border:none; vertical-align:middle;">
