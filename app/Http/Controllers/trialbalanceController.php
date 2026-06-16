@@ -40,7 +40,6 @@ class TrialBalanceController extends Controller
         //get the operational costs from the service file
         $operationalCosts = $this->getOperationalCosts();
 
-        //dd($currentAssets, $nonCurrentAssets, $currentLiabilities, $nonCurrentLiabilities, $costOfGoodsSold, $revenues, $operationalCosts);
 
         return [
             'costOfGoodsSold' => $costOfGoodsSold,
@@ -211,82 +210,82 @@ class TrialBalanceController extends Controller
     //function to get the total of all DEBIT entries in the trial balance report
     //use the collections liabiltites, assets, to sum the total of all debit entries
     protected function getTotalDr($reportData)
-{
-    $totalDr = 0;
+    {
+        $totalDr = 0;
 
-    foreach ($reportData as $data) {
+        foreach ($reportData as $data) {
 
-        if ($data instanceof \Illuminate\Support\Collection) {
+            if ($data instanceof \Illuminate\Support\Collection) {
 
-            // Handle grouped collections
-            if ($data->first() instanceof \Illuminate\Support\Collection) {
+                // Handle grouped collections
+                if ($data->first() instanceof \Illuminate\Support\Collection) {
 
-                foreach ($data as $group) {
-                    $totalDr += $group->where('type', 'dr')->sum('amount');
+                    foreach ($data as $group) {
+                        $totalDr += $group->where('type', 'dr')->sum('amount');
+                    }
+
+                } else {
+
+                    // Handle normal collections
+                    $totalDr += $data->where('type', 'dr')->sum('amount');
                 }
 
-            } else {
+            } elseif (is_array($data)) {
 
-                // Handle normal collections
-                $totalDr += $data->where('type', 'dr')->sum('amount');
-            }
+                foreach ($data as $group) {
 
-        } elseif (is_array($data)) {
+                    if ($group instanceof \Illuminate\Support\Collection) {
+                        $totalDr += $group->where('type', 'dr')->sum('amount');
+                    }
 
-            foreach ($data as $group) {
-
-                if ($group instanceof \Illuminate\Support\Collection) {
-                    $totalDr += $group->where('type', 'dr')->sum('amount');
                 }
 
             }
 
         }
 
+        return $totalDr;
     }
-
-    return $totalDr;
-}
 
 
 
     //total of all CREDIT entries in the trial balance report
     protected function getTotalCr($reportData)
-{
-    $totalCr = 0;
+    {
+        $totalCr = 0;
 
-    foreach ($reportData as $data) {
+        foreach ($reportData as $data) {
 
-        if ($data instanceof \Illuminate\Support\Collection) {
+            if ($data instanceof \Illuminate\Support\Collection) {
 
-            // grouped collection
-            if ($data->first() instanceof \Illuminate\Support\Collection) {
+                // grouped collection
+                if ($data->first() instanceof \Illuminate\Support\Collection) {
 
-                foreach ($data as $group) {
-                    $totalCr += $group->where('type', 'cr')->sum('amount');
+                    foreach ($data as $group) {
+                        $totalCr += $group->where('type', 'cr')->sum('amount');
+                    }
+
+                } else {
+
+                    $totalCr += $data->where('type', 'cr')->sum('amount');
                 }
 
-            } else {
+            } elseif (is_array($data)) {
 
-                $totalCr += $data->where('type', 'cr')->sum('amount');
-            }
+                foreach ($data as $group) {
 
-        } elseif (is_array($data)) {
+                    if ($group instanceof \Illuminate\Support\Collection) {
+                        $totalCr += $group->where('type', 'cr')->sum('amount');
+                    }
 
-            foreach ($data as $group) {
-
-                if ($group instanceof \Illuminate\Support\Collection) {
-                    $totalCr += $group->where('type', 'cr')->sum('amount');
                 }
 
             }
 
         }
 
+        return $totalCr;
     }
-
-    return $totalCr;
-}
 
 
 
