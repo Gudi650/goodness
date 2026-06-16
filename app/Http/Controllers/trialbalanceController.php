@@ -12,6 +12,68 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class TrialBalanceController extends Controller
 {
+
+
+    //function to get report data for trial balance report
+    private function reportData(): array
+    {
+
+        // get the Non current liabilities data from service file
+        $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
+
+        // get the current liabilities data from service file
+        $currentLiabilities = app(CurrentLiabilitiesService::class)->getCurrentLiabilities();
+
+        // get the current assets data from service file
+        $currentAssets = app(CurrentAssetsService::class)->getCurrentAssets();
+
+        // get the non current assets data from service file
+        $nonCurrentAssets = app(NonCurrentAssetsService::class)->getNonCurrentAssets();
+
+
+        //get the cost of goods sold from the service file
+        $costOfGoodsSold = $this->getCostOfGoodsSold();
+
+        //get the revenues from the service file
+        $revenues = $this->getRevenues();
+
+        //get the operational costs from the service file
+        $operationalCosts = $this->getOperationalCosts();
+
+        //dd($currentAssets, $nonCurrentAssets, $currentLiabilities, $nonCurrentLiabilities, $costOfGoodsSold, $revenues, $operationalCosts);
+
+        return [
+            'costOfGoodsSold' => $costOfGoodsSold,
+            'revenues' => $revenues,
+            'operationalCosts' => $operationalCosts,
+            'nonCurrentLiabilities' => $nonCurrentLiabilities,
+            'currentLiabilities' => $currentLiabilities,
+            'currentAssets' => $currentAssets,
+            'nonCurrentAssets' => $nonCurrentAssets,
+        ];
+
+    }
+
+    //function to index the data in the trial balance report
+    public function index()
+    {
+        $reportData = $this->reportData();
+
+        //get the total of all debit entries in the trial balance report
+        $totalDr = $this->getTotalDr($reportData);
+
+        //get teh total of all credit entries in the trial balance report
+        $totalCr = $this->getTotalCr($reportData);
+
+
+        return view('reports.trial_balance', $reportData, array_merge($reportData, [
+            'totalDr' => $totalDr,
+            'totalCr' => $totalCr,
+        ]));
+    }
+
+
+
     public function exportPdf()
     {
         // Replace this array with your Eloquent Query (e.g., Account::all())
@@ -67,25 +129,7 @@ class TrialBalanceController extends Controller
         $operationalCosts = $this->getOperationalCosts();
 
         // merge all the data into a single array
-        $accounts = array_merge(
-            //$accounts,
-            $costOfGoodsSold->toArray(),
-            $revenues->toArray(),
-            $operationalCosts->toArray(),
-            $currentLiabilities['short_term_loans']->toArray(),
-            $currentLiabilities['accrued_expenses']->toArray(),
-            $currentLiabilities['interest_payables']->toArray(),
-            $currentLiabilities['salaries']->toArray(),
-            $currentLiabilities['payable_vat']->toArray(),
-            $nonCurrentLiabilities->toArray(),
-            $currentAssets['inventory_assets']->toArray(),
-            $currentAssets['cash_and_bank_balances']->toArray(),
-            $nonCurrentAssets['property_assets']->toArray(),
-            $nonCurrentAssets['vehicle_assets']->toArray(),
-            $nonCurrentAssets['intangible_assets']->toArray(),
-            $nonCurrentAssets['investment_assets']->toArray(),
-
-        );
+        
 
 
 
@@ -117,7 +161,8 @@ class TrialBalanceController extends Controller
                     'amount' => $expense->amount,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
-            });
+            })
+            ->groupBy('name'); // Group by name to aggregate amounts for the same account
 
         // return in an array format
         return $costOfGoodsSold;
@@ -136,7 +181,8 @@ class TrialBalanceController extends Controller
                     'amount' => $invoice->total_amount,
                     'type' => 'cr', // Assuming revenues are credit entries
                 ];
-            });
+            })
+            ->groupBy('name'); // Group by name to aggregate amounts for the same account
 
         // return in an array format
         return $revenues;
@@ -155,10 +201,66 @@ class TrialBalanceController extends Controller
                     'amount' => $expense->amount,
                     'type' => 'dr', // Assuming expenses are debit entries
                 ];
-            });
+            })
+            ->groupBy('name'); // Group by name to aggregate amounts for the same account
 
         //return in an array format
         return $operationalCosts;
     }
+
+    //function to get the total of all DEBIT entries in the trial balance report
+    //use the collections liabiltites, assets, to sum the total of all debit entries
+    protected function getTotalDr($reportData)
+    {
+        $totalDr = 0;
+
+        foreach ($reportData as $data) {
+            if ($data instanceof \Illuminate\Support\Collection) {
+                // If grouped, flatten the sub‑Collections
+                if ($data->first() instanceof \Illuminate\Support\Collection) {
+                    foreach ($data as $group) {
+                        $totalDr += $group->where('type', 'dr')->sum('amount');
+                    }
+                } else {
+                    $totalDr += $data->where('type', 'dr')->sum('amount');
+                }
+            } elseif (is_array($data)) {
+                foreach ($data as $group) {
+                    if ($group instanceof \Illuminate\Support\Collection) {
+                        $totalDr += $group->where('type', 'dr')->sum('amount');
+                    }
+                }
+            }
+        }
+
+        return $totalDr;
+    }
+
+
+
+    //total of all CREDIT entries in the trial balance report
+    protected function getTotalCr($reportData)
+    {
+        $totalCr = 0;
+        foreach ($reportData as $data) {
+            // If it's a Collection, sum directly
+            if ($data instanceof \Illuminate\Support\Collection) {
+                $totalCr += $data->where('type', 'cr')->sum('amount');
+            }
+
+            // If it's an array of Collections (like grouped assets/liabilities)
+            elseif (is_array($data)) {
+                foreach ($data as $group) {
+                    if ($group instanceof \Illuminate\Support\Collection) {
+                        $totalCr += $group->where('type', 'cr')->sum('amount');
+                    }
+                }
+            }
+        }
+
+        return $totalCr;
+    }
+
+
 
 }

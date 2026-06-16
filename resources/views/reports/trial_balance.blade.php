@@ -55,6 +55,183 @@
             </tr>
         </thead>
         <tbody>
+
+
+            {{-- loop through non current assets --}}
+            @foreach ($nonCurrentAssets as $type => $items)
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+
+                    {{-- Debit column --}}
+                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty() 
+                            ? number_format($debitItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+
+                    {{-- Credit column --}}
+                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty() 
+                            ? number_format($creditItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+
+
+
+            {{-- loop through current assets --}}
+            @foreach ($currentAssets as $type => $items)
+
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+
+                    {{-- Debit column --}}
+                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty() 
+                            ? number_format($debitItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+
+                    {{-- Credit column --}}
+                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty() 
+                            ? number_format($creditItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                </tr>
+
+            @endforeach
+
+            {{-- loop through current liabilities --}}
+            @foreach ($currentLiabilities as $type => $items)
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+
+                    {{-- Debit column --}}
+                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty() 
+                            ? number_format($debitItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+
+                    {{-- Credit column --}}
+                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty() 
+                            ? number_format($creditItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+
+
+            {{-- loop through non current liabilities --}}
+            @foreach ($nonCurrentLiabilities as $type => $items)
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+
+                    {{-- Debit column --}}
+                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty() 
+                            ? number_format($debitItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+
+                    {{-- Credit column --}}
+                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty() 
+                            ? number_format($creditItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+
+            {{-- loop through the costs of goods sold --}}
+            @foreach ($costOfGoodsSold as $type => $items)
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+
+                    {{-- Debit column --}}
+                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty() 
+                            ? number_format($debitItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+
+                    {{-- Credit column --}}
+                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty() 
+                            ? number_format($creditItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+
+            {{-- loop through the revenues --}}
+            @foreach ($revenues as $type => $items)
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+                    {{-- Debit column --}}
+                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty() 
+                            ? number_format($debitItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                    {{-- Credit column --}}
+                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty() 
+                            ? number_format($creditItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+
+            {{-- loop through operating expenses --}}
+            @foreach ($operationalCosts as $type => $items)
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+                    {{-- Debit column --}}
+                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty() 
+                            ? number_format($debitItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                    {{-- Credit column --}}
+                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty() 
+                            ? number_format($creditItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+
+            {{-- loop through operational costs --}}
+
+
+            {{-- loop through the
+
+
             @foreach($accounts as $account)
             <tr>
                 <td>{{ $account['name'] }}</td>
@@ -67,6 +244,7 @@
                 </td>
             </tr>
             @endforeach
+             
 
             <tr class="total-row">
                 <td>Total</td>
@@ -74,6 +252,16 @@
                 <td class="text-right">{{ number_format($totalDr, 2) }}</td>
                 <td class="text-right">{{ number_format($totalCr, 2) }}</td>
             </tr>
+            --}}
+
+            <tr class="total-row">
+                <td>Total</td>
+                <td></td>
+                <td class="text-right">{{ number_format($totalDr, 2) }}</td>
+                <td class="text-right">{{ number_format($totalCr, 2) }}</td>
+            </tr>
+
+            
         </tbody>
     </table>
 

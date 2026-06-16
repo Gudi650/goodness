@@ -58,10 +58,6 @@ class balanceSheetController extends Controller
 
         ];
 
-
-
-
-
     }
 
     public function index()
