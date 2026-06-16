@@ -109,11 +109,11 @@ class TrialBalanceController extends Controller
     {
         // get the cost of goods sold from the products table
         $costOfGoodsSold = Expense::where('category', 'Cost of Goods Sold (COGS)')
-            ->where('status', 'issued')
+            ->where('status', 'draft')
             ->get()
             ->map(function ($expense) {
                 return [
-                    'name' => $expense->expense_number,
+                    'name' => 'Cost of Goods Sold (COGS)',
                     'amount' => $expense->amount,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
@@ -128,11 +128,11 @@ class TrialBalanceController extends Controller
     protected function getRevenues()
     {
         // fetch revenues from the database
-        $revenues = Invoice::where('status', 'paid')
+        $revenues = Invoice::where('status', 'draft')
             ->get()
             ->map(function ($invoice) {
                 return [
-                    'name' => $invoice->invoice_number,
+                    'name' => 'Revenue',
                     'amount' => $invoice->total_amount,
                     'type' => 'cr', // Assuming revenues are credit entries
                 ];
@@ -147,11 +147,11 @@ class TrialBalanceController extends Controller
     {
         //fetch the operational costs from the database
         $operationalCosts = Expense::where('category', 'Operating Expenses')
-            ->where('status', 'issued')
+            ->where('status', 'draft')
             ->get()
             ->map(function ($expense) {
                 return [
-                    'name' => $expense->expense_number,
+                    'name' => 'Operational Expenses',
                     'amount' => $expense->amount,
                     'type' => 'dr', // Assuming expenses are debit entries
                 ];
