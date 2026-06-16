@@ -211,55 +211,82 @@ class TrialBalanceController extends Controller
     //function to get the total of all DEBIT entries in the trial balance report
     //use the collections liabiltites, assets, to sum the total of all debit entries
     protected function getTotalDr($reportData)
-    {
-        $totalDr = 0;
+{
+    $totalDr = 0;
 
-        foreach ($reportData as $data) {
-            if ($data instanceof \Illuminate\Support\Collection) {
-                // If grouped, flatten the sub‑Collections
-                if ($data->first() instanceof \Illuminate\Support\Collection) {
-                    foreach ($data as $group) {
-                        $totalDr += $group->where('type', 'dr')->sum('amount');
-                    }
-                } else {
-                    $totalDr += $data->where('type', 'dr')->sum('amount');
-                }
-            } elseif (is_array($data)) {
+    foreach ($reportData as $data) {
+
+        if ($data instanceof \Illuminate\Support\Collection) {
+
+            // Handle grouped collections
+            if ($data->first() instanceof \Illuminate\Support\Collection) {
+
                 foreach ($data as $group) {
-                    if ($group instanceof \Illuminate\Support\Collection) {
-                        $totalDr += $group->where('type', 'dr')->sum('amount');
-                    }
+                    $totalDr += $group->where('type', 'dr')->sum('amount');
                 }
+
+            } else {
+
+                // Handle normal collections
+                $totalDr += $data->where('type', 'dr')->sum('amount');
             }
+
+        } elseif (is_array($data)) {
+
+            foreach ($data as $group) {
+
+                if ($group instanceof \Illuminate\Support\Collection) {
+                    $totalDr += $group->where('type', 'dr')->sum('amount');
+                }
+
+            }
+
         }
 
-        return $totalDr;
     }
+
+    return $totalDr;
+}
 
 
 
     //total of all CREDIT entries in the trial balance report
     protected function getTotalCr($reportData)
-    {
-        $totalCr = 0;
-        foreach ($reportData as $data) {
-            // If it's a Collection, sum directly
-            if ($data instanceof \Illuminate\Support\Collection) {
+{
+    $totalCr = 0;
+
+    foreach ($reportData as $data) {
+
+        if ($data instanceof \Illuminate\Support\Collection) {
+
+            // grouped collection
+            if ($data->first() instanceof \Illuminate\Support\Collection) {
+
+                foreach ($data as $group) {
+                    $totalCr += $group->where('type', 'cr')->sum('amount');
+                }
+
+            } else {
+
                 $totalCr += $data->where('type', 'cr')->sum('amount');
             }
 
-            // If it's an array of Collections (like grouped assets/liabilities)
-            elseif (is_array($data)) {
-                foreach ($data as $group) {
-                    if ($group instanceof \Illuminate\Support\Collection) {
-                        $totalCr += $group->where('type', 'cr')->sum('amount');
-                    }
+        } elseif (is_array($data)) {
+
+            foreach ($data as $group) {
+
+                if ($group instanceof \Illuminate\Support\Collection) {
+                    $totalCr += $group->where('type', 'cr')->sum('amount');
                 }
+
             }
+
         }
 
-        return $totalCr;
     }
+
+    return $totalCr;
+}
 
 
 
