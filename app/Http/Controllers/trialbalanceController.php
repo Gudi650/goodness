@@ -71,9 +71,30 @@ class TrialBalanceController extends Controller
         ]));
     }
 
-
-
     public function exportPdf()
+    {
+        $reportData = $this->reportData();
+
+        //get the total of all debit entries in the trial balance report
+        $totalDr = $this->getTotalDr($reportData);
+
+        //get teh total of all credit entries in the trial balance report
+        $totalCr = $this->getTotalCr($reportData);
+
+        $pdf = Pdf::loadView('reports.trial_balance', array_merge($this->reportData(), [
+            'showActions' => false,
+            'totalDr' => $totalDr,
+            'totalCr' => $totalCr,
+        ]));
+
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download('trial_balance.pdf');
+    }
+
+
+
+    public function exportPdfz()
     {
         // Replace this array with your Eloquent Query (e.g., Account::all())
         $accounts = [
