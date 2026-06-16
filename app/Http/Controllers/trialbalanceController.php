@@ -93,7 +93,7 @@ class TrialBalanceController extends Controller
     }
 
 
-
+    /*
     public function exportPdfz()
     {
         // Replace this array with your Eloquent Query (e.g., Account::all())
@@ -166,7 +166,7 @@ class TrialBalanceController extends Controller
 
         return $pdf->stream('trial_balance.pdf');
 
-    }
+    } */
 
     // function to get cost of goods sold  going to use it in trial balance report
     protected function getCostOfGoodsSold()
