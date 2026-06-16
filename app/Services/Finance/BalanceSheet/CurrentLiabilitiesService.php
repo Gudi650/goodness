@@ -46,6 +46,7 @@ class CurrentLiabilitiesService
                 return [
                     'name' => $salary->employee_id,
                     'amount' => $salary->amount,
+                    'type' => 'cr', // Assuming liabilities are credit entries
                 ];
             });
 
@@ -66,6 +67,7 @@ class CurrentLiabilitiesService
                 return [
                     'name' => $expense->expense_number,
                     'amount' => $expense->vat_amount,
+                    'type' => 'cr', // Assuming liabilities are credit entries
                 ];
             });
 
@@ -87,6 +89,7 @@ class CurrentLiabilitiesService
                 return [
                     'name' => $loan->name,
                     'amount' => $loan->current_amount,
+                    'type' => 'cr', // Assuming liabilities are credit entries
                 ];
             });
 
@@ -107,6 +110,7 @@ class CurrentLiabilitiesService
                 return [
                     'name' => $liability->name,
                     'amount' => $liability->current_amount,
+                    'type' => 'cr',
                 ];
             });
 
@@ -129,10 +133,13 @@ class CurrentLiabilitiesService
                 return [
                     'name' => $liability->name,
                     'amount' => $liability->current_amount,
+                    'type' => 'cr', // Assuming liabilities are credit entries
                 ];
             });
 
         return $interestPayables;
     }
+
+    
 
 }

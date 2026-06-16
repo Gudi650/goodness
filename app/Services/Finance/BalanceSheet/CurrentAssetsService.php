@@ -43,6 +43,7 @@ class CurrentAssetsService
                 return [
                     'name' => $account->account_name,
                     'amount' => $account->balance,
+                    'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
 
@@ -60,12 +61,12 @@ class CurrentAssetsService
                 return [
                     'name' => $product->name,
                     'amount' => $product->stock * $product->cost_per_unit,
+                    'type' => 'dr', 
                 ];
             });
 
         return $inventoryAssets;
     }
-
-    
+ 
 
 }

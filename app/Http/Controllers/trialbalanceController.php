@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Expense;
+use App\Models\Invoice;
+use App\Services\Finance\BalanceSheet\CurrentAssetsService;
+use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
+use App\Services\Finance\BalanceSheet\NonCurrentAssetsService;
+use App\Services\Finance\BalanceSheet\NonCurrentLiabilitiesService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class TrialBalanceController extends Controller
@@ -40,6 +45,31 @@ class TrialBalanceController extends Controller
         $totalDr = 0;
         $totalCr = 0;
 
+        // get the Non current liabilities data from service file
+        $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
+
+        // get the current liabilities data from service file
+        $currentLiabilities = app(CurrentLiabilitiesService::class)->getCurrentLiabilities();
+
+        // get the current assets data from service file
+        $currentAssets = app(CurrentAssetsService::class)->getCurrentAssets();
+
+        // get the non current assets data from service file
+        $nonCurrentAssets = app(NonCurrentAssetsService::class)->getNonCurrentAssets();
+
+        //get the cost of goods sold from the service file
+        $costOfGoodsSold = $this->getCostOfGoodsSold();
+
+        //get the revenues from the service file
+        $revenues = $this->getRevenues();
+
+        //get the operational costs from the service file
+        $operationalCosts = $this->getOperationalCosts();
+
+        // merge all the data into a single array
+        
+
+
         foreach ($accounts as $account) {
             if ($account['type'] === 'dr') {
                 $totalDr += $account['amount'];
@@ -48,7 +78,67 @@ class TrialBalanceController extends Controller
             }
         }
 
-        $pdf = Pdf::loadView('reports.trial_balance', compact('accounts', 'totalDr', 'totalCr'));
+        $pdf = Pdf::loadView('reports.trial_balance', compact('accounts', 'totalDr', 'totalCr', 'nonCurrentLiabilities', 'currentLiabilities', 'currentAssets', 'nonCurrentAssets'));
+
         return $pdf->stream('trial_balance.pdf');
+
     }
+
+    // function to get cost of goods sold  going to use it in trial balance report
+    protected function getCostOfGoodsSold()
+    {
+        // get the cost of goods sold from the products table
+        $costOfGoodsSold = Expense::where('category', 'Cost of Goods Sold (COGS)')
+            ->where('status', 'issued')
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'name' => $expense->expense_number,
+                    'amount' => $expense->amount,
+                    'type' => 'dr', // Assuming assets are debit entries
+                ];
+            });
+
+        // return in an array format
+        return $costOfGoodsSold;
+    }
+
+    // function to get the revenues from invoices table in the database
+    // use the invoices which are paid here
+    protected function getRevenues()
+    {
+        // fetch revenues from the database
+        $revenues = Invoice::where('status', 'paid')
+            ->get()
+            ->map(function ($invoice) {
+                return [
+                    'name' => $invoice->invoice_number,
+                    'amount' => $invoice->total_amount,
+                    'type' => 'cr', // Assuming revenues are credit entries
+                ];
+            });
+
+        // return in an array format
+        return $revenues;
+    }
+
+    //function to get the operational costs from expenses table in the db 
+    protected function getOperationalCosts()
+    {
+        //fetch the operational costs from the database
+        $operationalCosts = Expense::where('category', 'Operating Expenses')
+            ->where('status', 'issued')
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'name' => $expense->expense_number,
+                    'amount' => $expense->amount,
+                    'type' => 'dr', // Assuming expenses are debit entries
+                ];
+            });
+
+        //return in an array format
+        return $operationalCosts;
+    }
+
 }

@@ -42,6 +42,7 @@ class NonCurrentLiabilitiesService
                 return [
                     'name' => $loan->name,
                     'amount' => $loan->current_amount,
+                    'type' => 'cr', // Assuming liabilities are credit entries
                 ];
             });
 

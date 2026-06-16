@@ -23,7 +23,7 @@ class NonCurrentAssetsService
         $getPropertyAssets = $this->getPropertyAssets();
         $getVehicleAssets = $this->getVehicleAssets();
         $getIntangibleAssets = $this->getIntangibleAssets();
-        $getInventoryAssets = $this->getInventoryAssets();
+        //$getInventoryAssets = $this->getInventoryAssets();
 
         //return the non current assets
         return [
@@ -31,7 +31,7 @@ class NonCurrentAssetsService
             'property_assets' => $getPropertyAssets,
             'vehicle_assets' => $getVehicleAssets,
             'intangible_assets' => $getIntangibleAssets,
-            'inventory_assets' => $getInventoryAssets,
+            //'inventory_assets' => $getInventoryAssets,
         ];
         
     }
@@ -50,6 +50,7 @@ class NonCurrentAssetsService
                 return [
                     'name' => $asset->name,
                     'amount' => $asset->current_value,
+                    'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
 
@@ -69,6 +70,7 @@ class NonCurrentAssetsService
                 return [
                     'name' => $asset->name,
                     'amount' => $asset->current_value,
+                    'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
 
@@ -88,6 +90,7 @@ class NonCurrentAssetsService
                 return [
                     'name' => $asset->name,
                     'amount' => $asset->current_value,
+                    'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
 
@@ -107,13 +110,14 @@ class NonCurrentAssetsService
                 return [
                     'name' => $asset->name,
                     'amount' => $asset->current_value,
+                    'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
 
         return $intangibleAssets;
     }
 
-    //function to get the inventory assets from the assets table
+    /*function to get the inventory assets from the assets table
     protected function getInventoryAssets()
     {
         //get the inventory assets from the assets table wher stock is greater than 0
@@ -123,12 +127,13 @@ class NonCurrentAssetsService
                 return [
                     'name' => $asset->name,
                     'amount' => $asset->current_value,
+                    'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
 
         return $inventoryAssets;
         
-    }
+    } */
 
     
 
