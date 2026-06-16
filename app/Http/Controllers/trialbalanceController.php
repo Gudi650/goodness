@@ -67,7 +67,27 @@ class TrialBalanceController extends Controller
         $operationalCosts = $this->getOperationalCosts();
 
         // merge all the data into a single array
-        
+        $accounts = array_merge(
+            //$accounts,
+            $costOfGoodsSold->toArray(),
+            $revenues->toArray(),
+            $operationalCosts->toArray(),
+            $currentLiabilities['short_term_loans']->toArray(),
+            $currentLiabilities['accrued_expenses']->toArray(),
+            $currentLiabilities['interest_payables']->toArray(),
+            $currentLiabilities['salaries']->toArray(),
+            $currentLiabilities['payable_vat']->toArray(),
+            $nonCurrentLiabilities->toArray(),
+            $currentAssets['inventory_assets']->toArray(),
+            $currentAssets['cash_and_bank_balances']->toArray(),
+            $nonCurrentAssets['property_assets']->toArray(),
+            $nonCurrentAssets['vehicle_assets']->toArray(),
+            $nonCurrentAssets['intangible_assets']->toArray(),
+            $nonCurrentAssets['investment_assets']->toArray(),
+
+        );
+
+
 
 
         foreach ($accounts as $account) {
