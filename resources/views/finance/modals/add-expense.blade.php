@@ -123,7 +123,7 @@
                     <select id="expensePaymentMethod" name="payment_method" required
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="">Select payment method...</option>
-                        <option value="Cash">Cash</option>
+                        <!--<option value="Cash">Cash</option> -->
                         <option value="Bank Transfer">Bank Transfer</option>
                         <option value="Mobile Money">Mobile Money</option>
                         <option value="Cheque">Cheque</option>

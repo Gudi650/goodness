@@ -108,7 +108,7 @@ class ExpensesController extends Controller
             'net_amount' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
             'submit_mode' => 'nullable|in:draft,submit',
-            'bank_id' => 'required|exists:virtual_accounts,id',
+            //'bank_id' => 'required|exists:virtual_accounts,id',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'term' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:5000',
@@ -117,6 +117,7 @@ class ExpensesController extends Controller
 
         $attachmentPath = null;
         $originalFileName = null;
+
         if ($request->hasFile('attachment')) {
             $attachment = $request->file('attachment');
             $attachmentPath = $attachment->store('expense-attachments', 'public');
@@ -135,7 +136,6 @@ class ExpensesController extends Controller
             if (!$this->validateBankForExpense($bankId, $companyId, $amount)) {
                 return redirect()->back()->with('error', 'Invalid bank account or insufficient funds for this expense.');
             }
-
 
         }
 
@@ -257,6 +257,8 @@ class ExpensesController extends Controller
                 return redirect()->route('finance')->with('success', 'Expense approved successfully.');
             }
 
+            //here is the issueing part done by accountant, 
+            //the accountant will issue the expense and also deduct the amount from the bank account balance and also record the transaction in the transactions table for record keeping and future reference, this will be helpful for generating financial reports and also for auditing purposes
             if ($isAccountant) {
                 if ($expense->status !== 'approved') {
                     return redirect()->route('finance')->with('error', 'Expense must be approved by the CEO before it can be issued by the Accountant.');

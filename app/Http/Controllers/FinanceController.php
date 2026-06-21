@@ -81,6 +81,7 @@ class FinanceController extends Controller
         // function to check if the approve button should be displayed for the expense based on the user role and expense status
         foreach ($expenses as &$expense) {
             $expense['can_approve'] = $this->canApproveExpense($expense, $user, $isManager, $isCEO, $isAccountant);
+            $expense['can_issue'] = $this->canIssueExpense($expense, $user, $isAccountant);
             $expense['can_review'] = $this->canReviewExpense($expense, $user);
         }
 
@@ -325,10 +326,10 @@ class FinanceController extends Controller
     }
 
     // function to check if the approve button should be displayed for the expense based on the user role and expense status
-    protected function canApproveExpense($expense, $user, $isManager, $isCEO, $isAccountant)
+    protected function canApproveExpense($expense, $user, $isManager, $isCEO)
     {
         // check to see if user is neither manager, HR nor CEO, if not then return false
-        if (! $isManager && ! $isCEO && ! $isAccountant) {
+        if (! $isManager && ! $isCEO ) {
             return false;
         }
 
@@ -337,12 +338,25 @@ class FinanceController extends Controller
                 return $isManager && $user->company_id === $expense['company_id'];
             case 'checked':
                 return $isCEO;
+            default:
+                return false;
+        }
+
+    }
+
+    //Separate function to check if its an accountant an if so then the issue button to show up
+    protected function canIssueExpense($expense, $user, $isAccountant)
+    {
+        if (! $isAccountant) {
+            return false;
+        }
+
+        switch ($expense['status'] ?? '') {
             case 'approved':
                 return $isAccountant;
             default:
                 return false;
         }
-
     }
 
     /**
@@ -362,7 +376,7 @@ class FinanceController extends Controller
 
         return (int) ($expense['company_id'] ?? 0) === (int) $user->company_id
             && (int) ($expense['creator_id'] ?? 0) === (int) $user->id
-            && in_array($expense['status'] ?? '', ['approved', 'issued'], true);
+            && in_array($expense['status'] ?? '', ['issued'], true);
     }
 
     /**

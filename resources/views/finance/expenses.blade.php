@@ -198,6 +198,22 @@
                                             </button>
                                         </form>
 
+
+
+                                    @endif
+
+                                    @if ($expense['can_issue'])
+                                    
+                                        <button type="button" onclick="openIssueExpensesModal({{ $expense['id'] }})"
+                                            class="text-green-600 hover:text-green-800 transition-colors"
+                                            title="Issue expense" aria-label="Issue expense">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                            </svg>
+                                        </button>
+                                        
                                     @endif
 
                                 {{-- 

@@ -99,6 +99,7 @@
     @include('finance.modals.add-liabilities-category') 
     @include('finance.modals.add-items-category')
     @include('finance.modals.add-items')
+    @include('finance.modals.issue-expenses')
 
     <!-- Shared Components -->
     @include('components.modal')

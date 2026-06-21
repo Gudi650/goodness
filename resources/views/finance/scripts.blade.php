@@ -158,6 +158,17 @@
         });
     }
 
+    //function to open issue expenses modal
+    function openIssueExpensesModal() {
+        const body = document.getElementById('issueExpensesModal').innerHTML;
+
+        window.openModal('Issue Expense', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
 
     // Helper to get form fields either from modal or main page (for expenses which have dynamic modal fields)
     function getExpenseField(id) {
