@@ -295,8 +295,6 @@ class ExpensesController extends Controller
         //if the user is neither of the above then will return an error message saying that the user is not authorized to approve the expense
         return redirect()->route('finance')->with('error', 'You are not authorized to approve this expense.');
 
-
-
     }
 
 
@@ -342,6 +340,66 @@ class ExpensesController extends Controller
             'expense_id' => $expenseId,
             'transaction_type' => 'expense',
         ]);
+    }
+
+    //function to get the inout field of the bank from the accountnt during issueing og the expense
+    protected function issueExpense(Expense $expense, Request $request)
+    {
+
+        //get the requested data and validate it 
+        $validated = $request->validate([
+            'bank_id' => 'required|exists:virtual_accounts,id',
+        ]);
+
+        //check if the bank submitted is of same company and also check if the bank has sufficient money as well
+        if (!$this->validateBankForExpense($validated['bank_id'], $expense->company_id, $expense->amount)) {
+            return redirect()->back()->with('error', 'Invalid bank account or insufficient funds for this expense.');
+        }
+
+        //check it the usser is the manager of the company or an admin
+        $user = Auth::user();
+
+        $isAccountant = $user?->role?->name === 'Accountant';
+
+        if ($isAccountant) {
+            if ($expense->status !== 'approved') {
+                return redirect()->route('finance')->with('error', 'Expense must be approved by the CEO before it can be issued by the Accountant.');
+            }
+
+            try {
+                DB::transaction(function () use ($expense, $validated) {
+
+
+                    // Mark expense as issued
+                    $expense->status = 'issued';
+                    $expense->issued_by = Auth::id();
+                    $expense->bank_id = $validated['bank_id'];
+
+                    // Deduct from bank account
+                    $this->deductAmountFromBankAccount($validated['bank_id'], $expense->amount);
+
+                    // Record transaction
+                    $this->recordBankTransaction($validated['bank_id'], $expense->company_id, $expense->amount, $expense->id);
+
+                    $expense->save();
+                    
+                });
+
+                return redirect()->route('finance')->with('success', 'Expense issued successfully, balance deducted and transaction recorded.');
+            } catch (\Exception $e) {
+                \Log::error('Failed to issue expense: '.$e->getMessage(), [
+                    'expense_id' => $expense->id,
+                    'bank_id'    => $validated['bank_id'],
+                    'amount'     => $expense->amount,
+                ]);
+
+                return redirect()->route('finance')->with('error', 'Failed to issue expense. Please try again.');
+            }
+        }
+
+
+
+
     }
         
 
