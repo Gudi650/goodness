@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\AccessControlService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,12 +25,14 @@ class SalesController extends Controller
 
 
         $currentUser = Auth::user();
-        $isAdmin = $currentUser && $currentUser->role && $currentUser->role->name === 'Admin';
         $activeCompanyId = session('active_company_id');
+
+        //get teh authorised users for the company 
+        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser);
 
         $usersQuery = User::with('role', 'company', 'department');
 
-        if ($isAdmin && !empty($activeCompanyId)) {
+        if ($isQualifiedUser && !empty($activeCompanyId)) {
             $usersQuery->where('company_id', $activeCompanyId);
         } elseif ($currentUser) {
             $usersQuery->where('company_id', $currentUser->company_id);
@@ -39,22 +42,22 @@ class SalesController extends Controller
         $users = $usersQuery->get();
 
         //get the customers
-        $customers = $this->getCustomers($isAdmin, $activeCompanyId, $currentUser);
+        $customers = $this->getCustomers($isQualifiedUser, $activeCompanyId, $currentUser);
 
         //get the departments
         $departments = Department::pluck('name', 'id');
 
         //get the orders
-        $orders = $this->getOrders($isAdmin, $activeCompanyId, $currentUser);
+        $orders = $this->getOrders($isQualifiedUser, $activeCompanyId, $currentUser);
 
         //get the companies for the dropdown filter
         $companes = Company::orderByDesc('id')->pluck('name', 'id');
 
         //get suppliers for contract counterparties
-        $suppliers = $this->getSuppliers($isAdmin, $activeCompanyId, $currentUser);
+        $suppliers = $this->getSuppliers($isQualifiedUser, $activeCompanyId, $currentUser);
 
         //get the contracts
-        $contracts = $this->getContracts($isAdmin, $activeCompanyId, $currentUser);
+        $contracts = $this->getContracts($isQualifiedUser, $activeCompanyId, $currentUser);
 
         // prepare lightweight arrays for inline JS (avoid closures in Blade @json)
         $contractCustomers = ($customers ?? collect())->map(function ($customer) {
@@ -95,14 +98,14 @@ class SalesController extends Controller
     }
 
     //function to retrive the cusstomers based on search query and company filter
-    public function getCustomers($isAdmin, $activeCompanyId,$currentUser)
+    public function getCustomers($isQualifiedUser, $activeCompanyId,$currentUser)
     {
         
         $customersQuery = Customer::query()
             ->with('company')
             ->with('assignedSalesRep')
-            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
 
         $customers = $customersQuery->latest()->get();
 
@@ -111,17 +114,17 @@ class SalesController extends Controller
     }
 
     //function to get the products based on search query and company filter
-    public function getProducts($isAdmin, $activeCompanyId,$currentUser)
+    public function getProducts($isQualifiedUser, $activeCompanyId,$currentUser)
     {
         $productsQuery = Product::query()
             ->with('company')
-            ->when($isAdmin && !empty($activeCompanyId), function ($query) use ($activeCompanyId) {
+            ->when($isQualifiedUser && !empty($activeCompanyId), function ($query) use ($activeCompanyId) {
                 $query->where(function ($productQuery) use ($activeCompanyId) {
                     $productQuery->where('company_id', $activeCompanyId)
                         ->orWhereNull('company_id');
                 });
             })
-            ->when(!$isAdmin && $currentUser, function ($query) use ($currentUser) {
+            ->when(!$isQualifiedUser && $currentUser, function ($query) use ($currentUser) {
                 $query->where(function ($productQuery) use ($currentUser) {
                     $productQuery->where('company_id', $currentUser->company_id)
                         ->orWhereNull('company_id');
@@ -133,32 +136,32 @@ class SalesController extends Controller
         return $products;
     }
 
-    public function getSuppliers($isAdmin, $activeCompanyId, $currentUser)
+    public function getSuppliers($isQualifiedUser, $activeCompanyId, $currentUser)
     {
         $suppliersQuery = Supplier::query()
-            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
 
         return $suppliersQuery->latest()->get();
     }
 
-    public function getContracts($isAdmin, $activeCompanyId, $currentUser)
+    public function getContracts($isQualifiedUser, $activeCompanyId, $currentUser)
     {
         $contractsQuery = Contract::query()
             ->with('company', 'manager')
-            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('contract_our_company', $activeCompanyId))
-            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('contract_our_company', $currentUser->company_id));
+            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('contract_our_company', $activeCompanyId))
+            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('contract_our_company', $currentUser->company_id));
 
         return $contractsQuery->latest()->get();
     }
 
     //function get orders dta from the db
-    public function getOrders($isAdmin, $activeCompanyId,$currentUser)
+    public function getOrders($isQualifiedUser, $activeCompanyId,$currentUser)
     {
         $ordersQuery = Order::query()
             ->with('company', 'customer', 'salesRep', 'approvedBy', 'items')
-            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
 
         $orders = $ordersQuery->latest()->get();
 
