@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\AccessControlService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -18,12 +19,19 @@ class InventoryController extends Controller
     public function index()
     {
         $currentUser = Auth::user();
-        $isAdmin = $currentUser && $currentUser->role && $currentUser->role->name === 'Admin';
         $activeCompanyId = session('active_company_id');
+
+        //restrict access to none qualified users here and if not qualified redirect to dashboard with error message
+        if (! app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser) && ! app(AccessControlService::class)->isManager($currentUser)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have access to the HRM page.');
+        }
+
+        //get teh authorised users for the company 
+        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser);
 
         $usersQuery = User::with('role', 'company', 'department');
 
-        if ($isAdmin && !empty($activeCompanyId)) {
+        if ($isQualifiedUser && !empty($activeCompanyId)) {
             $usersQuery->where('company_id', $activeCompanyId);
         } elseif ($currentUser) {
             $usersQuery->where('company_id', $currentUser->company_id);
@@ -39,8 +47,8 @@ class InventoryController extends Controller
         $departments = Department::pluck('name', 'id');
 
         $productsQuery = Product::query()->with('company')
-            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
 
         $summaryProducts = (clone $productsQuery)->get();
 
@@ -69,10 +77,10 @@ class InventoryController extends Controller
         })->count();
 
         //fetch the suppliers details to be displayed from the suppliers table
-        $suppliers = $this->getSuppliers($isAdmin, $activeCompanyId,$currentUser);
+        $suppliers = $this->getSuppliers($isQualifiedUser, $activeCompanyId,$currentUser);
 
         //fetch the products details to be displayed from the products table
-        $purchases = $this->getProducts($isAdmin, $activeCompanyId,$currentUser);
+        $purchases = $this->getProducts($isQualifiedUser, $activeCompanyId,$currentUser);
 
 
         return view('inventory', [
@@ -90,12 +98,12 @@ class InventoryController extends Controller
     }
 
     //function to get suppliers details to be displayed from the suppliers table
-    protected function getSuppliers($isAdmin, $activeCompanyId,$currentUser)
+    protected function getSuppliers($isQualifiedUser, $activeCompanyId,$currentUser)
     {
         $suppliers = Supplier::query()
             ->with('company')
-            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
+            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
             ->latest()
             ->get();
 
@@ -104,14 +112,14 @@ class InventoryController extends Controller
     }
 
     //function for getting the products orders details to be displayed from the products table
-    protected function getProducts($isAdmin, $activeCompanyId,$currentUser)
+    protected function getProducts($isQualifiedUser, $activeCompanyId,$currentUser)
     {
 
         $purchases = PurchaseOrder::query()
             ->with('company')
             ->with('items') // Eager load items relationship
-            ->when($isAdmin && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isAdmin && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
+            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
             ->latest()
             ->get();
 
