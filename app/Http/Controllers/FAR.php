@@ -3,13 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\CreateAssets;
+use App\Services\AccessControlService;
 use App\Services\FAR\CalculateCurrentFar;
+use Illuminate\Support\Facades\Auth;
 
 class FAR extends Controller
 {
     // function to display the FAR page
     public function index()
     {
+        $currentUser = Auth::user();
+
+        //restrict access to none qualified users here and if not qualified redirect to dashboard with error message
+        if (! app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser) && ! app(AccessControlService::class)->isManager($currentUser)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have access to the HRM page.');
+        }
 
         //get the fixed asstes data from the services class and pass it to the FAR page
         $fixedAssets = app(CalculateCurrentFar::class)->calculateDepreciation();

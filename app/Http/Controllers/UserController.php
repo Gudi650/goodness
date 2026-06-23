@@ -105,10 +105,10 @@ class UserController extends Controller
     public function index(Request $request)
     {
 
-        //restrict access to none qualified users
+        /*restrict access to none qualified users
         if (! app(AccessControlService::class)->restrictUserAccess(Auth::user())) {
             return redirect()->route('dashboard')->with('error', 'You do not have access to the Users page.');
-        }
+        } */
 
         // Read search keyword from URL query string
         $search = trim((string) $request->query('search', ''));
