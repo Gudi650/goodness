@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Salary;
 use App\Models\Department;
 use App\Models\Leave;
+use App\Services\AccessControlService;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -25,13 +26,22 @@ class HrmController extends Controller
         $isAdmin = $currentUser?->role?->name === 'Admin';
         $activeCompanyId = session('active_company_id');
 
-        $companies = $isAdmin
+        //restrict access to none qualified users here and if not qualified redirect to dashboard with error message
+        if (! app(AccessControlService::class)->restrictHrmAccess($currentUser)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have access to the HRM page.');
+        }
+
+
+        //get the user role is Admin, CEO or Accountant
+        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser);
+
+        $companies = $isQualifiedUser
             ? Company::query()->orderBy('name', 'asc')->get()
             : collect($currentUser?->company ? [$currentUser->company] : []);
 
         $usersQuery = User::with('role', 'company', 'department');
 
-        if ($isAdmin) {
+        if ($isQualifiedUser) {
             if (!empty($activeCompanyId)) {
                 $usersQuery->where('company_id', $activeCompanyId);
             }
@@ -59,7 +69,7 @@ class HrmController extends Controller
 
         // Fetch departments for the active company
         $departmentsQuery = Department::query();
-        if ($isAdmin) {
+        if ($isQualifiedUser) {
             if (!empty($activeCompanyId)) {
                 $departmentsQuery->where('company_id', $activeCompanyId);
             }
@@ -97,7 +107,7 @@ class HrmController extends Controller
 
         // Fetch recent salary records for the active company (limited)
         $salaryQuery = Salary::with('user');
-        if ($isAdmin) {
+        if ($isQualifiedUser) {
             if (!empty($activeCompanyId)) {
                 $salaryQuery->where('company_id', $activeCompanyId);
             }
@@ -128,7 +138,7 @@ class HrmController extends Controller
             'departments' => $departments,
             'departmentOptions' => $departmentOptions,
             'companies' => $companies,
-            'isAdmin' => $isAdmin,
+            'isQualifiedUser' => $isQualifiedUser,
             'activeCompanyId' => $activeCompanyId,
             'salaries' => $salaries,
             'leaves' => Leave::with('user', 'approver')->orderBy('created_at', 'desc')->get(),

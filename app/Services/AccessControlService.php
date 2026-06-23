@@ -12,13 +12,52 @@ class AccessControlService
         //
     }
 
-
-    //function to check if user is CEO or Admin return true if user is CEO or Admin, otherwise return false
-    public function isCeoOrAdmin($user) : bool
+    //acces everything in the sytem
+    public function isAlwaysAllowed($user) : bool
     {
-        return $user->is_ceo || $user->is_admin;
+        return $user->role?->name === 'Admin' || $user->role?->name === 'CEO';
     }
 
-    
+
+
+    //function to check if user is CEO or Admin return true if user is CEO or Admin, otherwise return false
+    public function isCeoOrAdminOrAccountant($user) : bool
+    {
+        return $user->role?->name === 'CEO' || $user->role?->name === 'Admin' || $user->role?->name === 'Accountant';
+    }
+
+    //function to check if the user is a regular employee
+    public function isEmployee($user) : bool
+    {
+        return $user->role?->name === 'Employee';
+    }
+
+    //function to check if the user is a manager
+    public function isManager($user) : bool
+    {
+        return $user->role?->name === 'Manager';
+    }
+
+    //function to check if the user is a Accountant
+    public function isAccountant($user) : bool
+    {
+        return $user->role?->name === 'Accountant';
+    }
+
+    //function to check if HR Manager
+    public function isHrManager($user) : bool
+    {
+        return $user->role?->name === 'HR Manager';
+    }
+
+    //restriction of access to the HRM page only the CEO,Admin,HR Manager and Accountant can access the HRM page, other users will be redirected to the dashboard page with an error message
+    public function restrictHrmAccess($user) : bool
+    {
+        if (! $this->isAlwaysAllowed($user) && ! $this->isHrManager($user)) {
+           return false;
+        }
+
+        return true;
+    }
 
 }

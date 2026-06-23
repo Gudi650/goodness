@@ -13,7 +13,7 @@
 
             <div id="importStatus" class="hidden rounded-md border px-3 py-2 text-sm"></div>
 
-            @if ($isAdmin)
+            @if ($isQualifiedUser)
                 <select id="bulkImportCompany" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" required>
                     <option value="">Select Company</option>
                     @foreach ($companies as $company)
