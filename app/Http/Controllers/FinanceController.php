@@ -15,6 +15,7 @@ use App\Models\LiabilityCategory;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\VirtualAccounts;
+use App\Services\AccessControlService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,19 +31,26 @@ class FinanceController extends Controller
         // get the current logged in user
         $user = Auth::user();
 
+        //block if user is not supposed to see 
+        if (! app(AccessControlService::class)->isCeoOrAdminOrAccountant($user) && ! app(AccessControlService::class)->isManager($user)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have access to the Finance page.');
+        }
+
         // get teh role of the user
         $isAdmin = $user && $user->role && $user->role->name === 'Admin';
         $isManager = $user && $user->role && $user->role->name === 'Manager';
-        $isHr = $user && $user->role && $user->role->name === 'HR Manager';
         $isCEO = $user && $user->role && $user->role->name === 'CEO';
         $isAccountant = $user && $user->role && $user->role->name === 'Accountant';
+
+        //if user is Authorised
+        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($user);
 
         // get the active company id from the session
         $activeCompanyId = session('active_company_id');
 
         $usersQuery = User::with('role', 'company', 'department');
 
-        if ($isAdmin && ! empty($activeCompanyId)) {
+        if ($isQualifiedUser && ! empty($activeCompanyId)) {
             $usersQuery->where('company_id', $activeCompanyId);
         } elseif ($user) {
             $usersQuery->where('company_id', $user->company_id);
@@ -52,7 +60,7 @@ class FinanceController extends Controller
         $users = $usersQuery->get();
 
         //
-        $invoices = $this->getInvoices($isAdmin, $activeCompanyId, $user);
+        $invoices = $this->getInvoices($isQualifiedUser, $activeCompanyId, $user);
 
         // get the companies
         $companies = DB::table('companies')->pluck('name', 'id');
@@ -64,7 +72,7 @@ class FinanceController extends Controller
             ->get();
 
         // function to get the expense details to be displayed from the expenses table
-        $expenses = $this->getExpenses($isAdmin, $isAccountant, $user, $isCEO);
+        $expenses = $this->getExpenses($isQualifiedUser, $isAccountant, $user, $isCEO);
 
         // Summary metrics for top cards
         $expensesCollection = collect($expenses);
@@ -160,11 +168,11 @@ class FinanceController extends Controller
      * fuction to get the expense details to be displayed from the expenses table
      * but check if the user is admin or CEO, if admin then get all expenses, if not admin then get only the expenses of his company
      */
-    protected function getExpenses($isAdmin, $isAccountant, $user, $isCEO)
+    protected function getExpenses($isQualifiedUser, $isAccountant, $user, $isCEO)
     {
         // get all when user is admin or CEO, otherwise get only the expenses of his company
         $expenses = Expense::with(['company','financeItem', 'department', 'creator', 'approver', 'issuer', 'checker'])
-            ->when(! $isAdmin && ! $isCEO && ! $isAccountant, fn ($query) => $query->where('company_id', $user->company_id))
+            ->when(! $isQualifiedUser && ! $isCEO && ! $isAccountant, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
             ->get()
@@ -219,11 +227,11 @@ class FinanceController extends Controller
     }
 
     // function to get the payment details to be displayed from the payments table
-    protected function getPayments($isAdmin, $user, $isCEO, $isAccountant)
+    protected function getPayments($isQualifiedUser, $user, $isCEO, $isAccountant)
     {
         $payments = Payment::query()
             ->orderByDesc('created_at')
-            ->when(! $isAdmin && ! $isCEO && ! $isAccountant && $user, fn ($query) => $query->where('company_id', $user->company_id))
+            ->when(! $isQualifiedUser && ! $isCEO && ! $isAccountant && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->limit(100)
             ->get()
             ->map(function (Payment $payment) {
@@ -273,11 +281,11 @@ class FinanceController extends Controller
     }
 
     // function to display the invoices details to be displayed from the invoices table
-    protected function getInvoices($isAdmin, $activeCompanyId, $user)
+    protected function getInvoices($isQualifiedUser, $activeCompanyId, $user)
     {
         $invoices = Invoice::query()
             ->with('company', 'creator', 'items')
-            ->when(! $isAdmin && $user, fn ($query) => $query->where('company_id', $user->company_id))
+            ->when(! $isQualifiedUser && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
             ->get()
@@ -421,13 +429,13 @@ class FinanceController extends Controller
     /**
      * function to check who can view the virtual accounts, only admin ,CEO and accountant can view the virtual accounts, and if the user is not admin then he can only view the virtual accounts of his company
      */
-    protected function canViewVirtualAccounts($user, $isAdmin, $isCEO, $isAccountant)
+    protected function canViewVirtualAccounts($user, $isQualifiedUser)
     {
         if (! $user) {
             return false;
         }
 
-        return $isAdmin || $isCEO || $isAccountant;
+        return $isQualifiedUser;
     }
 
     /**

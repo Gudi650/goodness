@@ -82,8 +82,6 @@ class CompanyController extends Controller
         }
         
         $isAdmin = $currentUser->role?->name === 'Admin';
-        $isManager = $currentUser->role?->name === 'Manager';
-        $isHr = $currentUser->role?->name === 'HR Manager';
         $activeCompanyId = session('active_company_id');
         $isCEO = $currentUser->role?->name === 'CEO';
         $isAccountant = $currentUser->role?->name === 'Accountant';

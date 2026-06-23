@@ -1,3 +1,22 @@
+@php
+    
+    //get the authenticated users from the auth facade
+    $currentUser = auth()->user();
+    //check if the user is a qualified user
+    $isAlwaysAuthorized = $currentUser && $currentUser->role && in_array($currentUser->role->name, ['Admin','CEO']);
+
+    //get the employee
+    $employee = $currentUser?->role?->name === 'Employee' ? $currentUser : null;
+
+    //get the Accountant
+    $accountant = $currentUser?->role?->name === 'Accountant' ? $currentUser : null;
+
+    //get the menager
+    $manager = $currentUser?->role?->name === 'Manager' ? $currentUser : null;
+
+
+@endphp
+
 <div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden" onclick="toggleSidebar()">
 </div>
 
@@ -19,6 +38,7 @@
 
     <!-- Navigation Links -->
     <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+        
         <a href="/dashboard"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 mx-2 transition-colors"
             data-path="/dashboard">
@@ -28,6 +48,8 @@
             </svg>
             Dashboard
         </a>
+
+
         <a href="/companies"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/companies">
@@ -37,6 +59,8 @@
             </svg>
             Companies
         </a>
+
+        @if (!$employee)
         <a href="/users"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/users">
@@ -46,15 +70,8 @@
             </svg>
             Users
         </a>
-        <a href="/finance"
-            class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
-            data-path="/finance">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Finance
-        </a>
+        @endif
+
         <a href="/hrm"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/hrm">
@@ -64,6 +81,19 @@
             </svg>
             HRM
         </a>
+
+        @if ($isAlwaysAuthorized || $accountant || $manager)
+
+        <a href="/finance"
+            class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
+            data-path="/finance">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Finance
+        </a>
+
         <a href="/sales"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/sales">
@@ -73,6 +103,7 @@
             </svg>
             Sales
         </a>
+
         <a href="/inventory"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/inventory">
@@ -82,6 +113,7 @@
             </svg>
             Inventory
         </a>
+
         <a href="/far"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/far">
@@ -91,6 +123,7 @@
             </svg>
             Fixed Asset Register
         </a>
+
         <a href="/reports"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/reports">
@@ -100,6 +133,8 @@
             </svg>
             Reports
         </a>
+        @endif
+
         <a href="/communication"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/communication">
@@ -109,6 +144,7 @@
             </svg>
             communication
         </a>
+
         <a href="/settings"
             class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
             data-path="/settings">
@@ -120,6 +156,7 @@
             </svg>
             Settings
         </a>
+
     </nav>
 
     <!-- User Section & Logout (sticky and visible) -->

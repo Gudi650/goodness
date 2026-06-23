@@ -25,6 +25,14 @@ class SalesController extends Controller
 
 
         $currentUser = Auth::user();
+
+
+        //restrict the access of this page as well 
+        if (! app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser) && ! app(AccessControlService::class)->isManager($currentUser)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have access to the Sales page.');
+        }
+
+
         $activeCompanyId = session('active_company_id');
 
         //get teh authorised users for the company 
