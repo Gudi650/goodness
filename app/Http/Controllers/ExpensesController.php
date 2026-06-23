@@ -309,9 +309,11 @@ class ExpensesController extends Controller
             return false; // Bank account does not belong to the company
         }
 
+        /*
         if ($bankAccount->balance < $amount) {
             return false; // Insufficient funds in the bank account
         }
+            */
 
         return true; // Bank account is valid and has sufficient funds
     }
@@ -346,13 +348,13 @@ class ExpensesController extends Controller
     public function issueExpense(Expense $expense, Request $request)
     {
 
-        //dump the rutes datas as well her
-        dd($request->all());
 
         //get the requested data and validate it 
         $validated = $request->validate([
             'bank_id' => 'required|exists:virtual_accounts,id',
         ]);
+
+        //dd($validated);
 
 
         //check if the bank submitted is of same company and also check if the bank has sufficient money as well
@@ -364,6 +366,8 @@ class ExpensesController extends Controller
         $user = Auth::user();
 
         $isAccountant = $user?->role?->name === 'Accountant';
+
+        //dd($isAccountant);
 
         if ($isAccountant) {
             if ($expense->status !== 'approved') {
