@@ -151,7 +151,8 @@
                                         </svg>
                                     </button>
 
-                                    {{-- editing buttons as well --}}
+                                    {{-- editing buttons as well 
+
                                     <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
                                         title="Edit invoice" aria-label="Edit invoice"
                                         onclick="openEditInvoiceModal({{ $asset['id'] }})">
@@ -161,6 +162,8 @@
                                                 d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
                                         </svg>
                                     </button>
+                                    
+                                    --}}
 
                                     {{--  
                                     <form action="{{ route('invoices.destroy', $invoice['id']) }}" method="POST"

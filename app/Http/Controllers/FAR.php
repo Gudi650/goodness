@@ -3,44 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Models\CreateAssets;
-use Illuminate\Http\Request;
+use App\Services\FAR\CalculateCurrentFar;
 
 class FAR extends Controller
 {
-    //function to display the FAR page
+    // function to display the FAR page
     public function index()
     {
 
-        $fixedAssets = $this->getFixedAssets();
-
+        //get the fixed asstes data from the services class and pass it to the FAR page
+        $fixedAssets = app(CalculateCurrentFar::class)->calculateDepreciation();
         //dd($fixedAssets);
 
         return view('far', compact('fixedAssets'));
     }
 
-
-    //get the fixed assets only from the create_assets table and display them in the FAR page
+    // get the fixed assets only from the create_assets table and display them in the FAR page
     public function getFixedAssets()
     {
         $fixedAssets = CreateAssets::where('type', 'Fixed Asset')->get();
+
         return $fixedAssets;
     }
 
-    //calculating the depreciation value and current value of the fixed asset of the selected asset and display them in the FAR page
-        public function calculateDepreciation($assetId)
-        {
-            $asset = CreateAssets::find($assetId);
-    
-            if (!$asset) {
-                return redirect()->back()->with('error', 'Asset not found');
-            }
+    // calculating the depreciation value and current value of the fixed asset of the selected asset and display them in the FAR page
+    public function calculateDepreciation($assetId)
+    {
+        $asset = CreateAssets::find($assetId);
 
-            /**
-             * check the acquisition date and the current dat
-             */
-    
-            
+        if (! $asset) {
+            return redirect()->back()->with('error', 'Asset not found');
         }
+
+        /**
+         * check the acquisition date and the current dat
+         */
+    }
+
+
+    //function 
+
 
 
 }
