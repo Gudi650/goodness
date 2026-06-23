@@ -18,7 +18,7 @@ class AccessControlService
         return $user->role?->name === 'Admin' || $user->role?->name === 'CEO';
     }
 
-    //function to check if user is CEO or Admin return true if user is CEO or Admin, otherwise return false
+    //function to check if user is CEO or Admin or Accountant return true if user is CEO or Admin, otherwise return false
     public function isCeoOrAdminOrAccountant($user) : bool
     {
         return $user->role?->name === 'CEO' || $user->role?->name === 'Admin' || $user->role?->name === 'Accountant';

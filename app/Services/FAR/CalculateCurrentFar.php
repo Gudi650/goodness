@@ -118,7 +118,7 @@ class CalculateCurrentFar
             $years = $currentDate->diffInYears($acquisitionDate);
 
             // Depreciation value
-            $depreciationValue = ($depreciationRate / 100) * $asset->cost * $years;
+            $depreciationValue = ($depreciationRate / 100) * $asset->current_value * $years ? ($depreciationRate / 100) * $asset->current_value * $years : ($depreciationRate / 100) * $asset->original_value * $years;
 
             //dd($depreciationValue);
 
