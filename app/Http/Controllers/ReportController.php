@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Services\AccessControlService;
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -17,10 +18,14 @@ class ReportController extends Controller
     {
         $user = Auth::user();
 
-        $isAdmin = $user && $user->role && $user->role->name === 'Admin';
-        $isCEO = $user && $user->role && $user->role->name === 'CEO';
-        $isAccountant = $user && $user->role && $user->role->name === 'Accountant';
-        $canSeeAllCompanies = $isAdmin || $isCEO || $isAccountant;
+        $currentUser = Auth::user();
+
+        //restrict access to none qualified users here and if not qualified redirect to dashboard with error message
+        if (! app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser) && ! app(AccessControlService::class)->isManager($currentUser)) {
+            return redirect()->route('dashboard')->with('error', 'You do not have access to the HRM page.');
+        }
+
+        $canSeeAllCompanies = app(AccessControlService::class)->isCeoOrAdminOrAccountant($user);
 
         $companies = Company::query()
             ->orderBy('name', 'asc')

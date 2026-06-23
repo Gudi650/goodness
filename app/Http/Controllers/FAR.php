@@ -48,9 +48,4 @@ class FAR extends Controller
          */
     }
 
-
-    //function 
-
-
-
 }
