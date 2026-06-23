@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Company;
 use App\Models\Department;
+use App\Services\AccessControlService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -103,20 +104,28 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+
+        //restrict access to none qualified users
+        if (! app(AccessControlService::class)->restrictUserAccess(Auth::user())) {
+            return redirect()->route('dashboard')->with('error', 'You do not have access to the Users page.');
+        }
+
         // Read search keyword from URL query string
         $search = trim((string) $request->query('search', ''));
 
         // Determine the active company scope.
         $currentUser = Auth::user();
-        $isAdmin = $currentUser?->role?->name === 'Admin';
         $activeCompanyId = session('active_company_id');
+
+        //uses that are qualified by default
+        $isQualifiedUser = app(AccessControlService::class)->isAlwaysAllowed($currentUser);
 
         // Start building a query for users, eagerly load role and company relationships
         $usersQuery = User::with('role', 'company');
 
         // Admins can filter by the active company selected in the topbar.
         // Normal users are locked to the company assigned on their profile.
-        if ($isAdmin) {
+        if ($isQualifiedUser) {
             if (! empty($activeCompanyId)) {
                 $usersQuery->where('company_id', $activeCompanyId);
             }

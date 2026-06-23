@@ -18,8 +18,6 @@ class AccessControlService
         return $user->role?->name === 'Admin' || $user->role?->name === 'CEO';
     }
 
-
-
     //function to check if user is CEO or Admin return true if user is CEO or Admin, otherwise return false
     public function isCeoOrAdminOrAccountant($user) : bool
     {
@@ -55,6 +53,16 @@ class AccessControlService
     {
         if (! $this->isAlwaysAllowed($user) && ! $this->isHrManager($user)) {
            return false;
+        }
+
+        return true;
+    }
+
+    //restrict the acces of Users page to only CEO,Admin, HR Manager and Manager, other users will be redirected to the dashboard page with an error message
+    public function restrictUserAccess($user) : bool
+    {
+        if (! $this->isAlwaysAllowed($user) && ! $this->isHrManager($user) && ! $this->isManager($user)) {
+            return false;   
         }
 
         return true;
