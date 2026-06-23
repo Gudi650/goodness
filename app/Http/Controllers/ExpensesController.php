@@ -343,13 +343,17 @@ class ExpensesController extends Controller
     }
 
     //function to get the inout field of the bank from the accountnt during issueing og the expense
-    protected function issueExpense(Expense $expense, Request $request)
+    public function issueExpense(Expense $expense, Request $request)
     {
+
+        //dump the rutes datas as well her
+        dd($request->all());
 
         //get the requested data and validate it 
         $validated = $request->validate([
             'bank_id' => 'required|exists:virtual_accounts,id',
         ]);
+
 
         //check if the bank submitted is of same company and also check if the bank has sufficient money as well
         if (!$this->validateBankForExpense($validated['bank_id'], $expense->company_id, $expense->amount)) {
@@ -396,9 +400,6 @@ class ExpensesController extends Controller
                 return redirect()->route('finance')->with('error', 'Failed to issue expense. Please try again.');
             }
         }
-
-
-
 
     }
         

@@ -1,7 +1,10 @@
 <!-- Liability Category Modal -->
 <div id="issueExpensesModal" class="hidden ">
 
-    <form action="" method="POST" id="issueExpensesForm" class="space-y-4" onsubmit="showissueExpensesCreateLoader()">
+
+    <form action="#" method="POST" id="issueExpensesForm" class="space-y-4"
+        onsubmit="showissueExpensesCreateLoader()">
+
         @csrf
 
         <div>

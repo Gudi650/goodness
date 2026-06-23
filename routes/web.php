@@ -145,6 +145,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/expenses/{expense}/approve', 'approveExpense')->name('expenses.approve');
         Route::get('/expenses/{expense}/review', 'reviewExpense')->name('expenses.review');
         Route::patch('/expenses/{expense}/review', 'storeExpenseReview')->name('expenses.review.store');
+        Route::post('/expenses/{expense}/issue', 'issueExpense')->name('expenses.issue');
     });
 
     // Payments Management

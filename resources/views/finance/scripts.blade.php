@@ -159,10 +159,21 @@
     }
 
     //function to open issue expenses modal
-    function openIssueExpensesModal() {
-        const body = document.getElementById('issueExpensesModal').innerHTML;
+    function openIssueExpensesModal(id) {
+        console.log('Opening modal for ID:', id);
 
-        window.openModal('Issue Expense', body, null, {
+        const modalTemplate = document.getElementById('issueExpensesModal');
+
+        // Clone so we don't mutate the hidden template
+        const clone = modalTemplate.cloneNode(true);
+        const form = clone.querySelector('#issueExpensesForm');
+
+        if (form) {
+            form.action = `/expenses/${id}/issue`;
+            console.log('Action set to:', form.action);
+        }
+
+        window.openModal('Issue Expense', clone.innerHTML, null, {
             widthClass: 'max-w-3xl',
             bodyClass: 'max-h-[calc(100vh-12rem)]',
             hideFooter: true
