@@ -1,9 +1,3 @@
-{{-- Loading components for invoice actions
-<x-loading id="invoiceDeleteLoader" message="Deleting invoice..." :show="false" full-page="true" />
-<x-loading id="invoiceEditLoader" message="Updating invoice..." :show="false" full-page="true" />
- --}}
-
-
 <div id="equityPane">
     <div class="overflow-x-auto">
         <table class="min-w-full">
@@ -19,18 +13,21 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
+
                 <tr>
                     <td class="px-4 py-3 text-sm text-slate-700">John Doe</td>
                     <td class="px-4 py-3 text-sm text-slate-700">Alpha Corp</td>
                     <td class="px-4 py-3 text-sm text-slate-700">Common Stock</td>
                     <td class="px-4 py-3 text-sm text-right text-slate-700">10,000</td>
                     <td class="px-4 py-3 text-sm text-right text-slate-700">25%</td>
-                    <td class="px-4 py-3 text-sm text-center text-green-600">Active</td>
                     <td class="px-4 py-3 text-sm text-center">
-
-                        <button onclick="toggleDropdown(this)"
-                            class="text-slate-600 hover:text-slate-800 transition-colors">
-
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            Active
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-center">
+                        <!-- View -->
+                        <button onclick="toggleDropdown(this)" class="text-slate-600 hover:text-slate-800 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -38,19 +35,17 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
-
                         </button>
-
-                        <button class="text-blue-600 hover:text-blue-800 transition-colors">
-
+                        <!-- Edit -->
+                        <button class="text-blue-600 hover:text-blue-800 transition-colors ml-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="m16.862 4.487 1.687-1.688a2.25 2.25 0 1 1 3.182 3.182L10.582 17.13a4.5 4.5 0 0 1-1.897 1.13L6 19l.74-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487ZM16.862 4.487 19.5 7.125" />
                             </svg>
-
                         </button>
-                        <button class="text-red-600 hover:text-red-700 transition-colors">
+                        <!-- Delete -->
+                        <button class="text-red-600 hover:text-red-700 transition-colors ml-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -59,32 +54,33 @@
                         </button>
                     </td>
                 </tr>
-                <tr class="hidden bg-slate-100">
-                    <td colspan="7" class="px-4 py-3 text-sm text-slate-700">
-                        <strong>Details:</strong><br>
-                        - Shareholder: John Doe<br>
-                        - Company: Alpha Corp<br>
-                        - Equity Type: Common Stock<br>
-                        - Shares: 10,000<br>
-                        - Ownership: 25%<br>
-                        - Status: Active
+
+                <!-- Dropdown row -->
+                <tr class="hidden">
+                    <td colspan="7" class="px-4 py-3">
+                        <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 text-sm text-slate-700">
+                            <h3 class="font-semibold text-slate-800 mb-2">Equity Details</h3>
+                            <ul class="space-y-1">
+                                <li><strong>Shareholder:</strong> John Doe</li>
+                                <li><strong>Company:</strong> Alpha Corp</li>
+                                <li><strong>Equity Type:</strong> Common Stock</li>
+                                <li><strong>Shares:</strong> 10,000</li>
+                                <li><strong>Ownership:</strong> 25%</li>
+                                <li><strong>Status:</strong> Active</li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
 
-                
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    function toggleDropdown(button) {
-        const row = button.closest('tr');
-        const nextRow = row.nextElementSibling;
-        if (nextRow.classList.contains('hidden')) {
-            nextRow.classList.remove('hidden');
-        } else {
-            nextRow.classList.add('hidden');
-        }
-    }
+function toggleDropdown(button) {
+    const row = button.closest('tr');
+    const nextRow = row.nextElementSibling;
+    nextRow.classList.toggle('hidden');
+}
 </script>
