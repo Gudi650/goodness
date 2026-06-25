@@ -74,7 +74,7 @@
         <!-- Content Container -->
         <div class="bg-white border border-slate-200 rounded-lg p-4">
             <div id="tabContent" class="space-y-6">
-                
+
                 @include('equity.equity')
                 @include('equity.dividends')
                 @include('equity.share-premium')
@@ -84,19 +84,6 @@
     </main>
 
     <!-- Modals -->
-    {{-- 
-    @include('finance.modals.add-invoice')
-    @include('finance.modals.add-expense')
-    @include('finance.modals.add-payment')
-    @include('finance.modals.add-accounts')
-    @include('finance.modals.add-assets')
-    @include('finance.modals.add-liabilities') 
-    @include('finance.modals.add-assets-category') 
-    @include('finance.modals.add-liabilities-category') 
-    @include('finance.modals.add-items-category')
-    @include('finance.modals.add-items')
-    @include('finance.modals.issue-expenses')
-    --}}
 
     <!-- Shared Components -->
     @include('components.modal')

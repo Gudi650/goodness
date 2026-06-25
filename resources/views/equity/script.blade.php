@@ -1,6 +1,11 @@
 <script>
 
-        //rendering the button with onclick function ready to go
+    // Initialize: hide everything except the default 'equity' tab
+    document.addEventListener('DOMContentLoaded', function() {
+        togglePane('equity');
+    });
+
+    //rendering the button with onclick function ready to go
     function renderButton(label, onclick) {
         return `<button onclick="${onclick}" class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">
                     ${label}
@@ -104,5 +109,6 @@
         sectionButton.classList.add('hidden');
         */
     }
+
 
 </script>
