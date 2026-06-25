@@ -39,6 +39,19 @@
         });
     }
 
+    //open equity modal
+    function openEquityModal() {
+        const body = document.getElementById('addEquityModal').innerHTML;
+
+        console.log('Opening modal with body:',); // Debugging line
+
+        window.openModal('Add Equity', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
     //switch tab navigation
     function switchTab(tab, btnEl) {
         // Get all tab buttons
@@ -65,7 +78,7 @@
 
         if (tab === 'equity') {
             sectionTitle.textContent = 'Equity';
-            actionButton.innerHTML = renderButton('Add Equity', 'openInvoiceModal()');
+            actionButton.innerHTML = renderButton('Add Equity', 'openEquityModal()');
             sectionButton.classList.add('hidden');
 
             return;
@@ -85,35 +98,6 @@
             return;
         }
 
-        /*
-
-        if (tab === 'assets') {
-            sectionTitle.textContent = 'Assets';
-            actionButton.innerHTML = renderButton('Add Asset', 'openAddAssetsModal()');
-            sectionButton.classList.remove('hidden');
-            sectionButton.innerHTML = renderSectionButton('Add Categories', 'openAddAssetsCategoryModal()');
-            return;
-        }
-
-        if (tab === 'liabilities') {
-            sectionTitle.textContent = 'Liabilities';
-            actionButton.innerHTML = renderButton('Add Liability', 'openAddLiabilityModal()');
-            sectionButton.innerHTML = renderSectionButton('Add Categories', 'openAddLiabilityCategoryModal()');
-            sectionButton.classList.remove('hidden');
-            return;
-        }
-        if (tab === 'items') {
-            sectionTitle.textContent = 'Items';
-            actionButton.innerHTML = renderButton('Add Item', 'openAddItemModal()');
-            sectionButton.innerHTML = renderSectionButton('Add Categories', 'openAddItemCategoryModal()');
-            sectionButton.classList.remove('hidden');
-            return;
-        }
-
-        sectionTitle.textContent = 'Payments';
-        actionButton.innerHTML = renderButton('Add Payment', 'openAddPaymentModal()');
-        sectionButton.classList.add('hidden');
-        */
     }
 
 
