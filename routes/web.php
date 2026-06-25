@@ -396,6 +396,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchase-orders/{purchaseOrder}/download', 'downloadAttachment')->name('purchase-orders.download');
     });
 
+    //routes for Equity
+    Route::get('/equity', function () {
+        return view('equity');
+    })->name('equity');
+
     //FAR management
     Route::get('/far', [FAR::class, 'index'])->name('far');
 
