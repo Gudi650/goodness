@@ -23,13 +23,12 @@ class HrmController extends Controller
     public function index()
     {
         $currentUser = Auth::user();
-        $isAdmin = $currentUser?->role?->name === 'Admin';
         $activeCompanyId = session('active_company_id');
 
-        //restrict access to none qualified users here and if not qualified redirect to dashboard with error message
+        /*restrict access to none qualified users here and if not qualified redirect to dashboard with error message
         if (! app(AccessControlService::class)->restrictHrmAccess($currentUser)) {
             return redirect()->route('dashboard')->with('error', 'You do not have access to the HRM page.');
-        }
+        }*/
 
 
         //get the user role is Admin, CEO or Accountant
