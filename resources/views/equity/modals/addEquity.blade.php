@@ -8,25 +8,21 @@
             <select name="company"
                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                 <option value="">Select company...</option>
-                <option value="alpha">Alpha Corp</option>
-                <option value="beta">Beta Ltd</option>
-                <option value="gamma">Gamma Investments</option>
+                @foreach($companies as $company)
+                    <option value="{{ $company->id }}">{{ $company->name }}</option>
+                @endforeach
             </select>
         </div>
 
         <!-- Shareholder -->
         <div>
             <label class="block text-sm font-medium text-slate-700">Shareholder</label>
-            <select name="shareholder"
-                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
-                <option value="">Select shareholder...</option>
-                <option value="john">John Doe</option>
-                <option value="jane">Jane Smith</option>
-                <option value="gamma">Gamma Investments Ltd</option>
-            </select>
+            <input type="text" name="shareholder"
+                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
+                placeholder="e.g. Hamis Juma">
         </div>
 
-        <!-- Equity Type -->
+        <!-- Equity Type
         <div>
             <label class="block text-sm font-medium text-slate-700">Equity Type</label>
             <select name="equity_type"
@@ -36,29 +32,35 @@
                 <option>Capital Contribution</option>
             </select>
         </div>
+        -->
 
         <!-- Shares & Ownership -->
         <div class="grid grid-cols-2 gap-4">
+
             <div>
                 <label class="block text-sm font-medium text-slate-700">Shares Issued</label>
                 <input type="number" name="shares"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
                     placeholder="e.g. 10000">
             </div>
+
+             <!-- Value -->
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Value Held (TZS)</label>
+                <input type="number" name="value"
+                    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
+                    placeholder="e.g. 2500000">
+            </div>
+
+            {{-- 
             <div>
                 <label class="block text-sm font-medium text-slate-700">Ownership %</label>
                 <input type="number" step="0.01" name="ownership"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
                     placeholder="e.g. 25">
             </div>
-        </div>
+             --}}
 
-        <!-- Value -->
-        <div>
-            <label class="block text-sm font-medium text-slate-700">Value Held (TZS)</label>
-            <input type="number" name="value"
-                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
-                placeholder="e.g. 2500000">
         </div>
 
         <!-- Notes -->
