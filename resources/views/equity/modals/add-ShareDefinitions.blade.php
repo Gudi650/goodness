@@ -1,15 +1,16 @@
 <!-- Add Company Shares Modal -->
 <div id="addCompanySharesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
     <!-- Form -->
-    <form class="space-y-4">
+    <form action="{{ route('shares-definitions.store') }}" method="POST" class="space-y-4" onsubmit="showShareDefintionsCreateLoader()">
         <!-- Company -->
         <div>
             <label class="block text-sm font-medium text-slate-700">Company</label>
             <select name="company"
                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                 <option value="">Select company...</option>
-                <option value="alpha">Alpha Corp</option>
-                <option value="beta">Beta Ltd</option>
+                @foreach($companies as $company)
+                    <option value="{{ $company->id }}">{{ $company->name }}</option>
+                @endforeach
             </select>
         </div>
 
@@ -57,4 +58,19 @@
 
 </div>
 
-<script></script>
+{{-- adding the loader when the user submits the datas as well here --}}
+<x-loading id="AddShareDefintionsCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+
+    // Show loading indicator on form submit
+    document.querySelector('#addAccountModal form').addEventListener('submit', function () {
+        document.getElementById('AddShareDefintionsCreateLoader').classList.remove('hidden');
+    });
+
+    function showShareDefintionsCreateLoader() {
+        const loader = document.getElementById('AddShareDefintionsCreateLoader');
+        if (loader) loader.classList.remove('hidden');
+    }
+
+</script>

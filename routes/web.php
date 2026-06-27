@@ -14,6 +14,7 @@ use App\Http\Controllers\CreateLiabilityController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EquityController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\FAR;
 use App\Http\Controllers\FinanceController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SharesDefinitionsController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\trialbalanceController;
 use App\Http\Controllers\UserController;
@@ -397,9 +399,15 @@ Route::middleware('auth')->group(function () {
     });
 
     //routes for Equity
-    Route::get('/equity', function () {
-        return view('equity');
-    })->name('equity');
+    Route::controller(EquityController::class)->group(function () {
+        Route::get('/equity', 'index')->name('equity');
+    });
+
+    //routes to shares Definition 
+    Route::controller(SharesDefinitionsController::class)->group(function () {
+        Route::post('/shares-definitions', 'store')->name('shares-definitions.store');
+        Route::put('/shares-definitions/{id}', 'update')->name('shares-definitions.update');
+    });
 
     //FAR management
     Route::get('/far', [FAR::class, 'index'])->name('far');
