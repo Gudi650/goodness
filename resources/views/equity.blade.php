@@ -88,6 +88,7 @@
 
     <!-- Modals -->
     @include('equity.modals.addEquity')
+    @include('equity.modals.add-ShareDefinitions')
 
     <!-- Shared Components -->
     @include('components.modal')

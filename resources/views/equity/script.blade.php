@@ -57,6 +57,19 @@
         });
     }
 
+    //open the add company shares defintion modal
+    function openAddCompanySharesModal() {
+        const body = document.getElementById('addCompanySharesModal').innerHTML;
+
+        console.log('Opening modal with body:', body); // Debugging line
+
+        window.openModal('Add Company Shares', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
     //switch tab navigation
     function switchTab(tab, btnEl) {
         // Get all tab buttons
