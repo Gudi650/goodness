@@ -15,6 +15,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EquityController;
+use App\Http\Controllers\EquityDistributionController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\FAR;
 use App\Http\Controllers\FinanceController;
@@ -401,6 +402,11 @@ Route::middleware('auth')->group(function () {
     //routes for Equity
     Route::controller(EquityController::class)->group(function () {
         Route::get('/equity', 'index')->name('equity');
+    });
+
+    //route to equity distribution controller
+    Route::controller(EquityDistributionController::class)->group(function () {
+        Route::post('/equity-distributions', 'store')->name('equity-distributions.store');
     });
 
     //routes to shares Definition 

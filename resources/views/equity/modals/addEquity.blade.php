@@ -1,7 +1,7 @@
 <!-- Add Equity Modal -->
 <div id="addEquityModal" class= "bg-white border rounded shadow-sm p-6 mb-8 hidden">
     <!-- Form -->
-    <form class="space-y-4">
+    <form action="{{ route('equity-distributions.store') }}" method="POST" class="space-y-4" onsubmit="showEquityCreateLoader()" >
         <!-- Company -->
         <div>
             <label class="block text-sm font-medium text-slate-700">Company</label>
@@ -84,3 +84,20 @@
     </form>
 
 </div>
+
+{{-- adding the loader when the user submits the datas as well here --}}
+<x-loading id="AddEquityCreateLoader" fullPage="true" class="hidden" />
+
+<script>
+
+    // Show loading indicator on form submit
+    document.querySelector('#addAccountModal form').addEventListener('submit', function () {
+        document.getElementById('AddEquityCreateLoader').classList.remove('hidden');
+    });
+
+    function showEquityCreateLoader() {
+        const loader = document.getElementById('AddEquityCreateLoader');
+        if (loader) loader.classList.remove('hidden');
+    }
+
+</script>

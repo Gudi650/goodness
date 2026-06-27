@@ -10,6 +10,10 @@ class EquityDistributionController extends Controller
     //function to store add equity data in the database
     public function store(Request $request)
     {
+
+        //dump the datas
+        //dd($request->all());
+
         // Validate the request data
         $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
@@ -24,7 +28,7 @@ class EquityDistributionController extends Controller
             'company_id' => $request->company_id,
             'shareholder' => $request->shareholder,
             'shares' => $request->shares,
-            'share_value' => $request->share_value,
+            'value_held' => $request->share_value,
             'notes' => $request->notes,
         ]);
 
