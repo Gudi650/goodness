@@ -5,7 +5,7 @@
         <!-- Company -->
         <div>
             <label class="block text-sm font-medium text-slate-700">Company</label>
-            <select name="company"
+            <select name="company_id"
                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                 <option value="">Select company...</option>
                 @foreach($companies as $company)
@@ -47,7 +47,7 @@
              <!-- Value -->
             <div>
                 <label class="block text-sm font-medium text-slate-700">Value Held (TZS)</label>
-                <input type="number" name="value"
+                <input type="number" name="share_value"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
                     placeholder="e.g. 2500000">
             </div>

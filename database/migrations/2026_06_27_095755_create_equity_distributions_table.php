@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('equity_distributions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('company_id'); // link to companies table
-            $table->string('shareholder'); // link to shareholders table
+            $table->string('shareholder');
             $table->string('equity_type')->nullable(); // Common, Preferred, Capital Contribution
             $table->bigInteger('shares')->default(0);
             $table->decimal('ownership_percentage', 5, 2)->nullable(); // e.g. 25.00
@@ -24,7 +24,6 @@ return new class extends Migration
 
             // Foreign keys
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->timestamps();
         });
     }
 
