@@ -1,9 +1,3 @@
-
-
-{{-- Loading components for dividend actions --}}
-<x-loading id="dividendDeleteLoader" message="Deleting dividend record..." :show="false" full-page="true" />
-<x-loading id="dividendEditLoader" message="Updating dividend record..." :show="false" full-page="true" />
-
 <div id="dividendsPane">
     <div class="overflow-x-auto">
         <table class="min-w-full">

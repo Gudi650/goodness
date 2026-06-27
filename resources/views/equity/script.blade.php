@@ -31,12 +31,17 @@
             equity: document.getElementById('equityPane'),
             dividends: document.getElementById('dividendsPane'),
             'share-premium': document.getElementById('sharePremiumPane'),
+            companyShares: document.getElementById('companySharesPane')
+
+            
         };
 
         Object.entries(panes).forEach(([tab, pane]) => {
             if (!pane) return;
             pane.classList.toggle('hidden', tab !== activeTab);
         });
+
+        console.log('Panes:', panes); // Debugging line
     }
 
     //open equity modal
@@ -94,6 +99,13 @@
         if (tab === 'share-premium') {
             sectionTitle.textContent = 'Share Premium';
             actionButton.innerHTML = renderButton('Add Share Premium', 'openAddSharePremiumModal()');
+            sectionButton.classList.add('hidden');
+            return;
+        }
+
+        if (tab === 'companyShares') {
+            sectionTitle.textContent = 'Company Shares';
+            actionButton.innerHTML = renderButton('Add Company Shares', 'openAddCompanySharesModal()');
             sectionButton.classList.add('hidden');
             return;
         }

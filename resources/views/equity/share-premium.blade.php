@@ -1,6 +1,4 @@
 {{-- Loading components for share premium actions --}}
-<x-loading id="sharePremiumDeleteLoader" message="Deleting share premium record..." :show="false" full-page="true" />
-<x-loading id="sharePremiumEditLoader" message="Updating share premium record..." :show="false" full-page="true" />
 
 <div id="sharePremiumPane">
     <div class="overflow-x-auto">

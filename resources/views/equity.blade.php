@@ -55,6 +55,7 @@
                 <button onclick="switchTab('equity', this)" class="tab-btn py-4 text-sm font-medium text-slate-700 border-brand-600 cursor-pointer">Equity</button>
                 <button onclick="switchTab('dividends', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Dividends</button>
                 <button onclick="switchTab('share-premium', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Share Premium</button>
+                <button onclick="switchTab('companyShares', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Company Shares</button>
 
             </div>
         </div>
@@ -75,9 +76,11 @@
         <div class="bg-white border border-slate-200 rounded-lg p-4">
             <div id="tabContent" class="space-y-6">
 
+                
                 @include('equity.equity')
                 @include('equity.dividends')
                 @include('equity.share-premium')
+                @include('equity.define-equity')
 
             </div>
         </div>
