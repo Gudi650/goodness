@@ -39,4 +39,12 @@ class Company extends Model
     {
         return $this->hasMany(VirtualAccounts::class);
     }
+
+    /**
+     * Get all equity distributions that belong to this company.
+     */
+    public function equityDistributions(): HasMany
+    {
+        return $this->hasMany(EquityDistribution::class);
+    }
 }

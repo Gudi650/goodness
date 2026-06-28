@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\EquityDistribution;
 use Illuminate\Http\Request;
 
 class EquityController extends Controller
@@ -12,7 +13,11 @@ class EquityController extends Controller
     {
 
         $companies = $this->getCompanies();
-        return view('equity', compact('companies'));
+
+        //get all equity distribution data from the db and pass it to the view
+        $equityData = $this->getEquityData();
+
+        return view('equity', compact('companies', 'equityData'));
     }
 
 
@@ -21,6 +26,14 @@ class EquityController extends Controller
     {
         $companies = Company::all();
         return $companies;
+    }
+
+    //function to get the equity datas from the db 
+    protected function getEquityData()
+    {
+        $equityData = EquityDistribution::with('company')->get();
+
+        return $equityData;
     }
 
 
