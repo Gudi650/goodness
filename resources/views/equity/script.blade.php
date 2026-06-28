@@ -119,7 +119,8 @@
         if (tab === 'companyShares') {
             sectionTitle.textContent = 'Company Shares';
             actionButton.innerHTML = renderButton('Add Company Shares', 'openAddCompanySharesModal()');
-            sectionButton.classList.add('hidden');
+            sectionButton.innerHTML = renderSectionButton('Issue Dividends', 'openDividendModal()');
+            sectionButton.classList.remove('hidden');
             return;
         }
 

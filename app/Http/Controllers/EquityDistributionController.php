@@ -35,4 +35,7 @@ class EquityDistributionController extends Controller
         //redirct back with success message
         return redirect()->back()->with('success', 'Equity distribution created successfully');
     }
+
+
+    //
 }

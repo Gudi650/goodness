@@ -12,7 +12,7 @@ class EquityController extends Controller
     //function to display the equity page
     public function index()
     {
-
+        //get all companies from the db and pass it to the view
         $companies = $this->getCompanies();
 
         //get all equity distribution data from the db and pass it to the view
