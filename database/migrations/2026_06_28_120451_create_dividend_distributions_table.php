@@ -27,6 +27,7 @@ return new class extends Migration
             $table->foreign('dividend_id')->references('id')->on('dividends')->onDelete('cascade');
             //$table->foreign('shareholder_id')->references('id')->on('shareholders')->onDelete('cascade');
             $table->foreign('equity_id')->references('id')->on('equities')->onDelete('set null');
+            
         });
     }
 

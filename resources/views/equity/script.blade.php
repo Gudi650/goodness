@@ -1,5 +1,4 @@
 <script>
-
     // Initialize: hide everything except the default 'equity' tab
     document.addEventListener('DOMContentLoaded', function() {
         togglePane('equity');
@@ -33,7 +32,7 @@
             'share-premium': document.getElementById('sharePremiumPane'),
             companyShares: document.getElementById('companySharesPane')
 
-            
+
         };
 
         Object.entries(panes).forEach(([tab, pane]) => {
@@ -41,20 +40,25 @@
             pane.classList.toggle('hidden', tab !== activeTab);
         });
 
-        console.log('Panes:', panes); // Debugging line
     }
 
     //open equity modal
     function openEquityModal() {
         const body = document.getElementById('addEquityModal').innerHTML;
 
-        console.log('Opening modal with body:',); // Debugging line
+        console.log('Opening modal with body:', body); // Debugging line
 
         window.openModal('Add Equity', body, null, {
             widthClass: 'max-w-3xl',
             bodyClass: 'max-h-[calc(100vh-12rem)]',
             hideFooter: true
         });
+
+        // Wait for openModal to finish injecting HTML into the DOM
+        setTimeout(function() {
+            calculateOwnershipPercentage();
+        }, 0);
+
     }
 
     //open the add company shares defintion modal
@@ -126,5 +130,45 @@
 
     }
 
+    //function to calculate the ownership percentage based on the shares issued and the total shares
+    //It will calculate only when the user is typing the shares input field that when it will be called
+    function calculateOwnershipPercentage() {
 
+        // Get ALL elements with id="shares" — grab the last one (the cloned modal copy)
+        const allShares = document.querySelectorAll('#shares');
+        const allOwnership = document.querySelectorAll('#ownership_percentage');
+
+        console.log('[Equity] All #shares found:', allShares);
+        console.log('[Equity] Total #shares in DOM:', allShares.length);
+
+        // The last one is always the cloned modal copy
+        const sharesInput = allShares[allShares.length - 1];
+        const ownershipInput = allOwnership[allOwnership.length - 1];
+
+        console.log('[Equity] sharesInput element:', sharesInput);
+
+        if (!sharesInput || !ownershipInput) {
+            console.warn('[Equity] Inputs not found in DOM.');
+            return;
+        }
+
+        const totalShares = 100000;
+
+        // addEventListener goes on the ELEMENT
+        sharesInput.addEventListener('input', function() {
+
+            // Read .value INSIDE the handler, every time user types
+            const sharesValue = parseFloat(sharesInput.value) || 0;
+            console.log('[Equity] Shares typed:', sharesValue);
+
+            const ownership = ((sharesValue / totalShares) * 100).toFixed(2);
+            console.log('[Equity] Ownership %:', ownership);
+
+            // Set result on the ELEMENT
+            ownershipInput.value = ownership;
+        });
+
+        console.log('[Equity] Listener bound successfully.');
+    }
+    
 </script>

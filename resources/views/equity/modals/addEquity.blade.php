@@ -39,7 +39,7 @@
 
             <div>
                 <label class="block text-sm font-medium text-slate-700">Shares Issued</label>
-                <input type="number" name="shares"
+                <input type="number" id="shares" name="shares"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
                     placeholder="e.g. 10000">
             </div>
@@ -47,14 +47,14 @@
              <!-- Value -->
             <div>
                 <label class="block text-sm font-medium text-slate-700">Value Held (TZS)</label>
-                <input type="number" name="share_value"
+                <input type="number" id="share_value" name="share_value"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
                     placeholder="e.g. 2500000">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-slate-700">Ownership %</label>
-                <input type="number" step="0.01" name="ownership" readonly
+                <input id="ownership_percentage" type="text" step="0.01" name="ownership" readonly
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
                     placeholder="e.g. 25">
             </div>
@@ -89,7 +89,7 @@
 <script>
 
     // Show loading indicator on form submit
-    document.querySelector('#addAccountModal form').addEventListener('submit', function () {
+    document.querySelector('#addEquityModal form').addEventListener('submit', function () {
         document.getElementById('AddEquityCreateLoader').classList.remove('hidden');
     });
 
@@ -98,4 +98,7 @@
         if (loader) loader.classList.remove('hidden');
     }
 
+
 </script>
+
+

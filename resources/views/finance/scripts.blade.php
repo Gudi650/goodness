@@ -257,7 +257,7 @@
     function bindExpenseCategoryOptions() {
         // items data injected from Laravel
         const map = @json($itemData);
-        console.log("Items data:", map);
+        //console.log("Items data:", map);
 
         const category = getExpenseField('expenseCategory');
         const subCategory = getExpenseField('expenseSubCategory');
