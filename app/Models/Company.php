@@ -47,4 +47,13 @@ class Company extends Model
     {
         return $this->hasMany(EquityDistribution::class);
     }
+
+    /**
+     * Get all define equity that belong to this company
+     */
+    public function sharesDefinitions(): HasMany
+    {
+        return $this->hasMany(SharesDefinitions::class);
+    }
+
 }

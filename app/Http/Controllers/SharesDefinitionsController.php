@@ -15,21 +15,24 @@ class SharesDefinitionsController extends Controller
         dd($request->all());
         
         $request->validate([
-            'company_id' => 'required,integer|exists:companies,id',
-            'authorised_shares' => 'nullable|integer',
+            'company_id' => 'required|integer|exists:companies,id',
+            'authorized_shares' => 'required|integer',
             'issued_shares' => 'nullable|integer',
             'remaining_shares' => 'nullable|integer',
             'share_value' => 'required|numeric',
             'notes' => 'nullable|string',
         ]);
 
+        //finding the remaining shares by subtracting the issued shares from the authorized shares
+        $remainingShares = $request->authorized_shares - $request->issued_shares;
+
 
         //now save the data to the shares_definitions table
         SharesDefinitions::create([
             'company_id' => $request->company_id,
-            'authorised_shares' => $request->authorised_shares,
+            'authorized_shares' => $request->authorized_shares,
             'issued_shares' => $request->issued_shares,
-            'remaining_shares' => $request->remaining_shares,
+            'remaining_shares' => $remainingShares,
             'share_value' => $request->share_value,
             'notes' => $request->notes,
         ]);
