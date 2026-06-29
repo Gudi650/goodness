@@ -14,6 +14,7 @@ class EquityDistribution extends Model
         'share_value',
         'value_held',
         'notes',
+        'ownership_percentage',
     ];
 
     //relationships

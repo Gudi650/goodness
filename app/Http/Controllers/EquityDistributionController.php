@@ -15,13 +15,16 @@ class EquityDistributionController extends Controller
         //dd($request->all());
 
         // Validate the request data
-        $request->validate([
+        $validatedData = $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
             'shareholder' => 'required|string',
             'shares' => 'required|integer',
             'share_value' => 'required|numeric',
+            'ownership' => 'required|numeric',
             'notes' => 'nullable|string',
         ]);
+
+        //dd($validatedData);
 
         // Save the data to the equity_distributions table
         EquityDistribution::create([
@@ -30,6 +33,7 @@ class EquityDistributionController extends Controller
             'shares' => $request->shares,
             'value_held' => $request->share_value,
             'notes' => $request->notes,
+            'ownership_percentage' => $request->ownership,
         ]);
 
         //redirct back with success message

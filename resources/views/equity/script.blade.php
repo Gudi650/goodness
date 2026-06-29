@@ -95,13 +95,15 @@
         if (tab === 'dividends') {
             sectionTitle.textContent = 'Dividends';
             actionButton.innerHTML = renderButton('Add Dividend', 'openAddDividendModal()');
-            sectionButton.classList.add('hidden');
+            sectionButton.innerHTML = renderSectionButton('Issue Dividends', 'openDividendModal()');
+            sectionButton.classList.remove('hidden');
             return;
         }
 
         if (tab === 'share-premium') {
             sectionTitle.textContent = 'Share Premium';
             actionButton.innerHTML = renderButton('Add Share Premium', 'openAddSharePremiumModal()');
+            //sectionButton.innerHTML = renderSectionButton('Issue Dividends', 'openDividendModal()');
             sectionButton.classList.add('hidden');
             return;
         }
@@ -109,8 +111,8 @@
         if (tab === 'companyShares') {
             sectionTitle.textContent = 'Company Shares';
             actionButton.innerHTML = renderButton('Add Company Shares', 'openAddCompanySharesModal()');
-            sectionButton.innerHTML = renderSectionButton('Issue Dividends', 'openDividendModal()');
-            sectionButton.classList.remove('hidden');
+            //sectionButton.innerHTML = renderSectionButton('Issue Dividends', 'openDividendModal()');
+            sectionButton.classList.add('hidden');
             return;
         }
     }
@@ -190,4 +192,5 @@
 
         console.log('[Equity] Listeners bound successfully.');
     }
+    
 </script>
