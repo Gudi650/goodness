@@ -29,7 +29,7 @@ class DividendDistribution extends Model
     //relationship with the Equity model
     public function equity()
     {
-        return $this->belongsTo(Equity::class);
+        return $this->belongsTo(EquityDistribution::class);
     }
 
 }

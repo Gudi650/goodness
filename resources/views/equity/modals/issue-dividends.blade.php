@@ -8,15 +8,18 @@
         </div>
 
         <!-- Form -->
-        <form class="space-y-4">
+        <form action={{ route('dividends.store') }} method="POST" class="space-y-4" onsubmit="showDividendCreateLoader()">
+            @csrf
+
             <!-- Company -->
             <div>
                 <label class="block text-sm font-medium text-slate-700">Company</label>
-                <select name="company"
+                <select name="company_id"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                     <option value="">Select company...</option>
-                    <option value="alpha">Alpha Corp</option>
-                    <option value="beta">Beta Ltd</option>
+                    @foreach ($sharesDefinitions as $share)
+                        <option value="{{ $share->company->id }}">{{ $share->company->name }}</option>
+                    @endforeach
                 </select>
             </div>
 
@@ -54,13 +57,29 @@
     </div>
 </div>
 
+{{-- adding the loader when the user submits the datas as well here --}}
+<x-loading id="IssueDividendCreateLoader" fullPage="true" class="hidden" />
+
 <script>
-function openDividendModal() {
-    document.getElementById('issueDividendModal').classList.remove('hidden');
-    document.getElementById('issueDividendModal').classList.add('flex');
-}
-function closeDividendModal() {
-    document.getElementById('issueDividendModal').classList.add('hidden');
-    document.getElementById('issueDividendModal').classList.remove('flex');
-}
+    function openDividendModal() {
+        document.getElementById('issueDividendModal').classList.remove('hidden');
+        document.getElementById('issueDividendModal').classList.add('flex');
+    }
+
+    function closeDividendModal() {
+        document.getElementById('issueDividendModal').classList.add('hidden');
+        document.getElementById('issueDividendModal').classList.remove('flex');
+    }
+
+        // Show loading indicator on form submit
+    document.querySelector('#issueDividendModal form').addEventListener('submit', function () {
+        document.getElementById('IssueDividendCreateLoader').classList.remove('hidden');
+    });
+
+    function showDividendCreateLoader() {
+        const loader = document.getElementById('IssueDividendCreateLoader');
+        if (loader) loader.classList.remove('hidden');
+    }
+
+
 </script>

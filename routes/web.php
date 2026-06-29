@@ -14,6 +14,7 @@ use App\Http\Controllers\CreateLiabilityController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DividendsController;
 use App\Http\Controllers\EquityController;
 use App\Http\Controllers\EquityDistributionController;
 use App\Http\Controllers\ExpensesController;
@@ -413,6 +414,12 @@ Route::middleware('auth')->group(function () {
     Route::controller(SharesDefinitionsController::class)->group(function () {
         Route::post('/shares-definitions', 'store')->name('shares-definitions.store');
         Route::put('/shares-definitions/{id}', 'update')->name('shares-definitions.update');
+    });
+
+    //routes to dividends controller
+    Route::controller(DividendsController::class)->group(function () {
+        Route::post('/dividends', 'store')->name('dividends.store');
+        
     });
 
     //FAR management
