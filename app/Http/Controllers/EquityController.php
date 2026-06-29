@@ -49,4 +49,5 @@ class EquityController extends Controller
     }
 
 
+
 }

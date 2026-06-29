@@ -13,15 +13,15 @@
     //rendering the button with onclick function ready to go
     function renderButton(label, onclick) {
         return `<button onclick="${onclick}" class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md text-sm font-medium transition-colors">
-                    ${label}
-                </button>`;
+                ${label}
+            </button>`;
     }
 
     //function to render the section button if needed
     function renderSectionButton(label, onclick) {
         return `<button onclick="${onclick}" class="w-full lg:w-auto flex-shrink-0 whitespace-nowrap px-4 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-md text-sm font-medium transition-colors">
-                    ${label}
-                </button>`;
+                ${label}
+            </button>`;
     }
 
     // Toggle visibility of content panes based on active tab
@@ -31,22 +31,17 @@
             dividends: document.getElementById('dividendsPane'),
             'share-premium': document.getElementById('sharePremiumPane'),
             companyShares: document.getElementById('companySharesPane')
-
-
         };
 
         Object.entries(panes).forEach(([tab, pane]) => {
             if (!pane) return;
             pane.classList.toggle('hidden', tab !== activeTab);
         });
-
     }
 
     //open equity modal
     function openEquityModal() {
         const body = document.getElementById('addEquityModal').innerHTML;
-
-        console.log('Opening modal with body:', body); // Debugging line
 
         window.openModal('Add Equity', body, null, {
             widthClass: 'max-w-3xl',
@@ -56,16 +51,13 @@
 
         // Wait for openModal to finish injecting HTML into the DOM
         setTimeout(function() {
-            calculateOwnershipPercentage();
+            bindSharesListener();
         }, 0);
-
     }
 
-    //open the add company shares defintion modal
+    //open the add company shares definition modal
     function openAddCompanySharesModal() {
         const body = document.getElementById('addCompanySharesModal').innerHTML;
-
-        console.log('Opening modal with body:', body); // Debugging line
 
         window.openModal('Add Company Shares', body, null, {
             widthClass: 'max-w-3xl',
@@ -76,25 +68,20 @@
 
     //switch tab navigation
     function switchTab(tab, btnEl) {
-        // Get all tab buttons
         const tabBtns = document.querySelectorAll('.tab-btn');
 
-        // Remove active state from all buttons
         tabBtns.forEach(btn => {
             btn.classList.remove('text-slate-700', 'border-brand-600', 'border-b-2');
             btn.classList.add('text-slate-500');
         });
 
-        // Add active state to clicked button
         if (btnEl) {
             btnEl.classList.remove('text-slate-500');
             btnEl.classList.add('text-slate-700', 'border-brand-600', 'border-b-2');
         }
 
-        // Toggle content panes
         togglePane(tab);
 
-        // Update section title and action button
         const sectionTitle = document.getElementById('sectionTitle');
         const actionButton = document.getElementById('actionButton');
 
@@ -102,7 +89,6 @@
             sectionTitle.textContent = 'Equity';
             actionButton.innerHTML = renderButton('Add Equity', 'openEquityModal()');
             sectionButton.classList.add('hidden');
-
             return;
         }
 
@@ -127,48 +113,81 @@
             sectionButton.classList.remove('hidden');
             return;
         }
-
     }
 
-    //function to calculate the ownership percentage based on the shares issued and the total shares
-    //It will calculate only when the user is typing the shares input field that when it will be called
-    function calculateOwnershipPercentage() {
+    // Binds the ownership % calculation to the cloned modal inputs
+    // Uses sharesDefinitionsMap embedded by Blade to get the real issued_shares per company
+    function bindSharesListener() {
 
-        // Get ALL elements with id="shares" — grab the last one (the cloned modal copy)
         const allShares = document.querySelectorAll('#shares');
         const allOwnership = document.querySelectorAll('#ownership_percentage');
+        const allCompany = document.querySelectorAll('[name="company_id"]');
+        const allValue = document.querySelectorAll('#share_value'); // ADD THIS
 
-        console.log('[Equity] All #shares found:', allShares);
         console.log('[Equity] Total #shares in DOM:', allShares.length);
 
-        // The last one is always the cloned modal copy
         const sharesInput = allShares[allShares.length - 1];
         const ownershipInput = allOwnership[allOwnership.length - 1];
+        const companySelect = allCompany[allCompany.length - 1];
+        const valueInput = allValue[allValue.length - 1]; // ADD THIS
 
-        console.log('[Equity] sharesInput element:', sharesInput);
+        console.log('[Equity] sharesInput:', sharesInput);
+        console.log('[Equity] ownershipInput:', ownershipInput);
+        console.log('[Equity] companySelect:', companySelect);
+        console.log('[Equity] valueInput:', valueInput); // ADD THIS
 
-        if (!sharesInput || !ownershipInput) {
-            console.warn('[Equity] Inputs not found in DOM.');
+        if (!sharesInput || !ownershipInput || !companySelect || !valueInput) {
+            console.warn('[Equity] One or more inputs not found in DOM.');
             return;
         }
 
-        const totalShares = 100000;
+        // Make value readonly since it's auto-calculated
+        valueInput.setAttribute('readonly', true);
+        valueInput.classList.add('bg-slate-50', 'cursor-not-allowed');
 
-        // addEventListener goes on the ELEMENT
-        sharesInput.addEventListener('input', function() {
+        function recalculate() {
+            const companyId = companySelect.value;
+            console.log('[Equity] Selected company_id:', companyId);
 
-            // Read .value INSIDE the handler, every time user types
+            const definition = sharesDefinitionsMap[companyId];
+            console.log('[Equity] Matching definition:', definition);
+
+            if (!definition) {
+                console.warn('[Equity] No shares definition found for company:', companyId);
+                ownershipInput.value = '';
+                valueInput.value = '';
+                return;
+            }
+
+            const totalShares = definition.issued_shares;
+            const shareValuePerShare = definition.share_value;
+            console.log('[Equity] Total issued shares:', totalShares);
+            console.log('[Equity] Share value per share:', shareValuePerShare);
+
             const sharesValue = parseFloat(sharesInput.value) || 0;
             console.log('[Equity] Shares typed:', sharesValue);
 
+            if (totalShares <= 0) {
+                console.warn('[Equity] issued_shares is 0 for this company.');
+                ownershipInput.value = '0.00';
+                valueInput.value = '0.00';
+                return;
+            }
+
+            // Calculate ownership %
             const ownership = ((sharesValue / totalShares) * 100).toFixed(2);
             console.log('[Equity] Ownership %:', ownership);
-
-            // Set result on the ELEMENT
             ownershipInput.value = ownership;
-        });
 
-        console.log('[Equity] Listener bound successfully.');
+            // Calculate value held
+            const valueHeld = (sharesValue * shareValuePerShare).toFixed(2);
+            console.log('[Equity] Value Held (TZS):', valueHeld);
+            valueInput.value = valueHeld;
+        }
+
+        sharesInput.addEventListener('input', recalculate);
+        companySelect.addEventListener('change', recalculate);
+
+        console.log('[Equity] Listeners bound successfully.');
     }
-    
 </script>

@@ -8,8 +8,8 @@
             <select name="company_id"
                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                 <option value="">Select company...</option>
-                @foreach($companies as $company)
-                    <option value="{{ $company->id }}">{{ $company->name }}</option>
+                @foreach($sharesDefinitions as $share)
+                    <option value="{{ $share->company->id }}">{{ $share->company->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -47,7 +47,7 @@
              <!-- Value -->
             <div>
                 <label class="block text-sm font-medium text-slate-700">Value Held (TZS)</label>
-                <input type="number" id="share_value" name="share_value"
+                <input type="number" id="share_value" name="share_value" readonly
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200"
                     placeholder="e.g. 2500000">
             </div>
@@ -99,6 +99,20 @@
     }
 
 
+</script>
+
+<script>
+    // Embed sharesDefinitions as a JS object keyed by company_id
+    const sharesDefinitionsMap = {
+        @foreach($sharesDefinitions as $share)
+            {{ $share->company->id }}: {
+                issued_shares: {{ $share->issued_shares ?? 0 }},
+                share_value: {{ $share->share_value ?? 0 }},
+            },
+        @endforeach
+    };
+
+    console.log('[Equity] sharesDefinitionsMap:', sharesDefinitionsMap);
 </script>
 
 
