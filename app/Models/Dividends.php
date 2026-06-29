@@ -26,7 +26,7 @@ class Dividends extends Model
     //relationship with the DividendDistribution model
     public function distributions()
     {
-        return $this->hasMany(DividendDistribution::class);
+        return $this->hasMany(DividendDistribution::class, 'dividend_id');
     }
 
 }

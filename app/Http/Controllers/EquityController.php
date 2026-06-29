@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\Dividends;
 use App\Models\EquityDistribution;
 use App\Models\SharesDefinitions;
 use Illuminate\Http\Request;
@@ -21,7 +22,10 @@ class EquityController extends Controller
         //get all shares definitions data from the db and pass it to the view
         $sharesDefinitions = $this->getSharesDefinitions();
 
-        return view('equity', compact('companies', 'equityData', 'sharesDefinitions'));
+        //get dividends data from the db and pass it to the view
+        $dividendsData = $this->getDividendsData();
+
+        return view('equity', compact('companies', 'equityData', 'sharesDefinitions', 'dividendsData'));
     }
 
 
@@ -46,6 +50,14 @@ class EquityController extends Controller
         $sharesDefinitions = SharesDefinitions::with('company')->get();
 
         return $sharesDefinitions;
+    }
+
+    //function to get the dividends datas
+    public function getDividendsData()
+    {
+        $dividendsData = Dividends::with('company')->with('distributions')->get();
+
+        return $dividendsData;
     }
 
 
