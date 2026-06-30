@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Dividends;
 use App\Models\EquityDistribution;
+use App\Models\SharePremuims;
 use App\Models\SharesDefinitions;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,18 @@ class EquityController extends Controller
         //get dividends data from the db and pass it to the view
         $dividendsData = $this->getDividendsData();
 
-        return view('equity', compact('companies', 'equityData', 'sharesDefinitions', 'dividendsData'));
+        //get sharepremiums from the db and pass to thw view
+        $sharePremiumsData = $this->getSharePremiumsData();
+
+        return view('equity', compact(
+            
+            'companies', 
+            'equityData', 
+            'sharesDefinitions', 
+            'dividendsData',
+            'sharePremiumsData',
+
+            ));
     }
 
 
@@ -61,5 +73,12 @@ class EquityController extends Controller
     }
 
 
+    //function to get the share premiums data
+    protected function getSharePremiumsData()
+    {
+        $sharePremiumsData = SharePremuims::with('company')->get();
+
+        return $sharePremiumsData;
+    }
 
 }
