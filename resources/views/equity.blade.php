@@ -90,6 +90,7 @@
     @include('equity.modals.addEquity')
     @include('equity.modals.add-ShareDefinitions')
     @include('equity.modals.issue-dividends')
+    @include('equity.modals.add-sharePremium')
 
     <!-- Shared Components -->
     @include('components.modal')

@@ -66,6 +66,17 @@
         });
     }
 
+    //open the add share premium modal
+    function openAddSharePremiumModal() {
+        const body = document.getElementById('addSharePremiumModal').innerHTML;
+
+        window.openModal('Add Share Premium', body, null, {
+            widthClass: 'max-w-3xl',
+            bodyClass: 'max-h-[calc(100vh-12rem)]',
+            hideFooter: true
+        });
+    }
+
     //switch tab navigation
     function switchTab(tab, btnEl) {
         const tabBtns = document.querySelectorAll('.tab-btn');

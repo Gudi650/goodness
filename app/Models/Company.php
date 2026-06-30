@@ -56,4 +56,20 @@ class Company extends Model
         return $this->hasMany(SharesDefinitions::class);
     }
 
+    /**
+     * Get all dividends that belong to this company
+     */
+    public function dividends(): HasMany
+    {
+        return $this->hasMany(Dividends::class);
+    }
+
+    /**
+     * Get all share premiums that belong to this company
+     */
+    public function sharePremiums(): HasMany
+    {
+        return $this->hasMany(SharePremuims::class);
+    }
+
 }
