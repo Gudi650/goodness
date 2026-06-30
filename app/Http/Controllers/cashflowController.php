@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Dividends;
+use App\Services\NetIncome;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -69,4 +71,38 @@ class CashFlowController extends Controller
         $pdf = Pdf::loadView('reports.cash_flow', compact('data'));
         return $pdf->stream('cash_flow.pdf');
     }
+
+
+
+
+
+
+    //function to get the dividends paid to shareholders from the dividends table in the database
+    protected function getDividendsPaid()
+    {
+        $dividends = Dividends::where('status', 'Declared')->get();
+
+        //get the sum of dividends in the column amount
+        $dividendsPaid = $dividends->sum('amount');
+
+        return $dividendsPaid;
+    }
+
+    //function to get returned earnings
+    protected function getRetainedEarnings()
+    {
+        $dividends = $this->getDividendsPaid();
+
+        //get the net income from the net income service
+        $netIncome = app(NetIncome::class)->calculateNetIncome();
+
+        //get the retained earnings by subtracting the dividends paid from the net income
+        $retainedEarnings = $netIncome - $dividends;
+
+        return $retainedEarnings;
+    }
+
+    //function to 
+
+
 }

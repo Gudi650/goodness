@@ -41,7 +41,7 @@
             <textarea name="notes" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
         </div>
 
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md">Save Premium</button>
+        <button type="submit" class="px-4 py-2 rounded-md bg-brand-600 text-white hover:bg-brand-700">Save Premium</button>
     </form>
 </div>
 

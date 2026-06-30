@@ -438,7 +438,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/income-statement-export', [incomeStatement::class, 'exportPdf'])->name('income-statement-export');
     Route::get('/trial-balance', [trialbalanceController::class, 'index'])->name('trial-balance');
     Route::get('/trial-balance-export', [trialbalanceController::class, 'exportPdf'])->name('trial-balance-export');
-    Route::get('/cash-flow', [cashflowController::class, 'index'])->name('cash-flow');
+    Route::get('/cash-flow', [cashflowController::class, 'exportPdf'])->name('cash-flow');
     Route::get('/cash-flow-export', [cashflowController::class, 'exportPdf'])->name('cash-flow-export');
 
     // Reports & Analytics
