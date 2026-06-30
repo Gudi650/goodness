@@ -10,6 +10,9 @@ class SharePremuimsController extends Controller
     //function to store the share premium data
     public function store(Request $request)
     {
+
+        //dd('tumefika destination');
+
         $validated = $request->validate([
             'company_id' => 'required|exists:companies,id',
             'shares_issued' => 'required|integer|min:1',

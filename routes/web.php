@@ -39,6 +39,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SharePremuimsController;
 use App\Http\Controllers\SharesDefinitionsController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\trialbalanceController;
@@ -420,6 +421,11 @@ Route::middleware('auth')->group(function () {
     Route::controller(DividendsController::class)->group(function () {
         Route::post('/dividends', 'store')->name('dividends.store');
         
+    });
+
+    //route to store the sharePremiums controller
+    Route::controller(SharePremuimsController::class)->group(function () {
+        Route::post('/share-premiums', 'store')->name('share-premiums.store');
     });
 
     //FAR management

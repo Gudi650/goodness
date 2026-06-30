@@ -75,6 +75,9 @@
             bodyClass: 'max-h-[calc(100vh-12rem)]',
             hideFooter: true
         });
+        
+        // initialize calculator after modal is rendered
+        setTimeout(initSharePremiumCalculator, 0);
     }
 
     //switch tab navigation
@@ -203,5 +206,88 @@
 
         console.log('[Equity] Listeners bound successfully.');
     }
-    
+
+
+    // Initialize the share premium calculator when the modal is opened
+    // Initialize the share premium calculator when the modal is opened
+    // Initialize the share premium calculator when the modal is opened
+    // Initialize the share premium calculator when the modal is opened
+    function initSharePremiumCalculator() {
+
+    const allCompany = document.querySelectorAll('[name="company_id"]');
+    const allNominal = document.querySelectorAll('#nominal_value');
+    const allIssue = document.querySelectorAll('#issue_price');
+    const allShares = document.querySelectorAll('#shares_issued');
+    const allTotalPremium = document.querySelectorAll('#total_premium');
+
+    console.log('[SharePremium] Total company selects in DOM:', allCompany.length);
+
+    const companySelect = allCompany[allCompany.length - 1];
+    const nominalInput = allNominal[allNominal.length - 1];
+    const issueInput = allIssue[allIssue.length - 1];
+    const sharesInput = allShares[allShares.length - 1];
+    const totalPremiumInput = allTotalPremium[allTotalPremium.length - 1];
+
+    console.log('[SharePremium] companySelect:', companySelect);
+    console.log('[SharePremium] nominalInput:', nominalInput);
+    console.log('[SharePremium] issueInput:', issueInput);
+    console.log('[SharePremium] sharesInput:', sharesInput);
+    console.log('[SharePremium] totalPremiumInput:', totalPremiumInput);
+
+    if (!companySelect || !nominalInput || !issueInput || !sharesInput || !totalPremiumInput) {
+        console.warn('[SharePremium] One or more inputs not found in DOM.');
+        return;
+    }
+
+    console.log('[SharePremium] sharesDefinitionsMap:', sharesDefinitionsMap);
+
+    nominalInput.setAttribute('readonly', true);
+    nominalInput.classList.add('bg-slate-50', 'cursor-not-allowed');
+
+    function calculatePremium() {
+        const nominal = parseFloat(nominalInput.value) || 0;
+        const issue = parseFloat(issueInput.value) || 0;
+        const shares = parseInt(sharesInput.value) || 0;
+
+        const premiumPerShare = issue - nominal;
+        const totalPremium = premiumPerShare * shares;
+
+        console.log('[SharePremium] Total Premium:', totalPremium);
+        totalPremiumInput.value = totalPremium.toFixed(2);
+    }
+
+    function onCompanyChange() {
+        const companyId = companySelect.value;
+        console.log('[SharePremium] Selected company_id:', companyId);
+
+        const definition = sharesDefinitionsMap[companyId];
+        console.log('[SharePremium] Matching definition:', definition);
+
+        if (!definition) {
+            console.warn('[SharePremium] No shares definition found for company:', companyId);
+            nominalInput.value = '';
+            sharesInput.value = '';
+            totalPremiumInput.value = '';
+            return;
+        }
+
+        nominalInput.value = definition.share_value;
+        sharesInput.value = definition.issued_shares;
+
+        console.log('[SharePremium] Autofilled nominal:', definition.share_value, 'shares:', definition.issued_shares);
+
+        calculatePremium();
+    }
+
+    companySelect.addEventListener('change', function() {
+        console.log('[SharePremium] Company select CHANGE event fired. Value:', companySelect.value);
+        onCompanyChange();
+    });
+
+    issueInput.addEventListener('input', calculatePremium);
+    sharesInput.addEventListener('input', calculatePremium);
+
+    console.log('[SharePremium] Listeners bound successfully.');
+}
+
 </script>
