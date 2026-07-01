@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssetRevaluation;
 use App\Models\CreateAssets;
 use Illuminate\Http\Request;
 
@@ -59,9 +60,34 @@ class CreateAssetsController extends Controller
      * This function will take the asset id, the revalued amount, and the reason for revaluation, and will update the asset's current value and create a new record in the revaluation table.
      * 
      */
-    public function revaluate(Request $request, $id)
+    public function revaluate(CreateAssets $asset, Request $request)
     {
-        redirect()->back()->with('error', 'Revaluation feature is not implemented yet.');
+        //dd($request->all());
+
+        $validatedData = $request->validate([
+            'revalued_amount' => 'required|numeric',
+            'surplus' => 'required|numeric',
+            'notes' => 'nullable|string',
+            'date_of_revaluation' => 'nullable|date',
+
+        ]);
+
+        //create a new record in the revaluation table
+        AssetRevaluation::create([
+            'revalued_amount' => $validatedData['revalued_amount'],
+            'notes' => $validatedData['notes'] ?? null,
+            'company_id' => $asset->company_id,
+            'asset_id' => $asset->id,
+            'book_value' => $asset->current_value,
+            'surplus' => $validatedData['surplus'],
+            'date_of_revaluation' => $validatedData['date_of_revaluation'] ?? null,
+        ]);
+
+        //update the asset's current value
+        $asset->current_value = $validatedData['revalued_amount'];
+        $asset->save();
+
+        return redirect()->back()->with('success', 'Asset revaluated successfully');
     }
 
     //public return the asset details for the given id in json

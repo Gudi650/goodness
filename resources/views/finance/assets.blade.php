@@ -56,7 +56,6 @@
 </div>
 
 <script>
-    
     function openEditAssetModal(assetId) {
         console.log('[Asset] Opening edit modal for asset ID:', assetId);
 
@@ -82,6 +81,7 @@
                     const allRevalued = document.querySelectorAll('#revalued_amount');
                     const allSurplus = document.querySelectorAll('#surplus');
                     const allNotes = document.querySelectorAll('textarea[name="notes"]');
+                    const allForms = document.querySelectorAll('#addAssetRevaluationForm'); // ADD THIS
 
                     const companySelect = allCompany[allCompany.length - 1];
                     const assetNameInput = allAssetName[allAssetName.length - 1];
@@ -89,18 +89,17 @@
                     const revaluedInput = allRevalued[allRevalued.length - 1];
                     const surplusInput = allSurplus[allSurplus.length - 1];
                     const notesInput = allNotes[allNotes.length - 1];
-
-                    console.log('[Asset] companySelect:', companySelect);
-                    console.log('[Asset] assetNameInput:', assetNameInput);
-                    console.log('[Asset] bookInput:', bookInput);
-                    console.log('[Asset] revaluedInput:', revaluedInput);
-                    console.log('[Asset] surplusInput:', surplusInput);
+                    const form = allForms[allForms.length - 1]; // ADD THIS
 
                     if (!companySelect || !assetNameInput || !bookInput || !revaluedInput || !
-                        surplusInput) {
+                        surplusInput || !form) {
                         console.warn('[Asset] One or more inputs not found in DOM.');
                         return;
                     }
+
+                    // Set form action dynamically using the fetched asset ID
+                    form.action = `/assets/${asset.id}`;
+                    console.log('[Asset] Form action set to:', form.action);
 
                     // Populate with fetched data
                     companySelect.value = asset.company_id;
@@ -109,20 +108,15 @@
                     revaluedInput.value = '';
                     if (notesInput) notesInput.value = '';
 
-                    console.log('[Asset] Populated modal with asset data.');
-
                     // Bind surplus calculator
                     function calculateSurplus() {
                         const book = parseFloat(bookInput.value) || 0;
                         const revalued = parseFloat(revaluedInput.value) || 0;
                         surplusInput.value = (revalued - book).toFixed(2);
-                        console.log('[Asset] Surplus calculated:', surplusInput.value);
                     }
 
                     bookInput.addEventListener('input', calculateSurplus);
                     revaluedInput.addEventListener('input', calculateSurplus);
-
-                    // Trigger once to show initial surplus
                     calculateSurplus();
 
                     console.log('[Asset] Listeners bound successfully.');
@@ -133,5 +127,4 @@
                 console.error('[Asset] Failed to fetch asset details:', error);
             });
     }
-
 </script>
