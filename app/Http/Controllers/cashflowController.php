@@ -12,63 +12,40 @@ class CashFlowController extends Controller
     public function exportPdf()
     {
         $data = [
-            'company' => 'Apple Inc.',
-            'title' => 'CONSOLIDATED STATEMENTS OF CASH FLOWS',
-            'scale' => '(In millions)',
-            'years' => ['2022', '2021', '2020'],
-            'dates' => ['September 24, 2022', 'September 25, 2021', 'September 26, 2020'],
-            
-            'beginning_cash' => [35929, 39789, 50224],
-            
-            'operating_net_income' => [99803, 94680, 57411],
-            'operating_adjustments' => [
-                'Depreciation and amortization' => [11104, 11284, 11056],
-                'Share-based compensation expense' => [9038, 7906, 6829],
-                'Deferred income tax expense/(benefit)' => [895, -4774, -215],
-                'Other' => [111, -147, -97],
+            'company' => 'JBC Plc.',
+            'title' => 'Statement of Changes in Equity',
+            'period' => '31 December 20X4',
+            'scale' => '(in thousands EUR)',
+            'columns' => [
+                'Share capital',
+                'Share premium',
+                'Retained earnings',
+                'Revaluation surplus (PPE)',
+                'Total equity attributable to the owners of the parent',
             ],
-            'operating_changes' => [
-                'Accounts receivable, net' => [-1823, -10125, 6917],
-                'Inventories' => [1484, -2642, -127],
-                'Vendor non-trade receivables' => [-7520, -3903, 1553],
-                'Other current and non-current assets' => [-6499, -8042, -9588],
-                'Accounts payable' => [9448, 12326, -4062],
-                'Deferred revenue' => [478, 1676, 2081],
-                'Other current and non-current liabilities' => [5632, 5799, 8916],
+            'rows' => [
+                ['label' => 'Balance at 1 Jan 20X3', 'values' => [10000, 1100, 5240, 1000, 17340], 'strong' => true],
+                ['label' => 'Changes in accounting policy', 'values' => [null, null, 660, null, 660]],
+                ['label' => 'Restated balance', 'values' => [10000, 1100, 5900, 1000, 18000], 'strong' => true],
+                ['label' => 'Changes in equity for 20X3:', 'section' => true],
+                ['label' => 'Dividends paid', 'values' => [null, null, -3000, null, -3000], 'indent' => 1],
+                ['label' => 'Profit or loss', 'values' => [null, null, 4800, null, 4800], 'indent' => 1, 'italic' => true],
+                ['label' => 'Other comprehensive income', 'values' => [null, null, null, 580, 580], 'indent' => 1, 'italic' => true],
+                ['label' => 'TCI for the year', 'values' => [null, null, 4800, 580, 5380], 'underline' => true],
+                ['label' => 'Balance at 31 Dec 20X3:', 'values' => [10000, 1100, 7700, 1580, 20380], 'strong' => true],
+                ['label' => 'Changes in equity for 20X4:', 'section' => true],
+                ['label' => 'Issue of shares', 'values' => [2000, 200, null, null, 2200], 'indent' => 1],
+                ['label' => 'Dividends paid', 'values' => [null, null, -2500, null, -2500], 'indent' => 1],
+                ['label' => 'Profit or loss', 'values' => [null, null, 5300, null, 5300], 'indent' => 1, 'italic' => true],
+                ['label' => 'Other comprehensive income', 'values' => [null, null, null, -200, -200], 'indent' => 1, 'italic' => true],
+                ['label' => 'TCI for the year', 'values' => [null, null, 5300, -200, 5100], 'underline' => true],
+                ['label' => 'Balance at 31 Dec 20X4:', 'values' => [12000, 1300, 10500, 1380, 25180], 'strong' => true],
             ],
-            'operating_total' => [122151, 104038, 80674],
-
-            'investing_activities' => [
-                'Purchases of marketable securities' => [-76923, -109558, -114938],
-                'Proceeds from maturities of marketable securities' => [29917, 59023, 69918],
-                'Proceeds from sales of marketable securities' => [37446, 47460, 50473],
-                'Payments for acquisition of property, plant and equipment' => [-10708, -11085, -7309],
-                'Payments made in connection with business acquisitions, net' => [-306, -33, -1524],
-                'Other' => [-1780, -352, -909],
-            ],
-            'investing_total' => [-22354, -14545, -4289],
-
-            'financing_activities' => [
-                'Payments for taxes related to net share settlement of equity awards' => [-6223, -6556, -3634],
-                'Payments for dividends and dividend equivalents' => [-14841, -14467, -14081],
-                'Repurchases of common stock' => [-89402, -85971, -72358],
-                'Proceeds from issuance of term debt, net' => [5465, 20393, 16091],
-                'Repayments of term debt' => [-9543, -8750, -12629],
-                'Proceeds from/(Repayments of) commercial paper, net' => [3955, 1022, -963],
-                'Other' => [-160, 976, 754],
-            ],
-            'financing_total' => [-110749, -93353, -86820],
-
-            'net_decrease' => [-10952, -3860, -10435],
-            'ending_cash' => [24977, 35929, 39789],
-            
-            'supplemental' => [
-                'Cash paid for income taxes, net' => [19573, 25385, 9501],
-                'Cash paid for interest' => [2865, 2687, 3002]
-            ]
         ];
 
         $pdf = Pdf::loadView('reports.cash_flow', compact('data'));
+        $pdf->setPaper('a4', 'landscape');
+
         return $pdf->stream('cash_flow.pdf');
     }
 
