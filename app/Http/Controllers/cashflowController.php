@@ -15,7 +15,28 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class CashFlowController extends Controller
 {
-    public function exportPdf()
+    public function previewPdf()
+    {
+        return $this->renderReportPdf()->stream('cash_flow.pdf');
+    }
+
+    public function downloadPdf()
+    {
+        return $this->renderReportPdf()->download('cash_flow.pdf');
+    }
+
+
+
+
+
+
+    //function to get the dividends paid to shareholders from the dividends table in the database
+    protected function resolveCompanyId(): ?int
+    {
+        return session('active_company_id') ?? Auth::user()?->company_id;
+    }
+
+    protected function buildReportData(): array
     {
         $companyId = $this->resolveCompanyId();
         $companyName = $this->resolveCompanyName($companyId);
@@ -26,10 +47,11 @@ class CashFlowController extends Controller
         $currentSnapshot = $this->buildEquitySnapshot($companyId, $currentYear);
 
         $currentNetIncome = $this->calculateNetIncomeForYear($companyId, $currentYear);
+        $previousNetIncome = $this->calculateNetIncomeForYear($companyId, $previousYear);
         $currentDividends = $this->getDividendsPaid($companyId, $currentYear);
         $previousDividends = $this->getDividendsPaid($companyId, $previousYear);
 
-        $data = [
+        return [
             'company' => $companyName,
             'title' => 'Statement of Changes in Equity',
             'period' => Carbon::create($currentYear, 12, 31)->format('d F Y'),
@@ -42,14 +64,14 @@ class CashFlowController extends Controller
                 'Total equity attributable to the owners of the parent',
             ],
             'rows' => [
-                ['label' => 'Balance at 1 Jan ' . ($previousYear) . '', 'values' => [0, 0, 0, 0, 0], 'strong' => true],
+                ['label' => 'Balance at 1 Jan ' . $previousYear, 'values' => [0, 0, 0, 0, 0], 'strong' => true],
                 ['label' => 'Changes in accounting policy', 'values' => [0, 0, 0, 0, 0]],
                 ['label' => 'Restated balance', 'values' => [0, 0, 0, 0, 0], 'strong' => true],
                 ['label' => 'Changes in equity for ' . $previousYear . ':', 'section' => true],
                 ['label' => 'Dividends paid', 'values' => [0, 0, -1 * $previousDividends, 0, -1 * $previousDividends], 'indent' => 1],
-                ['label' => 'Profit or loss', 'values' => [0, 0, $this->calculateNetIncomeForYear($companyId, $previousYear), 0, $this->calculateNetIncomeForYear($companyId, $previousYear)], 'indent' => 1, 'italic' => true],
+                ['label' => 'Profit or loss', 'values' => [0, 0, $previousNetIncome, 0, $previousNetIncome], 'indent' => 1, 'italic' => true],
                 ['label' => 'Other comprehensive income', 'values' => [0, 0, 0, 0, 0], 'indent' => 1, 'italic' => true],
-                ['label' => 'TCI for the year', 'values' => [0, 0, $this->calculateNetIncomeForYear($companyId, $previousYear), 0, $this->calculateNetIncomeForYear($companyId, $previousYear)], 'underline' => true],
+                ['label' => 'TCI for the year', 'values' => [0, 0, $previousNetIncome, 0, $previousNetIncome], 'underline' => true],
                 ['label' => 'Balance at 31 Dec ' . $previousYear . ':', 'values' => [
                     $previousSnapshot['share_capital'],
                     $previousSnapshot['share_premium'],
@@ -78,22 +100,16 @@ class CashFlowController extends Controller
                 ], 'strong' => true],
             ],
         ];
+    }
+
+    protected function renderReportPdf()
+    {
+        $data = $this->buildReportData();
 
         $pdf = Pdf::loadView('reports.cash_flow', compact('data'));
         $pdf->setPaper('a4', 'landscape');
 
-        return $pdf->stream('cash_flow.pdf');
-    }
-
-
-
-
-
-
-    //function to get the dividends paid to shareholders from the dividends table in the database
-    protected function resolveCompanyId(): ?int
-    {
-        return session('active_company_id') ?? Auth::user()?->company_id;
+        return $pdf;
     }
 
     protected function resolveCompanyName(?int $companyId): string
