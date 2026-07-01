@@ -181,6 +181,8 @@ Route::middleware('auth')->group(function () {
     // Assets management
     Route::controller(CreateAssetsController::class)->group(function () {
         Route::post('/assets', 'store')->name('assets.store');
+        Route::post('/assets/{asset}/revaluate', 'revaluate')->name('assets.revaluate');
+        Route::get('/assets/{asset}/', 'show')->name('assets.revaluate.show');
     });
 
     //Liability managements

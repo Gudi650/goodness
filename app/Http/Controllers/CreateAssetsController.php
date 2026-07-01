@@ -52,4 +52,25 @@ class CreateAssetsController extends Controller
         return $code;
     }
 
+
+
+    /**
+     * function to do revaluation of an asset
+     * This function will take the asset id, the revalued amount, and the reason for revaluation, and will update the asset's current value and create a new record in the revaluation table.
+     * 
+     */
+    public function revaluate(Request $request, $id)
+    {
+        redirect()->back()->with('error', 'Revaluation feature is not implemented yet.');
+    }
+
+    //public return the asset details for the given id in json
+    public function show(CreateAssets $asset)
+    {
+        $asset->load('company', 'category');
+
+        return response()->json($asset);
+    }
+
+
 }

@@ -100,6 +100,7 @@
     @include('finance.modals.add-items-category')
     @include('finance.modals.add-items')
     @include('finance.modals.issue-expenses')
+    @include('finance.modals.assets-revaluation')
 
     <!-- Shared Components -->
     @include('components.modal')
