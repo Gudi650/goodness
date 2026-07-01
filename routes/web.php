@@ -6,7 +6,7 @@ use App\Http\Controllers\balanceSheet as BalanceSheetReportController;
 use App\Http\Controllers\balanceSheet;
 use App\Http\Controllers\balanceSheetController;
 use App\Http\Controllers\BulkImportController;
-use App\Http\Controllers\CashFlowController;
+use App\Http\Controllers\cashflowController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\CreateAssetsController;
