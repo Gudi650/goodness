@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
+use App\Models\AssetRevaluation;
 use App\Models\Dividends;
+use App\Models\SharePremuims;
+use App\Models\SharesDefinitions;
 use App\Services\NetIncome;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -11,10 +17,22 @@ class CashFlowController extends Controller
 {
     public function exportPdf()
     {
+        $companyId = $this->resolveCompanyId();
+        $companyName = $this->resolveCompanyName($companyId);
+        $currentYear = now()->year;
+        $previousYear = $currentYear - 1;
+
+        $previousSnapshot = $this->buildEquitySnapshot($companyId, $previousYear);
+        $currentSnapshot = $this->buildEquitySnapshot($companyId, $currentYear);
+
+        $currentNetIncome = $this->calculateNetIncomeForYear($companyId, $currentYear);
+        $currentDividends = $this->getDividendsPaid($companyId, $currentYear);
+        $previousDividends = $this->getDividendsPaid($companyId, $previousYear);
+
         $data = [
-            'company' => 'JBC Plc.',
+            'company' => $companyName,
             'title' => 'Statement of Changes in Equity',
-            'period' => '31 December 20X4',
+            'period' => Carbon::create($currentYear, 12, 31)->format('d F Y'),
             'scale' => '(in thousands EUR)',
             'columns' => [
                 'Share capital',
@@ -24,22 +42,40 @@ class CashFlowController extends Controller
                 'Total equity attributable to the owners of the parent',
             ],
             'rows' => [
-                ['label' => 'Balance at 1 Jan 20X3', 'values' => [10000, 1100, 5240, 1000, 17340], 'strong' => true],
-                ['label' => 'Changes in accounting policy', 'values' => [null, null, 660, null, 660]],
-                ['label' => 'Restated balance', 'values' => [10000, 1100, 5900, 1000, 18000], 'strong' => true],
-                ['label' => 'Changes in equity for 20X3:', 'section' => true],
-                ['label' => 'Dividends paid', 'values' => [null, null, -3000, null, -3000], 'indent' => 1],
-                ['label' => 'Profit or loss', 'values' => [null, null, 4800, null, 4800], 'indent' => 1, 'italic' => true],
-                ['label' => 'Other comprehensive income', 'values' => [null, null, null, 580, 580], 'indent' => 1, 'italic' => true],
-                ['label' => 'TCI for the year', 'values' => [null, null, 4800, 580, 5380], 'underline' => true],
-                ['label' => 'Balance at 31 Dec 20X3:', 'values' => [10000, 1100, 7700, 1580, 20380], 'strong' => true],
-                ['label' => 'Changes in equity for 20X4:', 'section' => true],
-                ['label' => 'Issue of shares', 'values' => [2000, 200, null, null, 2200], 'indent' => 1],
-                ['label' => 'Dividends paid', 'values' => [null, null, -2500, null, -2500], 'indent' => 1],
-                ['label' => 'Profit or loss', 'values' => [null, null, 5300, null, 5300], 'indent' => 1, 'italic' => true],
-                ['label' => 'Other comprehensive income', 'values' => [null, null, null, -200, -200], 'indent' => 1, 'italic' => true],
-                ['label' => 'TCI for the year', 'values' => [null, null, 5300, -200, 5100], 'underline' => true],
-                ['label' => 'Balance at 31 Dec 20X4:', 'values' => [12000, 1300, 10500, 1380, 25180], 'strong' => true],
+                ['label' => 'Balance at 1 Jan ' . ($previousYear) . '', 'values' => [0, 0, 0, 0, 0], 'strong' => true],
+                ['label' => 'Changes in accounting policy', 'values' => [0, 0, 0, 0, 0]],
+                ['label' => 'Restated balance', 'values' => [0, 0, 0, 0, 0], 'strong' => true],
+                ['label' => 'Changes in equity for ' . $previousYear . ':', 'section' => true],
+                ['label' => 'Dividends paid', 'values' => [0, 0, -1 * $previousDividends, 0, -1 * $previousDividends], 'indent' => 1],
+                ['label' => 'Profit or loss', 'values' => [0, 0, $this->calculateNetIncomeForYear($companyId, $previousYear), 0, $this->calculateNetIncomeForYear($companyId, $previousYear)], 'indent' => 1, 'italic' => true],
+                ['label' => 'Other comprehensive income', 'values' => [0, 0, 0, 0, 0], 'indent' => 1, 'italic' => true],
+                ['label' => 'TCI for the year', 'values' => [0, 0, $this->calculateNetIncomeForYear($companyId, $previousYear), 0, $this->calculateNetIncomeForYear($companyId, $previousYear)], 'underline' => true],
+                ['label' => 'Balance at 31 Dec ' . $previousYear . ':', 'values' => [
+                    $previousSnapshot['share_capital'],
+                    $previousSnapshot['share_premium'],
+                    $previousSnapshot['retained_earnings'],
+                    $previousSnapshot['revaluation_surplus'],
+                    $previousSnapshot['total_equity'],
+                ], 'strong' => true],
+                ['label' => 'Changes in equity for ' . $currentYear . ':', 'section' => true],
+                ['label' => 'Issue of shares', 'values' => [
+                    max($currentSnapshot['share_capital'] - $previousSnapshot['share_capital'], 0),
+                    max($currentSnapshot['share_premium'] - $previousSnapshot['share_premium'], 0),
+                    0,
+                    0,
+                    max($currentSnapshot['total_equity'] - $previousSnapshot['total_equity'], 0),
+                ], 'indent' => 1],
+                ['label' => 'Dividends paid', 'values' => [0, 0, -1 * $currentDividends, 0, -1 * $currentDividends], 'indent' => 1],
+                ['label' => 'Profit or loss', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'indent' => 1, 'italic' => true],
+                ['label' => 'Other comprehensive income', 'values' => [0, 0, 0, 0, 0], 'indent' => 1, 'italic' => true],
+                ['label' => 'TCI for the year', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'underline' => true],
+                ['label' => 'Balance at 31 Dec ' . $currentYear . ':', 'values' => [
+                    $currentSnapshot['share_capital'],
+                    $currentSnapshot['share_premium'],
+                    $currentSnapshot['retained_earnings'],
+                    $currentSnapshot['revaluation_surplus'],
+                    $currentSnapshot['total_equity'],
+                ], 'strong' => true],
             ],
         ];
 
@@ -55,31 +91,126 @@ class CashFlowController extends Controller
 
 
     //function to get the dividends paid to shareholders from the dividends table in the database
-    protected function getDividendsPaid()
+    protected function resolveCompanyId(): ?int
     {
-        $dividends = Dividends::where('status', 'Declared')->get();
+        return session('active_company_id') ?? Auth::user()?->company_id;
+    }
 
-        //get the sum of dividends in the column amount
-        $dividendsPaid = $dividends->sum('amount');
+    protected function resolveCompanyName(?int $companyId): string
+    {
+        if (! $companyId) {
+            return 'Company';
+        }
 
-        return $dividendsPaid;
+        return Company::query()->whereKey($companyId)->value('name') ?: 'Company';
+    }
+
+    protected function buildEquitySnapshot(?int $companyId, int $year): array
+    {
+        $shareCapital = $this->getShareCapital($companyId, $year);
+        $sharePremium = $this->getSharePremium($companyId, $year);
+        $retainedEarnings = $this->getRetainedEarnings($companyId, $year);
+        $revaluationSurplus = $this->getRevaluationSurplus($companyId, $year);
+
+        return [
+            'share_capital' => $shareCapital,
+            'share_premium' => $sharePremium,
+            'retained_earnings' => $retainedEarnings,
+            'revaluation_surplus' => $revaluationSurplus,
+            'total_equity' => $shareCapital + $sharePremium + $retainedEarnings + $revaluationSurplus,
+        ];
+    }
+
+    protected function getShareCapital(?int $companyId, int $year): float
+    {
+        $definition = SharesDefinitions::query()
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
+            ->whereYear('created_at', '<=', $year)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->first();
+
+        if (! $definition) {
+            return 0.0;
+        }
+
+        $issuedShares = (float) ($definition->issued_shares ?? 0);
+        $shareValue = (float) ($definition->share_value ?? 0);
+
+        return $issuedShares * $shareValue;
+    }
+
+    protected function getSharePremium(?int $companyId, int $year): float
+    {
+        return (float) SharePremuims::query()
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
+            ->whereYear('created_at', '<=', $year)
+            ->sum('total_premium');
+    }
+
+    protected function getDividendsPaid(?int $companyId = null, ?int $year = null): float
+    {
+        $query = Dividends::query()->where('status', 'Declared');
+
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        }
+
+        if ($year) {
+            $query->where(function ($subQuery) use ($year) {
+                $subQuery->whereYear('paid_at', $year)
+                    ->orWhere(function ($paidQuery) use ($year) {
+                        $paidQuery->whereNull('paid_at')
+                            ->whereYear('declared_at', $year);
+                    });
+            });
+        }
+
+        $dividendsPaid = $query->sum('amount');
+
+        return (float) $dividendsPaid;
     }
 
     //function to get returned earnings
-    protected function getRetainedEarnings()
+    protected function getRetainedEarnings(?int $companyId = null, ?int $year = null)
     {
-        $dividends = $this->getDividendsPaid();
+        $dividends = $this->getDividendsPaid($companyId, $year);
 
         //get the net income from the net income service
-        $netIncome = app(NetIncome::class)->calculateNetIncome();
+        $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
 
         //get the retained earnings by subtracting the dividends paid from the net income
         $retainedEarnings = $netIncome - $dividends;
 
-        return $retainedEarnings;
+        return (float) $retainedEarnings;
     }
 
-    //function to 
+    //function to get the retained suplus
+    protected function getRevaluationSurplus(?int $companyId = null, ?int $year = null)
+    {
+        //get the revaluation surplus from the asset revaluation table in the database
+        $query = AssetRevaluation::query();
+
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        }
+
+        if ($year) {
+            $query->where(function ($subQuery) use ($year) {
+                $subQuery->whereYear('date_of_revaluation', '<=', $year)
+                    ->orWhereYear('created_at', '<=', $year);
+            });
+        }
+
+        $revaluationSurplus = $query->sum('surplus');
+
+        return (float) $revaluationSurplus;
+    }
+
+    protected function calculateNetIncomeForYear(?int $companyId = null, ?int $year = null): float
+    {
+        return app(NetIncome::class)->calculateNetIncome($companyId, $year);
+    }
 
 
 }
