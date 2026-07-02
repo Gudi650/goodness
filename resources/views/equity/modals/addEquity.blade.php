@@ -11,7 +11,7 @@
                 @forelse ($sharesDefinitions as $share)
                     <option value="{{ $share->company->id }}">{{ $share->company->name }}</option> 
                 @empty
-                    <p class="text-sm text-red-500">Please add equity definitions of the companies first.</p>
+                    <option class="text-sm text-red-500" disabled>Please add equity definitions of the companies first.</option>
                 @endforelse
             </select>
         </div>
