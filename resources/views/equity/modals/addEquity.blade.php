@@ -8,9 +8,11 @@
             <select name="company_id"
                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                 <option value="">Select company...</option>
-                @foreach($sharesDefinitions as $share)
-                    <option value="{{ $share->company->id }}">{{ $share->company->name }}</option>
-                @endforeach
+                @forelse ($sharesDefinitions as $share)
+                    <option value="{{ $share->company->id }}">{{ $share->company->name }}</option> 
+                @empty
+                    <p class="text-sm text-red-500">Please add equity definitions of the companies first.</p>
+                @endforelse
             </select>
         </div>
 

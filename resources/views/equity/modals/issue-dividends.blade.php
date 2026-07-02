@@ -17,9 +17,13 @@
                 <select name="company_id"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                     <option value="">Select company...</option>
-                    @foreach ($sharesDefinitions as $share)
+                    
+                    @forelse ($sharesDefinitions as $share)
                         <option value="{{ $share->company->id }}">{{ $share->company->name }}</option>
-                    @endforeach
+                    @empty
+                        <p class="text-sm text-red-500">Please add equity definitions of the companies first.</p>
+                    @endforelse
+
                 </select>
             </div>
 
@@ -71,8 +75,8 @@
         document.getElementById('issueDividendModal').classList.remove('flex');
     }
 
-        // Show loading indicator on form submit
-    document.querySelector('#issueDividendModal form').addEventListener('submit', function () {
+    // Show loading indicator on form submit
+    document.querySelector('#issueDividendModal form').addEventListener('submit', function() {
         document.getElementById('IssueDividendCreateLoader').classList.remove('hidden');
     });
 
@@ -80,6 +84,4 @@
         const loader = document.getElementById('IssueDividendCreateLoader');
         if (loader) loader.classList.remove('hidden');
     }
-
-
 </script>
