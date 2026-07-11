@@ -112,6 +112,34 @@
             </div>
         </div>
 
+        @if (!empty($pendingReviewCount ?? 0) && !empty($firstPendingReviewExpenseId))
+            <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-amber-200 bg-white text-amber-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008ZM10.06 3.598a9 9 0 1 1 3.88 16.804 9 9 0 0 1-3.88-16.804Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-amber-900">Review reminder</p>
+                            <p class="mt-1 text-sm leading-6 text-amber-800">
+                                You have {{ $pendingReviewCount }} expense{{ $pendingReviewCount === 1 ? '' : 's' }} waiting for your review.
+                                Please submit the feedback and supporting evidence so the finance team can close the record.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('expenses.review', ['expense' => $firstPendingReviewExpenseId]) }}"
+                           class="inline-flex items-center justify-center rounded-md bg-amber-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-700">
+                            Review now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Secondary Metrics -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <!-- Invoice Amount -->

@@ -30,6 +30,7 @@ class DashboardController extends Controller
             $this->employeeMetrics(...$context),
             $this->invoiceMetrics(...$context),
             $this->expenseMetrics(...$context),
+            $this->expenseReviewReminderMetrics(...$context),
             $this->leaveMetrics(...$context),
             $this->inventoryMetrics(...$context),
             $this->recentTransactionMetrics(...$context),
@@ -137,6 +138,30 @@ class DashboardController extends Controller
                 ->count(),
             'totalExpenseAmount' => (clone $this->applyCompanyScope(Expense::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant))
                 ->sum('net_amount') ?? 0,
+        ];
+    }
+
+    private function expenseReviewReminderMetrics($currentUser, bool $isAdmin, $activeCompanyId, bool $isCEO, bool $isAccountant): array
+    {
+        $pendingReviewQuery = Expense::query()
+            ->where('status', 'issued')
+            ->whereNull('reviewed_at');
+
+        if (! empty($currentUser?->company_id)) {
+            $pendingReviewQuery->where('company_id', $currentUser->company_id);
+        }
+
+        if (! empty($currentUser?->id)) {
+            $pendingReviewQuery->where('created_by', $currentUser->id);
+        }
+
+        $pendingReviewExpense = (clone $pendingReviewQuery)
+            ->orderByDesc('created_at')
+            ->first(['id']);
+
+        return [
+            'pendingReviewCount' => (clone $pendingReviewQuery)->count(),
+            'firstPendingReviewExpenseId' => $pendingReviewExpense?->id,
         ];
     }
 
