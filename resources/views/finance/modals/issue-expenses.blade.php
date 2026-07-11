@@ -2,8 +2,7 @@
 <div id="issueExpensesModal" class="hidden ">
 
 
-    <form action="#" method="POST" id="issueExpensesForm" class="space-y-4"
-        onsubmit="showissueExpensesCreateLoader()">
+    <form action="#" method="POST" id="issueExpensesForm" class="space-y-4" onsubmit="showissueExpensesCreateLoader()">
 
         @csrf
 
@@ -21,6 +20,30 @@
 
             </select>
         </div>
+
+        <!--add payment method select-->
+        <div>
+            <label class="mb-1 block text-sm font-medium text-slate-700">Payment Method </label>
+            <select id="expensePaymentMethod" name="payment_method_id" required
+                class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
+                <option value="">Select payment method...</option>
+
+                <option value="">Select payment method...</option>
+                <!--<option value="Cash">Cash</option> -->
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Mobile Money">Mobile Money</option>
+                <option value="Cheque">Cheque</option>
+
+            </select>
+        </div>
+
+        <!--add reference input-->
+        <div>
+            <label class="block text-sm font-medium text-slate-700">Reference</label>
+            <input type="text" name="reference" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="Enter reference">
+        </div>
+        
 
         <div>
             <label class="block text-sm font-medium text-slate-700">Description</label>

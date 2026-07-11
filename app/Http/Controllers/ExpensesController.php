@@ -99,7 +99,7 @@ class ExpensesController extends Controller
             'department_id' => 'required|exists:departments,id',
             'category' => 'required|string|max:100',
             'sub_category' => 'nullable|string|max:100',
-            'payment_method' => 'required|string|max:50',
+            'payment_method' => 'nullable|string|max:50',
             'reference_number' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0',
             'vat_included' => 'required|boolean',
@@ -108,7 +108,6 @@ class ExpensesController extends Controller
             'net_amount' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
             'submit_mode' => 'nullable|in:draft,submit',
-            //'bank_id' => 'required|exists:virtual_accounts,id',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'term' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:5000',
@@ -127,7 +126,7 @@ class ExpensesController extends Controller
         $mode = $validated['submit_mode'] ?? 'submit';
         $status = $mode === 'draft' ? 'draft' : 'submitted';
 
-        //check if the bank submitted is of same company and also check if the bank has sufficient money as well
+        /*check if the bank submitted is of same company and also check if the bank has sufficient money as well
         if (isset($validated['bank_id'])) {
             $bankId = $validated['bank_id'];
             $companyId = $validated['company_id'];
@@ -137,7 +136,10 @@ class ExpensesController extends Controller
                 return redirect()->back()->with('error', 'Invalid bank account or insufficient funds for this expense.');
             }
 
-        }
+        } */
+
+        //force a temporary payment method
+        $validated['payment_method'] = 'To be determined';
 
         $expense = new Expense();
         $expense->forceFill([
@@ -145,7 +147,6 @@ class ExpensesController extends Controller
             'expense_date' => $validated['expense_date'],
             'company_id' => (int) $validated['company_id'],
             'department_id' => (int) $validated['department_id'],
-            'bank_id' => $validated['bank_id'],
             'created_by' => Auth::id(),
             'status' => $status,
             'category' => $validated['category'],
@@ -251,7 +252,6 @@ class ExpensesController extends Controller
 
                 $expense->status = 'approved';
                 $expense->approved_by = Auth::id();
-                $expense->approved_at = Carbon::now();
                 $expense->save();
 
                 return redirect()->route('finance')->with('success', 'Expense approved successfully.');
@@ -352,6 +352,8 @@ class ExpensesController extends Controller
         //get the requested data and validate it 
         $validated = $request->validate([
             'bank_id' => 'required|exists:virtual_accounts,id',
+            'payment_method' => 'required|string|max:50',
+            'reference_number' => 'nullable|string|max:100',
         ]);
 
         //dd($validated);
@@ -370,6 +372,7 @@ class ExpensesController extends Controller
         //dd($isAccountant);
 
         if ($isAccountant) {
+
             if ($expense->status !== 'approved') {
                 return redirect()->route('finance')->with('error', 'Expense must be approved by the CEO before it can be issued by the Accountant.');
             }
@@ -381,6 +384,9 @@ class ExpensesController extends Controller
                     // Mark expense as issued
                     $expense->status = 'issued';
                     $expense->issued_by = Auth::id();
+                    $expense->payment_method = $validated['payment_method'];
+                    $expense->reference_number = $validated['reference'];
+                    $expense->issued_at = Carbon::now();
                     $expense->bank_id = $validated['bank_id'];
 
                     // Deduct from bank account
