@@ -35,7 +35,7 @@
             <!-- #trial balance -->
             <option value="trial" @selected(($reportType ?? '') === 'trial')>Trial Balance</option>
             <!-- #cash flow -->
-            <option value="cashflow" @selected(($reportType ?? '') === 'cashflow')>Cash Flow Statement</option>
+            <option value="cashflow" @selected(($reportType ?? '') === 'cashflow')>Equity Statement</option>
           </select>
         </div>
 
