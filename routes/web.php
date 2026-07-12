@@ -6,7 +6,7 @@ use App\Http\Controllers\balanceSheet as BalanceSheetReportController;
 use App\Http\Controllers\balanceSheet;
 use App\Http\Controllers\balanceSheetController;
 use App\Http\Controllers\BulkImportController;
-use App\Http\Controllers\cashflowController;
+use App\Http\Controllers\CashFlowController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\CreateAssetsController;
@@ -23,7 +23,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FinanceItemsController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\IncomeStatement as IncomeStatementReportController;
-use App\Http\Controllers\incomeStatement;
+use App\Http\Controllers\IncomeStatement;
 use App\Http\Controllers\InternalMessagesController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvoiceController;
@@ -42,7 +42,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SharePremuimsController;
 use App\Http\Controllers\SharesDefinitionsController;
 use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\trialbalanceController;
+use App\Http\Controllers\TrialBalanceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VirtualAccountsController;
 use Illuminate\Support\Facades\Route;
@@ -434,14 +434,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/far', [FAR::class, 'index'])->name('far');
 
     // Dedicated financial statement previews and exports
-    Route::get('/balance-sheet', [balanceSheetController::class, 'index'])->name('balance-sheet');
-    Route::get('/balance_sheet', [balanceSheetController::class, 'exportPdf'])->name('balance_sheet');
-    Route::get('/income-statement', [incomeStatement::class, 'index'])->name('income-statement');
-    Route::get('/income-statement-export', [incomeStatement::class, 'exportPdf'])->name('income-statement-export');
-    Route::get('/trial-balance', [trialbalanceController::class, 'index'])->name('trial-balance');
-    Route::get('/trial-balance-export', [trialbalanceController::class, 'exportPdf'])->name('trial-balance-export');
-    Route::get('/cash-flow', [cashflowController::class, 'previewPdf'])->name('cash-flow');
-    Route::get('/cash-flow-export', [cashflowController::class, 'downloadPdf'])->name('cash-flow-export');
+    Route::get('/balance-sheet', [BalanceSheetController::class, 'index'])->name('balance-sheet');
+    Route::get('/balance_sheet', [BalanceSheetController::class, 'exportPdf'])->name('balance_sheet');
+    Route::get('/income-statement', [IncomeStatement::class, 'index'])->name('income-statement');
+    Route::get('/income-statement-export', [IncomeStatement::class, 'exportPdf'])->name('income-statement-export');
+    Route::get('/trial-balance', [TrialBalanceController::class, 'index'])->name('trial-balance');
+    Route::get('/trial-balance-export', [TrialBalanceController::class, 'exportPdf'])->name('trial-balance-export');
+    Route::get('/cash-flow', [CashFlowController::class, 'previewPdf'])->name('cash-flow');
+    Route::get('/cash-flow-export', [CashFlowController::class, 'downloadPdf'])->name('cash-flow-export');
 
     // Reports & Analytics
     Route::post('/reports', [ReportController::class, 'expenses'])->name('reports');
