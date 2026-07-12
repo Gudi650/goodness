@@ -135,14 +135,16 @@
                         <option value="Cheque">Cheque</option>
                     </select>
                 </div>
-                 --}}
-
+                 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Reference Number</label>
                     <input type="text" id="expenseReference" name="reference_number"
                         placeholder="Receipt / Cheque / M-Pesa Txn ID"
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                 </div>
+
+                --}}
+
 
                 <!-- Long Term / Short Term -->
                 <div>
