@@ -63,7 +63,9 @@ class CashFlowController extends Controller
                 'Revaluation surplus (PPE)',
                 'Total equity attributable to the owners of the parent',
             ],
+            
             'rows' => [
+
                 ['label' => 'Balance at 1 Jan ' . $previousYear, 'values' => [0, 0, 0, 0, 0], 'strong' => true],
                 ['label' => 'Changes in accounting policy', 'values' => [0, 0, 0, 0, 0]],
                 ['label' => 'Restated balance', 'values' => [0, 0, 0, 0, 0], 'strong' => true],
@@ -72,6 +74,7 @@ class CashFlowController extends Controller
                 ['label' => 'Profit or loss', 'values' => [0, 0, $previousNetIncome, 0, $previousNetIncome], 'indent' => 1, 'italic' => true],
                 ['label' => 'Other comprehensive income', 'values' => [0, 0, 0, 0, 0], 'indent' => 1, 'italic' => true],
                 ['label' => 'TCI for the year', 'values' => [0, 0, $previousNetIncome, 0, $previousNetIncome], 'underline' => true],
+
                 ['label' => 'Balance at 31 Dec ' . $previousYear . ':', 'values' => [
                     $previousSnapshot['share_capital'],
                     $previousSnapshot['share_premium'],
@@ -79,7 +82,9 @@ class CashFlowController extends Controller
                     $previousSnapshot['revaluation_surplus'],
                     $previousSnapshot['total_equity'],
                 ], 'strong' => true],
+
                 ['label' => 'Changes in equity for ' . $currentYear . ':', 'section' => true],
+
                 ['label' => 'Issue of shares', 'values' => [
                     max($currentSnapshot['share_capital'] - $previousSnapshot['share_capital'], 0),
                     max($currentSnapshot['share_premium'] - $previousSnapshot['share_premium'], 0),
@@ -87,10 +92,12 @@ class CashFlowController extends Controller
                     0,
                     max($currentSnapshot['total_equity'] - $previousSnapshot['total_equity'], 0),
                 ], 'indent' => 1],
+
                 ['label' => 'Dividends paid', 'values' => [0, 0, -1 * $currentDividends, 0, -1 * $currentDividends], 'indent' => 1],
                 ['label' => 'Profit or loss', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'indent' => 1, 'italic' => true],
                 ['label' => 'Other comprehensive income', 'values' => [0, 0, 0, 0, 0], 'indent' => 1, 'italic' => true],
                 ['label' => 'TCI for the year', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'underline' => true],
+                
                 ['label' => 'Balance at 31 Dec ' . $currentYear . ':', 'values' => [
                     $currentSnapshot['share_capital'],
                     $currentSnapshot['share_premium'],
@@ -98,6 +105,7 @@ class CashFlowController extends Controller
                     $currentSnapshot['revaluation_surplus'],
                     $currentSnapshot['total_equity'],
                 ], 'strong' => true],
+
             ],
         ];
     }
