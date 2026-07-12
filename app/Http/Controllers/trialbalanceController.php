@@ -65,7 +65,7 @@ class TrialBalanceController extends Controller
         $totalCr = $this->getTotalCr($reportData);
 
 
-        return view('reports.trial_balance', $reportData, array_merge($reportData, [
+        return view('reports.trial_balance', array_merge($reportData, [
             'totalDr' => $totalDr,
             'totalCr' => $totalCr,
         ]));

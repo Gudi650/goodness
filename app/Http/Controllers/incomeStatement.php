@@ -129,7 +129,7 @@ class IncomeStatement extends Controller
             return collect();
         }
 
-        return $expenses;
+        return $expenses->filter();
     }
 
     //function to get the total of all expenses per categories
@@ -139,13 +139,13 @@ class IncomeStatement extends Controller
 
         return $expenses
             ->groupBy(function ($expense) {
-                return $expense->category;
+                return $expense?->category ?? 'Uncategorized';
             })
             ->map(function ($categoryExpenses) {
 
                 return $categoryExpenses
                     ->groupBy(function ($expense) {
-                        return $expense->financeItem->item_name ?? 'Uncategorized';
+                        return $expense?->financeItem?->item_name ?? 'Uncategorized';
                     })
                     ->map(function ($itemExpenses) {
                         return $itemExpenses->sum('amount');
