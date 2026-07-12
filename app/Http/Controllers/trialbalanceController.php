@@ -15,6 +15,7 @@ class TrialBalanceController extends Controller
 
 
     //function to get report data for trial balance report
+    //changes
     private function reportData(): array
     {
 
