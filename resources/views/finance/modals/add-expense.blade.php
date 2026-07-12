@@ -152,8 +152,8 @@
                     <select id="expenseTerm" name="term"
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="">Select Liability Type...</option>
-                        <option value="Current_liabilities">Current Liabilities</option>
-                        <option value="NonCurrent_liabilities">Non Current Liabilities</option>
+                        <option value="current_liabilities">Current Liabilities</option>
+                        <option value="non_current_liabilities">Non Current Liabilities</option>
                     </select>
                 </div>
 
