@@ -440,6 +440,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/cash-flow', [CashFlowController::class, 'previewPdf'])->name('cash-flow');
     Route::get('/cash-flow-export', [CashFlowController::class, 'downloadPdf'])->name('cash-flow-export');
 
+
+    //Routes for hatcheering an prouction processes
+    Route::get('/production', function () {
+        return view('production');
+    })->name('production');
+
+    //Routes for machine maintenance and monitoring
+    Route::get('/machine', function () {
+        return view('machine');
+    })->name('machine');
+
+
+
     // Reports & Analytics
     Route::post('/reports', [ReportController::class, 'expenses'])->name('reports');
     Route::get('/reports', [ReportController::class, 'expenses'])->name('reports-get');

@@ -133,9 +133,9 @@
                 Fixed Asset Register
             </a>
 
-            <a href="/far"
+            <a href="/machine"
                 class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 mx-2 transition-colors"
-                data-path="/far">
+                data-path="/machine">
 
                 <svg xmlns="http://www.w3.org/2000/svg"
                     class="w-5 h-5"
@@ -151,9 +151,9 @@
                 Machine Monitoring
             </a>
 
-            <a href="/far"
+            <a href="/production"
                 class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 mx-2 transition-colors"
-                data-path="/far">
+                data-path="/production">
 
                 <svg xmlns="http://www.w3.org/2000/svg"
                     class="w-5 h-5"
