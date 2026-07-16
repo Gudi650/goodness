@@ -14,6 +14,9 @@
     //get the menager
     $manager = $currentUser?->role?->name === 'Manager' ? $currentUser : null;
 
+    //get the usser is of company hatchery
+    $isHatchery = $currentUser?->company?->name === 'Goodness Hatchery' || $isAlwaysAuthorized;
+
 @endphp
 
 <div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden" onclick="toggleSidebar()">
@@ -34,6 +37,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Navigation Links -->
     <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
@@ -80,6 +84,39 @@
             </svg>
             HRM
         </a>
+
+        <!--check the user has to be of company hatchery or is always authorized to view the production and hatchery link-->
+        @if ($isHatchery)
+            <a href="/production"
+                class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
+                data-path="/production">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9.75 17L9 21h6l-.75-4M4 5h16v12H4z" />
+                </svg>
+                Production and Hatchery
+            </a>
+
+            <a href="/machine"
+                class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 mx-2 transition-colors"
+                data-path="/machine">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9.75 17L9 21h6l-.75-4M4 5h16v12H4z"/>
+                </svg>
+
+                Machine Monitoring
+            </a>
+
+        @endif
+
 
         @if ($isAlwaysAuthorized || $accountant || $manager)
             <a href="/finance"
@@ -133,41 +170,6 @@
                 Fixed Asset Register
             </a>
 
-            <a href="/machine"
-                class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 mx-2 transition-colors"
-                data-path="/machine">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    class="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2">
-                    <path stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M9.75 17L9 21h6l-.75-4M4 5h16v12H4z"/>
-                </svg>
-
-                Machine Monitoring
-            </a>
-
-            <a href="/production"
-                class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 mx-2 transition-colors"
-                data-path="/production">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    class="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2">
-                    <path stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M3 21h18M5 21V8l5 3V5l6 4v12M9 21v-4h2v4m4 0v-6h2v6"/>
-                </svg>
-
-                Production
-            </a>
 
             <a href="/reports"
                 class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
