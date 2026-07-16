@@ -111,7 +111,7 @@
                 </div>
             </div>
         </div>
-        {{-- 
+        
         @if (!empty($pendingReviewCount ?? 0) && !empty($firstPendingReviewExpenseId))
             <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -139,7 +139,7 @@
                 </div>
             </div>
         @endif
-         --}}
+         
 
         <!-- Secondary Metrics -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

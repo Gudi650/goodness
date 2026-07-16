@@ -196,7 +196,14 @@ class DashboardController extends Controller
             ->limit(5)
             ->get(['id', 'invoice_number', 'total_amount', 'status', 'created_at']);
 
-        $recentPayments = $this->applyCompanyScope(Payment::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant)
+        $recentPaymentsQuery = Payment::query();
+        $paymentCompanyName = $this->resolvePaymentCompanyName($currentUser, $activeCompanyId, $isAdmin, $isCEO, $isAccountant);
+
+        if ($paymentCompanyName) {
+            $recentPaymentsQuery->where('company', $paymentCompanyName);
+        }
+
+        $recentPayments = $recentPaymentsQuery
             ->orderByDesc('created_at')
             ->limit(5)
             ->get(['id', 'payment_reference', 'amount', 'payment_status', 'created_at']);
@@ -205,6 +212,19 @@ class DashboardController extends Controller
             'recentInvoices' => $recentInvoices,
             'recentPayments' => $recentPayments,
         ];
+    }
+
+    private function resolvePaymentCompanyName($currentUser, $activeCompanyId, bool $isAdmin, bool $isCEO, bool $isAccountant): ?string
+    {
+        if ($isAdmin || $isCEO || $isAccountant) {
+            if (! empty($activeCompanyId)) {
+                return Company::query()->whereKey($activeCompanyId)->value('name');
+            }
+
+            return null;
+        }
+
+        return $currentUser?->company?->name;
     }
     
 }
