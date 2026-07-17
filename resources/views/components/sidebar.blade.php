@@ -86,7 +86,7 @@
         </a>
 
         <!--check the user has to be of company hatchery or is always authorized to view the production and hatchery link-->
-        @if ($isHatchery)
+        @if ($isHatchery || $isAlwaysAuthorized)
             <a href="/production"
                 class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
                 data-path="/production">
