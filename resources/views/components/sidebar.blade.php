@@ -15,7 +15,7 @@
     $manager = $currentUser?->role?->name === 'Manager' ? $currentUser : null;
 
     //get the usser is of company hatchery
-    $isHatchery = $currentUser?->company?->name === 'Goodness Hatchery' || $isAlwaysAuthorized;
+    $isHatchery = $currentUser?->company?->name === 'Goodness Hatchery' : null;
 
 @endphp
 
