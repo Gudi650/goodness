@@ -79,7 +79,7 @@
         {{-- depriciation value --}}
         <div>
             <label class="block text-sm font-medium text-slate-700">Depreciation Value(%) per Year</label>
-            <input type="number" name="depreciation_value"
+            <input type="text" name="depreciation_value"
                 class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500">
         </div>
 
