@@ -12,7 +12,7 @@ class SharesDefinitionsController extends Controller
     {
 
         //dup the request data and validate it
-        dd($request->all());
+        //dd($request->all());
         
         $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
