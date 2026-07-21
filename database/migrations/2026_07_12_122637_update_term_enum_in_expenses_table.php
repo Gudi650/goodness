@@ -12,12 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         DB::statement("ALTER TABLE expenses MODIFY term ENUM(
             'short_term',
             'long_term',
             'current_liabilities',
             'non_current_liabilities'
         ) NOT NULL DEFAULT 'short_term'");
+
     }
 
     /**
@@ -25,9 +27,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+
         DB::statement("ALTER TABLE expenses MODIFY term ENUM(
             'short_term',
             'long_term'
         ) NOT NULL DEFAULT 'short_term'");
+
     }
 };

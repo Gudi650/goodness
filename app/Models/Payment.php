@@ -13,7 +13,7 @@ class Payment extends Model
     protected $fillable = [
         'payment_reference',
         'payment_date',
-        'company',
+        'company_id',
         'payment_direction',
         'party_name',
         'payment_method',
@@ -35,6 +35,15 @@ class Payment extends Model
         'amount' => 'decimal:2',
         'exchange_rate' => 'decimal:4',
     ];
+
+
+    //relationship
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
 
     /**
      * Get the calculated TZS equivalent amount
