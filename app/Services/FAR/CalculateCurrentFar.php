@@ -110,6 +110,7 @@ class CalculateCurrentFar
         }
 
         foreach ($assetsToDepreciate as $asset) {
+
             $acquisitionDate   = $asset->acquired;
             $currentDate       = now();
             $depreciationRate  = $asset->depreciation_value;
@@ -126,7 +127,7 @@ class CalculateCurrentFar
             $currentValue = max(0, $asset->original_value - $depreciationValue);
 
             // Update asset in memory
-            $asset->depreciation_value = $depreciationValue;
+            //$asset->depreciation_value = $depreciationValue;
             $asset->current_value      = $currentValue;
         }
 
