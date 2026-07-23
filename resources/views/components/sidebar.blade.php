@@ -170,6 +170,16 @@
                 Fixed Asset Register
             </a>
 
+            <a href="/vataccount"
+                class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
+                data-path="/vataccount">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5h9m-9 4h9m-9 4h9m-9 4h9M5 5h.01M5 9h.01M5 13h.01M5 17h.01" />
+                </svg>
+                VAT Account
+            </a>
+
 
             <a href="/reports"
                 class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
