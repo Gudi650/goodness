@@ -452,6 +452,12 @@ Route::middleware('auth')->group(function () {
     })->name('machine');
 
 
+    //VAT Accounting
+    Route::get('/vataccount', function () {
+        return view('vat-account');
+    })->name('vataccount');
+
+
 
     // Reports & Analytics
     Route::post('/reports', [ReportController::class, 'expenses'])->name('reports');

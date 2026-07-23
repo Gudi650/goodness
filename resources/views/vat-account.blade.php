@@ -52,22 +52,8 @@
 
 <body class="bg-slate-50 text-slate-800">
 
-    <!-- Topbar -->
-    <header class="fixed top-0 left-0 right-0 h-16 bg-white border-b flex items-center px-6 z-20">
-        <span class="font-display font-semibold text-lg text-brand-700">Goodness ERP</span>
-    </header>
-
-    <!-- Sidebar -->
-    <aside class="hidden lg:block fixed top-16 left-0 bottom-0 w-64 bg-white border-r p-4">
-        <nav class="text-sm space-y-1">
-            <a href="#" class="block px-3 py-2 rounded hover:bg-slate-50 text-slate-600">Dashboard</a>
-            <a href="#" class="block px-3 py-2 rounded hover:bg-slate-50 text-slate-600">Sales</a>
-            <a href="#" class="block px-3 py-2 rounded hover:bg-slate-50 text-slate-600">Purchases</a>
-            <a href="#" class="block px-3 py-2 rounded bg-brand-50 text-brand-700 font-medium">VAT Account</a>
-            <a href="#" class="block px-3 py-2 rounded hover:bg-slate-50 text-slate-600">Fixed Assets</a>
-            <a href="#" class="block px-3 py-2 rounded hover:bg-slate-50 text-slate-600">Reports</a>
-        </nav>
-    </aside>
+    @include('components.topbar')
+    @include('components.sidebar')
 
     <main class="ml-0 lg:ml-64 pt-20 p-6">
 
