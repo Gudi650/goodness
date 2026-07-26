@@ -21,6 +21,9 @@ class MachineMaintenanceController extends Controller
      */
     public function index(): View
     {
+
+        //dd('debug');
+
         $machines = Machine::with('technician')
             ->orderBy('name')
             ->get();

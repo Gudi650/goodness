@@ -19,6 +19,13 @@ use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\FAR;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FinanceItemsController;
+use App\Http\Controllers\HatcheryMachine\CalibrationController;
+use App\Http\Controllers\HatcheryMachine\IotSensorController;
+use App\Http\Controllers\HatcheryMachine\MachineAlarmController;
+use App\Http\Controllers\HatcheryMachine\MachineController;
+use App\Http\Controllers\HatcheryMachine\MachineLogController;
+use App\Http\Controllers\HatcheryMachine\MachineMaintenanceController;
+use App\Http\Controllers\HatcheryMachine\MaintenanceScheduleController;
 use App\Http\Controllers\HrmController;
 use App\Http\Controllers\IncomeStatement;
 use App\Http\Controllers\InternalMessagesController;
@@ -447,9 +454,35 @@ Route::middleware('auth')->group(function () {
     })->name('production');
 
     //Routes for machine maintenance and monitoring
-    Route::get('/machine', function () {
-        return view('machine');
-    })->name('machine');
+    Route::prefix('machine')->group(function () {
+
+        // Machine Maintenance View
+        Route::get('/', [MachineMaintenanceController::class, 'index'])->name('machine');
+
+        // Core Machine Operations
+        Route::controller(MachineController::class)->group(function () {
+            Route::post('/', 'store')->name('machines.store');
+            Route::put('/{machine}', 'update')->name('machines.update');
+            Route::delete('/{machine}', 'destroy')->name('machines.destroy');
+        });
+
+        // Sub-resources
+        Route::post('/logs', [MachineLogController::class, 'store'])->name('logs.store');
+
+        Route::controller(MachineAlarmController::class)->prefix('alarms')->name('alarms.')->group(function () {
+            Route::post('/', 'store')->name('store');
+            Route::patch('/{alarm}/resolve', 'resolve')->name('resolve');
+        });
+
+        Route::controller(MaintenanceScheduleController::class)->prefix('schedule')->name('schedule.')->group(function () {
+            Route::post('/', 'store')->name('store');
+            Route::patch('/{schedule}/complete', 'complete')->name('complete');
+        });
+
+        Route::post('/calibration', [CalibrationController::class, 'store'])->name('calibration.store');
+        Route::post('/sensors', [IotSensorController::class, 'store'])->name('sensors.store');
+        
+    });
 
 
     //VAT Accounting
