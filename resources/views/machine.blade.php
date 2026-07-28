@@ -95,10 +95,10 @@
 
     <!-- Modals -->
     {{--
-    @include('maintenance.modals.add-machine')
-    @include('maintenance.modals.add-log')
-    @include('maintenance.modals.add-maintenance')
-    @include('maintenance.modals.add-calibration')
+    @include('machineHatchery.modals.add-machine')
+    @include('machineHatchery.modals.add-log')
+    @include('machineHatchery.modals.add-maintenance')
+    @include('machineHatchery.modals.add-calibration')
     --}}
 
     <!-- Shared Components -->
