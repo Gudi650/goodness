@@ -25,6 +25,9 @@
             $isCEO = $currentUser?->role?->name === 'CEO';
             $isAccountant = $currentUser?->role?->name === 'Accountant';
 
+            //Manager who is in Goodness Group is allowed to access everything in the system
+            $SuperManager = $currentUser->role?->name === 'Manager' && $currentUser->company?->name === 'Goodness Group';
+
             // Read the active company id from the session.
             $activeCompanyId = session('active_company_id');
 
@@ -33,7 +36,7 @@
 
         @endphp
 
-        @if ($isAdmin || $isCEO || $isAccountant)
+        @if ($isAdmin || $isCEO || $isAccountant || $SuperManager)
             {{-- Admin selector: can switch between companies or see all companies. --}}
             <form action="{{ route('active-company.store') }}" method="POST" class="flex items-center">
                 @csrf
