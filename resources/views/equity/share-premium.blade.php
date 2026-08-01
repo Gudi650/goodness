@@ -11,7 +11,7 @@
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Shares Issued</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Premium/Share</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Status</th>
-                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Actions</th>
+                    <!--<th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Actions</th> -->
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -24,12 +24,16 @@
                             TZS {{ number_format($premium->total_premium, 2) }}
                         </td>
                         <td class="px-4 py-3 text-sm text-right text-slate-700">{{ $premium->shares_issued }}</td>
+                        
                         <td class="px-4 py-3 text-sm text-right text-slate-700">{{ number_format($premium->premium_per_share, 2) }}</td>
+
                         <td class="px-4 py-3 text-sm text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-50 text-green-700 font-medium text-xs">
                                 Approved
                             </span>
                         </td>
+
+                        {{--
                         <td class="px-4 py-3 text-sm text-center">
                             <button onclick="toggleDropdown('share-premium-details-{{ $premium->id }}')" class="text-slate-600 hover:text-slate-800 transition-colors">
                                 <!-- eye icon -->
@@ -42,6 +46,8 @@
                                 </svg>
                             </button>
                         </td>
+                        --}}
+
                     </tr>
 
                     <!-- Dropdown row -->
