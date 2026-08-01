@@ -48,6 +48,7 @@ use App\Http\Controllers\SharesDefinitionsController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TrialBalanceController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VatAccount;
 use App\Http\Controllers\VirtualAccountsController;
 use Illuminate\Support\Facades\Route;
 
@@ -486,9 +487,7 @@ Route::middleware('auth')->group(function () {
 
 
     //VAT Accounting
-    Route::get('/vataccount', function () {
-        return view('vat-account');
-    })->name('vataccount');
+    Route::get('/vataccount', [VatAccount::class, 'index'])->name('vataccount');
 
 
 
