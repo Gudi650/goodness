@@ -198,7 +198,7 @@
         <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
             <button type="button" onclick="closeInvoiceModal()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium">Cancel</button>
 
-            <button type="button" onclick="saveInvoiceAsDraft()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">Save as Draft</button>
+            <button type="button" onclick="saveInvoiceAsDraft()" class="px-4 py-2 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">Save</button>
 
             {{-- 
                 <button type="button" onclick="sendInvoice()" class="flex items-center gap-2 px-4 py-2 rounded-md bg-brand-600 hover:bg-brand-700 text-white transition-colors text-sm font-medium">
