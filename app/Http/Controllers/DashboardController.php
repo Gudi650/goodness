@@ -22,12 +22,13 @@ class DashboardController extends Controller
     /**
      * Show the main dashboard with stats.
      */
+
     public function index()
     {
         $context = $this->dashboardContext();
 
         //get the always allowed status from the service class
-        $isAlwaysAllowed = app(AccessControlService::class)->isAlwaysAllowed($context[0]);
+        //$isAlwaysAllowed = app(AccessControlService::class)->isAlwaysAllowed($context[0]);
 
         return view('dashboard', array_merge(
             $this->companyMetrics(...$context),
@@ -49,8 +50,9 @@ class DashboardController extends Controller
         $isCEO = $currentUser?->role?->name === 'CEO';
         $isAccountant = $currentUser?->role?->name === 'Accountant';
         $activeCompanyId = session('active_company_id');
+        $isAlwaysAllowed = app(AccessControlService::class)->isAlwaysAllowed($currentUser);
 
-        return [$currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant];
+        return [$currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant,$isAlwaysAllowed];
     }
 
     private function applyCompanyScope($query, $currentUser, $activeCompanyId, $isAlwaysAllowed)
@@ -233,7 +235,7 @@ class DashboardController extends Controller
         return $currentUser?->company?->name;
     } */
 
-    private function resolvePaymentCompanyId($currentUser, $activeCompanyId, bool $isAlwaysAllowed): ?int
+    private function resolvePaymentCompanyId($currentUser, $activeCompanyId, $isAlwaysAllowed): ?int
     {
         if ($isAlwaysAllowed) {
             if (! empty($activeCompanyId)) {
