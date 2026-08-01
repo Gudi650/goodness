@@ -197,10 +197,11 @@ class DashboardController extends Controller
             ->get(['id', 'invoice_number', 'total_amount', 'status', 'created_at']);
 
         $recentPaymentsQuery = Payment::query();
-        $paymentCompanyName = $this->resolvePaymentCompanyName($currentUser, $activeCompanyId, $isAdmin, $isCEO, $isAccountant);
 
-        if ($paymentCompanyName) {
-            $recentPaymentsQuery->where('company', $paymentCompanyName);
+        $paymentCompanyId = $this->resolvePaymentCompanyId($currentUser, $activeCompanyId, $isAdmin, $isCEO, $isAccountant);
+
+        if ($paymentCompanyId) {
+            $recentPaymentsQuery->where('company_id', $paymentCompanyId);
         }
 
         $recentPayments = $recentPaymentsQuery
@@ -214,6 +215,7 @@ class DashboardController extends Controller
         ];
     }
 
+    /*
     private function resolvePaymentCompanyName($currentUser, $activeCompanyId, bool $isAdmin, bool $isCEO, bool $isAccountant): ?string
     {
         if ($isAdmin || $isCEO || $isAccountant) {
@@ -225,6 +227,19 @@ class DashboardController extends Controller
         }
 
         return $currentUser?->company?->name;
+    } */
+
+    private function resolvePaymentCompanyId($currentUser, $activeCompanyId, bool $isAdmin, bool $isCEO, bool $isAccountant): ?int
+    {
+        if ($isAdmin || $isCEO || $isAccountant) {
+            if (! empty($activeCompanyId)) {
+                return (int) $activeCompanyId;
+            }
+
+            return null;
+        }
+
+        return $currentUser?->company_id;
     }
-    
+        
 }
