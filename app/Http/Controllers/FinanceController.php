@@ -104,7 +104,7 @@ class FinanceController extends Controller
         $firstPendingReviewExpenseId = $reviewableExpenses->first()['id'] ?? null;
 
         // get the details of the virtual accounts to be displayed from the virtual_accounts table
-        $virtualAccounts = $this->getVirtualAccounts($isAdmin, $isCEO, $isAccountant, $user, $SuperManager);
+        $virtualAccounts = $this->getVirtualAccounts($user, $isQualifiedUser);
 
         // get the assets categories to be displayed from the assets_categories table
         $assetsCategories = $this->getAssetsCategories();
@@ -396,17 +396,17 @@ class FinanceController extends Controller
     /**
      * Getting the details of the virtual accounts to be displayed from the virtual_accounts table
      */
-    protected function getVirtualAccounts($isAdmin, $isCEO, $isAccountant, $user)
+    protected function getVirtualAccounts($user, $isQualifiedUser)
     {
 
         // check if the user can view the virtual accounts, if not then return empty array
-        if (! $this->canViewVirtualAccounts($user, $isAdmin, $isCEO, $isAccountant)) {
+        if (! $this->canViewVirtualAccounts($user, $isQualifiedUser)) {
             return [];
         }
 
         $virtualAccounts = VirtualAccounts::query()
             ->with('company')
-            ->when(! $isAdmin && ! $isCEO && $user, fn ($query) => $query->where('company_id', $user->company_id))
+            ->when(! $isQualifiedUser && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
             ->get()
