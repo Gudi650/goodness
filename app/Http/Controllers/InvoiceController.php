@@ -378,9 +378,10 @@ class InvoiceController extends Controller
             return false; // Bank account does not belong to the company
         }
 
+        /*
         if ($invoice_type == "expense" && $bankAccount->balance < $amount) {
             return false; 
-        }
+        } */
 
         return true; // Bank account is valid and has sufficient funds
     }
