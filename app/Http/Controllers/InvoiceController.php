@@ -253,7 +253,7 @@ class InvoiceController extends Controller
             $invoice_type = $validated['invoice_type'];
 
             if (!$this->validateBankForInvoice($bankId, $companyId, $amount, $invoice_type)) {
-                return redirect()->back()->with('error', 'Invalid bank account or insufficient funds for this expense.');
+                return redirect()->back()->with('error', 'Invalid bank account for the selected company');
             }
         }
 
