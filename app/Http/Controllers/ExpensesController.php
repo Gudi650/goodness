@@ -389,7 +389,7 @@ class ExpensesController extends Controller
                     $expense->issued_by = Auth::id();
                     $expense->payment_method = $validated['payment_method'];
                     $expense->reference_number = $validated['reference_number'] ?? null;
-                    $expense->issued_at = Carbon::now();
+                    //$expense->issued_at = Carbon::now();
                     $expense->bank_id = $validated['bank_id'] ?? null;
 
                     // Deduct from bank account
