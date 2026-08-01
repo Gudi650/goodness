@@ -364,7 +364,7 @@ class ExpensesController extends Controller
 
         //check if the bank submitted is of same company and also check if the bank has sufficient money as well
         if (!$this->validateBankForExpense($validated['bank_id'], $expense->company_id, $expense->amount)) {
-            return redirect()->back()->with('error', 'Invalid bank account or insufficient funds for this expense.');
+            return redirect()->back()->with('error', 'The bank account is not registered with the company intended to be used.');
         }
 
         //check it the usser is the manager of the company or an admin
