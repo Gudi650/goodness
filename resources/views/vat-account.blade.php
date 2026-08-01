@@ -81,7 +81,7 @@
             <div class="bg-white border rounded shadow-sm p-4 border-red-200">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">VAT Payable</p>
                 <p class="mt-1 text-xl font-bold mono text-red-600">TZS {{ number_format($vatPayable ?? 0, 0) }}</p>
-                <p class="mt-1 text-xs text-slate-500">Output VAT &minus; Input VAT</p>
+                <p class="mt-1 text-xs text-slate-500">Input VAT &minus; Output VAT</p>
             </div>
 
         </div>
@@ -180,7 +180,9 @@
             <ul class="text-sm space-y-1">
                 <li>Total Output VAT: <span class="mono">TZS {{ number_format($outputVat ?? 0, 0) }}</span></li>
                 <li>Total Input VAT: <span class="mono">TZS {{ number_format($inputVat ?? 0, 0) }}</span></li>
-                <li class="font-bold">Net VAT Payable: <span class="mono text-red-600">TZS {{ number_format($vatPayable ?? 0, 0) }}</span></li>
+                <li class="font-bold">Net VAT Payable: <span class="{{ ($vatPayable > 0 ? 'mono text-green-600' : 'mono text-red-600') }}">
+                    TZS {{ number_format($vatPayable ?? 0, 0) }}</span>
+                </li>
             </ul>
         </div>
 
