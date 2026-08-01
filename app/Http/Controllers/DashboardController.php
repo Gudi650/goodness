@@ -9,6 +9,7 @@ use App\Models\Expense;
 use App\Models\Leave;
 use App\Models\Product;
 use App\Models\Payment;
+use App\Services\AccessControlService;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -24,6 +25,9 @@ class DashboardController extends Controller
     public function index()
     {
         $context = $this->dashboardContext();
+
+        //get the always allowed status from the service class
+        $isAlwaysAllowed = app(AccessControlService::class)->isAlwaysAllowed($context[0]);
 
         return view('dashboard', array_merge(
             $this->companyMetrics(...$context),
@@ -49,9 +53,9 @@ class DashboardController extends Controller
         return [$currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant];
     }
 
-    private function applyCompanyScope($query, $currentUser, bool $isAdmin, $activeCompanyId, bool $isCEO, bool $isAccountant)
+    private function applyCompanyScope($query, $currentUser, $activeCompanyId, $isAlwaysAllowed)
     {
-        if ($isAdmin || $isCEO || $isAccountant) {
+        if ($isAlwaysAllowed) {
             if (!empty($activeCompanyId)) {
                 $query->where('company_id', $activeCompanyId);
             }
@@ -107,41 +111,41 @@ class DashboardController extends Controller
 
     }
 
-    private function invoiceMetrics($currentUser, bool $isAdmin, $activeCompanyId, bool $isCEO, bool $isAccountant): array
+    private function invoiceMetrics($currentUser, $activeCompanyId, $isAlwaysAllowed): array
     {
-        $invoiceQuery = $this->applyCompanyScope(Invoice::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant);
+        $invoiceQuery = $this->applyCompanyScope(Invoice::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed);
 
         return [
             'totalInvoices' => $invoiceQuery->get()->count(),
-            'pendingInvoices' => (clone $this->applyCompanyScope(Invoice::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant))
+            'pendingInvoices' => (clone $this->applyCompanyScope(Invoice::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed))
                 ->where('status', 'pending')
                 ->get()
                 ->count(),
-            'totalInvoiceAmount' => (clone $this->applyCompanyScope(Invoice::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant))
+            'totalInvoiceAmount' => (clone $this->applyCompanyScope(Invoice::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed))
                 ->sum('total_amount') ?? 0,
         ];
     }
 
-    private function expenseMetrics($currentUser, bool $isAdmin, $activeCompanyId, bool $isCEO, bool $isAccountant): array
+    private function expenseMetrics($currentUser, $activeCompanyId, $isAlwaysAllowed): array
     {
-        $expenseQuery = $this->applyCompanyScope(Expense::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant);
+        $expenseQuery = $this->applyCompanyScope(Expense::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed);
 
         return [
             'totalExpenses' => $expenseQuery->get()->count(),
-            'pendingExpenses' => (clone $this->applyCompanyScope(Expense::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant))
+            'pendingExpenses' => (clone $this->applyCompanyScope(Expense::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed))
                 ->where('status', 'submitted')
                 ->get()
                 ->count(),
-            'approvedExpenses' => (clone $this->applyCompanyScope(Expense::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant))
+            'approvedExpenses' => (clone $this->applyCompanyScope(Expense::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed))
                 ->where('status', 'approved')
                 ->get()
                 ->count(),
-            'totalExpenseAmount' => (clone $this->applyCompanyScope(Expense::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant))
+            'totalExpenseAmount' => (clone $this->applyCompanyScope(Expense::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed))
                 ->sum('net_amount') ?? 0,
         ];
     }
 
-    private function expenseReviewReminderMetrics($currentUser, bool $isAdmin, $activeCompanyId, bool $isCEO, bool $isAccountant): array
+    private function expenseReviewReminderMetrics($currentUser, $isAlwaysAllowed, $activeCompanyId): array
     {
         $pendingReviewQuery = Expense::query()
             ->where('status', 'issued')
@@ -165,13 +169,13 @@ class DashboardController extends Controller
         ];
     }
 
-    private function leaveMetrics($currentUser, bool $isAdmin, $activeCompanyId, bool $isCEO, bool $isAccountant): array
+    private function leaveMetrics($currentUser  , $activeCompanyId,$isAlwaysAllowed): array
     {
         $pendingLeavesQuery = Leave::query()
-            ->when(!$isAdmin && !$isCEO && !$isAccountant && !empty($currentUser?->company_id), fn($query) => $query->whereHas('user', fn($userQuery) => $userQuery->where('company_id', $currentUser->company_id)));
+            ->when(!$isAlwaysAllowed && !empty($currentUser?->company_id), fn($query) => $query->whereHas('user', fn($userQuery) => $userQuery->where('company_id', $currentUser->company_id)));
 
         $approvedLeavesQuery = Leave::query()
-            ->when(!$isAdmin && !$isCEO && !$isAccountant && !empty($currentUser?->company_id), fn($query) => $query->whereHas('user', fn($userQuery) => $userQuery->where('company_id', $currentUser->company_id)));
+            ->when(!$isAlwaysAllowed && !empty($currentUser?->company_id), fn($query) => $query->whereHas('user', fn($userQuery) => $userQuery->where('company_id', $currentUser->company_id)));
 
         return [
             'pendingLeaves' => (clone $pendingLeavesQuery)->where('status', 'pending')->get()->count(),
@@ -179,9 +183,9 @@ class DashboardController extends Controller
         ];
     }
 
-    private function inventoryMetrics($currentUser, bool $isAdmin, $activeCompanyId, bool $isCEO, bool $isAccountant): array
+    private function inventoryMetrics($currentUser, $activeCompanyId, $isAlwaysAllowed): array
     {
-        $lowStockQuery = $this->applyCompanyScope(Product::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant)
+        $lowStockQuery = $this->applyCompanyScope(Product::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed)
             ->whereColumn('stock', '<=', 'reorder_level');
 
         return [
@@ -189,16 +193,16 @@ class DashboardController extends Controller
         ];
     }
 
-    private function recentTransactionMetrics($currentUser, bool $isAdmin, $activeCompanyId, bool $isCEO, bool $isAccountant): array
+    private function recentTransactionMetrics($currentUser, $isAlwaysAllowed, $activeCompanyId): array
     {
-        $recentInvoices = $this->applyCompanyScope(Invoice::query(), $currentUser, $isAdmin, $activeCompanyId, $isCEO, $isAccountant)
+        $recentInvoices = $this->applyCompanyScope(Invoice::query(), $currentUser, $activeCompanyId, $isAlwaysAllowed)
             ->orderByDesc('created_at')
             ->limit(5)
             ->get(['id', 'invoice_number', 'total_amount', 'status', 'created_at']);
 
         $recentPaymentsQuery = Payment::query();
 
-        $paymentCompanyId = $this->resolvePaymentCompanyId($currentUser, $activeCompanyId, $isAdmin, $isCEO, $isAccountant);
+        $paymentCompanyId = $this->resolvePaymentCompanyId($currentUser, $activeCompanyId, $isAlwaysAllowed);
 
         if ($paymentCompanyId) {
             $recentPaymentsQuery->where('company_id', $paymentCompanyId);
@@ -229,9 +233,9 @@ class DashboardController extends Controller
         return $currentUser?->company?->name;
     } */
 
-    private function resolvePaymentCompanyId($currentUser, $activeCompanyId, bool $isAdmin, bool $isCEO, bool $isAccountant): ?int
+    private function resolvePaymentCompanyId($currentUser, $activeCompanyId, bool $isAlwaysAllowed): ?int
     {
-        if ($isAdmin || $isCEO || $isAccountant) {
+        if ($isAlwaysAllowed) {
             if (! empty($activeCompanyId)) {
                 return (int) $activeCompanyId;
             }
