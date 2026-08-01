@@ -216,7 +216,7 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'invoice_number' => 'required|string|unique:invoices',
             'company_id' => 'required',
-            'bank_id' => 'required|exists:virtual_accounts,id',
+            'bank_id' => 'nullable|exists:virtual_accounts,id',
             'client_name' => 'required|string',
             'client_email' => 'nullable|email',
             'client_phone' => 'nullable|string',
@@ -228,6 +228,7 @@ class InvoiceController extends Controller
             'subtotal' => 'required|numeric|min:0',
             'discount_amount' => 'required|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
+            'tax_amount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.item_number' => 'required|integer',
@@ -269,7 +270,7 @@ class InvoiceController extends Controller
             'status' => 'draft',
             'payment_method' => $validated['payment_method'],
             'subtotal' => $validated['subtotal'],
-            'tax_amount' => 0,
+            'tax_amount' => $validated['tax_amount'],
             'discount_amount' => $validated['discount_amount'],
             'total_amount' => $validated['total_amount'],
             'notes' => $validated['notes'],
@@ -290,11 +291,24 @@ class InvoiceController extends Controller
             ]);
         }
 
-        //check if the invoice type is expense or income then either add or deduct money from the virtual account balance
-        $this->updateVirtualAccountBalance($invoice);
+        //check if the invoices used bank
+        if($invoice->bank_id) {
+            //check if the invoice type is expense or income then either add or deduct money from the virtual account balance
+            $this->updateVirtualAccountBalance($invoice);
 
-        //now save the transaction in the transactions table
-        $this->saveTransaction($invoice);
+            //now save the transaction in the transactions table
+            $this->saveTransaction($invoice);
+        }
+
+        /*
+        
+            //check if the invoice type is expense or income then either add or deduct money from the virtual account balance
+            $this->updateVirtualAccountBalance($invoice);
+
+            //now save the transaction in the transactions table
+            $this->saveTransaction($invoice);
+            
+        */
            
 
         return redirect()->route('finance')->with('success', 'Invoice saved as draft! Invoice #' . $invoice->invoice_number . ' is ready for editing.');

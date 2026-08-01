@@ -161,11 +161,11 @@
                         <span class="text-slate-600">Subtotal:</span>
                         <span id="invoiceSubtotal" class="font-medium text-slate-900 mono">0.00 TZS</span>
                     </div>
-                    <div class="hidden flex justify-between items-center text-sm gap-3">
+                    <div class=" flex justify-between items-center text-sm gap-3">
                         <span class="text-slate-600">Tax (%):</span>
                         <input id="invoiceTaxRate" type="number" min="0" step="0.01" value="18" class="w-20 px-2 py-1 rounded-md border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent text-right text-sm" />
                     </div>
-                    <div class="hidden flex justify-between items-center text-sm">
+                    <div class=" flex justify-between items-center text-sm">
                         <span class="text-slate-600">Tax Amount:</span>
                         <span id="invoiceTaxAmount" class="font-medium text-slate-900 mono">0.00 TZS</span>
                     </div>
