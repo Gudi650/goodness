@@ -24,7 +24,7 @@
         <!--add payment method select-->
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-700">Payment Method </label>
-            <select id="expensePaymentMethod" name="payment_method_id" required
+            <select id="expensePaymentMethod" name="payment_method" required
                 class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                 <option value="">Select payment method...</option>
 
