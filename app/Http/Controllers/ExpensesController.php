@@ -92,6 +92,9 @@ class ExpensesController extends Controller
      */
     public function storeExpense(Request $request)
     {
+
+        //dd($request->all());
+
         $validated = $request->validate([
             'expense_number' => 'required|string|max:50|unique:expenses,expense_number',
             'expense_date' => 'required|date',
