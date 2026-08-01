@@ -112,7 +112,7 @@ class ExpensesController extends Controller
             'notes' => 'nullable|string',
             'submit_mode' => 'nullable|in:draft,submit',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'term' => 'nullable|string|max:255',
+            'term' => 'required|string|max:255',
             'description' => 'nullable|string|max:5000',
             'sub_category_id' => 'nullable|exists:finance_items,id',
         ]);
