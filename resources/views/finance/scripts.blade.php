@@ -318,7 +318,8 @@
                 return;
             }
 
-            const vat = gross * (rate / (100 + rate));
+            //const vat = gross * (rate / (100 + rate));
+            const vat = gross * (rate / (100));
             const net = gross - vat;
             vatAmount.value = vat.toFixed(2);
             netAmount.value = net.toFixed(2);
