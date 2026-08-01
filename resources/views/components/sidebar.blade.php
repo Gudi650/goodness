@@ -2,8 +2,12 @@
 
     //get the authenticated users from the auth facade
     $currentUser = auth()->user();
+
+    //Manager who is in Goodness Group is allowed to access everything in the system
+    $SuperManager = $currentUser->role?->name === 'Manager' && $currentUser->company?->name === 'Goodness Group';
+
     //check if the user is a qualified user
-    $isAlwaysAuthorized = $currentUser && $currentUser->role && in_array($currentUser->role->name, ['Admin', 'CEO']);
+    $isAlwaysAuthorized = $currentUser && $currentUser->role && in_array($currentUser->role->name, ['Admin', 'CEO']) || $SuperManager;
 
     //get the employee
     $employee = $currentUser?->role?->name === 'Employee' ? $currentUser : null;

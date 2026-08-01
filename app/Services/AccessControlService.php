@@ -15,7 +15,12 @@ class AccessControlService
     //acces everything in the sytem
     public function isAlwaysAllowed($user) : bool
     {
-        return $user->role?->name === 'Admin' || $user->role?->name === 'CEO';
+
+        //Manager who is in Goodness Group is allowed to access everything in the system
+        $SuperManager = $user->role?->name === 'Manager' && $user->company?->name === 'Goodness Group';
+
+        return $user->role?->name === 'Admin' || $user->role?->name === 'CEO' || $SuperManager;
+        
     }
 
     //function to check if user is CEO or Admin or Accountant return true if user is CEO or Admin, otherwise return false
