@@ -354,7 +354,7 @@ class ExpensesController extends Controller
 
         //get the requested data and validate it 
         $validated = $request->validate([
-            'bank_id' => 'required|exists:virtual_accounts,id',
+            'bank_id' => 'nullable|exists:virtual_accounts,id',
             'payment_method' => 'required|string|max:50',
             'reference_number' => 'nullable|string|max:100',
         ]);
