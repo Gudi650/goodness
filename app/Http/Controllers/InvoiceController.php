@@ -359,7 +359,7 @@ class InvoiceController extends Controller
             'company_id' => $invoice->company_id,
             'balance_after' => VirtualAccounts::find($invoice->bank_id)->balance,
             'affecting_balance' => -$invoice->total_amount,
-            'expense_id' => $invoice->id,
+            'invoice_id' => $invoice->id,
             'transaction_type' => 'income',
         ]);
 
