@@ -90,7 +90,7 @@ class FinanceController extends Controller
         $issuedCount = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'issued')->count();
 
         // get the payment details to be displayed from the payments table
-        $payments = $this->getPayments($isAdmin, $user, $isCEO, $isAccountant);
+        $payments = $this->getPayments($isAdmin, $user, $isCEO, $isAccountant, $SuperManager);
 
         // function to check if the approve button should be displayed for the expense based on the user role and expense status
         foreach ($expenses as &$expense) {
@@ -104,7 +104,7 @@ class FinanceController extends Controller
         $firstPendingReviewExpenseId = $reviewableExpenses->first()['id'] ?? null;
 
         // get the details of the virtual accounts to be displayed from the virtual_accounts table
-        $virtualAccounts = $this->getVirtualAccounts($isAdmin, $isCEO, $isAccountant, $user);
+        $virtualAccounts = $this->getVirtualAccounts($isAdmin, $isCEO, $isAccountant, $user, $SuperManager);
 
         // get the assets categories to be displayed from the assets_categories table
         $assetsCategories = $this->getAssetsCategories();
