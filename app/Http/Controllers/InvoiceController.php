@@ -245,7 +245,7 @@ class InvoiceController extends Controller
             return back()->withErrors(['company_id' => 'Please select a valid company.']);
         }
 
-        //check if the bank submitted is of same company and also check if the bank has sufficient money as well
+        //check if the bank submitted is of same company 
         if (isset($validated['bank_id']) ) {
             $bankId = $validated['bank_id'];
             $companyId = $validated['company_id'];
@@ -360,7 +360,7 @@ class InvoiceController extends Controller
             'balance_after' => VirtualAccounts::find($invoice->bank_id)->balance,
             'affecting_balance' => -$invoice->total_amount,
             'expense_id' => $invoice->id,
-            'transaction_type' => 'expense',
+            'transaction_type' => 'income',
         ]);
 
     }
