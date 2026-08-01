@@ -43,7 +43,13 @@ class FinanceController extends Controller
         $isAccountant = $user && $user->role && $user->role->name === 'Accountant';
 
         //if user is Authorised
-        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($user);
+        $QualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($user);
+
+        //get the super manager who is in goodness group
+        $SuperManager = $user->role?->name === 'Manager' && $user->company?->name === 'Goodness Group';
+
+        //now for the final check if the user is either a qualified user or a super manager
+        $isQualifiedUser = $QualifiedUser || $SuperManager;
 
         // get the active company id from the session
         $activeCompanyId = session('active_company_id');
