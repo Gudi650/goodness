@@ -21,6 +21,12 @@
     //get the usser is of company hatchery
     $isHatchery = $currentUser?->company?->name === 'Goodness Hatchery';
 
+    //get Admin
+    $isAdmin = $currentUser?->role?->name === 'Admin' ? $currentUser : null;
+
+    //get HR from service file
+    $isHR = app(AccessControlService::class)->isHrManager($currentUser);
+
 @endphp
 
 <div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden" onclick="toggleSidebar()">
@@ -57,17 +63,8 @@
         </a>
 
 
-        <a href="/companies"
-            class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
-            data-path="/companies">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
-            </svg>
-            Companies
-        </a>
+        @if ($isHR || $isAdmin)
 
-        @if (!$employee)
             <a href="/users"
                 class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
                 data-path="/users">
@@ -77,6 +74,17 @@
                 </svg>
                 Users
             </a>
+
+            <a href="/companies"
+                class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
+                data-path="/companies">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                </svg>
+                Companies
+            </a>
+
         @endif
 
         <a href="/hrm"
@@ -125,6 +133,7 @@
 
 
         @if ($isAlwaysAuthorized || $accountant || $manager)
+
             <a href="/finance"
                 class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
                 data-path="/finance">
