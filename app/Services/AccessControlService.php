@@ -19,14 +19,22 @@ class AccessControlService
         //Manager who is in Goodness Group is allowed to access everything in the system
         $SuperManager = $user->role?->name === 'Manager' && $user->company?->name === 'Goodness Group';
 
-        return $user->role?->name === 'Admin' || $user->role?->name === 'CEO' || $SuperManager;
-        
+        //Super Accountant
+        //$SuperAccountant = $user->role?->name === 'Accountant' && $user->company?->name === 'Goodness Group';
+
+        return $user->role?->name === 'Admin' || $user->role?->name === 'CEO' || $SuperManager  ;
+
     }
+
+
 
     //function to check if user is CEO or Admin or Accountant return true if user is CEO or Admin, otherwise return false
     public function isCeoOrAdminOrAccountant($user) : bool
     {
-        return $user->role?->name === 'CEO' || $user->role?->name === 'Admin' || $user->role?->name === 'Accountant';
+        //Super Accountant
+        $SuperAccountant = $user->role?->name === 'Accountant' && $user->company?->name === 'Goodness Group';
+
+        return $user->role?->name === 'CEO' || $user->role?->name === 'Admin' || $SuperAccountant;
     }
 
     //function to check if the user is a regular employee

@@ -16,17 +16,17 @@
     <!-- Right Side -->
     <div class="flex items-center gap-2 lg:gap-4 flex-shrink-0">
         @php
+
+            use App\Services\AccessControlService;
+
             // Load the available companies for the admin selector.
             $companyOptions = \App\Models\Company::orderBy('name')->get();
 
             // Check whether the current user is an admin.
             $currentUser = auth()->user();
-            $isAdmin = $currentUser?->role?->name === 'Admin';
-            $isCEO = $currentUser?->role?->name === 'CEO';
-            $isAccountant = $currentUser?->role?->name === 'Accountant';
 
-            //Manager who is in Goodness Group is allowed to access everything in the system
-            $SuperManager = $currentUser->role?->name === 'Manager' && $currentUser->company?->name === 'Goodness Group';
+            $isSuperAccountant = $currentUser?->role?->name === 'Accountant' && $currentUser->company?->name === 'Goodness Group' ;
+
 
             // Read the active company id from the session.
             $activeCompanyId = session('active_company_id');
@@ -34,9 +34,11 @@
             // Normal users are always tied to their own company.
             $currentCompany = $currentUser?->company;
 
+            $isAlwaysAllowed = app(AccessControlService::class)->isAlwaysAllowed($currentUser);
+
         @endphp
 
-        @if ($isAdmin || $isCEO || $isAccountant || $SuperManager)
+        @if ($isAlwaysAllowed || $isSuperAccountant )
             {{-- Admin selector: can switch between companies or see all companies. --}}
             <form action="{{ route('active-company.store') }}" method="POST" class="flex items-center">
                 @csrf
@@ -79,7 +81,7 @@
                 {{-- Display the authenticated user's name --}}
                 <p class="text-sm font-medium text-slate-700">{{ auth()->user()?->name ?? 'User' }}</p>
                 <p class="text-xs px-2 py-0.5 rounded bg-brand-100 text-brand-700 font-medium">
-                    {{ $isAdmin ? 'Admin' : $currentUser?->role?->name ?? 'User' }}
+                    {{ $currentUser?->role?->name ?? 'User' }}
                 </p>
             </div>
 
