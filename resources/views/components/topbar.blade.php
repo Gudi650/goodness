@@ -47,7 +47,10 @@
                     <option value="" @selected(is_null($activeCompanyId))>Goodness Group</option>
 
                     @forelse ($companyOptions as $company)
-                        <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>{{ $company->name }}</option>
+
+                        @if ($company->name != 'Goodness Group')
+                            <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>{{ $company->name }}</option>
+                        @endif
                     @empty
                         <option disabled selected>No companies available</option>
                     @endforelse
