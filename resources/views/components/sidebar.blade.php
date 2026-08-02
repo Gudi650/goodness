@@ -1,5 +1,7 @@
 @php
 
+    use App\Services\AccessControlService;
+
     //get the authenticated users from the auth facade
     $currentUser = auth()->user();
 
