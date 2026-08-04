@@ -75,7 +75,7 @@ class LeavesController extends Controller
         $user = auth()->user();
         $access = app(AccessControlService::class);
 
-        if (! $access->restrictHrmAccess($user)) {
+        if (! $access->isHrManager($user)) {
             return redirect()->back()->with('error', 'You do not have permission to update leave requests.');
         }
 
@@ -115,42 +115,6 @@ class LeavesController extends Controller
         }
 
         return redirect()->back()->with('success', 'Leave request deleted successfully.');
-    }
-
-
-    /**
-     * Approve the leave requests for the authenticated user.
-     * Only the HR can approve the leave requests.
-     */
-    protected function approveLeave(Request $request, Leave $leave)
-    {
-
-        dd("Approve Leave Function Called");
-
-        //get authenticated user
-        $user = auth()->user();
-
-        //import the HR manager from the service file
-        $isHR = app(AccessControlService::class)->isHrManager($user);
-
-        // Check if the authenticated user is HR
-        if (!$isHR) {
-            return redirect()->route('dashboard')->with('error', 'You do not have access to the HRM page.');
-        }
-
-        $validated = $request->validate([
-            'status' => 'required|string|in:Approved,Rejected',
-            'approval_remarks' => 'nullable|string|max:500',
-        ]);
-
-        $leave->update([
-            'status' => $validated['status'],
-            'approval_remarks' => $validated['approval_remarks'] ?? null,
-            'approved_by' => auth()->id(),
-            'approved_at' => now(),
-        ]);
-
-        return redirect()->back()->with('success', 'Leave request has been ' . strtolower($validated['status']) . '.');
     }
 
 }
