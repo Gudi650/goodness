@@ -91,10 +91,9 @@ class balanceSheetController extends Controller
     protected function getShareCapital(?int $companyId = null, ?int $year = null): float
     {
         $definition = SharesDefinitions::query()
-            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
             ->latest('created_at')
-            ->latest('id')
             ->first();
+
 
         if (! $definition) {
             return 0.0;
@@ -113,7 +112,7 @@ class balanceSheetController extends Controller
         $dividends = $this->getDividendsPaid($companyId, $year);
 
         //get the net income from the net income service
-        $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
+        $netIncome = $this->calculateNetIncomeForYear($companyId, null);
 
         //get the retained earnings by subtracting the dividends paid from the net income
         $retainedEarnings = $netIncome - $dividends;
@@ -136,18 +135,12 @@ class balanceSheetController extends Controller
         }
 
         return (float) $query->sum('amount');
-        
+
     }
 
     protected function getOtherEquity(?int $companyId = null): float
     {
-        $query = EquityDistribution::query();
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
-
-        return (float) $query->sum('value_held');
+        return (float) EquityDistribution::query()->sum('value_held');
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database

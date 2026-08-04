@@ -9,7 +9,7 @@
             <tr>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Code</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Name</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Term</th>
+                <!--<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Term</th> -->
                 <th class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Value</th>
                 <th class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Action</th>
             </tr>
@@ -19,6 +19,8 @@
                 <tr class="hover:bg-slate-50">
                     <td class="px-4 py-3 font-mono text-xs text-slate-500">{{ $asset['code'] }}</td>
                     <td class="px-4 py-3 font-medium text-slate-800">{{ $asset['name'] }}</td>
+                    
+                    {{-- 
                     <td class="px-4 py-3">
                         @if ($asset['term'] === 'Long-term')
                             <span
@@ -28,6 +30,8 @@
                                 class="badge bg-blue-100 text-blue-700 border border-blue-200">{{ $asset['term'] }}</span>
                         @endif
                     </td>
+                     --}}
+
                     <td class="px-4 py-3 text-right font-mono">TZS {{ number_format($asset['current_value'], 0) }}</td>
 
                     <td class="px-4 py-3 text-right">
