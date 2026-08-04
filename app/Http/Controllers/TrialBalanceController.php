@@ -194,7 +194,7 @@ class TrialBalanceController extends Controller
     protected function getRevenues()
     {
         // fetch revenues from the database
-        $revenues = Invoice::where('status', 'draft')
+        $revenues = Invoice::where('status', 'paid')
             ->get()
             ->map(function ($invoice) {
                 return [

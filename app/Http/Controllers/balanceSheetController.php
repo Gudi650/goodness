@@ -85,11 +85,11 @@ class balanceSheetController extends Controller
         return $pdf->download('balance_sheet.pdf');
     }
 
-    protected function getShareCapital(?int $companyId, int $year): float
+    protected function getShareCapital(): float
     {
         $definition = SharesDefinitions::query()
-            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
-            ->whereYear('created_at', '<=', $year)
+            //->when($companyId, fn ($query) => $query->where('company_id', $companyId))
+            //->whereYear('created_at', '<=', $year)
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->first();
@@ -108,7 +108,7 @@ class balanceSheetController extends Controller
     //function to get returned earnings
     protected function getRetainedEarnings(?int $companyId = null, ?int $year = null)
     {
-        $dividends = $this->getDividendsPaid($companyId, $year);
+        $dividends = $this->getDividendsPaid();
 
         //get the net income from the net income service
         $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
@@ -125,23 +125,10 @@ class balanceSheetController extends Controller
     }
 
 
-    protected function getDividendsPaid(?int $companyId = null, ?int $year = null): float
+    protected function getDividendsPaid(): float
     {
         $query = Dividends::query()->where('status', 'Declared');
 
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
-
-        if ($year) {
-            $query->where(function ($subQuery) use ($year) {
-                $subQuery->whereYear('paid_at', $year)
-                    ->orWhere(function ($paidQuery) use ($year) {
-                        $paidQuery->whereNull('paid_at')
-                            ->whereYear('declared_at', $year);
-                    });
-            });
-        }
 
         $dividendsPaid = $query->sum('amount');
 

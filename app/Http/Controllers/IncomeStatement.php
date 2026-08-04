@@ -99,7 +99,7 @@ class IncomeStatement extends Controller
     protected function getRevenues()
     {
         //fetch revenues from the database
-        $revenues = Invoice::where('status', 'draft')->get();
+        $revenues = Invoice::where('status', 'paid')->get();
     
         return $revenues;
         
