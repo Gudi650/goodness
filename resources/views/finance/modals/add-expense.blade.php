@@ -160,7 +160,7 @@
 
                 <div class="hidden">
                     <label class="mb-1 block text-sm font-medium text-slate-700 ">Classification</label>
-                    <input name="term" value="current" readonly />
+                    <input name="term" value="non_current_liabilities" readonly />
                 </div>
 
 

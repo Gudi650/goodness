@@ -153,7 +153,7 @@
             <tr>
                 <td>{{ $item['name'] }}</td>
                 <td class="amount">
-                    {{ number_format(collect($item)->sum('amount'), 2) }}
+                    {{ number_format($item['amount'], 2) }}
                 </td>
             </tr>
         @endforeach
