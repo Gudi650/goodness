@@ -23,7 +23,7 @@
                         <td class="px-4 py-3 text-sm text-slate-700">{{ $equity->company->name ?? 'N/A' }}</td>
                         <td class="px-4 py-3 text-sm text-slate-700">Common Stock</td>
                         <td class="px-4 py-3 text-sm text-right text-slate-700">{{ number_format($equity->shares) }}</td>
-                        <td class="px-4 py-3 text-sm text-right text-slate-700">{{ number_format($ownershipPercent, 1) }}%</td>
+                        <td class="px-4 py-3 text-sm text-right text-slate-700">{{ $equity->ownership_percentage ?? 0 }}%</td>
                         <td class="px-4 py-3 text-sm text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                                 Active
