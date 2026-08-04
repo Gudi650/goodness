@@ -146,16 +146,23 @@
                 --}}
 
 
-                <!-- Long Term / Short Term -->
+                <!-- Long Term / Short Term 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Classification</label>
-                    <select id="expenseTerm" name="term"
+                    <select id="expenseTerm" name="term" value="Current"
                         class="w-full rounded-md border border-slate-200 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-brand-500">
                         <option value="">Select Liability Type...</option>
                         <option value="current_liabilities">Current Liabilities</option>
                         <option value="non_current_liabilities">Non Current Liabilities</option>
                     </select>
                 </div>
+                -->
+
+                <div class="hidden">
+                    <label class="mb-1 block text-sm font-medium text-slate-700 ">Classification</label>
+                    <input name="term" value="current" readonly />
+                </div>
+
 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700">Expense Description</label>
