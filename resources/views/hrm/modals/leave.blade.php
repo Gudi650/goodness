@@ -41,7 +41,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="leaveDays" class="block text-sm text-slate-600">Days</label>
-                    <input id="leaveDays" name="days" type="number" min="1" required class="mt-1 w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" />
+                    <input id="leaveDays" name="days" type="number" min="1" required class="mt-1 w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600" readonly />
                 </div>
                 <div>
                     <label for="leaveReason" class="block text-sm text-slate-600">Reason</label>

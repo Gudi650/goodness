@@ -37,8 +37,21 @@
                         </td>
                         <td class="px-4 py-3 text-sm space-x-2">
                             @if($leave->status === 'Pending')
-                                <button onclick="approveLeave({{ $leave->id }})" class="px-2 py-1 bg-brand-50 text-brand-700 text-xs rounded hover:bg-brand-100">Approve</button>
-                                <button onclick="rejectLeave({{ $leave->id }})" class="px-2 py-1 bg-red-50 text-red-700 text-xs rounded hover:bg-red-100">Reject</button>
+
+                                <form method="POST" action="{{ route('leaves.update', $leave->id) }}" class="inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="status" value="Approved">
+                                    <button type="submit" class="px-2 py-1 bg-brand-50 text-brand-700 text-xs rounded hover:bg-brand-100">Approve</button>
+                                </form>
+
+                                <form method="POST" action="{{ route('leaves.update', $leave->id) }}" class="inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="status" value="Rejected">
+                                    <button type="submit" class="px-2 py-1 bg-red-50 text-red-700 text-xs rounded hover:bg-red-100">Reject</button>
+                                </form>
+                                
                             @else
                                 <span class="text-slate-400 text-xs">-</span>
                             @endif
