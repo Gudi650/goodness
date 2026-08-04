@@ -54,7 +54,7 @@
             <div class="flex gap-8">
                 <button onclick="switchTab('invoices', this)" class="tab-btn py-4 text-sm font-medium text-slate-700 border-brand-600 cursor-pointer">Invoices</button>
                 <button onclick="switchTab('expenses', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Expenses</button>
-                <button onclick="switchTab('payments', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Payments</button>
+                {{--<button onclick="switchTab('payments', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Payments</button> --}}
                 <button onclick="switchTab('accounts', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Accounts</button>
                 <button onclick="switchTab('assets', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Assets</button>
                 <button onclick="switchTab('liabilities', this)" class="tab-btn py-4 text-sm font-medium text-slate-500 hover:text-slate-700 cursor-pointer">Liabilities</button>
@@ -79,7 +79,7 @@
             <div id="tabContent" class="space-y-6">
                 @include('finance.invoices', ['invoices' => $invoices, 'virtualAccounts' => $virtualAccounts])
                 @include('finance.expenses', ['expenses' => $expenses])
-                @include('finance.payments', ['payments' => $payments])
+                {{-- @include('finance.payments', ['payments' => $payments]) --}}
                 @include('finance.accounts', ['virtualAccounts' => $virtualAccounts])
                 @include('finance.assets',['assetsCategories' => $assetsCategories, 'assetsDetails' => $assetsDetails])
                 @include('finance.liabilities', ['liabilityCategories' => $liabilityCategories, 'liabilitiesDetails' => $liabilitiesDetails])

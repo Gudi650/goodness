@@ -205,6 +205,7 @@
                     </div>
                 </div>
 
+                {{-- 
                 <div class="border-b border-slate-200 pb-4">
                     <h4 class="text-sm font-semibold text-slate-700 mb-3">Section 5: Banking and Payment Details</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -283,10 +284,11 @@
                                 class="w-full px-3 py-2 border border-slate-300 rounded-md"></textarea>
                         </div>
                     </div>
-                </div>
+                </div>  
+                --}}
 
                 <div>
-                    <h4 class="text-sm font-semibold text-slate-700 mb-3">Section 7: Documents (Optional)</h4>
+                    <h4 class="text-sm font-semibold text-slate-700 mb-3">Section 5: Documents (Optional)</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Business Registration Certificate</label>

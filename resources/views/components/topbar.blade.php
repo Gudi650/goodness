@@ -51,6 +51,7 @@
                         @if ($company->name != 'Goodness Group')
                             <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>{{ $company->name }}</option>
                         @endif
+                        
                     @empty
                         <option disabled selected>No companies available</option>
                     @endforelse
