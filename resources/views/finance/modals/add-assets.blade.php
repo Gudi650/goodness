@@ -37,6 +37,7 @@
             </select>
         </div>
 
+        {{-- 
         <div>
             <label class="block text-sm font-medium text-slate-700">Term</label>
             <select name="term"
@@ -45,6 +46,11 @@
                 <option>Short-term</option>
                 <option>Long-term</option>
             </select>
+        </div>
+         --}}
+
+        <div class="hidden">
+            <input name="term" value="Short-term" readonly />
         </div>
 
         <!-- Category & Sub-category -->
