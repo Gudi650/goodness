@@ -5,6 +5,7 @@
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
                     <th class="px-4 py-2 text-left">Account Name</th>
+                    <th class="px-4 py-2 text-left">Bank Name</th>
                     <th class="px-4 py-2 text-left">Account Number</th>
                     <th class="px-4 py-2 text-left">Company</th>
                     <th class="px-4 py-2 text-left">Currency</th>
@@ -17,6 +18,7 @@
                 {{-- display the dynamic data here --}}
                 @forelse ($virtualAccounts as $account)
                     <tr class="cursor-pointer" >
+                        <td class="px-4 py-2">{{ $account['account_name'] }}</td>
                         <td class="px-4 py-2">{{ $account['bank_name'] }}</td>
                         <td class="px-4 py-2">{{ $account['account_number'] }}</td>
                         <td class="px-4 py-2">{{ $account['company_name'] }}</td>
