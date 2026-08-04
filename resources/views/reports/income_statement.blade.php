@@ -105,7 +105,7 @@
     @foreach($totalRevenuesByCategory as $category => $amount)
     <tr>
         <td class="desc">{{ $category }}</td>
-        <td class="amount">${{ number_format($amount, 2) }}</td>
+        <td class="amount">Tsh{{ number_format($amount, 2) }}</td>
     </tr>
     @endforeach
 
