@@ -19,7 +19,7 @@
                 <tr class="hover:bg-slate-50">
                     <td class="px-4 py-3 font-mono text-xs text-slate-500">{{ $asset['code'] }}</td>
                     <td class="px-4 py-3 font-medium text-slate-800">{{ $asset['name'] }}</td>
-                    
+
                     {{-- 
                     <td class="px-4 py-3">
                         @if ($asset['term'] === 'Long-term')
@@ -32,7 +32,8 @@
                     </td>
                      --}}
 
-                    <td class="px-4 py-3 text-right font-mono">TZS {{ number_format($asset['current_value'], 0) }}</td>
+                    <td class="px-4 py-3 text-right font-mono">
+                        TZS {{ ($asset['current_value']) ? number_format($asset['current_value'], 0) : number_format($asset['original_value'], 0) }}</td>
 
                     <td class="px-4 py-3 text-right">
 
