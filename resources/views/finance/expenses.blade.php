@@ -7,15 +7,19 @@
         <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 shadow-sm">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div class="flex items-start gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-amber-700 border border-amber-200 flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008ZM10.06 3.598a9 9 0 1 1 3.88 16.804 9 9 0 0 1-3.88-16.804Z" />
+                    <div
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-amber-700 border border-amber-200 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                            stroke="currentColor" class="h-5 w-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m0 3.75h.008v.008H12v-.008ZM10.06 3.598a9 9 0 1 1 3.88 16.804 9 9 0 0 1-3.88-16.804Z" />
                         </svg>
                     </div>
                     <div>
                         <p class="text-sm font-semibold text-amber-900">Review reminder</p>
                         <p class="mt-1 text-sm text-amber-800 leading-6">
-                            You have {{ $pendingReviewCount }} expense{{ $pendingReviewCount === 1 ? '' : 's' }} waiting for your review.
+                            You have {{ $pendingReviewCount }} expense{{ $pendingReviewCount === 1 ? '' : 's' }} waiting
+                            for your review.
                             Please submit the feedback and supporting evidence so the finance team can close the record.
                         </p>
                     </div>
@@ -23,7 +27,7 @@
 
                 <div class="flex items-center gap-3">
                     <a href="{{ route('expenses.review', ['expense' => $firstPendingReviewExpenseId]) }}"
-                       class="inline-flex items-center justify-center rounded-md bg-amber-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-700">
+                        class="inline-flex items-center justify-center rounded-md bg-amber-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-700">
                         Review now
                     </a>
                 </div>
@@ -38,8 +42,10 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Expenses</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($totalExpensesCount ?? 0) }}</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-blue-100">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-blue-100">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
                 </svg>
             </div>
         </div>
@@ -48,10 +54,13 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Amount</p>
-                    <p class="text-2xl font-bold text-slate-800">TZS {{ number_format($totalExpensesAmount ?? 0, 2) }}</p>
+                    <p class="text-2xl font-bold text-slate-800">TZS {{ number_format($totalExpensesAmount ?? 0, 2) }}
+                    </p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-green-100">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-green-100">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
                 </svg>
             </div>
         </div>
@@ -62,8 +71,10 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Pending Approvals</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($pendingApprovals ?? 0) }}</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-amber-100">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c.866-1.5 2.945-2.625 5.303-2.625s4.437 1.125 5.303 2.625M3.75 4.5h16.5M3.75 12h16.5m-16.5 7.5h16.5" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-amber-100">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m-9.303 3.376c.866-1.5 2.945-2.625 5.303-2.625s4.437 1.125 5.303 2.625M3.75 4.5h16.5M3.75 12h16.5m-16.5 7.5h16.5" />
                 </svg>
             </div>
         </div>
@@ -74,7 +85,8 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Drafted</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($draftedCount ?? 0) }}</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-slate-100">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-slate-100">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h8m-8 6h16" />
                 </svg>
             </div>
@@ -86,7 +98,8 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Issued</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($issuedCount ?? 0) }}</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-indigo-100">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-indigo-100">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
                 </svg>
             </div>
@@ -98,7 +111,8 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Approved</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($approvedCount ?? 0) }}</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-emerald-100">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-emerald-100">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
                 </svg>
             </div>
@@ -139,7 +153,7 @@
                         <td class="px-4 py-3 text-right">
                             <div class="inline-flex items-center gap-6">
 
-                                
+
                                 <button type="button"
                                     onclick="toggleExpenseDetails('expense-details-{{ $expense['id'] }}', this)"
                                     class="text-slate-600 hover:text-slate-800 transition-colors" title="Show details"
@@ -154,11 +168,10 @@
                                 </button>
 
                                 {{-- can review --}}
-                                @if($expense['can_review'])
+                                @if ($expense['can_review'])
                                     <a href="{{ route('expenses.review', ['expense' => $expense['id']]) }}"
-                                       class="text-brand-600 hover:text-brand-800 transition-colors"
-                                       title="Review expense"
-                                       aria-label="Review expense">
+                                        class="text-brand-600 hover:text-brand-800 transition-colors"
+                                        title="Review expense" aria-label="Review expense">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -181,40 +194,38 @@
                                     Then the best way to implement this is to do the checks in the controller and pass a variable to the view indicating whether the approve button should be shown or not, and then in the view just check that variable to decide whether to show the button or not
                                 --}}
 
-                                    {{-- can approve expenses --}}
-                                    @if($expense['can_approve'])
-
-                                        <form method="POST" action="{{ route('expenses.approve', ['expense' => $expense['id']]) }}">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" onclick="showExpenseActionLoader()" class="text-blue-600 hover:text-blue-800 transition-colors"
-                                                title="Approve expense" aria-label="Approve expense">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                    stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z" />
-                                                </svg>
-                                            </button>
-                                        </form>
-
-
-
-                                    @endif
-
-                                    @if ($expense['can_issue'])
-                                    
-                                        <button type="button" onclick="openIssueExpensesModal({{ $expense['id'] }})"
-                                            class="text-green-600 hover:text-green-800 transition-colors"
-                                            title="Issue expense" aria-label="Issue expense">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                {{-- can approve expenses --}}
+                                @if ($expense['can_approve'])
+                                    <form method="POST"
+                                        action="{{ route('expenses.approve', ['expense' => $expense['id']]) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" onclick="showExpenseActionLoader()"
+                                            class="text-blue-600 hover:text-blue-800 transition-colors"
+                                            title="Approve expense" aria-label="Approve expense">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
+                                                class="w-4 h-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                    d="M9 12l2 2 4-4" />
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z" />
                                             </svg>
                                         </button>
-                                        
-                                    @endif
+                                    </form>
+                                @endif
+
+                                @if ($expense['can_issue'])
+                                    <button type="button" onclick="openIssueExpensesModal({{ $expense['id'] }})"
+                                        class="text-green-600 hover:text-green-800 transition-colors"
+                                        title="Issue expense" aria-label="Issue expense">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                    </button>
+                                @endif
 
                                 {{-- 
                                     <form id="delete-expense-form-{{ $expense['id'] }}" method="POST"
@@ -234,7 +245,7 @@
                                     </form>
                                  --}}
 
-                                 {{-- 
+                                {{-- 
                                     <button type="button" class="text-blue-600 hover:text-blue-800 transition-colors"
                                         title="Edit expense" aria-label="Edit expense">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -267,7 +278,8 @@
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['term'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Sub-category
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        Sub-category
                                     </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['sub_category'] }}</p>
                                 </div>
@@ -277,15 +289,18 @@
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['creator_name'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved By</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved By
+                                    </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['approved_by_name'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Issued By</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Issued By
+                                    </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['issued_by_name'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Checked By</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Checked By
+                                    </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['checked_by_name'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
@@ -315,7 +330,8 @@
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['submitted_at'] }}</p>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved At</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved At
+                                    </p>
                                     <p class="mt-1 text-sm text-slate-700">{{ $expense['approved_at'] }}</p>
                                 </div>
                                 <div
@@ -347,7 +363,8 @@
                                                 </a>
 
                                                 <!--download button-->
-                                                <a href="{{ route('expenses.download', ['expense' => $expense['id']]) }}">
+                                                <a
+                                                    href="{{ route('expenses.download', ['expense' => $expense['id']]) }}">
                                                     Download Attachment
                                                 </a>
                                             @endif
@@ -358,59 +375,79 @@
                                 </div>
 
                                 @if (!empty($expense['reviewed_at']))
-                                    <div class="rounded-lg border border-brand-200 bg-brand-50/40 p-3 md:col-span-2 lg:col-span-4">
+                                    <div
+                                        class="rounded-lg border border-brand-200 bg-brand-50/40 p-3 md:col-span-2 lg:col-span-4">
                                         <div class="flex items-center justify-between gap-3 flex-wrap">
-                                            <p class="text-xs font-semibold uppercase tracking-wide text-brand-700">Submitted Review</p>
-                                            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-700 border border-brand-200">
+                                            <p class="text-xs font-semibold uppercase tracking-wide text-brand-700">
+                                                Submitted Review</p>
+                                            <span
+                                                class="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-700 border border-brand-200">
                                                 {{ $expense['reviewed_at'] }}
                                             </span>
                                         </div>
 
                                         <div class="mt-4 grid gap-3 md:grid-cols-2">
                                             <div class="rounded-md bg-white p-3 border border-brand-100">
-                                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Feedback</p>
-                                                <p class="mt-1 text-sm text-slate-700 leading-6 whitespace-pre-line">{{ $expense['review_feedback'] ?: 'No feedback provided.' }}</p>
+                                                <p
+                                                    class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                                    Feedback</p>
+                                                <p class="mt-1 text-sm text-slate-700 leading-6 whitespace-pre-line">
+                                                    {{ $expense['review_feedback'] ?: 'No feedback provided.' }}</p>
                                             </div>
 
                                             <div class="rounded-md bg-white p-3 border border-brand-100">
-                                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Itemized Spending</p>
+                                                <p
+                                                    class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                                    Itemized Spending</p>
                                                 @if (!empty($expense['review_items']))
                                                     <div class="mt-2 space-y-2">
                                                         @foreach ($expense['review_items'] as $reviewItem)
-                                                            <div class="rounded-md bg-slate-50 p-2 text-sm text-slate-700">
+                                                            <div
+                                                                class="rounded-md bg-slate-50 p-2 text-sm text-slate-700">
                                                                 <div class="flex items-start justify-between gap-3">
                                                                     <div>
-                                                                        <p class="font-medium text-slate-800">{{ $reviewItem['description'] ?? '-' }}</p>
+                                                                        <p class="font-medium text-slate-800">
+                                                                            {{ $reviewItem['description'] ?? '-' }}</p>
                                                                         @if (!empty($reviewItem['note']))
-                                                                            <p class="text-xs text-slate-500 mt-1">{{ $reviewItem['note'] }}</p>
+                                                                            <p class="text-xs text-slate-500 mt-1">
+                                                                                {{ $reviewItem['note'] }}</p>
                                                                         @endif
                                                                     </div>
                                                                     @if (!empty($reviewItem['amount']))
-                                                                        <span class="whitespace-nowrap font-semibold text-brand-700">TZS {{ number_format((float) $reviewItem['amount'], 2) }}</span>
+                                                                        <span
+                                                                            class="whitespace-nowrap font-semibold text-brand-700">TZS
+                                                                            {{ number_format((float) $reviewItem['amount'], 2) }}</span>
                                                                     @endif
                                                                 </div>
                                                             </div>
                                                         @endforeach
                                                     </div>
                                                 @else
-                                                    <p class="mt-2 text-sm text-slate-500">No itemized spending was added.</p>
+                                                    <p class="mt-2 text-sm text-slate-500">No itemized spending was
+                                                        added.</p>
                                                 @endif
                                             </div>
 
                                             <div class="rounded-md bg-white p-3 border border-brand-100 md:col-span-2">
-                                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Evidence / Receipts</p>
+                                                <p
+                                                    class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                                    Evidence / Receipts</p>
                                                 @if (!empty($expense['review_evidence_paths']))
                                                     <div class="mt-2 flex flex-wrap gap-2">
                                                         @foreach ($expense['review_evidence_paths'] as $evidence)
                                                             @if (!empty($evidence['path']))
-                                                                <a href="{{ asset('storage/' . $evidence['path']) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:border-brand-400 hover:text-brand-800">
-                                                                    <span class="truncate max-w-[14rem]">{{ $evidence['name'] ?? 'View evidence' }}</span>
+                                                                <a href="{{ asset('storage/' . $evidence['path']) }}"
+                                                                    target="_blank" rel="noopener"
+                                                                    class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:border-brand-400 hover:text-brand-800">
+                                                                    <span
+                                                                        class="truncate max-w-[14rem]">{{ $evidence['name'] ?? 'View evidence' }}</span>
                                                                 </a>
                                                             @endif
                                                         @endforeach
                                                     </div>
                                                 @else
-                                                    <p class="mt-2 text-sm text-slate-500">No evidence files were uploaded.</p>
+                                                    <p class="mt-2 text-sm text-slate-500">No evidence files were
+                                                        uploaded.</p>
                                                 @endif
                                             </div>
                                         </div>
@@ -471,5 +508,4 @@
             },
         });
     }
-    
 </script>
