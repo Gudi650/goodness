@@ -139,13 +139,13 @@ class IncomeStatement extends Controller
 
         return $expenses
             ->groupBy(function ($expense) {
-                return $expense?->category ?? 'Uncategorized';
+                return $expense?->category ?? 'Uncategorized_Category';
             })
             ->map(function ($categoryExpenses) {
 
                 return $categoryExpenses
                     ->groupBy(function ($expense) {
-                        return $expense?->financeItem?->item_name ?? 'Uncategorized';
+                        return $expense?->financeItem?->item_name ?? 'Uncategorized_Sub_Category';
                     })
                     ->map(function ($itemExpenses) {
                         return $itemExpenses->sum('amount');
