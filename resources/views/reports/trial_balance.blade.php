@@ -64,7 +64,7 @@
                     <td class="text-center"></td>
 
                     {{-- Debit column --}}
-                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
                     <td class="text-right">
                         {{ $debitItems->isNotEmpty() 
                             ? number_format($debitItems->sum('amount'), 2) 
@@ -72,7 +72,32 @@
                     </td>
 
                     {{-- Credit column --}}
-                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty() 
+                            ? number_format($creditItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+
+
+            {{-- loop through other assets --}}
+            @foreach ($otherAssets as $type => $items)
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+
+                    {{-- Debit column --}}
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty() 
+                            ? number_format($debitItems->sum('amount'), 2) 
+                            : '-' }}
+                    </td>
+
+                    {{-- Credit column --}}
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
                     <td class="text-right">
                         {{ $creditItems->isNotEmpty() 
                             ? number_format($creditItems->sum('amount'), 2) 
@@ -91,7 +116,7 @@
                     <td class="text-center"></td>
 
                     {{-- Debit column --}}
-                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
                     <td class="text-right">
                         {{ $debitItems->isNotEmpty() 
                             ? number_format($debitItems->sum('amount'), 2) 
@@ -99,7 +124,7 @@
                     </td>
 
                     {{-- Credit column --}}
-                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
                     <td class="text-right">
                         {{ $creditItems->isNotEmpty() 
                             ? number_format($creditItems->sum('amount'), 2) 
@@ -109,6 +134,8 @@
 
             @endforeach
 
+            
+
             {{-- loop through current liabilities --}}
             @foreach ($currentLiabilities as $type => $items)
                 <tr>
@@ -116,7 +143,7 @@
                     <td class="text-center"></td>
 
                     {{-- Debit column --}}
-                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
                     <td class="text-right">
                         {{ $debitItems->isNotEmpty() 
                             ? number_format($debitItems->sum('amount'), 2) 
@@ -124,7 +151,7 @@
                     </td>
 
                     {{-- Credit column --}}
-                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
                     <td class="text-right">
                         {{ $creditItems->isNotEmpty() 
                             ? number_format($creditItems->sum('amount'), 2) 
@@ -141,7 +168,7 @@
                     <td class="text-center"></td>
 
                     {{-- Debit column --}}
-                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
                     <td class="text-right">
                         {{ $debitItems->isNotEmpty() 
                             ? number_format($debitItems->sum('amount'), 2) 
@@ -149,7 +176,7 @@
                     </td>
 
                     {{-- Credit column --}}
-                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
                     <td class="text-right">
                         {{ $creditItems->isNotEmpty() 
                             ? number_format($creditItems->sum('amount'), 2) 
@@ -180,7 +207,7 @@
                     <td class="text-center"></td>
 
                     {{-- Debit column --}}
-                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
                     <td class="text-right">
                         {{ $debitItems->isNotEmpty() 
                             ? number_format($debitItems->sum('amount'), 2) 
@@ -188,7 +215,7 @@
                     </td>
 
                     {{-- Credit column --}}
-                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
                     <td class="text-right">
                         {{ $creditItems->isNotEmpty() 
                             ? number_format($creditItems->sum('amount'), 2) 
@@ -203,14 +230,14 @@
                     <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>
                     {{-- Debit column --}}
-                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
                     <td class="text-right">
                         {{ $debitItems->isNotEmpty() 
                             ? number_format($debitItems->sum('amount'), 2) 
                             : '-' }}
                     </td>
                     {{-- Credit column --}}
-                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
                     <td class="text-right">
                         {{ $creditItems->isNotEmpty() 
                             ? number_format($creditItems->sum('amount'), 2) 
@@ -225,14 +252,14 @@
                     <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>
                     {{-- Debit column --}}
-                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
                     <td class="text-right">
                         {{ $debitItems->isNotEmpty() 
                             ? number_format($debitItems->sum('amount'), 2) 
                             : '-' }}
                     </td>
                     {{-- Credit column --}}
-                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
                     <td class="text-right">
                         {{ $creditItems->isNotEmpty() 
                             ? number_format($creditItems->sum('amount'), 2) 
@@ -248,14 +275,14 @@
                     <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>
                     {{-- Debit column --}}
-                    @php $debitItems = $items->where('type', 'dr'); @endphp
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
                     <td class="text-right">
                         {{ $debitItems->isNotEmpty() 
                             ? number_format($debitItems->sum('amount'), 2) 
                             : '-' }}
                     </td>
                     {{-- Credit column --}}
-                    @php $creditItems = $items->where('type', 'cr'); @endphp
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
                     <td class="text-right">
                         {{ $creditItems->isNotEmpty() 
                             ? number_format($creditItems->sum('amount'), 2) 

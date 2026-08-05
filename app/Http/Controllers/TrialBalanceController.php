@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CreateAssets;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\SharesDefinitions;
@@ -48,6 +49,9 @@ class TrialBalanceController extends Controller
         //get the equities to display in the trial balance report
         $equities = $this->getEquities();
 
+        //get other assets to display in the trial balance report
+        $otherAssets = $this->getAssets();
+
 
         return [
             'costOfGoodsSold' => $costOfGoodsSold,
@@ -59,6 +63,7 @@ class TrialBalanceController extends Controller
             'nonCurrentAssets' => $nonCurrentAssets,
             'otherExpenses' => $otherExpenses,
             'equities' => $equities,
+            'otherAssets' => $otherAssets,
         ];
 
     }
@@ -209,6 +214,30 @@ class TrialBalanceController extends Controller
         return (float) $totalOtherExpenses;
     }
 
+    //get all other assets
+    protected function getAssets()
+    {
+        //get the vehicles assets from the assets table
+        $otherAssets = CreateAssets::whereHas('category', function ($query) {
+            $query->where('category', '!=','Vehicle Assets')
+                ->where('category', '!=','Property Assets')
+                ->where('category', '!=','Investment Assets')
+                ->where('category', '!=','Intangible Assets');
+        })
+            ->where('current_value', '>', 0)
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => $asset->name,
+                    'amount' => $asset->current_value,
+                    'type' => 'dr', // Assuming assets are debit entries
+                ];
+            })
+            ->groupBy('name');
+
+        return $otherAssets;
+    }
+
     //get the equities to display in the trial balance report
     protected function getEquities()
     {
@@ -270,6 +299,12 @@ class TrialBalanceController extends Controller
 
             }
 
+        }
+
+        //get other assets and add them to the totalDr
+        $otherAssets = $this->getAssets();
+        foreach ($otherAssets as $asset) {
+            $totalDr += $asset->sum('amount');
         }
 
         //add the total of other expenses to the totalDr
