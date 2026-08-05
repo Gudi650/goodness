@@ -188,7 +188,7 @@ class TrialBalanceController extends Controller
 
 
         //return in an array format
-        dd($otherExpenses);
+        //dd($otherExpenses);
         return $otherExpenses;
     }
 
