@@ -69,6 +69,22 @@
             </select>
         </div>
 
+        {{-- account to take effect on --}}
+        <div>
+            <label class="block text-sm font-medium text-slate-700">Account</label>
+            <select name="account_id" id="assetAccountSelect"
+                class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-green-500">
+                <!-- Options populated from accounts table -->
+                <option value="">Select Account</option>
+                @if (isset($virtualAccounts))
+                    @foreach ($virtualAccounts as $account)
+                        <option value="{{ $account['id'] }}">{{ $account['account_name'] }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-slate-700">Original Value</label>
