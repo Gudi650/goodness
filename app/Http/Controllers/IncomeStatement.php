@@ -137,7 +137,7 @@ class IncomeStatement extends Controller
     {
         $expenses = $this->getExpenses();
 
-        return $expenses
+        $expenseStatement = $expenses
             ->groupBy(function ($expense) {
                 return $expense?->category ?? 'Uncategorized_Category';
             })
@@ -152,6 +152,22 @@ class IncomeStatement extends Controller
                     });
 
             });
+
+        $orderedExpenseStatement = collect();
+
+        foreach (['Cost of Goods Sold (COGS)', 'Operational'] as $category) {
+            if ($expenseStatement->has($category)) {
+                $orderedExpenseStatement->put($category, $expenseStatement->get($category));
+            }
+        }
+
+        foreach ($expenseStatement as $category => $items) {
+            if (! $orderedExpenseStatement->has($category)) {
+                $orderedExpenseStatement->put($category, $items);
+            }
+        }
+
+        return $orderedExpenseStatement;
     }
 
 }

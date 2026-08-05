@@ -62,7 +62,7 @@ class NonCurrentAssetsService
     {
         //get the property, plant and equipment assets from the assets table
         $ppeAssets = CreateAssets::whereHas('category', function ($query) {
-            $query->where('category', 'Property, Plant & Equipment');
+            $query->where('category', 'Property Assets');
         })
             ->where('current_value', '>', 0)
             ->get()
