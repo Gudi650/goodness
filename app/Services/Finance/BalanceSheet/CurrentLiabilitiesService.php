@@ -40,12 +40,24 @@ class CurrentLiabilitiesService
     //function to get the salaries and wages for the balance sheet report from the salaries table
     protected function getSalaries()
     {
-        //get the salaries from the salaries table
+        /*get the salaries from the salaries table
         $salaries = Salary::where('effective_date', '<=', now())
             ->get()
             ->map(function ($salary) {
                 return [
                     'name' => $salary->employee_id,
+                    'amount' => $salary->amount,
+                    'type' => 'cr', // Assuming liabilities are credit entries
+                ];
+            });
+            */
+
+        $salaries = Expense::where('category', 'Salaries & Wages')
+            ->where('status', 'issued')
+            ->get()
+            ->map(function ($salary) {
+                return [
+                    'name' => $salary->expense_number,
                     'amount' => $salary->amount,
                     'type' => 'cr', // Assuming liabilities are credit entries
                 ];
