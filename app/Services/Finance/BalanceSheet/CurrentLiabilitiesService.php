@@ -53,7 +53,7 @@ class CurrentLiabilitiesService
             */
 
         //$salaries = Expense::where('category', 'Operating Expenses')
-        $salaries = Expense::where('status', 'draft')
+        $salaries = Expense::where('status', 'issued')
             ->whereHas('financeItem', function ($query) {
                 $query->where('item_name', 'Salaries and Wages');
             })
