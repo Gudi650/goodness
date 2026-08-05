@@ -41,6 +41,9 @@ class TrialBalanceController extends Controller
         //get the operational costs from the service file
         $operationalCosts = $this->getOperationalCosts();
 
+        //get other other expenses as well here
+        $otherExpenses = $this->getOtherExpenses();
+
 
         return [
             'costOfGoodsSold' => $costOfGoodsSold,
@@ -50,6 +53,7 @@ class TrialBalanceController extends Controller
             'currentLiabilities' => $currentLiabilities,
             'currentAssets' => $currentAssets,
             'nonCurrentAssets' => $nonCurrentAssets,
+            'otherExpenses' => $otherExpenses,
         ];
 
     }
@@ -174,7 +178,7 @@ class TrialBalanceController extends Controller
     {
         // get the cost of goods sold from the products table
         $costOfGoodsSold = Expense::where('category', 'Cost of Goods Sold (COGS)')
-            ->where('status', 'paid')
+            ->where('status', 'issued')
             ->get()
             ->map(function ($expense) {
                 return [
@@ -214,7 +218,7 @@ class TrialBalanceController extends Controller
     {
         //fetch the operational costs from the database
         $operationalCosts = Expense::where('category', 'Operating Expenses')
-            ->where('status', 'draft')
+            ->where('status', 'issued')
             ->get()
             ->map(function ($expense) {
                 return [
@@ -227,6 +231,41 @@ class TrialBalanceController extends Controller
 
         //return in an array format
         return $operationalCosts;
+    }
+
+    //okay get other expenses with their categories
+    protected function getOtherExpenses()
+    {
+        //fetch the other expenses from the database
+        $otherExpenses = Expense::where('category', '!=', 'Cost of Goods Sold (COGS)')
+            ->where('category', '!=', 'Operating Expenses')
+            ->where('status', 'issued')
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'name' => $expense->category,
+                    'amount' => $expense->amount,
+                    'type' => 'dr', // Assuming expenses are debit entries
+                ];
+            })
+            ->groupBy('name'); // Group by name to aggregate amounts for the same account
+
+        //return in an array format
+        return $otherExpenses;
+    }
+
+    //get total of the otherExpenses
+    protected function getTotalOtherExpenses()
+    {
+        $otherExpenses = $this->getOtherExpenses();
+
+        $totalOtherExpenses = 0;
+
+        foreach ($otherExpenses as $expenseGroup) {
+            $totalOtherExpenses += $expenseGroup->sum('amount');
+        }
+
+        return (float) $totalOtherExpenses;
     }
 
     //function to get the total of all DEBIT entries in the trial balance report
@@ -265,6 +304,9 @@ class TrialBalanceController extends Controller
             }
 
         }
+
+        //add the total of other expenses to the totalDr
+        $totalDr += $this->getTotalOtherExpenses();
 
         return $totalDr;
     }
