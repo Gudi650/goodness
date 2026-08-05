@@ -66,7 +66,7 @@ class CurrentLiabilitiesService
                 ];
             });
         
-        dd($salaries);
+        //dd($salaries);
 
         //return the salaries
         return $salaries;
