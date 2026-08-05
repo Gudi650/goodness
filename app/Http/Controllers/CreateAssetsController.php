@@ -13,6 +13,7 @@ class CreateAssetsController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+
             'name' => 'required',
             'company_id' => 'nullable|exists:companies,id',
             'category_id' => 'nullable|exists:assets_categories,id',
@@ -24,6 +25,7 @@ class CreateAssetsController extends Controller
             'acquired' => 'nullable|date',
             'status' => 'required|in:Active,Disposed,Sold,Written Off',
             'account_id' => 'required|exists:virtual_accounts,id',
+
         ]);
 
         //get the generated asset code
@@ -36,10 +38,12 @@ class CreateAssetsController extends Controller
         $this->deductAccountMoneyonAssetCreation($validatedData['account_id'], $validatedData['current_value']);
 
         //dump the validated datas
-        //dd($validatedData);
+        //depreciation_valuedd($validatedData);
 
 
         $asset = CreateAssets::create($validatedData);
+
+        
 
         return redirect()->back()->with('success', 'Asset created successfully');
 
@@ -77,6 +81,7 @@ class CreateAssetsController extends Controller
             'surplus' => 'required|numeric',
             'notes' => 'nullable|string',
             'date_of_revaluation' => 'nullable|date',
+            
 
         ]);
 
