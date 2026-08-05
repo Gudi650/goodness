@@ -158,6 +158,20 @@
                 </tr>
             @endforeach
 
+            {{-- record the equities its always credit --}}
+            <tr>
+                <td>{{ ucfirst(str_replace('_', ' ', 'Owner\'s Equities')) }}</td>
+                <td class="text-center"></td>
+                <td class="text-right">
+                    {{ number_format($equities, 2) ?? '-' }}
+                </td>
+
+                <td class="text-right">
+                    {{ '-' }}
+                </td>
+
+            </tr>
+
             {{-- loop through the costs of goods sold --}}
             @foreach ($costOfGoodsSold as $type => $items)
                 <tr>

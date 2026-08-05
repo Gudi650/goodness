@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\SharesDefinitions;
 use App\Services\Finance\BalanceSheet\CurrentAssetsService;
 use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
 use App\Services\Finance\BalanceSheet\NonCurrentAssetsService;
@@ -44,6 +45,9 @@ class TrialBalanceController extends Controller
         //get other other expenses as well here
         $otherExpenses = $this->getOtherExpenses();
 
+        //get the equities to display in the trial balance report
+        $equities = $this->getEquities();
+
 
         return [
             'costOfGoodsSold' => $costOfGoodsSold,
@@ -54,6 +58,7 @@ class TrialBalanceController extends Controller
             'currentAssets' => $currentAssets,
             'nonCurrentAssets' => $nonCurrentAssets,
             'otherExpenses' => $otherExpenses,
+            'equities' => $equities,
         ];
 
     }
@@ -96,82 +101,6 @@ class TrialBalanceController extends Controller
 
         return $pdf->download('trial_balance.pdf');
     }
-
-
-    /*
-    public function exportPdfz()
-    {
-        // Replace this array with your Eloquent Query (e.g., Account::all())
-        $accounts = [
-            ['name' => 'Purchases A/c', 'type' => 'dr', 'amount' => 45000],
-            ['name' => 'Sales A/c', 'type' => 'cr', 'amount' => 85000],
-            ['name' => 'Purchase Return A/c', 'type' => 'cr', 'amount' => 1200],
-            ['name' => 'Sales Return A/c', 'type' => 'dr', 'amount' => 1500],
-            ['name' => 'Cash A/c', 'type' => 'dr', 'amount' => 12500],
-            ['name' => 'Bank A/c', 'type' => 'dr', 'amount' => 28000],
-            ['name' => 'Capital A/c', 'type' => 'cr', 'amount' => 50000],
-            ['name' => 'Salaries A/c', 'type' => 'dr', 'amount' => 8000],
-            ['name' => 'Furniture A/c', 'type' => 'dr', 'amount' => 15000],
-            ['name' => 'Bills Payable A/c', 'type' => 'cr', 'amount' => 4200],
-            ['name' => 'Bills Receivable A/c', 'type' => 'dr', 'amount' => 6000],
-            ['name' => 'Debtors A/c', 'type' => 'dr', 'amount' => 18500],
-            ['name' => 'Creditors A/c', 'type' => 'cr', 'amount' => 11200],
-            ['name' => 'Drawings A/c', 'type' => 'dr', 'amount' => 3000],
-            ['name' => 'Loan A/c', 'type' => 'cr', 'amount' => 20000],
-            ['name' => 'Interest Received A/c', 'type' => 'cr', 'amount' => 600],
-            ['name' => 'Interest Paid A/c', 'type' => 'dr', 'amount' => 400],
-            ['name' => 'Carriage Inward and Outward A/c', 'type' => 'dr', 'amount' => 1100],
-            ['name' => 'Opening stock A/c', 'type' => 'dr', 'amount' => 14000],
-            ['name' => 'Machinery A/c', 'type' => 'dr', 'amount' => 35000],
-            ['name' => 'Prepaid Expenses A/c', 'type' => 'dr', 'amount' => 900],
-            ['name' => 'Outstanding Expenses A/c', 'type' => 'cr', 'amount' => 1300],
-            ['name' => 'Discount Received A/c', 'type' => 'cr', 'amount' => 800],
-            ['name' => 'Discount Allowed A/c', 'type' => 'dr', 'amount' => 500],
-        ];
-
-        $totalDr = 0;
-        $totalCr = 0;
-
-        // get the Non current liabilities data from service file
-        $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
-
-        // get the current liabilities data from service file
-        $currentLiabilities = app(CurrentLiabilitiesService::class)->getCurrentLiabilities();
-
-        // get the current assets data from service file
-        $currentAssets = app(CurrentAssetsService::class)->getCurrentAssets();
-
-        // get the non current assets data from service file
-        $nonCurrentAssets = app(NonCurrentAssetsService::class)->getNonCurrentAssets();
-
-        //get the cost of goods sold from the service file
-        $costOfGoodsSold = $this->getCostOfGoodsSold();
-
-        //get the revenues from the service file
-        $revenues = $this->getRevenues();
-
-        //get the operational costs from the service file
-        $operationalCosts = $this->getOperationalCosts();
-
-        // merge all the data into a single array
-        
-
-
-
-
-        foreach ($accounts as $account) {
-            if ($account['type'] === 'dr') {
-                $totalDr += $account['amount'];
-            } else {
-                $totalCr += $account['amount'];
-            }
-        }
-
-        $pdf = Pdf::loadView('reports.trial_balance', compact('accounts', 'totalDr', 'totalCr', 'nonCurrentLiabilities', 'currentLiabilities', 'currentAssets', 'nonCurrentAssets'));
-
-        return $pdf->stream('trial_balance.pdf');
-
-    } */
 
     // function to get cost of goods sold  going to use it in trial balance report
     protected function getCostOfGoodsSold()
@@ -266,6 +195,47 @@ class TrialBalanceController extends Controller
         }
 
         return (float) $totalOtherExpenses;
+    }
+
+    //get the equities to display in the trial balance report
+    protected function getEquities()
+    {
+        //get the equities from the database
+        /*
+        $equities = Expense::where('category', 'Equity')
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'name' => $expense->category,
+                    'amount' => $expense->amount,
+                    'type' => 'cr', // Assuming equities are credit entries
+                ];
+            })
+            ->groupBy('name'); // Group by name to aggregate amounts for the same account
+        */
+
+        $equities = SharesDefinitions::all()
+            ->map(function ($share) {
+                return [
+                    'name' => $share->company_id,
+                    'amount' => $share->share_value * $share->issued_shares,
+                    'type' => 'cr', // Assuming equities are credit entries
+                ];
+            })
+            ->groupBy('name'); // Group by name to aggregate amounts for the same account
+
+        //get total of the equities
+        $totalEquities = 0;
+
+        foreach ($equities as $equityGroup) {
+            $totalEquities += $equityGroup->sum('amount');
+        }
+        
+        //dd($equities);
+
+        //return in an array format
+        return $totalEquities;
+
     }
 
     //function to get the total of all DEBIT entries in the trial balance report
