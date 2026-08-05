@@ -52,7 +52,10 @@ class CurrentLiabilitiesService
             });
             */
 
-        $salaries = Expense::where('category', 'Salaries & Wages')
+        $salaries = Expense::where('category', 'Operating Expenses')
+            ->whereHas('financeItem', function ($query) {
+                $query->where('item_name', 'Salaries and Wages');
+            })
             ->where('status', 'issued')
             ->get()
             ->map(function ($salary) {
@@ -62,6 +65,8 @@ class CurrentLiabilitiesService
                     'type' => 'cr', // Assuming liabilities are credit entries
                 ];
             });
+        
+        //dd($salaries);
 
         //return the salaries
         return $salaries;
