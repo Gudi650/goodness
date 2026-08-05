@@ -90,19 +90,17 @@ class balanceSheetController extends Controller
 
     protected function getShareCapital(?int $companyId = null, ?int $year = null): float
     {
-        $definition = SharesDefinitions::query()
-            ->latest('created_at')
-            ->first();
+        $definitions = SharesDefinitions::query()->get();
 
-
-        if (! $definition) {
+        if ($definitions->isEmpty()) {
             return 0.0;
         }
 
-        $issuedShares = (float) ($definition->issued_shares ?? 0);
-        $shareValue = (float) ($definition->share_value ?? 0);
+        $total = $definitions->sum(function ($d) {
+            return (float) ($d->issued_shares ?? 0) * (float) ($d->share_value ?? 0);
+        });
 
-        return $issuedShares * $shareValue;
+        return (float) $total;
     }
 
 
