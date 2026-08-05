@@ -111,24 +111,23 @@ class CalculateCurrentFar
 
         foreach ($assetsToDepreciate as $asset) {
 
-            $acquisitionDate  = $asset->acquired;
-            $currentDate      = now();
-            $depreciationRate = $asset->depreciation_rate ?? $asset->depreciation_value ?? 0;
+            $acquisitionDate   = $asset->acquired;
+            $currentDate       = now();
+            $depreciationRate  = $asset->depreciation_value;
 
-            // Calculate number of years since acquisition (at least 0)
-            $years = max(0, $currentDate->diffInYears($acquisitionDate));
+            // Calculate number of years since acquisition
+            $years = $currentDate->diffInYears($acquisitionDate);
 
-            // Choose base value for depreciation: prefer current_value, else original_value
-            $baseValue = $asset->current_value ?: $asset->original_value ?: 0;
+            // Depreciation value
+            $depreciationValue = ($depreciationRate / 100) * $asset->current_value * $years ? ($depreciationRate / 100) * $asset->current_value * $years : ($depreciationRate / 100) * $asset->original_value * $years;
 
-            // Depreciation value = rate% * base * years
-            $depreciationValue = ($depreciationRate / 100) * $baseValue * $years;
+            //dd($depreciationValue);
 
-            // Current value = original minus accumulated depreciation (not negative)
-            $currentValue = max(0, ($asset->original_value ?: $baseValue) - $depreciationValue);
+            // Current value
+            $currentValue = max(0, $asset->original_value - $depreciationValue);
 
             // Update asset in memory
-            $asset->depreciation_value = $depreciationValue;
+            //$asset->depreciation_value = $depreciationValue;
             $asset->current_value = $currentValue;
         }
 
