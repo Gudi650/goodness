@@ -168,7 +168,10 @@ class TrialBalanceController extends Controller
         //fetch the other expenses from the database
         $otherExpenses = Expense::where('category', '!=', 'Cost of Goods Sold (COGS)')
             ->where('category', '!=', 'Operating Expenses')
-            ->whereHas('financeItem' ) // Ensure the expense has a related finance item
+            ->whereHas('financeItem' ) // Ensure it queries except finance items of Salaries and Wages
+            ->whereHas('financeItem', function ($query) {
+                $query->where('item_name', '!=', 'Salaries and Wages');
+            })
             ->where('status', 'issued')
             ->get()
             ->map(function ($expense) {
@@ -185,7 +188,7 @@ class TrialBalanceController extends Controller
 
 
         //return in an array format
-        //dd($otherExpenses);
+        dd($otherExpenses);
         return $otherExpenses;
     }
 
