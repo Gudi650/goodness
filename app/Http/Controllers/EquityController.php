@@ -29,6 +29,9 @@ class EquityController extends Controller
         //get sharepremiums from the db and pass to thw view
         $sharePremiumsData = $this->getSharePremiumsData();
 
+        //get the net value of the shares for every company and pass it to the view
+        $netValues = $this->getNetValue();
+
         return view('equity', compact(
             
             'companies', 
@@ -36,6 +39,7 @@ class EquityController extends Controller
             'sharesDefinitions', 
             'dividendsData',
             'sharePremiumsData',
+            'netValues',
 
             ));
     }
@@ -79,6 +83,21 @@ class EquityController extends Controller
         $sharePremiumsData = SharePremuims::with('company')->get();
 
         return $sharePremiumsData;
+    }
+
+    //get the net value of the shares for very company and return it as an array
+    public function getNetValue()
+    {
+        $sharesDefinitions = SharesDefinitions::with('company')->get();
+
+        $netValues = [];
+
+        foreach ($sharesDefinitions as $shareDef) {
+            $netValue = (float) ($shareDef->issued_shares ?? 0) * (float) ($shareDef->share_value ?? 0);
+            $netValues[$shareDef->company_id] = $netValue;
+        }
+
+        return $netValues;
     }
 
 }

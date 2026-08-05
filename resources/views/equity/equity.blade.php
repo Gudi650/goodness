@@ -14,10 +14,12 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($equityData as $index => $equity)
+
                     @php
                         $totalShares = $equity->company ? $equity->company->equityDistributions->sum('shares') : 1;
                         $ownershipPercent = $totalShares > 0 ? ($equity->shares / $totalShares) * 100 : 0;
                     @endphp
+                    
                     <tr>
                         <td class="px-4 py-3 text-sm text-slate-700">{{ $equity->shareholder }}</td>
                         <td class="px-4 py-3 text-sm text-slate-700">{{ $equity->company->name ?? 'N/A' }}</td>

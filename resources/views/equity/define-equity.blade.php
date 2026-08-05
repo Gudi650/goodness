@@ -9,6 +9,7 @@
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Issued Shares</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Remaining Shares</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Share Value (TZS)</th>
+                    <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Net Value (TZS)</th>
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Actions</th>
                 </tr>
             </thead>
@@ -20,6 +21,7 @@
                         <td class="px-4 py-3 text-sm text-right text-slate-700">{{ number_format($shareDef->issued_shares) }}</td>
                         <td class="px-4 py-3 text-sm text-right text-slate-700">{{ number_format($shareDef->remaining_shares) }}</td>
                         <td class="px-4 py-3 text-sm text-right text-slate-700">TZS {{ number_format($shareDef->share_value) }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-slate-700">TZS {{ number_format($netValues[$shareDef->company_id] ?? 0) }}</td>
                         <td class="px-4 py-3 text-sm text-center">
 
                             <!--view button -->
