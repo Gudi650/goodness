@@ -162,12 +162,13 @@
             <tr>
                 <td>{{ ucfirst(str_replace('_', ' ', 'Owner\'s Equities')) }}</td>
                 <td class="text-center"></td>
+                
                 <td class="text-right">
-                    {{ number_format($equities, 2) ?? '-' }}
+                    {{ '-' }}
                 </td>
 
                 <td class="text-right">
-                    {{ '-' }}
+                    {{ number_format($equities, 2) ?? '-' }}
                 </td>
 
             </tr>

@@ -318,6 +318,12 @@ class TrialBalanceController extends Controller
 
         }
 
+        //add the equities in the creadit as well here
+
+        $totalCr += $this->getEquities();
+
+        //dd($totalCr);
+
         return $totalCr;
     }
 
