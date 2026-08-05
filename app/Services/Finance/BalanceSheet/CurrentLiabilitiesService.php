@@ -79,10 +79,12 @@ class CurrentLiabilitiesService
             ->map(function ($invoice) {
                 return [
                     'name' => $invoice->invoice_number,
-                    'amount' => $invoice->vat_amount,
+                    'amount' => $invoice->tax_amount,
                     'type' => 'cr', // Assuming liabilities are credit entries
                 ];
             });
+
+        //dd($invoiceVAT);
 
         //payable vat is difference btn the invoice vat and the expense vat
         $payableVATAmount = $invoiceVAT->sum('amount') - $payableVAT->sum('amount');
