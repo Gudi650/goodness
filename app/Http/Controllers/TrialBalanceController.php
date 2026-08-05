@@ -168,18 +168,24 @@ class TrialBalanceController extends Controller
         //fetch the other expenses from the database
         $otherExpenses = Expense::where('category', '!=', 'Cost of Goods Sold (COGS)')
             ->where('category', '!=', 'Operating Expenses')
+            ->whereHas('financeItem' ) // Ensure the expense has a related finance item
             ->where('status', 'issued')
             ->get()
             ->map(function ($expense) {
                 return [
-                    'name' => $expense->category,
+                    //'name' => optional($expense->financeItem)->item_name ?? $expense->sub_category ?? 'Uncategorized',
+                    'name' => $expense->financeItem->item_name ?? $expense->sub_category ?? 'Uncategorized',
                     'amount' => $expense->amount,
                     'type' => 'dr', // Assuming expenses are debit entries
                 ];
             })
             ->groupBy('name'); // Group by name to aggregate amounts for the same account
+        
+
+
 
         //return in an array format
+        //dd($otherExpenses);
         return $otherExpenses;
     }
 
@@ -201,19 +207,6 @@ class TrialBalanceController extends Controller
     protected function getEquities()
     {
         //get the equities from the database
-        /*
-        $equities = Expense::where('category', 'Equity')
-            ->get()
-            ->map(function ($expense) {
-                return [
-                    'name' => $expense->category,
-                    'amount' => $expense->amount,
-                    'type' => 'cr', // Assuming equities are credit entries
-                ];
-            })
-            ->groupBy('name'); // Group by name to aggregate amounts for the same account
-        */
-
         $equities = SharesDefinitions::all()
             ->map(function ($share) {
                 return [
@@ -230,8 +223,6 @@ class TrialBalanceController extends Controller
         foreach ($equities as $equityGroup) {
             $totalEquities += $equityGroup->sum('amount');
         }
-        
-        //dd($equities);
 
         //return in an array format
         return $totalEquities;

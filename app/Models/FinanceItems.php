@@ -18,4 +18,5 @@ class FinanceItems extends Model
     {
         return $this->belongsTo(ItemsCategory::class, 'category_id');
     }
+
 }
