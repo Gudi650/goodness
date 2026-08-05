@@ -36,7 +36,8 @@ class ReportController extends Controller
         $selectedCompanyId = $request->integer('company_id');
         $startDate = $request->string('start_date')->toString();
         $endDate = $request->string('end_date')->toString();
-        $period = $request->string('period')->toString();
+        // map view's `date_filter` to internal period variable
+        $period = $request->string('date_filter')->toString() ?: 'this_month';
 
         if (! $canSeeAllCompanies) {
             $selectedScope = 'company';
@@ -72,8 +73,7 @@ class ReportController extends Controller
         $expensesQuery = Expense::query()
             ->with(['company', 'department', 'creator', 'approver', 'issuer', 'checker'])
             ->orderByDesc('expense_date')
-            ->orderByDesc('id')
-            ->whereBetween('created_at', [$startDate, $endDate]);
+            ->orderByDesc('id');
 
         if ($selectedScope === 'company' && $selectedCompanyId) {
             $expensesQuery->where('company_id', $selectedCompanyId);
@@ -312,6 +312,9 @@ class ReportController extends Controller
             'plExpenses' => $expenseSeries,
             'plProfit' => $profitSeries,
             'balance' => $balance,
+            'dateFilter' => $period,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ]);
     }
 }

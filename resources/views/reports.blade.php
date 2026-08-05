@@ -165,17 +165,17 @@
       @if (($reportType ?? 'expenses') === 'expenses')
         <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between">
           <p class="text-xs uppercase tracking-wide text-slate-500">Expense Count</p>
-          <p class="mt-2 text-2xl font-semibold text-slate-900">{{ number_format($totals['expense_count']) }}</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">{{ number_format($totals['expense_count'] ?? 0) }}</p>
         </div>
         <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between">
           <p class="text-xs uppercase tracking-wide text-slate-500">Gross Amount</p>
-          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($totals['gross_amount'], 2) }}</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($totals['gross_amount'] ?? 0, 2) }}</p>
         </div>
         <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between">
           <p class="text-xs uppercase tracking-wide text-slate-500">Net Amount</p>
-          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($totals['net_amount'], 2) }}</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($totals['net_amount'] ?? 0, 2) }}</p>
         </div>
-      @else
+      @elseif (($reportType ?? '') === 'income')
         <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between">
           <p class="text-xs uppercase tracking-wide text-slate-500">Invoices</p>
           <p class="mt-2 text-2xl font-semibold text-slate-900">{{ number_format($incomeTotals['invoice_count'] ?? 0) }}</p>
@@ -188,6 +188,21 @@
           <p class="text-xs uppercase tracking-wide text-slate-500">Total</p>
           <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($incomeTotals['total'] ?? 0, 2) }}</p>
         </div>
+      @elseif (($reportType ?? '') === 'balance')
+        <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between">
+          <p class="text-xs uppercase tracking-wide text-slate-500">Assets</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($balance['assets'] ?? 0, 2) }}</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between">
+          <p class="text-xs uppercase tracking-wide text-slate-500">Liabilities</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($balance['liabilities'] ?? 0, 2) }}</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-between">
+          <p class="text-xs uppercase tracking-wide text-slate-500">Equity</p>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">TZS {{ number_format($balance['equity'] ?? 0, 2) }}</p>
+        </div>
+      @else
+        <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-center text-sm text-slate-500">No summary available for this report type.</div>
       @endif
     </div>
 
