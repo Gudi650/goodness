@@ -174,7 +174,7 @@ class TrialBalanceController extends Controller
     {
         // get the cost of goods sold from the products table
         $costOfGoodsSold = Expense::where('category', 'Cost of Goods Sold (COGS)')
-            ->where('status', 'draft')
+            ->where('status', 'paid')
             ->get()
             ->map(function ($expense) {
                 return [
