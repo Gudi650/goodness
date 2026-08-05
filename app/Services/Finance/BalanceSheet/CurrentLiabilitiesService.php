@@ -52,11 +52,12 @@ class CurrentLiabilitiesService
             });
             */
 
-        $salaries = Expense::where('category', 'Operating Expenses')
+        //$salaries = Expense::where('category', 'Operating Expenses')
+        $salaries = Expense::where('status', 'draft')
             ->whereHas('financeItem', function ($query) {
                 $query->where('item_name', 'Salaries and Wages');
             })
-            ->where('status', 'issued')
+            //->where('status', 'issued')
             ->get()
             ->map(function ($salary) {
                 return [
