@@ -160,7 +160,7 @@
 
             {{-- record the equities its always credit --}}
             <tr>
-                <td>{{ ucfirst(str_replace('_', ' ', 'Owner\'s Equities')) }}</td>
+                <td>{{ ucfirst(str_replace('_', ' ', 'Owner\'s Equity')) }}</td>
                 <td class="text-center"></td>
                 
                 <td class="text-right">

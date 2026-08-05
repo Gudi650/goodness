@@ -63,7 +63,7 @@ class CurrentLiabilitiesService
                 return [
                     'name' => $salary->expense_number,
                     'amount' => $salary->amount,
-                    'type' => 'cr', // Assuming liabilities are credit entries
+                    'type' => 'dr', // Assuming liabilities are credit entries
                 ];
             });
         
