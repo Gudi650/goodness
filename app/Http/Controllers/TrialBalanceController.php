@@ -151,13 +151,16 @@ class TrialBalanceController extends Controller
             ->get()
             ->map(function ($expense) {
                 return [
-                    'name' => 'Operational Expenses',
+                    //'name' => optional($expense->financeItem)->item_name ?? $expense->sub_category ?? 'Uncategorized',
+                    'name' => $expense->financeItem->item_name ?? $expense->sub_category ?? 'Uncategorized',
                     'amount' => $expense->amount,
                     'type' => 'dr', // Assuming expenses are debit entries
                 ];
             })
             ->groupBy('name'); // Group by name to aggregate amounts for the same account
 
+
+          //dd($operationalCosts);  
         //return in an array format
         return $operationalCosts;
     }
