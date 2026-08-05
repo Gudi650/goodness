@@ -4,6 +4,7 @@ namespace App\Services\Finance\BalanceSheet;
 
 use App\Models\CreateLiability;
 use App\Models\Expense;
+use App\Models\Invoice;
 use App\Models\Salary;
 
 class CurrentLiabilitiesService
@@ -71,7 +72,30 @@ class CurrentLiabilitiesService
                 ];
             });
 
-        return $payableVAT;
+        //get the invoice vat 
+        $invoiceVAT = Invoice::where('tax_amount','>', 0)
+            //->where('amount', '>', 0)
+            ->get()
+            ->map(function ($invoice) {
+                return [
+                    'name' => $invoice->invoice_number,
+                    'amount' => $invoice->vat_amount,
+                    'type' => 'cr', // Assuming liabilities are credit entries
+                ];
+            });
+
+        //payable vat is difference btn the invoice vat and the expense vat
+        $payableVATAmount = $invoiceVAT->sum('amount') - $payableVAT->sum('amount');
+
+        
+
+        return collect([
+            [
+                'name' => 'Payable VAT',
+                'amount' => $payableVATAmount,
+                'type' => 'cr',
+            ],
+        ]);
     }
 
     //get the short Term Loans from the Liabilities table
