@@ -138,7 +138,8 @@ class balanceSheetController extends Controller
 
     protected function getOtherEquity(?int $companyId = null): float
     {
-        return (float) EquityDistribution::query()->sum('value_held');
+        //return (float) EquityDistribution::query()->sum('value_held');
+        return 0.0;
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database
