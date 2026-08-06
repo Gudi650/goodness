@@ -228,7 +228,7 @@ class TrialBalanceController extends Controller
             ->get()
             ->map(function ($asset) {
                 return [
-                    'name' => $asset->name,
+                    'name' => $asset->category->category ?? 'Uncategorized',
                     'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
