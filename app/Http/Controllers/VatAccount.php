@@ -67,9 +67,12 @@ class VatAccount extends Controller
             'period' => $start->format('F Y'),
             'outputVat' => $outputVat,
             'inputVat' => $inputVat,
-            'vatPayable' => $inputVat - $outputVat,
+            'vatPayable' => $outputVat - $inputVat,
             'outputRows' => $outputRows,
             'inputRows' => $inputRows,
         ]);
+
+    
+            
     }
 }
