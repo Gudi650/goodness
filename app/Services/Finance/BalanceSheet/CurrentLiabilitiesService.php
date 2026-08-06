@@ -80,6 +80,7 @@ class CurrentLiabilitiesService
         //get the payable VAT from the expenses table
         //get the expenses where vat_included is true and the amount is greater than 0
         $ExpensesVAT = Expense::where('vat_included', true)
+            ->where('status', 'issued')
             ->where('amount', '>', 0)
             ->get()
             ->map(function ($expense) {
@@ -91,8 +92,8 @@ class CurrentLiabilitiesService
             });
 
         //get the invoice vat 
-        $invoiceVAT = Invoice::where('tax_amount','>', 0)
-            //->where('amount', '>', 0)
+        $invoiceVAT = Invoice::where('status', 'paid')
+            ->where('tax_amount','>', 0)
             ->get()
             ->map(function ($invoice) {
                 return [
