@@ -152,6 +152,7 @@ class IncomeStatement extends Controller
                     });
 
             });
+            
 
         $orderedExpenseStatement = collect();
 

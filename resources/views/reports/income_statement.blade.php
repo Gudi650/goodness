@@ -4,6 +4,7 @@
     <meta charset="utf-8">
 
     <style>
+        
         body {
             font-family: DejaVu Sans;
             color: #000;
@@ -116,7 +117,11 @@
     </tr>
 
     @php
-        $cogsItems = $totalExpensesByCategory->get('Cost of Goods Sold (COGS)', collect());
+        $cogsCategory = $totalExpensesByCategory->keys()->first(function ($key) {
+            $k = strtolower((string) $key);
+            return str_contains($k, 'cogs') || str_contains($k, 'cost of good sold') || str_contains($k, 'cost of goods sold');
+        });
+        $cogsItems = $cogsCategory ? $totalExpensesByCategory->get($cogsCategory, collect()) : collect();
         $cogsTotal = $cogsItems->sum();
     @endphp
 
@@ -150,7 +155,7 @@
     </tr>
 
     @foreach($totalExpensesByCategory as $category => $items)
-        @if($category !== 'Cost of Goods Sold (COGS)')
+        @if($category !== $cogsCategory)
             <tr class="section">
                 <td colspan="2">{{ $category }}</td>
             </tr>
