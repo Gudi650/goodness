@@ -185,7 +185,7 @@
             </tr> --}}
 
             <tr>
-                <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                <td>{{ $items->first()['name'] ?? ucfirst(str_replace('_', ' ', $type)) }}</td>
                 <td class="amount">
                     {{ number_format($items->sum('amount'), 2) }}
                 </td>
