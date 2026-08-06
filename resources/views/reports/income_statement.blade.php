@@ -115,73 +115,73 @@
         <td class="amount">Tsh{{ number_format($totalRevenue, 2) }}</td>
     </tr>
 
-    <!-- Expenses -->
-    @foreach($totalExpensesByCategory as $category => $items)
-
-    <tr class="section">
-        <td colspan="2">{{ $category }}</td>
-    </tr>
-
     @php
-        $categoryTotal = 0;
+        $cogsItems = $totalExpensesByCategory->get('Cost of Goods Sold (COGS)', collect());
+        $cogsTotal = $cogsItems->sum();
     @endphp
 
-    @foreach($items as $itemName => $amount)
+    <tr class="section">
+        <td colspan="2">Cost of Goods Sold (COGS)</td>
+    </tr>
 
-        @php
-            $categoryTotal += $amount;
-        @endphp
-
-        <tr>
-            <td class="desc">{{ $itemName }}</td>
-            <td class="amount">
-                Tsh{{ number_format($amount, 2) }}
-            </td>
-        </tr>
-
+    @foreach($cogsItems as $itemName => $amount)
+    <tr>
+        <td class="desc">{{ $itemName }}</td>
+        <td class="amount">Tsh{{ number_format($amount, 2) }}</td>
+    </tr>
     @endforeach
 
     <tr class="total">
-        <td>Total {{ $category }}</td>
-        <td class="amount">
-            Tsh{{ number_format($categoryTotal, 2) }}
-        </td>
+        <td>Total Cost of Goods Sold (COGS)</td>
+        <td class="amount">Tsh{{ number_format($cogsTotal, 2) }}</td>
     </tr>
 
-    @endforeach
-
-    <tr>
-        <td class="desc">Gross Profit</td>
+    <tr class="total">
+        <td>Gross Profit</td>
         <td class="amount">Tsh{{ number_format($grossProfit, 2) }}</td>
     </tr>
 
-    <tr>
-        <td class="desc">Operating Expenses</td>
-        <td class="amount">Tsh{{ number_format($totalOperatingExpenses, 2) }}</td>
-    </tr>
-
-    <tr class="total">
-        <td>Operating Income</td>
-        <td class="amount">Tsh{{ number_format($operatingIncome, 2) }}</td>
-    </tr>
+    @php
+        $otherExpensesTotal = 0;
+    @endphp
 
     <tr class="section">
-        <td colspan="2">Other Items</td>
+        <td colspan="2">Expenses</td>
     </tr>
 
-    @foreach($data['other_items'] as $item)
-    <tr>
-        <td class="desc">{{ $item['name'] }}</td>
+    @foreach($totalExpensesByCategory as $category => $items)
+        @if($category !== 'Cost of Goods Sold (COGS)')
+            <tr class="section">
+                <td colspan="2">{{ $category }}</td>
+            </tr>
 
-        <td class="amount">
-            @if($item['amount'] < 0)
-                (Tsh{{ number_format(abs($item['amount']), 2) }})
-            @else
-                Tsh{{ number_format($item['amount'], 2) }}
-            @endif
-        </td>
-    </tr>
+            @php
+                $categoryTotal = 0;
+            @endphp
+
+            @foreach($items as $itemName => $amount)
+                @php
+                    $categoryTotal += $amount;
+                    $otherExpensesTotal += $amount;
+                @endphp
+
+                <tr>
+                    <td class="desc">{{ $itemName }}</td>
+                    <td class="amount">Tsh{{ number_format($amount, 2) }}</td>
+                </tr>
+            @endforeach
+
+            <tr class="total">
+                <td>Total {{ $category }}</td>
+                <td class="amount">Tsh{{ number_format($categoryTotal, 2) }}</td>
+            </tr>
+        @endif
     @endforeach
+
+    <tr class="total">
+        <td>Total Expenses</td>
+        <td class="amount">Tsh{{ number_format($otherExpensesTotal, 2) }}</td>
+    </tr>
 
     <tr class="total">
         <td>Pre-Tax Income</td>
