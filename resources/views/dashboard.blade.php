@@ -187,7 +187,7 @@
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left font-semibold">Company</th>
-                                <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right font-semibold">Revenue</th>
+                                {{--<th class="text-xs text-slate-500 uppercase px-4 py-3 text-right font-semibold">Revenue</th> --}}
                                 <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right font-semibold">Employees</th>
                                 <th class="text-xs text-slate-500 uppercase px-4 py-3 text-left font-semibold">Status</th>
                             </tr>
@@ -196,7 +196,7 @@
                             @forelse ($companies as $company)
                                 <tr class="hover:bg-slate-50 transition-colors">
                                     <td class="px-4 py-3 text-sm font-medium text-slate-900">{{ $company->name }}</td>
-                                    <td class="px-4 py-3 text-sm text-right mono text-slate-700">TZS {{ number_format($company->revenue ?? 0, 2) }}</td>
+                                    {{-- <tdclass="px-4py-3text-smtext-rightmonotext-slate-700">TZSnumber_format($company->revenue??0,2)</td> --}}
                                     <td class="px-4 py-3 text-sm text-right font-medium text-slate-700">{{ $company->users_count ?? 0 }}</td>
                                     <td class="px-4 py-3 text-sm">
                                         <span class="px-3 py-1 inline-flex items-center rounded-full text-xs font-semibold {{ $company->status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700' }}">
