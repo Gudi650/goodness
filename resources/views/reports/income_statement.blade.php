@@ -155,7 +155,10 @@
     </tr>
 
     @foreach($totalExpensesByCategory as $category => $items)
-        @if($category !== $cogsCategory)
+        @php
+            $isInvestment = str_contains(strtolower((string) $category), 'investment');
+        @endphp
+        @if($category !== $cogsCategory && ! $isInvestment)
             <tr class="section">
                 <td colspan="2">{{ $category }}</td>
             </tr>
