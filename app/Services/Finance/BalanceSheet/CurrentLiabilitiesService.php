@@ -24,14 +24,14 @@ class CurrentLiabilitiesService
         $getShortTermLoans = $this->getShortTermLoans();
         $getAccruedExpenses = $this->getAccruedExpenses();
         $getInterestPayables = $this->getInterestPayables();
-        $getSalaries = $this->getSalaries();
+        //$getSalaries = $this->getSalaries();
         $getPayableVAT = $this->getPayableVAT();
 
         return [
             'short_term_loans' => $getShortTermLoans,
             'accrued_expenses' => $getAccruedExpenses,
             'interest_payables' => $getInterestPayables,
-            'salaries' => $getSalaries,
+            //'salaries' => $getSalaries,
             'payable_vat' => $getPayableVAT,
         ];
     }
