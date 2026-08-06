@@ -48,6 +48,27 @@ class balanceSheetController extends Controller
         //get other assets
         $otherAssets = $this->getAssets();
 
+        // Move VAT between Assets and Liabilities depending on its type
+        if (isset($currentLiabilities['payable_vat'])) {
+
+            $vat = $currentLiabilities['payable_vat']->first();
+
+            if ($vat && $vat['type'] === 'dr') {
+
+                // VAT Receivable → Current Assets
+                $currentAssets['vat_receivable'] = collect([$vat]);
+
+                unset($currentLiabilities['payable_vat']);
+
+            } else {
+
+                // VAT Payable → keep in Current Liabilities
+                $currentLiabilities['vat_payable'] = $currentLiabilities['payable_vat'];
+
+                unset($currentLiabilities['payable_vat']);
+            }
+        }
+
         $equityLiabilities = [
             'equity' => [
                 ['name' => 'Share Capital', 'amount' => $shareCapital],
