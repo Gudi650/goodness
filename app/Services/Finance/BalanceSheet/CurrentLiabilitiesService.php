@@ -105,19 +105,28 @@ class CurrentLiabilitiesService
         //dd($invoiceVAT);
 
         //payable vat is difference btn the invoice vat and the expense vat
-        //$payableVATAmount = $invoiceVAT->sum('amount') - $payableVAT->sum('amount');
-        $payableVATAmount = $ExpensesVAT->sum('amount') - $invoiceVAT->sum('amount');
+        $payableVATAmount = $invoiceVAT->sum('amount') - $ExpensesVAT->sum('amount');
 
 
+        //now check if the payable vat is less than 0 then return 0
+        if ($payableVATAmount < 0) {
+            $name = 'Receivable VAT';
+            $type = 'dr';
+            $payableVATAmount = abs($payableVATAmount);
+        } else {
+            $name= 'Payable VAT';
+            $type = 'cr';
+        } 
         
 
         return collect([
             [
-                'name' => 'Payable VAT',
+                'name' => $name,
                 'amount' => $payableVATAmount,
-                'type' => 'cr',
+                'type' => $type,
             ],
         ]);
+        
     }
 
     //get the short Term Loans from the Liabilities table
