@@ -61,6 +61,20 @@
                     placeholder="e.g. 25">
             </div>
 
+            {{-- virtual Account --}}
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Bank </label>
+                <select name="virtual_account_id"
+                    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
+                    <option value="">Select bank...</option>
+                    @forelse ($virtualAccounts as $account)
+                        <option value="{{ $account->id }}">{{ $account->account_name }}</option> 
+                    @empty
+                        <option class="text-sm text-red-500" disabled>Please add virtual accounts first.</option>
+                    @endforelse
+                </select>
+            </div>
+
         </div>
 
         <!-- Notes -->

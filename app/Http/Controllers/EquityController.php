@@ -7,6 +7,7 @@ use App\Models\Dividends;
 use App\Models\EquityDistribution;
 use App\Models\SharePremuims;
 use App\Models\SharesDefinitions;
+use App\Models\VirtualAccounts;
 use Illuminate\Http\Request;
 
 class EquityController extends Controller
@@ -32,6 +33,9 @@ class EquityController extends Controller
         //get the net value of the shares for every company and pass it to the view
         $netValues = $this->getNetValue();
 
+        //get the virtual accounts with their companies and pass it to the view
+        $virtualAccounts = $this->getVirtualAccounts();
+
         return view('equity', compact(
             
             'companies', 
@@ -40,6 +44,7 @@ class EquityController extends Controller
             'dividendsData',
             'sharePremiumsData',
             'netValues',
+            'virtualAccounts'
 
             ));
     }
@@ -98,6 +103,14 @@ class EquityController extends Controller
         }
 
         return $netValues;
+    }
+
+    //get the virtual accounts with their companies as well
+    public function getVirtualAccounts()
+    {
+        $virtualAccounts = VirtualAccounts::with('company')->get();
+
+        return $virtualAccounts;
     }
 
 }

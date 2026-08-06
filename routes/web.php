@@ -195,12 +195,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/liabilities', 'store')->name('liabilities.store');
     });
 
-    /*Finance items
-    Route::get('/items', function () {
-        return view('finance.items');
-    })->name('finance-items');
-    */
-
     //route to store the new item category in the database
     Route::controller(ItemsCategoryController::class)->group(function () {
         Route::post('/items/categories', 'store')->name('items.categories.store');
@@ -210,14 +204,6 @@ Route::middleware('auth')->group(function () {
     Route::controller(FinanceItemsController::class)->group(function () {
         Route::post('/items', 'store')->name('items.store');
     });
-
-    /* HRM Management
-    Route::get('/hrm', [HrmController::class, 'index'])->name('hrm');
-    Route::post('/employees', [UserController::class, 'store'])->name('employees.store');
-    Route::delete('/employees/{user}', [UserController::class, 'destroy'])->name('employees.destroy');
-    Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
-    Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
-    Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy'); */
 
     // group the hrm management
     Route::controller(HrmController::class)->group(function () {
@@ -239,23 +225,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('/departments/{department}', 'destroy')->name('departments.destroy');
     });
 
-    /* Bulk Import
-        Route::post('/bulk-import/preview', [BulkImportController::class, 'previewImport'])->name('bulk-import.preview');
-        Route::post('/bulk-import/confirm', [BulkImportController::class, 'confirmImport'])->name('bulk-import.confirm');
-    */
-
     // group bulk import routes
     Route::controller(BulkImportController::class)->group(function () {
         Route::post('/bulk-import/preview', 'previewImport')->name('bulk-import.preview');
         Route::post('/bulk-import/confirm', 'confirmImport')->name('bulk-import.confirm');
     });
 
-    /* Payroll - minimal: record salaries
-        Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
-        Route::post('/payroll', [PayrollController::class, 'store'])->name('payroll.store');
-        Route::put('/payroll/{salary}', [PayrollController::class, 'update'])->name('payroll.update');
-        Route::delete('/payroll/{salary}', [PayrollController::class, 'destroy'])->name('payroll.destroy');
-    */
 
     // group payroll routes
     Route::controller(PayrollController::class)->group(function () {
@@ -264,13 +239,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/payroll/{salary}', 'update')->name('payroll.update');
         Route::delete('/payroll/{salary}', 'destroy')->name('payroll.destroy');
     });
-
-    /* Account Settings
-        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
-        Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.update.profile');
-        Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.update.password');
-        Route::put('/settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.update.preferences');
-    */
 
     // group routes of account settings
     Route::controller(SettingsController::class)->group(function () {
@@ -284,22 +252,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/sales', [SalesController::class, 'index'])->name('sales');
 
-    /* Customers (sales)
-        Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
-        Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
-        Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
-        Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
-
-
-    //group the customers routes
-    Route::controller(CustomerController::class)->group(function () {
-        Route::post('/customers', 'store')->name('customers.store');
-        Route::get('/customers/{customer}', 'show')->name('customers.show');
-        Route::put('/customers/{customer}', 'update')->name('customers.update');
-        Route::delete('/customers/{customer}', 'destroy')->name('customers.destroy');
-    });
-    */
-
     // group the customers routes
     Route::controller(CustomerController::class)->group(function () {
         Route::post('/customers', 'store')->name('customers.store');
@@ -307,13 +259,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/customers/{customer}', 'update')->name('customers.update');
         Route::delete('/customers/{customer}', 'destroy')->name('customers.destroy');
     });
-
-    /* Orders (sales)
-    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-    Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
-    Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
-    */
 
     // group orders routes
     Route::controller(OrderController::class)->group(function () {
@@ -323,12 +268,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/orders/{order}', 'destroy')->name('orders.destroy');
     });
 
-    /* Contracts (sales)
-    Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
-    Route::get('/contracts/{contract}', [ContractController::class, 'show'])->name('contracts.show');
-    Route::put('/contracts/{contract}', [ContractController::class, 'update'])->name('contracts.update');
-    Route::delete('/contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
-    */
 
     // contract group routes
     Route::controller(ContractController::class)->group(function () {
@@ -338,13 +277,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/contracts/{contract}', 'destroy')->name('contracts.destroy');
     });
 
-    /* Leaves (HRM)
-    Route::post('/leaves', [LeavesController::class, 'store'])->name('leaves.store');
-    Route::get('/leaves', [LeavesController::class, 'index'])->name('leaves.index');
-    Route::get('/leaves/{leave}', [LeavesController::class, 'show'])->name('leaves.show');
-    Route::put('/leaves/{leave}', [LeavesController::class, 'update'])->name('leaves.update');
-    Route::delete('/leaves/{leave}', [LeavesController::class, 'destroy'])->name('leaves.destroy');
-    */
 
     // leaves group routes
     Route::controller(LeavesController::class)->group(function () {
@@ -358,14 +290,6 @@ Route::middleware('auth')->group(function () {
     // Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
 
-    /* Products (inventory)
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
-    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-    */
-
     // group the products routes
     Route::controller(ProductController::class)->group(function () {
         Route::get('/products', 'index')->name('products.index');
@@ -375,11 +299,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/products/{product}', 'destroy')->name('products.destroy');
     });
 
-    /* Suppliers (inventory)
-    Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
-    Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
-    Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
-    */
 
     // group the suppliers routes
     Route::controller(SupplierController::class)->group(function () {
@@ -391,13 +310,6 @@ Route::middleware('auth')->group(function () {
     // download  attachements list
     Route::get('/suppliers/{supplier}/download/{type}', [SupplierController::class, 'downloadAttachment'])->name('suppliers.downloadAttachment');
 
-    /* Purchase Orders (inventory)
-    Route::get('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
-    Route::post('/purchase-orders', [PurchaseOrderController::class, 'store'])->name('purchase-orders.store');
-    Route::put('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->name('purchase-orders.update');
-    Route::delete('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('purchase-orders.destroy');
-    Route::get('/purchase-orders/{purchaseOrder}/download', [PurchaseOrderController::class, 'downloadAttachment'])->name('purchase-orders.download');
-    */
 
     // group purchase orders routes
     Route::controller(PurchaseOrderController::class)->group(function () {
@@ -484,6 +396,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/sensors', [IotSensorController::class, 'store'])->name('sensors.store');
         
     });
+
+    //routes for the loans page
+    Route::get('/loans', function () {
+        return view('loan');
+    })->name('loans');
 
 
     //VAT Accounting
