@@ -72,6 +72,7 @@ class IncomeStatement extends Controller
         $taxExpense = $preTaxIncome * 0.18;
 
         $netIncome = $preTaxIncome - $taxExpense;
+        
 
         return [
             'data' => $data,

@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Dividends;
 use App\Models\Expense;
 use App\Models\Invoice;
-use Illuminate\Support\Carbon;
 
 class NetIncome
 {
@@ -17,42 +15,73 @@ class NetIncome
         //
     }
 
-    //function to get the net income
+    /**
+     * Calculate Net Income
+     */
     public function calculateNetIncome(?int $companyId = null, ?int $year = null): float
     {
+        // Total Revenue
         $totalRevenue = $this->getRevenues($companyId, $year)->sum('total_amount');
-        $totalExpenses = $this->getExpenses($companyId, $year)->sum('amount');
 
-        $totalRevenuesByCategory = $this->getTotalRevenuesByCategory($companyId, $year);
+        // Expenses grouped by category
         $totalExpensesByCategory = $this->getExpenseStatement($companyId, $year);
-        $totalCOGS = $totalExpensesByCategory->get('Cost of Goods Sold (COGS)', collect())->sum() ?? 0;
-        $totalOperatingExpenses = $totalExpensesByCategory->get('Operational', collect())->sum() ?? 0;
 
-        //gross profit is the difference between total revenue and total COGS
+        // Detect COGS category dynamically
+        $cogsCategory = $totalExpensesByCategory->keys()->first(function ($key) {
+            $k = strtolower((string) $key);
+
+            return str_contains($k, 'cogs')
+                || str_contains($k, 'cost of good sold')
+                || str_contains($k, 'cost of goods sold');
+        });
+
+        // Categories excluded from operating expenses
+        $excludedCategories = collect([$cogsCategory, 'Investment'])
+            ->filter()
+            ->values();
+
+        // Total Operating Expenses (excluding COGS and Investment)
+        $totalOperatingExpenses = $totalExpensesByCategory
+            ->reject(function ($items, $category) use ($excludedCategories) {
+                return $excludedCategories->contains($category)
+                    || str_contains(strtolower((string) $category), 'investment');
+            })
+            ->flatten()
+            ->sum();
+
+        // Total COGS
+        $totalCOGS = $cogsCategory
+            ? ($totalExpensesByCategory->get($cogsCategory, collect())->sum() ?? 0)
+            : 0;
+
+        // Gross Profit
         $grossProfit = $totalRevenue - $totalCOGS;
 
+        // Operating Income
         $operatingIncome = $grossProfit - $totalOperatingExpenses;
 
+        // Other income/expenses (future use)
         $otherItemsTotal = 0;
 
+        // Profit before tax
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
 
-        //tax expense is calculated as a percentage of pre-tax income, for example 30%
+        // Tax Expense (18%)
         $taxExpense = $preTaxIncome * 0.18;
 
+        // Net Income
         $netIncome = $preTaxIncome - $taxExpense;
 
-        return $netIncome;
-
+        return (float) $netIncome;
     }
 
-
-    //function to get the revenues from invoices table in the database
-    //use the invoices which are paid here
+    /**
+     * Get Paid Revenues
+     */
     protected function getRevenues(?int $companyId = null, ?int $year = null)
     {
-        //fetch revenues from the database
-        $revenues = Invoice::query()->where('status', 'draft');
+        $revenues = Invoice::query()
+            ->where('status', 'paid');
 
         if ($companyId) {
             $revenues->where('company_id', $companyId);
@@ -62,30 +91,28 @@ class NetIncome
             $revenues->whereYear('created_at', $year);
         }
 
-        $revenues = $revenues->get();
-    
-        return $revenues;
-        
+        return $revenues->get();
     }
 
-    //now get the total of all revenues per categories
+    /**
+     * Revenue grouped by category
+     */
     protected function getTotalRevenuesByCategory(?int $companyId = null, ?int $year = null)
     {
-        $revenues = $this->getRevenues($companyId, $year);
-    
-        $totalIncomeByCategory = $revenues->groupBy('category')->map(function ($group) {
-            return $group->sum('total_amount');
-        });
-    
-        return $totalIncomeByCategory;
+        return $this->getRevenues($companyId, $year)
+            ->groupBy('category')
+            ->map(function ($group) {
+                return $group->sum('total_amount');
+            });
     }
 
-    //function to get the expenses from expense table in the database
-    //use the expenses which are issued here
+    /**
+     * Get Issued Expenses
+     */
     protected function getExpenses(?int $companyId = null, ?int $year = null)
     {
-        //fetch expenses from the database
-        $expenses = Expense::query()->where('status', 'issued');
+        $expenses = Expense::query()
+            ->where('status', 'issued');
 
         if ($companyId) {
             $expenses->where('company_id', $companyId);
@@ -97,35 +124,49 @@ class NetIncome
 
         $expenses = $expenses->get();
 
-        //if empty return an empty collection
-        if ($expenses->isEmpty()) {
-            return collect();
-        }
-
-        return $expenses;
+        return $expenses->isEmpty()
+            ? collect()
+            : $expenses;
     }
 
-    //function to get the total of all expenses per categories
+    /**
+     * Expense Statement
+     */
     protected function getExpenseStatement(?int $companyId = null, ?int $year = null)
     {
         $expenses = $this->getExpenses($companyId, $year);
 
-        return $expenses
+        $expenseStatement = $expenses
             ->groupBy(function ($expense) {
-                return $expense->category;
+                return $expense?->category ?? 'Uncategorized_Category';
             })
             ->map(function ($categoryExpenses) {
 
                 return $categoryExpenses
                     ->groupBy(function ($expense) {
-                        return $expense->financeItem->item_name ?? 'Uncategorized';
+                        return $expense?->financeItem?->item_name ?? 'Uncategorized_Sub_Category';
                     })
                     ->map(function ($itemExpenses) {
                         return $itemExpenses->sum('amount');
                     });
 
             });
+
+        // Keep COGS and Operational at the top
+        $orderedExpenseStatement = collect();
+
+        foreach (['Cost of Goods Sold (COGS)', 'Operational'] as $category) {
+            if ($expenseStatement->has($category)) {
+                $orderedExpenseStatement->put($category, $expenseStatement->get($category));
+            }
+        }
+
+        foreach ($expenseStatement as $category => $items) {
+            if (! $orderedExpenseStatement->has($category)) {
+                $orderedExpenseStatement->put($category, $items);
+            }
+        }
+
+        return $orderedExpenseStatement;
     }
-
-
 }
