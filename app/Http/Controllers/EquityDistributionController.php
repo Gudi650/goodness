@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\EquityDistribution;
+use App\Models\VirtualAccounts;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class EquityDistributionController extends Controller
 {
@@ -22,9 +24,13 @@ class EquityDistributionController extends Controller
             'share_value' => 'required|numeric',
             'ownership' => 'required|numeric',
             'notes' => 'nullable|string',
+            'virtual_account_id' => 'required|exists:virtual_accounts,id',
         ]);
 
         //dd($validatedData);
+
+        //call the function to add money to the bank account in response to the amount
+        $this->addMoneyToBankAccount($validatedData['virtual_account_id'], $validatedData['share_value']);
 
         // Save the data to the equity_distributions table
         EquityDistribution::create([
@@ -40,6 +46,23 @@ class EquityDistributionController extends Controller
         return redirect()->back()->with('success', 'Equity distribution created successfully');
     }
 
+    //add money to the bank account in response to the amount 
+    protected function addMoneyToBankAccount($accountId, $amount)
+    {
+        
+        // Find the bank account by ID
+        $bankAccount = VirtualAccounts::find($accountId);
 
-    //
+        if (!$bankAccount) {
+            throw ValidationException::withMessages([
+                'account_id' => 'The account does not have enough money to create the asset.',
+            ]);
+        }
+
+        // Add the amount to the bank account balance
+        $bankAccount->balance += $amount;
+        $bankAccount->save();
+
+    }
+
 }
