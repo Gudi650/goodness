@@ -34,16 +34,29 @@ class IncomeStatement extends Controller
         //get the total expenses by category
         $totalExpensesByCategory = $this->getExpenseStatement();
 
-        //total expenses of all categories
-        $totalExpenses = collect($totalExpensesByCategory)
-        ->flatten()
-        ->sum();
+        $cogsCategory = $totalExpensesByCategory->keys()->first(function ($key) {
+            $k = strtolower((string) $key);
+            return str_contains($k, 'cogs') || str_contains($k, 'cost of good sold') || str_contains($k, 'cost of goods sold');
+        });
 
-        //get the total expenses of COGS category
-        $totalCOGS = $totalExpensesByCategory->get('Cost of Goods Sold (COGS)', collect())->sum() ?? 0;
+        $excludedCategories = collect([$cogsCategory, 'Investment'])
+            ->filter()
+            ->values();
 
-        //get the total of operating expenses category
-        $totalOperatingExpenses = $totalExpensesByCategory->get('Operational', collect())->sum() ?? 0;
+        // total expenses excluding COGS and Investment, matching the report layout
+        $totalExpenses = $totalExpensesByCategory
+            ->reject(function ($items, $category) use ($excludedCategories) {
+                return $excludedCategories->contains($category)
+                    || str_contains(strtolower((string) $category), 'investment');
+            })
+            ->flatten()
+            ->sum();
+
+        // get the total expenses of COGS category
+        $totalCOGS = $cogsCategory ? ($totalExpensesByCategory->get($cogsCategory, collect())->sum() ?? 0) : 0;
+
+        // expenses shown in the statement
+        $totalOperatingExpenses = $totalExpenses;
 
         //gross profit is the difference between total revenue and total COGS
         $grossProfit = $totalRevenue - $totalCOGS;
