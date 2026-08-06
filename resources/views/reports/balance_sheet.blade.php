@@ -147,7 +147,8 @@
             <td class="amount">
                 {{  number_format(
                     collect($nonCurrentAssets)->flatten(1)->sum('amount') +
-                    collect($currentAssets)->flatten(1)->sum('amount'),
+                    collect($currentAssets)->flatten(1)->sum('amount') +
+                    collect($otherAssets)->flatten(1)->sum('amount'),
                     2) 
                 }}
             </td>
