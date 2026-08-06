@@ -117,6 +117,18 @@
 
         @endforeach
 
+        {{--loop through other assets --}}
+        @foreach ($otherAssets as $type => $items)
+
+            {{-- Category heading --}}
+            <tr>
+                <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                <td class="amount">
+                    {{ number_format($items->sum('amount'), 2) }}
+                </td>
+            </tr>
+        @endforeach
+
         <tr class="subcategory">
             <td colspan="2">Current Assets</td>
         </tr>

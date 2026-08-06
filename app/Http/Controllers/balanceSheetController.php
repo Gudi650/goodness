@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CreateAssets;
 use App\Models\CreateLiability;
 use App\Models\Dividends;
 use App\Models\Expense;
@@ -44,6 +45,9 @@ class balanceSheetController extends Controller
 
         $otherEquity = $this->getOtherEquity($companyId);
 
+        //get other assets
+        $otherAssets = $this->getAssets();
+
         $equityLiabilities = [
             'equity' => [
                 ['name' => 'Share Capital', 'amount' => $shareCapital],
@@ -64,7 +68,7 @@ class balanceSheetController extends Controller
             'currentLiabilities' => $currentLiabilities,
             'nonCurrentAssets' => $nonCurrentAssets,
             'currentAssets' => $currentAssets,
-            
+            'otherAssets' => $otherAssets,
 
         ];
 
@@ -152,6 +156,30 @@ class balanceSheetController extends Controller
         }
 
         return \App\Models\Company::query()->value('id');
+    }
+
+
+    protected function getAssets()
+    {
+        //get the vehicles assets from the assets table
+        $otherAssets = CreateAssets::whereHas('category', function ($query) {
+            $query->where('category', '!=','Vehicle Assets')
+                ->where('category', '!=','Property Assets')
+                ->where('category', '!=','Investment Assets')
+                ->where('category', '!=','Intangible Assets');
+        })
+            ->where('current_value', '>', 0)
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => $asset->category->category ?? 'Uncategorized',
+                    'amount' => $asset->current_value,
+                    'type' => 'dr', // Assuming assets are debit entries
+                ];
+            })
+            ->groupBy('name');
+
+        return $otherAssets;
     }
 
 
