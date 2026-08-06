@@ -264,6 +264,13 @@ class TrialBalanceController extends Controller
 
     }
 
+    //function to get the depreciations of assets to display in the trial balance report
+    protected function getDepreciations()
+    {
+        // Implementation for getting depreciations
+
+    }
+
     //function to get the total of all DEBIT entries in the trial balance report
     //use the collections liabiltites, assets, to sum the total of all debit entries
     protected function getTotalDr($reportData)
