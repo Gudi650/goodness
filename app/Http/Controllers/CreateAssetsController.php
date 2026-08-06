@@ -6,6 +6,7 @@ use App\Models\AssetRevaluation;
 use App\Models\CreateAssets;
 use App\Models\VirtualAccounts;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CreateAssetsController extends Controller
 {
@@ -116,14 +117,16 @@ class CreateAssetsController extends Controller
     {
         $account = VirtualAccounts::find($accountId);
 
-        //check if the account has enough money to create the asset
-        if($this->checkAccountMoney($accountId, $amount)) {
-            $account->balance -= $amount;
-            $account->save();
-        } else {
-            //throw an exception if the account does not have enough money
-            throw new \Exception('Insufficient funds in the account to create the asset.');
+        // Check if the account has enough money
+        if (! $this->checkAccountMoney($accountId, $amount)) {
+            throw ValidationException::withMessages([
+                'account_id' => 'The account does not have enough money to create the asset.',
+            ]);
         }
+
+        // Deduct the money
+        $account->balance -= $amount;
+        $account->save();
 
     }
 
