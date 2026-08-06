@@ -139,7 +139,7 @@
             {{-- loop through current liabilities --}}
             @foreach ($currentLiabilities as $type => $items)
                 <tr>
-                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td>{{ $items->first()['name'] ?? ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>
 
                     {{-- Debit column --}}
