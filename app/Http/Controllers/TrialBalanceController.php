@@ -123,6 +123,9 @@ class TrialBalanceController extends Controller
             })
             ->groupBy('name'); // Group by name to aggregate amounts for the same account
 
+            //dump the asm of cost of goods sold
+        dd($costOfGoodsSold->sum('amount'));
+
         // return in an array format
         return $costOfGoodsSold;
     }
