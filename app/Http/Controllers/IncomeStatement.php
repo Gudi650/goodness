@@ -116,34 +116,16 @@ class IncomeStatement extends Controller
         //$revenues = Invoice::where('status', 'draft')->get();
 
         //fetch revenues from the database
-        $Totalrevenues = Invoice::where('status', 'paid')->get();
-
-        //get the VAT amount from the invoices and subtract it from the total amount to get the revenue
-        $invoiceVAT = Invoice::where('status', 'paid')
-            ->where('tax_amount','>', 0)
+        $revenues = Invoice::where('status', 'paid')
             ->get()
             ->map(function ($invoice) {
                 return [
-                    'name' => $invoice->invoice_number,
-                    'amount' => $invoice->tax_amount,
-                    'type' => 'cr', // Assuming liabilities are credit entries
+                    'name'   => $invoice->invoice_number,
+                    'amount' => $invoice->total_amount - $invoice->tax_amount,
+                    'type'   => 'cr',
                 ];
             });
-        
-        //sum of the VAT amount from the invoices
-        $totalInvoiceVAT = $invoiceVAT->sum('amount');
 
-        dd($totalInvoiceVAT);
-
-        //subtract the VAT amount from the total amount to get the revenue
-        $revenues = $Totalrevenues->map(function ($invoice) use ($totalInvoiceVAT) {
-            return [
-                'name' => $invoice->invoice_number,
-                'amount' => $invoice->total_amount - $totalInvoiceVAT,
-                'type' => 'cr', // Assuming liabilities are credit entries
-            ];
-        });
-    
         return $revenues;
         
     }
