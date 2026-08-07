@@ -304,15 +304,6 @@ class TrialBalanceController extends Controller
 
         }
 
-        //get other assets and add them to the totalDr
-        $otherAssets = $this->getAssets();
-        foreach ($otherAssets as $asset) {
-            $totalDr += $asset->sum('amount');
-        }
-
-        //add the total of other expenses to the totalDr
-        $totalDr += $this->getTotalOtherExpenses();
-
         return $totalDr;
     }
 
