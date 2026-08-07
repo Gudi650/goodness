@@ -356,7 +356,6 @@ class InvoiceController extends Controller
                 ->increment('balance', $invoice->total_amount);
         }
 
-        //okay now moify
     }
 
     /**
