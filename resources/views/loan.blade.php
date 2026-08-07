@@ -219,52 +219,116 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Loan Code</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Company</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Installment #</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Due Date</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Principal</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Interest</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Total Installment</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Status</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Installments</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Next Due Date</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Paid</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Pending</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Overdue</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Outstanding</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                @forelse($repaymentSchedule ?? [] as $installment)
-                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $installment->loan->company->name ?? '-' }}">
-                                        <td class="px-4 py-3 mono text-xs text-slate-500">{{ $installment->loan->code ?? '-' }}</td>
+                                @forelse($loans ?? [] as $loan)
+                                    @php
+                                        $installments = $loan->repaymentSchedule;
+                                        $paidCount = $installments->where('status', 'Paid')->count();
+                                        $pendingCount = $installments->where('status', 'Pending')->count();
+                                        $overdueCount = $installments->where('status', 'Overdue')->count();
+                                        $nextDue = $installments->where('status', '!=', 'Paid')->sortBy('due_date')->first();
+                                    @endphp
+                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                        <td class="px-4 py-3 mono text-xs text-slate-500">{{ $loan->code }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $installment->loan->company->name ?? '-' }}</span>
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company->name ?? '-' }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-right mono">{{ $installment->installment_number }}</td>
-                                        <td class="px-4 py-3">{{ $installment->due_date->format('d M Y') }}</td>
-                                        <td class="px-4 py-3 text-right mono">TZS {{ number_format($installment->principal_portion) }}</td>
-                                        <td class="px-4 py-3 text-right mono">TZS {{ number_format($installment->interest_portion) }}</td>
-                                        <td class="px-4 py-3 text-right mono font-medium">TZS {{ number_format($installment->total_installment) }}</td>
+                                        <td class="px-4 py-3 text-right mono">{{ $installments->count() }}</td>
                                         <td class="px-4 py-3">
-                                            @if ($installment->status === 'Paid')
-                                                <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 border border-green-200">Paid</span>
-                                            @elseif($installment->status === 'Overdue')
-                                                <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 border border-red-200">Overdue</span>
+                                            @if ($nextDue)
+                                                {{ $nextDue->due_date->format('d M Y') }}
+                                                @if ($nextDue->status === 'Overdue')
+                                                    <span class="ml-1 inline-flex px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 border border-red-200">Overdue</span>
+                                                @endif
                                             @else
-                                                <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-700 border border-yellow-200">Pending</span>
+                                                <span class="text-slate-400">All paid</span>
                                             @endif
                                         </td>
+                                        <td class="px-4 py-3 text-right mono text-green-700">{{ $paidCount }}</td>
+                                        <td class="px-4 py-3 text-right mono text-yellow-700">{{ $pendingCount }}</td>
+                                        <td class="px-4 py-3 text-right mono text-red-700">{{ $overdueCount }}</td>
+                                        <td class="px-4 py-3 text-right mono font-medium">TZS {{ number_format($loan->outstanding_balance) }}</td>
                                         <td class="px-4 py-3">
-                                            @if ($installment->status !== 'Paid')
-                                                <form action="{{ route('loans.schedule.mark-paid', $installment->id) }}" method="POST"
-                                                    onsubmit="return confirm('Mark installment #{{ $installment->installment_number }} as paid?');">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" class="text-emerald-600 hover:text-emerald-800 text-xs font-medium">Mark Paid</button>
-                                                </form>
+                                            <div class="flex items-center justify-center">
+                                                <button type="button" onclick="toggleScheduleDetails('{{ $loan->id }}')"
+                                                    class="text-slate-600 hover:text-slate-800 transition-colors"
+                                                    title="View installments" aria-label="View installments">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                        stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="schedule-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                        <td colspan="9" class="px-4 py-4">
+                                            @if ($installments->isEmpty())
+                                                <p class="text-sm text-slate-500 px-2">No installments generated for this loan yet.</p>
                                             @else
-                                                <span class="text-xs text-slate-400">—</span>
+                                                <table class="w-full text-sm border border-slate-200 rounded overflow-hidden">
+                                                    <thead class="bg-white border-b border-slate-200">
+                                                        <tr>
+                                                            <th class="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">#</th>
+                                                            <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Due Date</th>
+                                                            <th class="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Principal</th>
+                                                            <th class="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Interest</th>
+                                                            <th class="px-3 py-2 text-right text-xs font-semibold uppercase text-slate-500">Total</th>
+                                                            <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Status</th>
+                                                            <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-slate-500">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="bg-white divide-y divide-slate-100">
+                                                        @foreach ($installments as $installment)
+                                                            <tr>
+                                                                <td class="px-3 py-2 text-right mono">{{ $installment->installment_number }}</td>
+                                                                <td class="px-3 py-2">{{ $installment->due_date->format('d M Y') }}</td>
+                                                                <td class="px-3 py-2 text-right mono">TZS {{ number_format($installment->principal_portion) }}</td>
+                                                                <td class="px-3 py-2 text-right mono">TZS {{ number_format($installment->interest_portion) }}</td>
+                                                                <td class="px-3 py-2 text-right mono font-medium">TZS {{ number_format($installment->total_installment) }}</td>
+                                                                <td class="px-3 py-2">
+                                                                    @if ($installment->status === 'Paid')
+                                                                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 border border-green-200">Paid</span>
+                                                                    @elseif($installment->status === 'Overdue')
+                                                                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 border border-red-200">Overdue</span>
+                                                                    @else
+                                                                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-700 border border-yellow-200">Pending</span>
+                                                                    @endif
+                                                                </td>
+                                                                <td class="px-3 py-2">
+                                                                    @if ($installment->status !== 'Paid')
+                                                                        <form action="{{ route('loans.schedule.mark-paid', $installment->id) }}" method="POST"
+                                                                            onsubmit="return confirm('Mark installment #{{ $installment->installment_number }} as paid?');">
+                                                                            @csrf
+                                                                            @method('PATCH')
+                                                                            <button type="submit" class="text-emerald-600 hover:text-emerald-800 text-xs font-medium">Mark Paid</button>
+                                                                        </form>
+                                                                    @else
+                                                                        <span class="text-xs text-slate-400">—</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
                                             @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="px-4 py-3 text-center text-slate-500">No repayment schedule generated</td>
+                                        <td colspan="9" class="px-4 py-3 text-center text-slate-500">No loans recorded</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -419,6 +483,13 @@
 
         function toggleLoanDetails(id) {
             const detailsRow = document.getElementById(`loan-details-${id}`);
+            if (detailsRow) {
+                detailsRow.classList.toggle('hidden');
+            }
+        }
+
+        function toggleScheduleDetails(id) {
+            const detailsRow = document.getElementById(`schedule-details-${id}`);
             if (detailsRow) {
                 detailsRow.classList.toggle('hidden');
             }

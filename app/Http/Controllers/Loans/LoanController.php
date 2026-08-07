@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Loans;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Loan;
-use App\Models\LoanRepaymentSchedule;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,23 +15,25 @@ class LoanController extends Controller
     /**
      * Renders the Loans page. This currently loads both the loan register
      * and the repayment schedule since the page hasn't been split into
-     * subpages yet — once you do that split, move the schedule query into
-     * LoanRepaymentScheduleController and give the view its own route.
+     * subpages yet — once you do that split, move the schedule-related
+     * data into LoanRepaymentScheduleController and give the view its own
+     * route.
      */
     public function index(): View
     {
-        $loans = Loan::with(['company', 'approvedBy'])
+        $loans = Loan::with(['company', 'approvedBy', 'repaymentSchedule' => function ($query) {
+                $query->orderBy('installment_number');
+            }])
             ->orderByDesc('start_date')
-            ->get();
-
-        $repaymentSchedule = LoanRepaymentSchedule::with(['loan.company'])
-            ->orderBy('due_date')
             ->get();
 
         $companies = Company::orderBy('name')->get(['id', 'name']);
         $approvers = User::orderBy('name')->get(['id', 'name']);
 
-        return view('loan', compact('loans', 'repaymentSchedule', 'companies', 'approvers'));
+        // The Repayment Schedule tab groups by loan (one row per loan, with
+        // an expandable installment breakdown), so it reads straight off
+        // $loans -> repaymentSchedule instead of a separate flat query.
+        return view('loan', compact('loans', 'companies', 'approvers'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -126,5 +127,4 @@ class LoanController extends Controller
 
         return back()->with('success', "Loan {$loan->code} removed.");
     }
-
 }
