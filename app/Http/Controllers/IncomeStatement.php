@@ -25,7 +25,7 @@ class IncomeStatement extends Controller
             'tax_expense' => 0,
         ];
 
-        $totalRevenue = $this->getRevenues()->sum('total_amount');
+        $totalRevenue = $this->getRevenues()->sum('amount');
         
 
         //get the total revenues by category
@@ -112,34 +112,29 @@ class IncomeStatement extends Controller
     //use the invoices which are paid here
     protected function getRevenues()
     {
-
-        //$revenues = Invoice::where('status', 'draft')->get();
-
-        //fetch revenues from the database
-        $revenues = Invoice::where('status', 'paid')
+        //invoices amount minus their VAT amount to get the revenue amount
+        return Invoice::where('status', 'paid')
             ->get()
             ->map(function ($invoice) {
                 return [
-                    'name'   => $invoice->invoice_number,
-                    'amount' => $invoice->total_amount - $invoice->tax_amount,
-                    'type'   => 'cr',
+                    'name'     => $invoice->invoice_number,
+                    'category' => $invoice->category,
+                    'amount'   => ($invoice->total_amount ?? 0) - ($invoice->tax_amount ?? 0),
+                    'type'     => 'cr',
                 ];
             });
 
-        return $revenues;
-        
     }
 
     //now get the total of all revenues per categories
     protected function getTotalRevenuesByCategory()
     {
         $revenues = $this->getRevenues();
-    
-        $totalIncomeByCategory = $revenues->groupBy('category')->map(function ($group) {
-            return $group->sum('total_amount');
+
+        return $revenues->groupBy('category')->map(function ($group) {
+            return $group->sum('amount');
         });
-    
-        return $totalIncomeByCategory;
+        
     }
 
     //function to get the expenses from expense table in the database
