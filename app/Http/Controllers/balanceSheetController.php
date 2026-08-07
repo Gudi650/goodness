@@ -135,7 +135,7 @@ class balanceSheetController extends Controller
         $dividends = $this->getDividendsPaid($companyId, $year);
 
         //get the net income from the net income service
-        $netIncome = $this->calculateNetIncomeForYear($companyId, null);
+        $netIncome = $this->calculateNetIncomeForYear(null, null);
 
         //get the retained earnings by subtracting the dividends paid from the net income
         $retainedEarnings = $netIncome - $dividends;
@@ -152,10 +152,6 @@ class balanceSheetController extends Controller
     protected function getDividendsPaid(?int $companyId = null, ?int $year = null): float
     {
         $query = Dividends::query()->where('status', 'Declared');
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
 
         return (float) $query->sum('amount');
 
