@@ -128,23 +128,19 @@ class TrialBalanceController extends Controller
     }
 
     // function to get the revenues from invoices table in the database
-    // use the invoices which are paid here
+    // use the invoices which are paid here and exclude the VAT amount from the total amount to get the revenue amount
     protected function getRevenues()
     {
-        // fetch revenues from the database
-        $revenues = Invoice::where('status', 'paid')
+        return Invoice::where('status', 'paid')
             ->get()
             ->map(function ($invoice) {
                 return [
-                    'name' => 'Revenue',
-                    'amount' => $invoice->total_amount,
-                    'type' => 'cr', // Assuming revenues are credit entries
+                    'name'   => 'Revenue',
+                    'amount' => ($invoice->total_amount ?? 0) - ($invoice->tax_amount ?? 0),
+                    'type'   => 'cr',
                 ];
             })
-            ->groupBy('name'); // Group by name to aggregate amounts for the same account
-
-        // return in an array format
-        return $revenues;
+            ->groupBy('name');
     }
 
     //function to get the operational costs from expenses table in the db 
