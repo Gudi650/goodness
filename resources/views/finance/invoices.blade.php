@@ -3,6 +3,224 @@
 <x-loading id="invoiceEditLoader" message="Updating invoice..." :show="false" full-page="true" />
 
 <div id="invoicesPane">
+
+    <!-- Invoice Statistics -->
+    <div class="grid gap-4 mb-6 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+
+        <!-- Total Invoices -->
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-blue-500 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                        Total Invoices
+                    </p>
+                    <p class="text-2xl font-bold text-slate-800">
+                        148
+                    </p>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-blue-100">
+
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12h6m-6 4h6M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+                </svg>
+
+            </div>
+        </div>
+
+        <!-- Total Amount -->
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-green-500 p-4">
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                        Total Value
+                    </p>
+
+                    <p class="text-2xl font-bold text-slate-800">
+                        TZS 94,300,000
+                    </p>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-green-100">
+
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 1v8" />
+                </svg>
+
+            </div>
+        </div>
+
+        <!-- Paid -->
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-emerald-500 p-4">
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                        Paid
+                    </p>
+
+                    <p class="text-2xl font-bold text-slate-800">
+                        93
+                    </p>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-emerald-100">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                </svg>
+
+            </div>
+        </div>
+
+        <!-- Pending -->
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-amber-500 p-4">
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                        Pending
+                    </p>
+
+                    <p class="text-2xl font-bold text-slate-800">
+                        29
+                    </p>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-amber-100">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2 2" />
+                </svg>
+
+            </div>
+        </div>
+
+        <!-- Overdue -->
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-red-500 p-4">
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                        Overdue
+                    </p>
+
+                    <p class="text-2xl font-bold text-slate-800">
+                        18
+                    </p>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-red-100">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008" />
+                </svg>
+
+            </div>
+        </div>
+
+        <!-- Draft -->
+        <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-slate-500 p-4">
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                        Draft
+                    </p>
+
+                    <p class="text-2xl font-bold text-slate-800">
+                        8
+                    </p>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-10 h-10 text-slate-100">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h8m-8 6h16" />
+                </svg>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Invoice Filters -->
+    <div class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+
+            <!-- Search -->
+            <div class="relative flex-1 xl:max-w-xl">
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400">
+
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m21 21-4.35-4.35M16 10.5A5.5 5.5 0 1 1 5 10.5a5.5 5.5 0 0 1 11 0" />
+                </svg>
+
+                <input type="text" placeholder="Search invoice number, customer, email..."
+                    class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-brand-500 focus:ring-brand-500">
+
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+
+                <select class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm">
+                    <option>All Periods</option>
+                    <option>Today</option>
+                    <option>This Week</option>
+                    <option>This Month</option>
+                    <option>This Quarter</option>
+                    <option>This Year</option>
+                    <option>Custom Range</option>
+                </select>
+
+                <button
+                    class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100">
+                    Reset
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">
+
+            <select class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+                <option>All Status</option>
+                <option>Draft</option>
+                <option>Pending</option>
+                <option>Paid</option>
+                <option>Overdue</option>
+            </select>
+
+            <select class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+                <option>All Invoice Types</option>
+                <option>Product</option>
+                <option>Service</option>
+            </select>
+
+            <select class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+                <option>All Payment Methods</option>
+                <option>Cash</option>
+                <option>Bank</option>
+                <option>Mobile Money</option>
+                <option>Card</option>
+            </select>
+
+            <span class="ml-auto text-sm text-slate-500">
+                Showing <strong>148</strong> invoices
+            </span>
+
+        </div>
+
+    </div>
+
+
     <div class="overflow-x-auto">
         <table class="min-w-full">
             <thead class="bg-slate-50">
@@ -29,7 +247,7 @@
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
                             <div class="flex items-center justify-center gap-6">
-                                
+
                                 <a href="{{ route('invoices.download', $invoice['id']) }}"
                                     class="text-emerald-600 hover:text-emerald-800 transition-colors"
                                     title="Download invoice PDF" aria-label="Download invoice PDF">
@@ -126,7 +344,7 @@
                                         <p class="text-slate-900 font-semibold">Total: TZS
                                             {{ number_format($invoice['total_amount']) }}</p>
                                     </div>
-                                    
+
                                 </div>
 
                                 <div class="mt-4">
@@ -138,7 +356,8 @@
                                                     <th class="px-3 py-2 text-left font-medium text-slate-600">#</th>
                                                     <th class="px-3 py-2 text-left font-medium text-slate-600">
                                                         Description</th>
-                                                    <th class="px-3 py-2 text-right font-medium text-slate-600">Qty</th>
+                                                    <th class="px-3 py-2 text-right font-medium text-slate-600">Qty
+                                                    </th>
                                                     <th class="px-3 py-2 text-right font-medium text-slate-600">Unit
                                                         Price</th>
                                                     <th class="px-3 py-2 text-right font-medium text-slate-600">Total
@@ -148,9 +367,11 @@
                                             <tbody class="divide-y divide-slate-100 bg-white">
                                                 @forelse ($invoice['items'] as $item)
                                                     <tr>
-                                                        <td class="px-3 py-2 text-slate-500">{{ $item['item_number'] }}
+                                                        <td class="px-3 py-2 text-slate-500">
+                                                            {{ $item['item_number'] }}
                                                         </td>
-                                                        <td class="px-3 py-2 text-slate-700">{{ $item['description'] }}
+                                                        <td class="px-3 py-2 text-slate-700">
+                                                            {{ $item['description'] }}
                                                         </td>
                                                         <td class="px-3 py-2 text-right text-slate-700">
                                                             {{ $item['quantity'] }}</td>
@@ -225,8 +446,10 @@
                 document.getElementById('invoiceClientEmail').value = invoice.client_email || '';
                 document.getElementById('invoiceClientPhone').value = invoice.client_phone || '';
                 document.getElementById('invoiceClientAddress').value = invoice.client_address || '';
-                document.getElementById('invoiceDate').value = invoice.invoice_date ? invoice.invoice_date.split('T')[0] : '';
-                document.getElementById('invoiceDueDate').value = invoice.due_date ? invoice.due_date.split('T')[0] : '';
+                document.getElementById('invoiceDate').value = invoice.invoice_date ? invoice.invoice_date.split(
+                    'T')[0] : '';
+                document.getElementById('invoiceDueDate').value = invoice.due_date ? invoice.due_date.split('T')[
+                    0] : '';
                 document.getElementById('invoiceStatus').value = invoice.status || 'draft';
                 document.getElementById('invoicePaymentMethod').value = invoice.payment_method || 'cash';
                 document.getElementById('invoiceNotes').value = invoice.notes || '';
