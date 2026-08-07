@@ -167,6 +167,16 @@
                 Sales
             </a>
 
+            <a href="/loans"
+                class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 mx-2 transition-colors"
+                data-path="/loans">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                </svg>
+                Loans
+            </a>
+
             <a href="/inventory"
                 class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900  mx-2 transition-colors"
                 data-path="/inventory">
@@ -207,6 +217,7 @@
                 </svg>
                 Reports
             </a>
+
         @endif
 
         <a href="/communication"
