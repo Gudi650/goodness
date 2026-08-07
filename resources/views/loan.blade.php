@@ -31,11 +31,13 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+
     <style>
         body { font-family: Inter, sans-serif; }
         h1, h2, h3, nav, button { font-family: Outfit, sans-serif; }
         .mono { font-family: ui-monospace, monospace; }
     </style>
+    
 </head>
 
 <body class="bg-slate-50 text-slate-800">
@@ -100,7 +102,8 @@
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Term</th>
                                     <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Outstanding</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Status</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Action</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase">Disbursement</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -118,6 +121,8 @@
                                         <td class="px-4 py-3">
                                             @if ($loan->status === 'Active')
                                                 <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 border border-green-200">Active</span>
+                                            @elseif($loan->status === 'Pending')
+                                                <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700 border border-amber-200">Pending</span>
                                             @elseif($loan->status === 'Closed')
                                                 <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200">Closed</span>
                                             @elseif($loan->status === 'Overdue')
@@ -126,8 +131,27 @@
                                                 <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 border border-red-200">{{ $loan->status }}</span>
                                             @endif
                                         </td>
+                                        <td class="px-4 py-3 text-center">
+                                            @if ($loan->disbursement_date)
+                                                <span class="text-xs text-slate-500 mono" title="Disbursed on {{ $loan->disbursement_date->format('d M Y') }}">
+                                                    ✓ {{ $loan->disbursement_date->format('d/m/Y') }}
+                                                </span>
+                                            @elseif ($loan->approved_by_id)
+                                                <form action="{{ route('loans.disburse', $loan->id) }}" method="POST"
+                                                    onsubmit="return confirm('Confirm disbursement of TZS {{ number_format($loan->principal) }} for loan {{ $loan->code }}? Funds will be added to the selected bank account balance.');">
+                                                    @csrf
+                                                    <button type="submit" class="px-2.5 py-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded text-xs font-medium transition-colors shadow-sm">
+                                                        Disburse Funds
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-xs text-amber-600 font-medium" title="Approval required before disbursement">
+                                                    Awaiting Approval
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3">
-                                            <div class="flex items-center justify-center gap-4">
+                                            <div class="flex items-center justify-center gap-3">
                                                 <button type="button" onclick="toggleLoanDetails('{{ $loan->id }}')"
                                                     class="text-slate-600 hover:text-slate-800 transition-colors"
                                                     title="View loan details" aria-label="View loan details">
@@ -155,8 +179,12 @@
                                         </td>
                                     </tr>
                                     <tr id="loan-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
-                                        <td colspan="9" class="px-4 py-4">
+                                        <td colspan="10" class="px-4 py-4">
                                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Target Bank Account</p>
+                                                    <p class="mt-1 text-sm text-slate-700 font-medium">{{ $loan->bankAccount->bank_name ?? '-' }} ({{ $loan->bankAccount->account_number ?? 'No account assigned' }})</p>
+                                                </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Purpose</p>
                                                     <p class="mt-1 text-sm text-slate-700">{{ $loan->purpose ?? '-' }}</p>
@@ -171,38 +199,26 @@
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved By</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->approvedBy->name ?? '-' }}</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->approvedBy->name ?? 'Not Approved' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Disbursement Date</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->disbursement_date?->format('d M Y') ?? '-' }}</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->disbursement_date?->format('d M Y') ?? 'Not Disbursed' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Maturity Date</p>
                                                     <p class="mt-1 text-sm text-slate-700">{{ $loan->maturity_date->format('d M Y') }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Interest Payable: TZS</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ number_format($loan->total_interest_payable) }}</p>
-                                                </div>
-                                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Repayable: TZS</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ number_format($loan->total_repayable) }}</p>
-                                                </div>
-                                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Created At</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->created_at?->format('d M Y H:i') ?? '-' }}</p>
-                                                </div>
-                                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Updated At</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->updated_at?->format('d M Y H:i') ?? 'N/A' }}</p>
+                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Interest Payable</p>
+                                                    <p class="mt-1 text-sm text-slate-700">TZS {{ number_format($loan->total_interest_payable) }}</p>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="px-4 py-3 text-center text-slate-500">No loans recorded</td>
+                                        <td colspan="10" class="px-4 py-3 text-center text-slate-500">No loans recorded</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -418,10 +434,6 @@
         </div>
     </main>
 
-    {{-- Modals to build once Repayments and Interest Summary get their own backend --}}
-    {{--
-    @include('loans.modals.record-repayment')
-    --}}
     @include('loans.modals.add-loan')
 
     @include('components.modal')
@@ -436,10 +448,6 @@
             summary: 'Interest Summary'
         };
 
-        // Only Loan Register has a working backend right now, so it's the
-        // only tab that gets a functional Add button. Repayments and
-        // Interest Summary stay empty until their controllers exist —
-        // add entries here once they do.
         const loanAddButtons = {
             register: { label: 'Add Loan', modal: 'modal-add-loan' }
         };

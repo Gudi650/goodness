@@ -354,11 +354,6 @@ class InvoiceController extends Controller
             DB::table('virtual_accounts')
                 ->where('company_id', $invoice->company_id)
                 ->increment('balance', $invoice->total_amount);
-        } else {
-            // For expense invoices, deduct the total amount from the virtual account balance
-            DB::table('virtual_accounts')
-                ->where('company_id', $invoice->company_id)
-                ->decrement('balance', $invoice->total_amount);
         }
     }
 

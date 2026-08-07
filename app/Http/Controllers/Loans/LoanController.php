@@ -15,8 +15,7 @@ use Illuminate\View\View;
 class LoanController extends Controller
 {
     /**
-     * Renders the Loans page. This loads the loan register,
-     * companies, approvers, and virtual accounts for dropdowns.
+     * Renders the Loans page.
      */
     public function index(): View
     {
@@ -27,12 +26,15 @@ class LoanController extends Controller
             ->get();
 
         $companies = Company::orderBy('name')->get(['id', 'name']);
+
         $approvers = User::orderBy('name')->get(['id', 'name']);
+
         $virtualAccounts = VirtualAccounts::where('status', 'active')
             ->orderBy('bank_name')
             ->get(['id', 'bank_name', 'account_name', 'account_number']);
 
         return view('loan', compact('loans', 'companies', 'approvers', 'virtualAccounts'));
+        
     }
 
     public function store(Request $request): RedirectResponse
@@ -48,7 +50,7 @@ class LoanController extends Controller
             'disbursement_date' => ['nullable', 'date'],
             'start_date' => ['required', 'date'],
             'maturity_date' => ['required', 'date', 'after:start_date'],
-            'status' => ['required', 'in:Active,Closed,Overdue,Defaulted'],
+            'status' => ['required', 'in:Pending,Active,Closed,Overdue,Defaulted'],
             'purpose' => ['nullable', 'string'],
             'collateral' => ['nullable', 'string'],
             'guarantor' => ['nullable', 'string', 'max:150'],
@@ -71,19 +73,46 @@ class LoanController extends Controller
                 }
             } while (true);
 
-            // Auto-build the amortization schedule from the terms just entered.
+            // Auto-build the amortization schedule
             $loan->generateSchedule();
-
-            // Money flow logic: Add loan principal to selected bank account balance
-            if (!empty($data['bank_id'])) {
-                $bankAccount = VirtualAccounts::find($data['bank_id']);
-                if ($bankAccount) {
-                    $bankAccount->increment('balance', $data['principal']);
-                }
-            }
         });
 
-        return back()->with('success', "Loan {$loan->code} added, schedule generated, and account balance updated.");
+        return back()->with('success', "Loan {$loan->code} recorded and repayment schedule generated.");
+    }
+
+    /**
+     * Confirms loan disbursement: adds principal to bank balance and marks active.
+     */
+    public function disburse(Request $request, Loan $loan): RedirectResponse
+    {
+        // 1. Verify that loan is approved first
+        if (empty($loan->approved_by_id)) {
+            return back()->with('error', "Loan {$loan->code} must be approved by an authorized user before disbursement.");
+        }
+
+        // 2. Prevent duplicate disbursal
+        if ($loan->disbursement_date !== null && $loan->status === 'Active') {
+            return back()->with('error', "Loan {$loan->code} has already been disbursed on {$loan->disbursement_date->format('d M Y')}.");
+        }
+
+        // 3. Ensure a bank account is selected to receive funds
+        if (empty($loan->bank_id)) {
+            return back()->with('error', "Please assign a target Bank/Virtual Account to loan {$loan->code} before disbursing.");
+        }
+
+        DB::transaction(function () use ($loan) {
+            // Update bank balance on day of disbursement
+            $bankAccount = VirtualAccounts::findOrFail($loan->bank_id);
+            $bankAccount->increment('balance', $loan->principal);
+
+            // Update loan status and record actual disbursement date
+            $loan->update([
+                'status' => 'Active',
+                'disbursement_date' => now(),
+            ]);
+        });
+
+        return back()->with('success', "Loan {$loan->code} successfully disbursed. Funds (TZS " . number_format($loan->principal) . ") deposited to bank account.");
     }
 
     public function update(Request $request, Loan $loan): RedirectResponse
@@ -99,7 +128,7 @@ class LoanController extends Controller
             'disbursement_date' => ['nullable', 'date'],
             'start_date' => ['required', 'date'],
             'maturity_date' => ['required', 'date', 'after:start_date'],
-            'status' => ['required', 'in:Active,Closed,Overdue,Defaulted'],
+            'status' => ['required', 'in:Pending,Active,Closed,Overdue,Defaulted'],
             'purpose' => ['nullable', 'string'],
             'collateral' => ['nullable', 'string'],
             'guarantor' => ['nullable', 'string', 'max:150'],
@@ -115,7 +144,6 @@ class LoanController extends Controller
 
         $loan->update($data);
 
-        // Rebuild schedule if parameters driving amortisation changed
         if ($termsChanged) {
             $loan->generateSchedule();
         }
