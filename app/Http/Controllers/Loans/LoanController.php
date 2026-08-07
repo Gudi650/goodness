@@ -6,22 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Loan;
 use App\Models\User;
+use App\Models\VirtualAccounts;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class LoanController extends Controller
 {
     /**
-     * Renders the Loans page. This currently loads both the loan register
-     * and the repayment schedule since the page hasn't been split into
-     * subpages yet — once you do that split, move the schedule-related
-     * data into LoanRepaymentScheduleController and give the view its own
-     * route.
+     * Renders the Loans page. This loads the loan register,
+     * companies, approvers, and virtual accounts for dropdowns.
      */
     public function index(): View
     {
-        $loans = Loan::with(['company', 'approvedBy', 'repaymentSchedule' => function ($query) {
+        $loans = Loan::with(['company', 'bankAccount', 'approvedBy', 'repaymentSchedule' => function ($query) {
                 $query->orderBy('installment_number');
             }])
             ->orderByDesc('start_date')
@@ -29,17 +28,18 @@ class LoanController extends Controller
 
         $companies = Company::orderBy('name')->get(['id', 'name']);
         $approvers = User::orderBy('name')->get(['id', 'name']);
+        $virtualAccounts = VirtualAccounts::where('status', 'active')
+            ->orderBy('bank_name')
+            ->get(['id', 'bank_name', 'account_name', 'account_number']);
 
-        // The Repayment Schedule tab groups by loan (one row per loan, with
-        // an expandable installment breakdown), so it reads straight off
-        // $loans -> repaymentSchedule instead of a separate flat query.
-        return view('loan', compact('loans', 'companies', 'approvers'));
+        return view('loan', compact('loans', 'companies', 'approvers', 'virtualAccounts'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'company_id' => ['required', 'exists:companies,id'],
+            'bank_id' => ['nullable', 'exists:virtual_accounts,id'],
             'lender' => ['required', 'string', 'max:150'],
             'principal' => ['required', 'numeric', 'min:0'],
             'interest_rate' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -56,35 +56,41 @@ class LoanController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        // The code is never taken from the form — it's generated here so
-        // it can't be duplicated, mistyped, or left in the wrong format.
-        // The retry loop only matters if two loans are saved in the same
-        // instant and both compute the same "next" number before either
-        // has committed; on the rare collision it just tries the next one.
-        $attempts = 0;
-        do {
-            $data['code'] = Loan::generateNextCode();
-            try {
-                $loan = Loan::create($data);
-                break;
-            } catch (\Illuminate\Database\QueryException $e) {
-                $attempts++;
-                if ($attempts >= 3) {
-                    throw $e;
+        DB::transaction(function () use (&$loan, $data) {
+            $attempts = 0;
+            do {
+                $data['code'] = Loan::generateNextCode();
+                try {
+                    $loan = Loan::create($data);
+                    break;
+                } catch (\Illuminate\Database\QueryException $e) {
+                    $attempts++;
+                    if ($attempts >= 3) {
+                        throw $e;
+                    }
+                }
+            } while (true);
+
+            // Auto-build the amortization schedule from the terms just entered.
+            $loan->generateSchedule();
+
+            // Money flow logic: Add loan principal to selected bank account balance
+            if (!empty($data['bank_id'])) {
+                $bankAccount = VirtualAccounts::find($data['bank_id']);
+                if ($bankAccount) {
+                    $bankAccount->increment('balance', $data['principal']);
                 }
             }
-        } while (true);
+        });
 
-        // Auto-build the amortization schedule from the terms just entered.
-        $loan->generateSchedule();
-
-        return back()->with('success', "Loan {$loan->code} added and schedule generated.");
+        return back()->with('success', "Loan {$loan->code} added, schedule generated, and account balance updated.");
     }
 
     public function update(Request $request, Loan $loan): RedirectResponse
     {
         $data = $request->validate([
             'company_id' => ['required', 'exists:companies,id'],
+            'bank_id' => ['nullable', 'exists:virtual_accounts,id'],
             'lender' => ['required', 'string', 'max:150'],
             'principal' => ['required', 'numeric', 'min:0'],
             'interest_rate' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -100,9 +106,6 @@ class LoanController extends Controller
             'approved_by_id' => ['nullable', 'exists:users,id'],
             'notes' => ['nullable', 'string'],
         ]);
-
-        // Code is intentionally not editable — it's the permanent
-        // reference the schedule and (eventually) repayments are keyed to.
 
         $termsChanged = $loan->principal != $data['principal']
             || $loan->interest_rate != $data['interest_rate']
@@ -112,8 +115,7 @@ class LoanController extends Controller
 
         $loan->update($data);
 
-        // If the numbers driving the schedule changed, rebuild it. If only
-        // status/notes/etc changed, leave the existing schedule untouched.
+        // Rebuild schedule if parameters driving amortisation changed
         if ($termsChanged) {
             $loan->generateSchedule();
         }

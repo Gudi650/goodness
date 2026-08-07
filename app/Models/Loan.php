@@ -14,6 +14,7 @@ class Loan extends Model
 
     protected $fillable = [
         'company_id',
+        'bank_id', // Added foreign key for bank/virtual account
         'code',
         'lender',
         'principal',
@@ -49,6 +50,14 @@ class Loan extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Relationship to the virtual account/bank receiving the loan funds.
+     */
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(VirtualAccounts::class, 'bank_id');
     }
 
     public function approvedBy(): BelongsTo
@@ -173,4 +182,5 @@ class Loan extends Model
             'total_repayable' => round($totalRepayable, 2),
         ]);
     }
+    
 }
