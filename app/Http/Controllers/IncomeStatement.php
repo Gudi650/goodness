@@ -72,7 +72,7 @@ class IncomeStatement extends Controller
         $taxExpense = $preTaxIncome * 0.18;
 
         $netIncome = $preTaxIncome - $taxExpense;
-        
+
 
         return [
             'data' => $data,
@@ -112,8 +112,35 @@ class IncomeStatement extends Controller
     //use the invoices which are paid here
     protected function getRevenues()
     {
+
+        //$revenues = Invoice::where('status', 'draft')->get();
+
         //fetch revenues from the database
-        $revenues = Invoice::where('status', 'paid')->get();
+        $Totalrevenues = Invoice::where('status', 'draft')->get();
+
+        //get the VAT amount from the invoices and subtract it from the total amount to get the revenue
+        $invoiceVAT = Invoice::where('status', 'draft')
+            ->where('tax_amount','>', 0)
+            ->get()
+            ->map(function ($invoice) {
+                return [
+                    'name' => $invoice->invoice_number,
+                    'amount' => $invoice->tax_amount,
+                    'type' => 'cr', // Assuming liabilities are credit entries
+                ];
+            });
+        
+        //sum of the VAT amount from the invoices
+        $totalInvoiceVAT = $invoiceVAT->sum('amount');
+
+        //subtract the VAT amount from the total amount to get the revenue
+        $revenues = $Totalrevenues->map(function ($invoice) use ($totalInvoiceVAT) {
+            return [
+                'name' => $invoice->invoice_number,
+                'total_amount' => $invoice->total_amount - $totalInvoiceVAT,
+                'category' => $invoice->category ?? 'Uncategorized',
+            ];
+        }); 
     
         return $revenues;
         
