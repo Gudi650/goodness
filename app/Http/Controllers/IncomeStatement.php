@@ -116,10 +116,10 @@ class IncomeStatement extends Controller
         //$revenues = Invoice::where('status', 'draft')->get();
 
         //fetch revenues from the database
-        $Totalrevenues = Invoice::where('status', 'draft')->get();
+        $Totalrevenues = Invoice::where('status', 'paid')->get();
 
         //get the VAT amount from the invoices and subtract it from the total amount to get the revenue
-        $invoiceVAT = Invoice::where('status', 'draft')
+        $invoiceVAT = Invoice::where('status', 'paid')
             ->where('tax_amount','>', 0)
             ->get()
             ->map(function ($invoice) {
