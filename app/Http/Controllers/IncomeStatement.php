@@ -133,14 +133,16 @@ class IncomeStatement extends Controller
         //sum of the VAT amount from the invoices
         $totalInvoiceVAT = $invoiceVAT->sum('amount');
 
+        dd($totalInvoiceVAT);
+
         //subtract the VAT amount from the total amount to get the revenue
         $revenues = $Totalrevenues->map(function ($invoice) use ($totalInvoiceVAT) {
             return [
                 'name' => $invoice->invoice_number,
-                'total_amount' => $invoice->total_amount - $totalInvoiceVAT,
-                'category' => $invoice->category ?? 'Uncategorized',
+                'amount' => $invoice->total_amount - $totalInvoiceVAT,
+                'type' => 'cr', // Assuming liabilities are credit entries
             ];
-        }); 
+        });
     
         return $revenues;
         
