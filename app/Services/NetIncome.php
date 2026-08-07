@@ -20,8 +20,8 @@ class NetIncome
      */
     public function calculateNetIncome(?int $companyId = null, ?int $year = null): float
     {
-        // Total Revenue
-        $totalRevenue = $this->getRevenues($companyId, $year)->sum('total_amount');
+        // Total Revenue needs to exclude the VAT
+        $totalRevenue = $this->getRevenues($companyId, $year)->sum('amount');
 
         // Expenses grouped by category
         $totalExpensesByCategory = $this->getExpenseStatement($companyId, $year);
@@ -91,7 +91,14 @@ class NetIncome
             $revenues->whereYear('created_at', $year);
         }
 
-        return $revenues->get();
+        return $revenues->get()->map(function ($invoice) {
+            return [
+                'name'     => $invoice->invoice_number,
+                'category' => $invoice->category,
+                'amount'   => ($invoice->total_amount ?? 0) - ($invoice->tax_amount ?? 0),
+                'type'     => 'cr',
+            ];
+        });
     }
 
     /**
@@ -102,7 +109,7 @@ class NetIncome
         return $this->getRevenues($companyId, $year)
             ->groupBy('category')
             ->map(function ($group) {
-                return $group->sum('total_amount');
+                return $group->sum('amount');
             });
     }
 
