@@ -35,13 +35,16 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+    {{-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6"> --}}
+    <div class="grid gap-4 mb-6 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+
         <div class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-blue-500 p-4">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Expenses</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($totalExpensesCount ?? 0) }}</p>
                 </div>
+
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-10 h-10 text-blue-100">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -54,9 +57,11 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Amount</p>
-                    <p class="text-2xl font-bold text-slate-800">TZS {{ number_format($totalExpensesAmount ?? 0, 2) }}
+                    <p class="text-2xl font-bold text-slate-800">
+                        TZS {{ number_format($totalExpensesAmount ?? 0, 2) }}
                     </p>
                 </div>
+
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-10 h-10 text-green-100">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -71,6 +76,7 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Pending Approvals</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($pendingApprovals ?? 0) }}</p>
                 </div>
+
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-10 h-10 text-amber-100">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -85,6 +91,7 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Drafted</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($draftedCount ?? 0) }}</p>
                 </div>
+
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-10 h-10 text-slate-100">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h8m-8 6h16" />
@@ -98,6 +105,7 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Issued</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($issuedCount ?? 0) }}</p>
                 </div>
+
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-10 h-10 text-indigo-100">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
@@ -111,13 +119,61 @@
                     <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Approved</p>
                     <p class="text-2xl font-bold text-slate-800">{{ number_format($approvedCount ?? 0) }}</p>
                 </div>
+
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-10 h-10 text-emerald-100">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
                 </svg>
             </div>
         </div>
+
     </div>
+
+    <!-- ================= FILTER TOOLBAR ================= -->
+
+    <div class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+
+            <!-- Search -->
+            <div class="relative flex-1 xl:max-w-xl">
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400">
+
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m21 21-4.35-4.35M16 10.5A5.5 5.5 0 1 1 5 10.5a5.5 5.5 0 0 1 11 0" />
+                </svg>
+
+                <input type="text" placeholder="Search by expense ID, company, department or category..."
+                    class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-brand-500 focus:ring-brand-500">
+            </div>
+
+            <!-- Right -->
+            <div class="flex flex-wrap gap-3">
+
+                <select class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm">
+                    <option>All Periods</option>
+                    <option>Today</option>
+                    <option>This Week</option>
+                    <option>This Month</option>
+                    <option>This Quarter</option>
+                    <option>This Year</option>
+                    <option>Custom Range</option>
+                </select>
+
+                <button
+                    class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100">
+                    Reset
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================= TABLE ================= -->
 
     <div class="overflow-x-auto">
         <table class="min-w-full">
