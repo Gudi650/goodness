@@ -34,6 +34,8 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ItemsCategoryController;
 use App\Http\Controllers\LeavesController;
 use App\Http\Controllers\LiabilityCategoryController;
+use App\Http\Controllers\Loans\LoanController;
+use App\Http\Controllers\Loans\LoanRepaymentScheduleController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PayrollController;
@@ -397,10 +399,34 @@ Route::middleware('auth')->group(function () {
         
     });
 
-    //routes for the loans page
+    /*routes for the loans page
     Route::get('/loans', function () {
         return view('loan');
     })->name('loans');
+    */
+
+    /*
+|--------------------------------------------------------------------------
+| Loans Module Routes
+|--------------------------------------------------------------------------
+| Include this file from routes/web.php:
+|   require __DIR__.'/loans.php';
+| (nest the require call inside your existing Route::middleware('auth')
+| ->group() so these sit behind login like your other modules)
+*/
+
+    Route::prefix('loans')->name('loans.')->group(function () {
+        Route::get('/', [LoanController::class, 'index'])->name('index');
+
+        // Loan register
+        Route::post('/', [LoanController::class, 'store'])->name('store');
+        Route::put('/{loan}', [LoanController::class, 'update'])->name('update');
+        Route::delete('/{loan}', [LoanController::class, 'destroy'])->name('destroy');
+
+        // Repayment schedule
+        Route::post('/{loan}/schedule/regenerate', [LoanRepaymentScheduleController::class, 'regenerate'])->name('schedule.regenerate');
+        Route::patch('/schedule/{schedule}/mark-paid', [LoanRepaymentScheduleController::class, 'markPaid'])->name('schedule.mark-paid');
+    });
 
 
     //VAT Accounting
