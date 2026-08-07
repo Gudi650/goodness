@@ -294,7 +294,7 @@ class InvoiceController extends Controller
         //check if the invoices used bank
         if($invoice->bank_id) {
             //check if the invoice type is expense or income then either add or deduct money from the virtual account balance
-            $this->updateVirtualAccountBalance($invoice);
+            $this->updateVirtualAccountBalance($invoice, $validated['bank_id']);
 
             //now save the transaction in the transactions table
             $this->saveTransaction($invoice);
@@ -347,14 +347,16 @@ class InvoiceController extends Controller
     /**
      * deduct or add money from the virtual account based on the invoice type
      */
-    protected function updateVirtualAccountBalance(Invoice $invoice): void
+    protected function updateVirtualAccountBalance(Invoice $invoice, int $bankId): void
     {
         if ($this->isInvoiceIncome($invoice)) {
             // For income invoices, add the total amount to the virtual account balance
             DB::table('virtual_accounts')
-                ->where('company_id', $invoice->company_id)
+                ->where('id', $bankId)
                 ->increment('balance', $invoice->total_amount);
         }
+
+        //okay now moify
     }
 
     /**
