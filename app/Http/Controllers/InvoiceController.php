@@ -267,7 +267,7 @@ class InvoiceController extends Controller
             'client_address' => $validated['client_address'],
             'invoice_date' => $validated['invoice_date'],
             'due_date' => $validated['due_date'] ?? $validated['invoice_date'],
-            'status' => 'draft',
+            'status' => 'paid', // Set status to 'paid' for draft invoices
             'payment_method' => $validated['payment_method'],
             'subtotal' => $validated['subtotal'],
             'tax_amount' => $validated['tax_amount'],

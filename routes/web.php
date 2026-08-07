@@ -399,12 +399,6 @@ Route::middleware('auth')->group(function () {
         
     });
 
-    /*routes for the loans page
-    Route::get('/loans', function () {
-        return view('loan');
-    })->name('loans');
-    */
-
     /*
 |--------------------------------------------------------------------------
 | Loans Module Routes
@@ -422,10 +416,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [LoanController::class, 'store'])->name('store');
         Route::put('/{loan}', [LoanController::class, 'update'])->name('update');
         Route::delete('/{loan}', [LoanController::class, 'destroy'])->name('destroy');
-
+        
         // Repayment schedule
         Route::post('/{loan}/schedule/regenerate', [LoanRepaymentScheduleController::class, 'regenerate'])->name('schedule.regenerate');
         Route::patch('/schedule/{schedule}/mark-paid', [LoanRepaymentScheduleController::class, 'markPaid'])->name('schedule.mark-paid');
+
+        Route::post('/loans/{loan}/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
+
     });
 
 
