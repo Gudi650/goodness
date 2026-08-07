@@ -67,7 +67,7 @@ class NetIncome
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
 
         // Tax Expense (18%)
-        $taxExpense = $preTaxIncome * 0.18;
+        $taxExpense = $preTaxIncome > 0 ? $preTaxIncome * 0.18 : 0;
 
         // Net Income
         $netIncome = $preTaxIncome - $taxExpense;

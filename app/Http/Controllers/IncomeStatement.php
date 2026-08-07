@@ -69,7 +69,8 @@ class IncomeStatement extends Controller
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
 
         //tax expense is calculated as a percentage of pre-tax income, for example 30%
-        $taxExpense = $preTaxIncome * 0.18;
+        //put a condition if preTaxIncome is zero or neg the taxExpense s zero
+        $taxExpense = $preTaxIncome > 0 ? $preTaxIncome * 0.18 : 0;
 
         $netIncome = $preTaxIncome - $taxExpense;
 
