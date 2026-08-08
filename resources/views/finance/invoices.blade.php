@@ -15,7 +15,7 @@
                         Total Invoices
                     </p>
                     <p class="text-2xl font-bold text-slate-800">
-                        148
+                        {{ number_format($totalInvoicesCount ?? 0) }}
                     </p>
                 </div>
 
@@ -39,7 +39,7 @@
                     </p>
 
                     <p class="text-2xl font-bold text-slate-800">
-                        TZS 94,300,000
+                        TZS {{ number_format($totalInvoicesAmount ?? 0, 2) }}
                     </p>
                 </div>
 
@@ -63,7 +63,7 @@
                     </p>
 
                     <p class="text-2xl font-bold text-slate-800">
-                        93
+                        {{ number_format($paidInvoicesCount ?? 0) }}
                     </p>
                 </div>
 
@@ -86,7 +86,7 @@
                     </p>
 
                     <p class="text-2xl font-bold text-slate-800">
-                        29
+                        {{ number_format($pendingInvoicesCount ?? 0) }}
                     </p>
                 </div>
 
@@ -109,7 +109,7 @@
                     </p>
 
                     <p class="text-2xl font-bold text-slate-800">
-                        18
+                        {{ number_format($overdueInvoicesCount ?? 0) }}
                     </p>
                 </div>
 
@@ -132,7 +132,7 @@
                     </p>
 
                     <p class="text-2xl font-bold text-slate-800">
-                        8
+                        {{ number_format($draftInvoicesCount ?? 0) }}
                     </p>
                 </div>
 

@@ -143,6 +143,36 @@ class FinanceController extends Controller
 
         //dd($incomeCategories);
 
+        // Invoice summary metrics for the top cards
+        $invoicesCollection = collect($invoices);
+
+        $totalInvoicesCount = $invoicesCollection->count();
+
+        $totalInvoicesAmount = $invoicesCollection->sum(function ($invoice) {
+            return (float) ($invoice['total_amount'] ?? 0);
+        });
+
+        $paidInvoicesCount = $invoicesCollection->filter(function ($invoice) {
+            return strtolower($invoice['status'] ?? '') === 'paid';
+        })->count();
+
+        $pendingInvoicesCount = $invoicesCollection->filter(function ($invoice) {
+            return strtolower($invoice['status'] ?? '') === 'pending';
+        })->count();
+
+        $draftInvoicesCount = $invoicesCollection->filter(function ($invoice) {
+            return strtolower($invoice['status'] ?? '') === 'draft';
+        })->count();
+
+        $overdueInvoicesCount = $invoicesCollection->filter(function ($invoice) {
+            if (empty($invoice['due_date_raw'])) {
+                return false;
+            }
+
+            return Carbon::parse($invoice['due_date_raw'])->isPast()
+                && !in_array(strtolower($invoice['status'] ?? ''), ['paid', 'cancelled'], true);
+        })->count();
+
         return view('finance', [
             'invoices' => $invoices,
             'expenses' => $expenses,
@@ -167,6 +197,15 @@ class FinanceController extends Controller
             'itemData' => $itemData,
             'incomeItems' => $incomeItems,
             'incomeCategories' => $incomeCategories,
+
+            // Invoice summary metrics
+            'totalInvoicesCount' => $totalInvoicesCount,
+            'totalInvoicesAmount' => $totalInvoicesAmount,
+            'paidInvoicesCount' => $paidInvoicesCount,
+            'pendingInvoicesCount' => $pendingInvoicesCount,
+            'overdueInvoicesCount' => $overdueInvoicesCount,
+            'draftInvoicesCount' => $draftInvoicesCount,
+            
         ]);
     }
 
