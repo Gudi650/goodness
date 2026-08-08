@@ -205,7 +205,7 @@ class FinanceController extends Controller
             'pendingInvoicesCount' => $pendingInvoicesCount,
             'overdueInvoicesCount' => $overdueInvoicesCount,
             'draftInvoicesCount' => $draftInvoicesCount,
-            
+
         ]);
     }
 
@@ -376,6 +376,282 @@ class FinanceController extends Controller
             ->all();
 
         return $invoices;
+    }
+
+    /**
+ * Search invoices using AJAX.
+ */
+    public function searchInvoices()
+    {
+        $user = Auth::user();
+
+        // Check finance access
+        if (
+            ! app(AccessControlService::class)->isCeoOrAdminOrAccountant($user)
+            && ! app(AccessControlService::class)->isManager($user)
+        ) {
+            return response()->json([
+                'message' => 'You do not have access to the Finance page.'
+            ], 403);
+        }
+
+        // Determine user permissions
+        $isQualifiedUser = app(AccessControlService::class)
+            ->isCeoOrAdminOrAccountant($user);
+
+        $search = request('search');
+
+        $query = Invoice::query()
+            ->with('company', 'creator', 'items')
+            ->when(
+                ! $isQualifiedUser && $user,
+                fn ($query) => $query->where('company_id', $user->company_id)
+            );
+
+        // Search invoices
+        if (! empty($search)) {
+            $query->where(function ($query) use ($search) {
+                $query->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhere('client_name', 'like', "%{$search}%")
+                    ->orWhere('client_email', 'like', "%{$search}%")
+                    ->orWhere('client_phone', 'like', "%{$search}%");
+            });
+        }
+
+        $invoices = $query
+            ->latest()
+            ->limit(100)
+            ->get()
+            ->map(function (Invoice $invoice) {
+                return [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'display_id' => $invoice->invoice_number,
+                    'company_id' => $invoice->company_id,
+                    'invoice_type' => $invoice->invoice_type,
+
+                    'invoice_date' => $invoice->invoice_date
+                        ? Carbon::parse($invoice->invoice_date)->format('M d, Y')
+                        : '-',
+
+                    'invoice_date_raw' => $invoice->invoice_date,
+
+                    'due_date' => $invoice->due_date
+                        ? Carbon::parse($invoice->due_date)->format('M d, Y')
+                        : null,
+
+                    'due_date_raw' => $invoice->due_date,
+
+                    'company_name' => $invoice->company?->name ?? '-',
+
+                    'client_name' => $invoice->client_name,
+                    'client_email' => $invoice->client_email,
+                    'client_phone' => $invoice->client_phone,
+                    'client_address' => $invoice->client_address,
+
+                    'subtotal' => (float) $invoice->subtotal,
+                    'tax_amount' => (float) $invoice->tax_amount,
+                    'discount_amount' => (float) $invoice->discount_amount,
+                    'total_amount' => (float) $invoice->total_amount,
+                    'amount' => (float) $invoice->total_amount,
+
+                    'status' => $invoice->status,
+                    'payment_method' => $invoice->payment_method,
+
+                    'description' => $invoice->description ?? '-',
+                    'notes' => $invoice->notes,
+
+                    'creator_name' => $invoice->creator?->name ?? '-',
+
+                    'created_at' => $invoice->created_at
+                        ? $invoice->created_at->format('M d, Y h:i A')
+                        : null,
+
+                    'items' => $invoice->items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'item_number' => $item->item_number,
+                            'description' => $item->description,
+                            'quantity' => (int) $item->quantity,
+                            'unit_price' => (float) $item->unit_price,
+                            'total_price' => (float) $item->total_price,
+                        ];
+                    })->values()->all(),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'count' => $invoices->count(),
+            'invoices' => $invoices,
+        ]);
+
+    }
+
+    /**
+     * Search expenses using AJAX.
+     */
+    public function searchExpenses()
+    {
+        $user = Auth::user();
+
+        // Check Finance access
+        if (
+            ! app(AccessControlService::class)->isCeoOrAdminOrAccountant($user)
+            && ! app(AccessControlService::class)->isManager($user)
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have access to the Finance page.'
+            ], 403);
+        }
+
+        // Determine user permissions
+        $isQualifiedUser = app(AccessControlService::class)
+            ->isCeoOrAdminOrAccountant($user);
+
+        $isCEO = $user && $user->role && $user->role->name === 'CEO';
+        $isAccountant = $user && $user->role && $user->role->name === 'Accountant';
+
+        $search = trim(request('search', ''));
+
+        $query = Expense::with([
+            'company',
+            'financeItem',
+            'department',
+            'creator',
+            'approver',
+            'issuer',
+            'checker'
+        ]);
+
+        // Respect company access
+        if (! $isQualifiedUser && ! $isCEO && ! $isAccountant && $user) {
+            $query->where('company_id', $user->company_id);
+        }
+
+        // Search
+        if ($search !== '') {
+            $query->where(function ($query) use ($search) {
+
+                $query->where('expense_number', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('reference_number', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('payment_method', 'like', "%{$search}%");
+
+                // Search by related company
+                $query->orWhereHas('company', function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%");
+                });
+
+                // Search by department
+                $query->orWhereHas('department', function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%");
+                });
+
+                // Search by creator
+                $query->orWhereHas('creator', function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%");
+                });
+
+                // Search by finance item
+                $query->orWhereHas('financeItem', function ($query) use ($search) {
+                    $query->where('item_name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $expenses = $query
+            ->latest()
+            ->limit(100)
+            ->get()
+            ->map(function (Expense $expense) {
+
+                return [
+                    'id' => $expense->id,
+
+                    'company_id' => $expense->company_id,
+
+                    'display_id' => $expense->expense_number,
+
+                    'expense_number' => $expense->expense_number,
+
+                    'expense_date' => $expense->expense_date
+                        ? Carbon::parse($expense->expense_date)->format('M d, Y')
+                        : '-',
+
+                    'expense_date_raw' => $expense->expense_date,
+
+                    'company_name' => $expense->company?->name ?? '-',
+
+                    'department_name' => $expense->department?->name ?? '-',
+
+                    'category' => $expense->category ?? '-',
+
+                    'sub_category' => $expense->financeItem?->item_name ?? '-',
+
+                    'payment_method' => $expense->payment_method ?? '-',
+
+                    'reference_number' => $expense->reference_number ?: '-',
+
+                    'amount' => (float) $expense->net_amount,
+
+                    'gross_amount' => (float) $expense->amount,
+
+                    'vat_included' => (bool) $expense->vat_included,
+
+                    'vat_rate' => (float) $expense->vat_rate,
+
+                    'vat_amount' => (float) $expense->vat_amount,
+
+                    'net_amount' => (float) $expense->net_amount,
+
+                    'status' => $expense->status,
+
+                    'description' => $expense->description ?: '-',
+
+                    'notes' => $expense->notes ?: '-',
+
+                    'creator_id' => $expense->created_by,
+
+                    'creator_name' => $expense->creator?->name ?? '-',
+
+                    'approved_by_name' => $expense->approver?->name ?? '-',
+
+                    'issued_by_name' => $expense->issuer?->name ?? '-',
+
+                    'checked_by_name' => $expense->checker?->name ?? '-',
+
+                    'submitted_at' => $expense->submitted_at
+                        ? Carbon::parse($expense->submitted_at)->format('M d, Y h:i A')
+                        : '-',
+
+                    'approved_at' => $expense->approved_at
+                        ? Carbon::parse($expense->approved_at)->format('M d, Y h:i A')
+                        : '-',
+
+                    'reviewed_at' => $expense->reviewed_at
+                        ? Carbon::parse($expense->reviewed_at)->format('M d, Y h:i A')
+                        : null,
+
+                    'review_feedback' => $expense->review_feedback,
+
+                    'review_items' => $expense->review_items ?? [],
+
+                    'review_evidence_paths' => $expense->review_evidence_paths ?? [],
+
+                    'term' => $expense->term,
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'count' => $expenses->count(),
+            'expenses' => $expenses,
+        ]);
     }
 
     // function to check if the approve button should be displayed for the expense based on the user role and expense status

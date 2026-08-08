@@ -144,6 +144,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoices/{invoice}', 'show')->name('invoices.show');
         Route::put('/invoices/{invoice}', 'update')->name('invoices.update');
         Route::delete('/invoices/{invoice}', 'destroy')->name('invoices.destroy');
+        Route::get('/finance/invoices/search', [FinanceController::class, 'searchInvoices'])->name('finance.invoices.search');
     });
 
     // Finance Management
@@ -158,6 +159,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/expenses/{expense}/review', 'reviewExpense')->name('expenses.review');
         Route::patch('/expenses/{expense}/review', 'storeExpenseReview')->name('expenses.review.store');
         Route::post('/expenses/{expense}/issue', 'issueExpense')->name('expenses.issue');
+        Route::get('/finance/expenses/search', [FinanceController::class, 'searchExpenses'])->name('finance.expenses.search');
     });
 
     // Payments Management

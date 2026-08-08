@@ -162,7 +162,11 @@
                         d="m21 21-4.35-4.35M16 10.5A5.5 5.5 0 1 1 5 10.5a5.5 5.5 0 0 1 11 0" />
                 </svg>
 
-                <input type="text" placeholder="Search invoice number, customer, email..."
+                <input
+                    type="text"
+                    id="invoiceSearch"
+                    placeholder="Search invoice number, customer, email..."
+                    autocomplete="off"
                     class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-brand-500 focus:ring-brand-500">
 
             </div>
@@ -233,7 +237,7 @@
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-center">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody id="invoiceTableBody" class="divide-y divide-slate-100">
                 @forelse ($invoices as $invoice)
                     <tr class="align-top">
                         <td class="px-4 py-3 text-sm font-medium">{{ $invoice['invoice_number'] }}</td>
@@ -508,4 +512,201 @@
             targetRow.classList.remove('hidden');
         }
     }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const searchInput = document.getElementById('invoiceSearch');
+    const invoiceTableBody = document.getElementById('invoiceTableBody');
+
+    if (!searchInput || !invoiceTableBody) {
+        return;
+    }
+
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function () {
+
+        clearTimeout(searchTimeout);
+
+        const search = this.value.trim();
+
+        searchTimeout = setTimeout(() => {
+
+            searchInvoices(search);
+
+        }, 400);
+
+    });
+
+
+    async function searchInvoices(search) {
+
+        // Show loading state
+        invoiceTableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-8 text-center">
+                    <div class="flex items-center justify-center gap-2 text-sm text-slate-500">
+                        <svg class="w-5 h-5 animate-spin"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24">
+
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4">
+                            </circle>
+
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                            </path>
+
+                        </svg>
+
+                        Searching invoices...
+                    </div>
+                </td>
+            </tr>
+        `;
+
+
+        try {
+
+            const url = new URL(
+                "{{ route('finance.invoices.search') }}",
+                window.location.origin
+            );
+
+            if (search !== '') {
+                url.searchParams.set('search', search);
+            }
+
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+
+            if (!response.ok) {
+                throw new Error('Failed to search invoices.');
+            }
+
+
+            const data = await response.json();
+
+
+            if (!data.success) {
+                throw new Error(data.message || 'Unable to search invoices.');
+            }
+
+
+            renderInvoices(data.invoices);
+
+
+        } catch (error) {
+
+            console.error('Invoice search error:', error);
+
+            invoiceTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-sm text-red-500">
+                        Unable to search invoices. Please try again.
+                    </td>
+                </tr>
+            `;
+
+        }
+
+    }
+
+
+    function renderInvoices(invoices) {
+
+        if (!invoices || invoices.length === 0) {
+
+            invoiceTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">
+                        No invoices found.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+
+        invoiceTableBody.innerHTML = invoices.map(invoice => {
+
+            const status = invoice.status
+                ? invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)
+                : 'N/A';
+
+
+            return `
+                <tr class="hover:bg-slate-50 transition-colors">
+
+                    <td class="px-4 py-3 text-sm font-medium text-slate-900">
+                        ${escapeHtml(invoice.invoice_number ?? '-')}
+                    </td>
+
+                    <td class="px-4 py-3 text-sm text-slate-700">
+                        ${escapeHtml(invoice.client_name ?? '-')}
+                    </td>
+
+                    <td class="px-4 py-3 text-sm text-slate-600">
+                        ${escapeHtml(invoice.invoice_date ?? '-')}
+                    </td>
+
+                    <td class="px-4 py-3 text-sm font-medium text-slate-900">
+                        TZS ${formatNumber(invoice.total_amount)}
+                    </td>
+
+                    <td class="px-4 py-3 text-sm">
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-slate-100 text-slate-700">
+                            ${escapeHtml(status)}
+                        </span>
+                    </td>
+
+                </tr>
+            `;
+
+        }).join('');
+
+    }
+
+
+    function formatNumber(value) {
+
+        const number = Number(value || 0);
+
+        return new Intl.NumberFormat('en-TZ', {
+            maximumFractionDigits: 2
+        }).format(number);
+
+    }
+
+
+    function escapeHtml(value) {
+
+        const div = document.createElement('div');
+
+        div.textContent = value ?? '';
+
+        return div.innerHTML;
+
+    }
+
+});
 </script>

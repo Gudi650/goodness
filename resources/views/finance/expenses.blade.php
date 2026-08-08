@@ -145,8 +145,13 @@
                         d="m21 21-4.35-4.35M16 10.5A5.5 5.5 0 1 1 5 10.5a5.5 5.5 0 0 1 11 0" />
                 </svg>
 
-                <input type="text" placeholder="Search by expense ID, company, department or category..."
-                    class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-brand-500 focus:ring-brand-500">
+                <input
+                type="text"
+                id="expenseSearch"
+                placeholder="Search expenses..."
+                autocomplete="off"
+                class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-brand-500 focus:ring-brand-500">
+
             </div>
 
             <!-- Right -->
@@ -190,7 +195,7 @@
                     <th class="text-xs text-slate-500 uppercase px-4 py-3 text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody id="expenseTableBody" class="divide-y divide-slate-100">
                 @forelse ($expenses as $expense)
                     <tr class="align-top">
                         <td class="px-4 py-3 text-sm">{{ $expense['display_id'] }}</td>
@@ -564,4 +569,242 @@
             },
         });
     }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const searchInput = document.getElementById('expenseSearch');
+    const expenseTableBody = document.getElementById('expenseTableBody');
+
+    if (!searchInput || !expenseTableBody) {
+        return;
+    }
+
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function () {
+
+        clearTimeout(searchTimeout);
+
+        const search = this.value.trim();
+
+        searchTimeout = setTimeout(function () {
+            searchExpenses(search);
+        }, 400);
+
+    });
+
+
+    async function searchExpenses(search) {
+
+        // Loading state
+        expenseTableBody.innerHTML = `
+            <tr>
+                <td colspan="100%" class="px-4 py-8 text-center">
+
+                    <div class="flex items-center justify-center gap-2 text-sm text-slate-500">
+
+                        <svg
+                            class="w-5 h-5 animate-spin"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24">
+
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4">
+                            </circle>
+
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                            </path>
+
+                        </svg>
+
+                        Searching expenses...
+
+                    </div>
+
+                </td>
+            </tr>
+        `;
+
+
+        try {
+
+            const url = new URL(
+                "{{ route('finance.expenses.search') }}",
+                window.location.origin
+            );
+
+            if (search !== '') {
+                url.searchParams.set('search', search);
+            }
+
+
+            const response = await fetch(url, {
+
+                method: 'GET',
+
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+
+            });
+
+
+            if (!response.ok) {
+                throw new Error('Failed to search expenses.');
+            }
+
+
+            const data = await response.json();
+
+
+            if (!data.success) {
+                throw new Error(
+                    data.message || 'Unable to search expenses.'
+                );
+            }
+
+
+            renderExpenses(data.expenses);
+
+
+        } catch (error) {
+
+            console.error('Expense search error:', error);
+
+            expenseTableBody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="100%"
+                        class="px-4 py-8 text-center text-sm text-red-500">
+
+                        Unable to search expenses.
+                        Please try again.
+
+                    </td>
+                </tr>
+            `;
+
+        }
+
+    }
+
+
+    function renderExpenses(expenses) {
+
+        if (!expenses || expenses.length === 0) {
+
+            expenseTableBody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="100%"
+                        class="px-4 py-8 text-center text-sm text-slate-500">
+
+                        No expenses found.
+
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+
+        expenseTableBody.innerHTML = expenses.map(expense => {
+
+            const status = expense.status
+                ? expense.status.charAt(0).toUpperCase()
+                    + expense.status.slice(1)
+                : 'N/A';
+
+
+            return `
+                <tr class="hover:bg-slate-50 transition-colors">
+
+                    <td class="px-4 py-3 text-sm font-medium text-slate-900">
+                        ${escapeHtml(expense.expense_number ?? '-')}
+                    </td>
+
+
+                    <td class="px-4 py-3 text-sm text-slate-700">
+                        ${escapeHtml(expense.company_name ?? '-')}
+                    </td>
+
+
+                    <td class="px-4 py-3 text-sm text-slate-700">
+                        ${escapeHtml(expense.category ?? '-')}
+                    </td>
+
+
+                    <td class="px-4 py-3 text-sm text-slate-600">
+                        ${escapeHtml(expense.expense_date ?? '-')}
+                    </td>
+
+
+                    <td class="px-4 py-3 text-sm font-medium text-slate-900">
+                        TZS ${formatNumber(expense.net_amount)}
+                    </td>
+
+
+                    <td class="px-4 py-3 text-sm">
+
+                        <span class="
+                            inline-flex
+                            items-center
+                            rounded-full
+                            px-2.5
+                            py-1
+                            text-xs
+                            font-medium
+                            bg-slate-100
+                            text-slate-700
+                        ">
+
+                            ${escapeHtml(status)}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+            `;
+
+        }).join('');
+
+    }
+
+
+    function formatNumber(value) {
+
+        const number = Number(value || 0);
+
+        return new Intl.NumberFormat('en-TZ', {
+            maximumFractionDigits: 2
+        }).format(number);
+
+    }
+
+
+    function escapeHtml(value) {
+
+        const div = document.createElement('div');
+
+        div.textContent = value ?? '';
+
+        return div.innerHTML;
+
+    }
+
+});
 </script>
