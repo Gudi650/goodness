@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -12,6 +10,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
 
         DB::statement("ALTER TABLE expenses MODIFY term ENUM(
             'short_term',
@@ -19,7 +20,6 @@ return new class extends Migration
             'current_liabilities',
             'non_current_liabilities'
         ) NOT NULL DEFAULT 'short_term'");
-
     }
 
     /**
@@ -27,11 +27,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
 
         DB::statement("ALTER TABLE expenses MODIFY term ENUM(
             'short_term',
             'long_term'
         ) NOT NULL DEFAULT 'short_term'");
-
     }
 };
