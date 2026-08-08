@@ -48,7 +48,7 @@ use App\Http\Controllers\SharePremuimsController;
 use App\Http\Controllers\SharesDefinitionsController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TrialBalanceController;
-use App\Http\Controllers\TrueCashFlowController;
+use App\Http\Controllers\TrueCashflowController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VatAccount;
 use App\Http\Controllers\VirtualAccountsController;
@@ -361,8 +361,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/income-statement-export', [IncomeStatement::class, 'exportPdf'])->name('income-statement-export');
     Route::get('/trial-balance', [TrialBalanceController::class, 'index'])->name('trial-balance');
     Route::get('/trial-balance-export', [TrialBalanceController::class, 'exportPdf'])->name('trial-balance-export');
-    Route::get('/cash-flow', [TrueCashFlowController::class, 'previewPdf'])->name('cash-flow');
-    Route::get('/cash-flow-export', [TrueCashFlowController::class, 'downloadPdf'])->name('cash-flow-export');
+    Route::get('/cash-flow', [TrueCashflowController::class, 'previewPdf'])->name('cash-flow');
+    Route::get('/cash-flow-export', [TrueCashflowController::class, 'downloadPdf'])->name('cash-flow-export');
 
 
     //Routes for hatcheering an prouction processes
