@@ -4,6 +4,7 @@ use App\Http\Controllers\AssetsCategoriesController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\balanceSheetController;
 use App\Http\Controllers\BulkImportController;
+use App\Http\Controllers\CashFlowController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\CreateAssetsController;
@@ -363,6 +364,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/trial-balance-export', [TrialBalanceController::class, 'exportPdf'])->name('trial-balance-export');
     Route::get('/cash-flow', [TrueCashflowController::class, 'previewPdf'])->name('cash-flow');
     Route::get('/cash-flow-export', [TrueCashflowController::class, 'downloadPdf'])->name('cash-flow-export');
+    Route::get('/equity-statement', [CashFlowController::class, 'previewPdf'])->name('equity-statement');
+    Route::get('/equity-statement-export', [CashFlowController::class, 'downloadPdf'])->name('equity-statement-export');
 
 
     //Routes for hatcheering an prouction processes
