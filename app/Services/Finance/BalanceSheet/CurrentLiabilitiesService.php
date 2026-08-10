@@ -6,6 +6,7 @@ use App\Models\CreateLiability;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Salary;
+use App\Support\ReportFilters;
 
 class CurrentLiabilitiesService
 {
@@ -41,12 +42,12 @@ class CurrentLiabilitiesService
     protected function getSalaries()
     {
         //$salaries = Expense::where('category', 'Operating Expenses')
-        $salaries = Expense::where('status', 'issued')
+        $query = Expense::where('status', 'issued')
             ->whereHas('financeItem', function ($query) {
                 $query->where('item_name', 'Salaries and Wages');
-            })
-            //->where('status', 'issued')
-            ->get()
+            });
+        ReportFilters::current()->apply($query, 'expense_date');
+        $salaries = $query->get()
             ->map(function ($salary) {
                 return [
                     'name' => $salary->expense_number,
@@ -67,10 +68,11 @@ class CurrentLiabilitiesService
 
         //get the payable VAT from the expenses table
         //get the expenses where vat_included is true and the amount is greater than 0
-        $ExpensesVAT = Expense::where('vat_included', true)
+        $expensesQuery = Expense::where('vat_included', true)
             ->where('status', 'issued')
-            ->where('amount', '>', 0)
-            ->get()
+            ->where('amount', '>', 0);
+        ReportFilters::current()->apply($expensesQuery, 'expense_date');
+        $ExpensesVAT = $expensesQuery->get()
             ->map(function ($expense) {
                 return [
                     'name' => $expense->expense_number,
@@ -80,9 +82,10 @@ class CurrentLiabilitiesService
             });
 
         //get the invoice vat 
-        $invoiceVAT = Invoice::where('status', 'paid')
-            ->where('tax_amount','>', 0)
-            ->get()
+        $invoiceQuery = Invoice::where('status', 'paid')
+            ->where('tax_amount','>', 0);
+        ReportFilters::current()->apply($invoiceQuery, 'invoice_date');
+        $invoiceVAT = $invoiceQuery->get()
             ->map(function ($invoice) {
                 return [
                     'name' => $invoice->invoice_number,
@@ -122,13 +125,14 @@ class CurrentLiabilitiesService
     protected function getShortTermLoans()
     {
         //get the short term loans from the liabilities table
-        $shortTermLoans = CreateLiability::where('term', 'Short-term')
+        $query = CreateLiability::where('term', 'Short-term')
             ->whereHas('category', function ($query) {
                 $query->where('name', 'Loans & Borrowings');
             })
             ->where('due_date', '<=', now())
-            ->where('current_amount', '>', 0)
-            ->get()
+            ->where('current_amount', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $shortTermLoans = $query->get()
             ->map(function ($loan) {
                 return [
                     'name' => $loan->name,
@@ -144,12 +148,13 @@ class CurrentLiabilitiesService
     protected function getAccruedExpenses()
     {
         //get the accured expenses from the liabilities table
-        $accruedExpenses = CreateLiability::whereHas('category', function ($query) {
+        $query = CreateLiability::whereHas('category', function ($query) {
                 $query->where('category', 'Accrued Expenses');
             })
             ->where('due_date', '<=', now())
-            ->where('current_amount', '>', 0)
-            ->get()
+            ->where('current_amount', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $accruedExpenses = $query->get()
             ->map(function ($liability) {
                 return [
                     'name' => $liability->name,
@@ -167,12 +172,13 @@ class CurrentLiabilitiesService
     protected function getInterestPayables()
     {
         //get the interest payables from the liabilities table
-        $interestPayables = CreateLiability::whereHas('category', function ($query) {
+        $query = CreateLiability::whereHas('category', function ($query) {
             $query->where('category', 'Interest Payables');
         })
             ->where('due_date', '<=', now())
-            ->where('current_amount', '>', 0)
-            ->get()
+            ->where('current_amount', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $interestPayables = $query->get()
             ->map(function ($liability) {
                 return [
                     'name' => $liability->name,

@@ -14,6 +14,7 @@ use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
 use App\Services\Finance\BalanceSheet\NonCurrentAssetsService;
 use App\Services\Finance\BalanceSheet\NonCurrentLiabilitiesService;
 use App\Services\NetIncome;
+use App\Support\ReportFilters;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,6 +22,8 @@ class balanceSheetController extends Controller
 {
     private function reportData(): array
     {
+        ReportFilters::boot();
+
         //get the Non current liabilities data from service file
         $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
 
@@ -35,7 +38,7 @@ class balanceSheetController extends Controller
 
         //get company id
         $companyId = $this->resolveCompanyId();
-        $year = now()->year;
+        $year = ReportFilters::current()->year();
 
         //get the share capital
         $shareCapital = $this->getShareCapital($companyId,$year);
@@ -115,7 +118,9 @@ class balanceSheetController extends Controller
 
     protected function getShareCapital(?int $companyId = null, ?int $year = null): float
     {
-        $definitions = SharesDefinitions::query()->get();
+        $definitions = SharesDefinitions::query()
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
+            ->get();
 
         if ($definitions->isEmpty()) {
             return 0.0;
@@ -135,7 +140,7 @@ class balanceSheetController extends Controller
         $dividends = $this->getDividendsPaid($companyId, $year);
 
         //get the net income from the net income service
-        $netIncome = $this->calculateNetIncomeForYear(null, null);
+        $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
 
         //get the retained earnings by subtracting the dividends paid from the net income
         $retainedEarnings = $netIncome - $dividends;
@@ -152,6 +157,9 @@ class balanceSheetController extends Controller
     protected function getDividendsPaid(?int $companyId = null, ?int $year = null): float
     {
         $query = Dividends::query()->where('status', 'Declared');
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        }
 
         return (float) $query->sum('amount');
 
@@ -166,6 +174,15 @@ class balanceSheetController extends Controller
         //function to get the dividends paid to shareholders from the dividends table in the database
     protected function resolveCompanyId(): ?int
     {
+        $filters = ReportFilters::current();
+        if ($filters->scope === 'company' && $filters->companyId) {
+            return $filters->companyId;
+        }
+
+        if ($filters->scope === 'all') {
+            return null;
+        }
+
         $companyId = session('active_company_id') ?? Auth::user()?->company_id;
 
         if ($companyId) {
@@ -178,20 +195,20 @@ class balanceSheetController extends Controller
 
     protected function getAssets()
     {
-        //get the vehicles assets from the assets table
-        $otherAssets = CreateAssets::whereHas('category', function ($query) {
+        $query = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', '!=','Vehicle Assets')
                 ->where('category', '!=','Property Assets')
                 ->where('category', '!=','Investment Assets')
                 ->where('category', '!=','Intangible Assets');
         })
-            ->where('current_value', '>', 0)
-            ->get()
+            ->where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $otherAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->category->category ?? 'Uncategorized',
                     'amount' => $asset->current_value,
-                    'type' => 'dr', // Assuming assets are debit entries
+                    'type' => 'dr',
                 ];
             })
             ->groupBy('name');

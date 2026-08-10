@@ -8,31 +8,38 @@ use App\Models\Dividends;
 use App\Models\SharePremuims;
 use App\Models\SharesDefinitions;
 use App\Services\NetIncome;
+use App\Support\ReportFilters;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class CashFlowController extends Controller
 {
     public function previewPdf()
     {
+        ReportFilters::boot();
+
         return $this->renderReportPdf()->stream('cash_flow.pdf');
     }
 
     public function downloadPdf()
     {
+        ReportFilters::boot();
+
         return $this->renderReportPdf()->download('cash_flow.pdf');
     }
 
-
-
-
-
-
-    //function to get the dividends paid to shareholders from the dividends table in the database
     protected function resolveCompanyId(): ?int
     {
+        $filters = ReportFilters::current();
+        if ($filters->scope === 'company' && $filters->companyId) {
+            return $filters->companyId;
+        }
+
+        if ($filters->scope === 'all') {
+            return null;
+        }
+
         return session('active_company_id') ?? Auth::user()?->company_id;
     }
 
@@ -40,7 +47,7 @@ class CashFlowController extends Controller
     {
         $companyId = $this->resolveCompanyId();
         $companyName = $this->resolveCompanyName($companyId);
-        $currentYear = now()->year;
+        $currentYear = ReportFilters::current()->year();
         $previousYear = $currentYear - 1;
 
         $previousSnapshot = $this->buildEquitySnapshot($companyId, $previousYear);
@@ -63,7 +70,7 @@ class CashFlowController extends Controller
                 'Revaluation surplus (PPE)',
                 'Total equity attributable to the owners of the parent',
             ],
-            
+
             'rows' => [
 
                 ['label' => 'Balance at 1 Jan ' . $previousYear, 'values' => [0, 0, 0, 0, 0], 'strong' => true],
@@ -97,7 +104,7 @@ class CashFlowController extends Controller
                 ['label' => 'Profit or loss', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'indent' => 1, 'italic' => true],
                 ['label' => 'Other comprehensive income', 'values' => [0, 0, 0, 0, 0], 'indent' => 1, 'italic' => true],
                 ['label' => 'TCI for the year', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'underline' => true],
-                
+
                 ['label' => 'Balance at 31 Dec ' . $currentYear . ':', 'values' => [
                     $currentSnapshot['share_capital'],
                     $currentSnapshot['share_premium'],
@@ -123,7 +130,7 @@ class CashFlowController extends Controller
     protected function resolveCompanyName(?int $companyId): string
     {
         if (! $companyId) {
-            return 'Company';
+            return 'Goodness Group';
         }
 
         return Company::query()->whereKey($companyId)->value('name') ?: 'Company';
@@ -195,24 +202,17 @@ class CashFlowController extends Controller
         return (float) $dividendsPaid;
     }
 
-    //function to get returned earnings
     protected function getRetainedEarnings(?int $companyId = null, ?int $year = null)
     {
         $dividends = $this->getDividendsPaid($companyId, $year);
-
-        //get the net income from the net income service
         $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
-
-        //get the retained earnings by subtracting the dividends paid from the net income
         $retainedEarnings = $netIncome - $dividends;
 
         return (float) $retainedEarnings;
     }
 
-    //function to get the retained suplus
     protected function getRevaluationSurplus(?int $companyId = null, ?int $year = null)
     {
-        //get the revaluation surplus from the asset revaluation table in the database
         $query = AssetRevaluation::query();
 
         if ($companyId) {
@@ -235,6 +235,4 @@ class CashFlowController extends Controller
     {
         return app(NetIncome::class)->calculateNetIncome($companyId, $year);
     }
-
-
 }

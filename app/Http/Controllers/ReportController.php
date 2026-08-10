@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Services\AccessControlService;
+use App\Support\ReportFilters;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -46,6 +47,14 @@ class ReportController extends Controller
         if ($selectedScope === 'company' && ! $selectedCompanyId) {
             $selectedCompanyId = (int) ($companies->first()->id ?? 0);
         }
+
+        ReportFilters::boot($request->merge([
+            'scope' => $selectedScope,
+            'company_id' => $selectedCompanyId ?: null,
+            'date_filter' => $period,
+            'start_date' => $startDate ?: null,
+            'end_date' => $endDate ?: null,
+        ]));
 
         $applyCompanyFilter = function ($query) use ($selectedScope, $selectedCompanyId, $canSeeAllCompanies, $user) {
             if ($selectedScope === 'company' && $selectedCompanyId) {

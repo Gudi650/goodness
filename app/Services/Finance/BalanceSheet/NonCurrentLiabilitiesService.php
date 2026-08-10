@@ -5,6 +5,7 @@ namespace App\Services\Finance\BalanceSheet;
 use App\Models\CreateLiability;
 use App\Models\Expense;
 use App\Models\Salary;
+use App\Support\ReportFilters;
 
 class NonCurrentLiabilitiesService
 {
@@ -31,13 +32,14 @@ class NonCurrentLiabilitiesService
     protected function getLongTermLoans()
     {
         //get the long term loans from the liabilities table
-        $longTermLoans = CreateLiability::where('term', 'Long-term')
+        $query = CreateLiability::where('term', 'Long-term')
             ->whereHas('category', function ($query) {
                 $query->where('category', 'Loans & Borrowings');
             })
             ->where('due_date', '>', now())
-            ->where('current_amount', '>', 0)
-            ->get()
+            ->where('current_amount', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $longTermLoans = $query->get()
             ->map(function ($loan) {
                 return [
                     'name' => $loan->name,
