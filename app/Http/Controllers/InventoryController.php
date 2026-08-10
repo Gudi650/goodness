@@ -27,13 +27,14 @@ class InventoryController extends Controller
         }
 
         //get teh authorised users for the company 
-        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser);
+        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser)
+            || ($currentUser?->role?->name === 'Manager' && $currentUser->company?->name === 'Goodness Group');
 
         $usersQuery = User::with('role', 'company', 'department');
 
-        if ($isQualifiedUser && !empty($activeCompanyId)) {
+        if (!empty($activeCompanyId)) {
             $usersQuery->where('company_id', $activeCompanyId);
-        } elseif ($currentUser) {
+        } elseif (!$isQualifiedUser && $currentUser) {
             $usersQuery->where('company_id', $currentUser->company_id);
         }
 
@@ -47,8 +48,8 @@ class InventoryController extends Controller
         $departments = Department::pluck('name', 'id');
 
         $productsQuery = Product::query()->with('company')
-            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+            ->when(!empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(empty($activeCompanyId) && !$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
 
         $summaryProducts = (clone $productsQuery)->get();
 
@@ -102,8 +103,8 @@ class InventoryController extends Controller
     {
         $suppliers = Supplier::query()
             ->with('company')
-            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
+            ->when(!empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(empty($activeCompanyId) && !$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
             ->latest()
             ->get();
 
@@ -118,8 +119,8 @@ class InventoryController extends Controller
         $purchases = PurchaseOrder::query()
             ->with('company')
             ->with('items') // Eager load items relationship
-            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
+            ->when(!empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(empty($activeCompanyId) && !$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id))
             ->latest()
             ->get();
 

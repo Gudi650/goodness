@@ -25,7 +25,8 @@ class ReportController extends Controller
             return redirect()->route('dashboard')->with('error', 'You do not have access to the HRM page.');
         }
 
-        $canSeeAllCompanies = app(AccessControlService::class)->isCeoOrAdminOrAccountant($user);
+        $canSeeAllCompanies = app(AccessControlService::class)->isAlwaysAllowed($user)
+            || app(AccessControlService::class)->isCeoOrAdminOrAccountant($user);
 
         $companies = Company::query()
             ->orderBy('name', 'asc')
@@ -45,7 +46,11 @@ class ReportController extends Controller
         }
 
         if ($selectedScope === 'company' && ! $selectedCompanyId) {
-            $selectedCompanyId = (int) ($companies->first()->id ?? 0);
+            $selectedCompanyId = (int) (
+                session('active_company_id')
+                ?: $companies->first(fn ($company) => $company->name !== 'Goodness Group')?->id
+                ?: 0
+            );
         }
 
         ReportFilters::boot($request->merge([

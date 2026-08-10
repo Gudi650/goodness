@@ -19,9 +19,12 @@ class LoanController extends Controller
      */
     public function index(): View
     {
+        $activeCompanyId = session('active_company_id');
+
         $loans = Loan::with(['company', 'bankAccount', 'approvedBy', 'repaymentSchedule' => function ($query) {
                 $query->orderBy('installment_number');
             }])
+            ->when(! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
             ->orderByDesc('start_date')
             ->get();
 
@@ -30,6 +33,7 @@ class LoanController extends Controller
         $approvers = User::orderBy('name')->get(['id', 'name']);
 
         $virtualAccounts = VirtualAccounts::where('status', 'active')
+            ->when(! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
             ->orderBy('bank_name')
             ->get(['id', 'bank_name', 'account_name', 'account_number']);
 
@@ -58,7 +62,7 @@ class LoanController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        DB::transaction(function () use (&$loan, $data) {
+        $loan = DB::transaction(function () use ($data) {
             $attempts = 0;
             do {
                 $data['code'] = Loan::generateNextCode();
@@ -75,6 +79,8 @@ class LoanController extends Controller
 
             // Auto-build the amortization schedule
             $loan->generateSchedule();
+
+            return $loan;
         });
 
         return back()->with('success', "Loan {$loan->code} recorded and repayment schedule generated.");

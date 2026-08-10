@@ -46,7 +46,7 @@ class CurrentLiabilitiesService
             ->whereHas('financeItem', function ($query) {
                 $query->where('item_name', 'Salaries and Wages');
             });
-        ReportFilters::current()->apply($query, 'expense_date');
+        ReportFilters::current()->applyCompany($query);
         $salaries = $query->get()
             ->map(function ($salary) {
                 return [
@@ -71,7 +71,8 @@ class CurrentLiabilitiesService
         $expensesQuery = Expense::where('vat_included', true)
             ->where('status', 'issued')
             ->where('amount', '>', 0);
-        ReportFilters::current()->apply($expensesQuery, 'expense_date');
+        // VAT payable is a balance-sheet position: company scope only (not period-sliced).
+        ReportFilters::current()->applyCompany($expensesQuery);
         $ExpensesVAT = $expensesQuery->get()
             ->map(function ($expense) {
                 return [
@@ -84,7 +85,7 @@ class CurrentLiabilitiesService
         //get the invoice vat 
         $invoiceQuery = Invoice::where('status', 'paid')
             ->where('tax_amount','>', 0);
-        ReportFilters::current()->apply($invoiceQuery, 'invoice_date');
+        ReportFilters::current()->applyCompany($invoiceQuery);
         $invoiceVAT = $invoiceQuery->get()
             ->map(function ($invoice) {
                 return [
@@ -127,7 +128,7 @@ class CurrentLiabilitiesService
         //get the short term loans from the liabilities table
         $query = CreateLiability::where('term', 'Short-term')
             ->whereHas('category', function ($query) {
-                $query->where('name', 'Loans & Borrowings');
+                $query->where('category', 'Loans & Borrowings');
             })
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0);

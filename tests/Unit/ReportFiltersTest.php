@@ -76,3 +76,34 @@ test('report filters query string includes company and period', function () {
         ->and($filters->queryString())->toContain('date_filter=custom')
         ->and($filters->year())->toBe(2026);
 });
+
+test('report filters company-only does not date-slice vat style queries', function () {
+    DB::table('filter_items')->insert([
+        ['company_id' => 1, 'item_date' => '2026-01-05', 'amount' => 40],
+        ['company_id' => 1, 'item_date' => '2026-08-05', 'amount' => 60],
+        ['company_id' => 2, 'item_date' => '2026-08-05', 'amount' => 200],
+    ]);
+
+    $filters = ReportFilters::boot(request()->merge([
+        'scope' => 'company',
+        'company_id' => 1,
+        'date_filter' => 'this_month',
+    ]));
+
+    $query = DB::table('filter_items');
+    $filters->applyCompany($query);
+
+    expect((float) $query->sum('amount'))->toBe(100.0);
+});
+
+test('report filters scope all ignores company id from request', function () {
+    $filters = ReportFilters::boot(request()->merge([
+        'scope' => 'all',
+        'company_id' => 1,
+        'date_filter' => 'this_year',
+    ]));
+
+    expect($filters->scope)->toBe('all')
+        ->and($filters->companyId)->toBeNull()
+        ->and($filters->resolveCompanyId())->toBeNull();
+});
