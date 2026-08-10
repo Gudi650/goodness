@@ -41,10 +41,10 @@ class balanceSheetController extends Controller
         $year = ReportFilters::current()->year();
 
         //get the share capital
-        $shareCapital = $this->getShareCapital($companyId,$year);
+        $shareCapital = $this->getShareCapital($companyId, null);
 
-        //get retained earnings 
-        $retainedEarnings = $this->getRetainedEarnings($companyId,$year);
+        //get retained earnings (all periods unless a single company scope is set — matches prior behaviour)
+        $retainedEarnings = $this->getRetainedEarnings($companyId, $companyId ? $year : null);
 
         $otherEquity = $this->getOtherEquity($companyId);
 

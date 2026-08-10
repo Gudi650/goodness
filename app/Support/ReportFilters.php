@@ -5,6 +5,7 @@ namespace App\Support;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class ReportFilters
 {
@@ -45,6 +46,15 @@ class ReportFilters
 
         if (! $companyId && $scope === 'company') {
             $companyId = (int) (session('active_company_id') ?? Auth::user()?->company_id ?? 0) ?: null;
+        }
+
+        // Goodness Group means consolidated / all companies (same as topbar empty selection).
+        if ($companyId && Schema::hasTable('companies')) {
+            $companyName = \App\Models\Company::query()->where('id', $companyId)->value('name');
+            if ($companyName === 'Goodness Group') {
+                $scope = 'all';
+                $companyId = null;
+            }
         }
 
         $payload = [

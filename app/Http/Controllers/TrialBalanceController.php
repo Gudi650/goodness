@@ -114,7 +114,8 @@ class TrialBalanceController extends Controller
     {
         $query = Expense::where('category', 'Cost of Goods Sold (COGS)')
             ->where('status', 'issued');
-        ReportFilters::current()->apply($query, 'expense_date');
+        // Trial balance expense lines: company scope only (same as pre-filter behaviour).
+        ReportFilters::current()->applyCompany($query);
         $costOfGoodsSold = $query->get()
             ->map(function ($expense) {
                 return [
@@ -131,7 +132,7 @@ class TrialBalanceController extends Controller
     protected function getRevenues()
     {
         $query = Invoice::where('status', 'paid');
-        ReportFilters::current()->apply($query, 'invoice_date');
+        ReportFilters::current()->applyCompany($query);
 
         return $query->get()
             ->map(function ($invoice) {
@@ -148,7 +149,7 @@ class TrialBalanceController extends Controller
     {
         $query = Expense::where('category', 'Operating Expenses')
             ->where('status', 'issued');
-        ReportFilters::current()->apply($query, 'expense_date');
+        ReportFilters::current()->applyCompany($query);
         $operationalCosts = $query->get()
             ->map(function ($expense) {
                 return [
@@ -168,7 +169,7 @@ class TrialBalanceController extends Controller
             ->where('category', '!=', 'Operating Expenses')
             ->whereHas('financeItem')
             ->where('status', 'issued');
-        ReportFilters::current()->apply($query, 'expense_date');
+        ReportFilters::current()->applyCompany($query);
         $otherExpenses = $query->get()
             ->map(function ($expense) {
                 return [
