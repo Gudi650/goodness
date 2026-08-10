@@ -35,7 +35,9 @@
             <!-- #trial balance -->
             <option value="trial" @selected(($reportType ?? '') === 'trial')>Trial Balance</option>
             <!-- #cash flow -->
-            <option value="cashflow" @selected(($reportType ?? '') === 'cashflow')>Equity Statement</option>
+            <option value="cashflow" @selected(($reportType ?? '') === 'cashflow')>Cash Flow Statement</option>
+            <option value="equity" @selected(($reportType ?? '') === 'equity')>Equity Statement</option>
+           
           </select>
         </div>
 
@@ -158,6 +160,11 @@
       <div class="flex flex-wrap gap-3 mb-6">
         <a href="/cash-flow{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Cash Flow Statement</a>
         <a href="/cash-flow-export{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Cash Flow Statement PDF</a>
+      </div>
+    @elseif (($reportType ?? '') === 'equity')
+      <div class="flex flex-wrap gap-3 mb-6">
+        <a href="/equity-statement" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Equity Statement</a>
+        <a href="/equity-statement-export" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Equity Statement PDF</a>
       </div>
     @endif
 
