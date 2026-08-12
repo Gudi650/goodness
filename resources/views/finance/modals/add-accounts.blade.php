@@ -17,6 +17,7 @@
                 <option value="Equity">Equity Bank</option>
                 <option value="StandardChartered">Standard Chartered Bank</option>
                 <option value="DTB">Diamond Trust Bank (DTB)</option>
+                <option value="DTB">Cash Account</option>
             </select>
         </div>
 
