@@ -207,7 +207,7 @@
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Maturity Date</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->maturity_date->format('d M Y') }}</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->maturity_date?->format('d M Y') ?? '-' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Interest Payable</p>

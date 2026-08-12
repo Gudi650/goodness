@@ -426,7 +426,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{loan}/schedule/regenerate', [LoanRepaymentScheduleController::class, 'regenerate'])->name('schedule.regenerate');
         Route::patch('/schedule/{schedule}/mark-paid', [LoanRepaymentScheduleController::class, 'markPaid'])->name('schedule.mark-paid');
 
-        Route::post('/loans/{loan}/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
+        Route::post('/{loan}/disburse', [LoanController::class, 'disburse'])->name('disburse');
 
     });
 
