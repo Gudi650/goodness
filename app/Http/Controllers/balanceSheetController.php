@@ -116,6 +116,7 @@ class balanceSheetController extends Controller
         return $pdf->download('balance_sheet.pdf');
     }
 
+    /*
     protected function getShareCapital(?int $companyId = null, ?int $year = null): float
     {
         $definitions = SharesDefinitions::query()
@@ -131,6 +132,22 @@ class balanceSheetController extends Controller
         });
 
         return (float) $total;
+    }*/
+
+    //get share capital from equity distribution table
+    protected function getShareCapital(?int $companyId = null, ?int $year = null): float
+    {
+        $query = EquityDistribution::query();
+        ReportFilters::current()->applyCompany($query);
+        $shareCapital = $query->get()
+            ->map(function ($equity) {
+                return [
+                    'name' => $equity->company->name,
+                    'amount' => $equity->value_held,
+                ];
+            })
+            ->sum('amount');
+        return $shareCapital;
     }
 
 
