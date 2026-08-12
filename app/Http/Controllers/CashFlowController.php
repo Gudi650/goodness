@@ -58,6 +58,9 @@ class CashFlowController extends Controller
         $currentDividends = $this->getDividendsPaid($companyId, $currentYear);
         $previousDividends = $this->getDividendsPaid($companyId, $previousYear);
 
+        $shareCapitalIssued = max($currentSnapshot['share_capital'] - $previousSnapshot['share_capital'], 0);
+        $sharePremiumIssued = max($currentSnapshot['share_premium'] - $previousSnapshot['share_premium'], 0);
+
         return [
             'company' => $companyName,
             'title' => 'Statement of Changes in Equity',
@@ -93,11 +96,11 @@ class CashFlowController extends Controller
                 ['label' => 'Changes in equity for ' . $currentYear . ':', 'section' => true],
 
                 ['label' => 'Issue of shares', 'values' => [
-                    max($currentSnapshot['share_capital'] - $previousSnapshot['share_capital'], 0),
-                    max($currentSnapshot['share_premium'] - $previousSnapshot['share_premium'], 0),
+                    $shareCapitalIssued,
+                    $sharePremiumIssued,
                     0,
                     0,
-                    max($currentSnapshot['total_equity'] - $previousSnapshot['total_equity'], 0),
+                    $shareCapitalIssued + $sharePremiumIssued,
                 ], 'indent' => 1],
 
                 ['label' => 'Dividends paid', 'values' => [0, 0, -1 * $currentDividends, 0, -1 * $currentDividends], 'indent' => 1],
