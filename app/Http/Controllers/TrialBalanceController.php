@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CreateAssets;
+use App\Models\EquityDistribution;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\SharesDefinitions;
@@ -221,6 +222,7 @@ class TrialBalanceController extends Controller
         return $otherAssets;
     }
 
+    /*
     protected function getEquities()
     {
         $query = SharesDefinitions::query();
@@ -240,6 +242,31 @@ class TrialBalanceController extends Controller
         foreach ($equities as $equityGroup) {
             $totalEquities += $equityGroup->sum('amount');
         }
+
+        return $totalEquities;
+    } */
+
+    //use equityDefinitions table to get the equities
+    protected function getEquities()
+    {
+        $query = EquityDistribution::query();
+        ReportFilters::current()->applyCompany($query);
+        $equities = $query->get()
+            ->map(function ($equity) {
+                return [
+                    'name' => $equity->company->name,
+                    'amount' => $equity->value_held,
+                    'type' => 'cr',
+                ];
+            })
+            ->groupBy('name');
+
+        $totalEquities = 0;
+
+        foreach ($equities as $equityGroup) {
+            $totalEquities += $equityGroup->sum('amount');
+        }
+
 
         return $totalEquities;
     }
