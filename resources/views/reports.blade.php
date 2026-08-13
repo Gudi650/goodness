@@ -44,7 +44,7 @@
         <div class="w-full lg:w-56">
           <label for="scope" class="block text-sm font-medium text-slate-700 mb-1">Report scope</label>
           <select id="scope" name="scope" class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm bg-white">
-            <option value="all" @selected($selectedScope === 'all')>Goodness Group {{-- all companies --}}</option>
+            <option value="all" @selected($selectedScope === 'all')>All Companies</option>
             <option value="company" @selected($selectedScope === 'company')>Single company</option>
           </select>
         </div>
@@ -52,15 +52,11 @@
         <div id="companyField" class="w-full lg:w-64 {{ $selectedScope === 'company' ? '' : 'hidden' }}">
           <label for="company_id" class="block text-sm font-medium text-slate-700 mb-1">Company</label>
           <select id="company_id" name="company_id" class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm bg-white">
-
             @foreach ($companies as $company)
-              @if ($company->name !== 'Goodness Group' )
-
-                <option value="{{ $company->id }}" @selected((int) $selectedCompanyId === (int) $company->id)>{{ $company->name }}</option>
-
-              @endif
+              <option value="{{ $company->id }}" @selected((int) $selectedCompanyId === (int) $company->id)>
+                {{ $company->name === 'Goodness Group' ? 'Goodness Group (Parent)' : $company->name }}
+              </option>
             @endforeach
-
           </select>
         </div>
          {{-- Date Range --}}
