@@ -44,14 +44,12 @@
                 @csrf
                 <select name="company_id" onchange="this.form.submit()"
                     class="block border border-slate-300 rounded-md text-xs lg:text-sm px-2 lg:px-3 py-1.5 text-slate-700 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none max-w-xs truncate">
-                    <option value="" @selected(is_null($activeCompanyId))>Goodness Group</option>
+                    <option value="" @selected(is_null($activeCompanyId))>All Companies</option>
 
                     @forelse ($companyOptions as $company)
-
-                        @if ($company->name != 'Goodness Group')
-                            <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>{{ $company->name }}</option>
-                        @endif
-                        
+                        <option value="{{ $company->id }}" @selected((string) $activeCompanyId === (string) $company->id)>
+                            {{ $company->name === 'Goodness Group' ? 'Goodness Group (Parent)' : $company->name }}
+                        </option>
                     @empty
                         <option disabled selected>No companies available</option>
                     @endforelse

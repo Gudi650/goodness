@@ -28,11 +28,9 @@ class ReportFilters
     {
         $request ??= request();
 
-        $scope = $request->string('scope')->toString()
-            ?: (string) session('report_filters.scope', 'all');
-        $companyId = $request->filled('company_id')
-            ? $request->integer('company_id')
-            : (session('report_filters.company_id') ? (int) session('report_filters.company_id') : null);
+        $scopeFromRequest = $request->string('scope')->toString();
+        $hasCompanyInRequest = $request->filled('company_id');
+
         $dateFilter = $request->string('date_filter')->toString()
             ?: (string) session('report_filters.date_filter', 'this_month');
         $startDate = $request->string('start_date')->toString()
@@ -40,20 +38,30 @@ class ReportFilters
         $endDate = $request->string('end_date')->toString()
             ?: session('report_filters.end_date');
 
-        if ($scope !== 'company') {
-            $companyId = null;
-        }
+        $activeCompanyId = session('active_company_id');
 
-        if (! $companyId && $scope === 'company') {
-            $companyId = (int) (session('active_company_id') ?? Auth::user()?->company_id ?? 0) ?: null;
-        }
-
-        // Goodness Group means consolidated / all companies (same as topbar empty selection).
-        if ($companyId && Schema::hasTable('companies')) {
-            $companyName = \App\Models\Company::query()->where('id', $companyId)->value('name');
-            if ($companyName === 'Goodness Group') {
+        // Topbar drives company scope unless the request explicitly sets report filters.
+        if ($scopeFromRequest === '' && ! $hasCompanyInRequest) {
+            if ($activeCompanyId) {
+                $scope = 'company';
+                $companyId = (int) $activeCompanyId;
+            } else {
                 $scope = 'all';
                 $companyId = null;
+            }
+        } else {
+            $scope = $scopeFromRequest
+                ?: (string) session('report_filters.scope', 'all');
+            $companyId = $hasCompanyInRequest
+                ? $request->integer('company_id')
+                : (session('report_filters.company_id') ? (int) session('report_filters.company_id') : null);
+
+            if ($scope !== 'company') {
+                $companyId = null;
+            }
+
+            if (! $companyId && $scope === 'company') {
+                $companyId = (int) ($activeCompanyId ?? Auth::user()?->company_id ?? 0) ?: null;
             }
         }
 
@@ -101,6 +109,34 @@ class ReportFilters
         }
 
         return $query;
+    }
+
+    public function consolidationParentCompanyId(): ?int
+    {
+        if (! Schema::hasTable('companies')) {
+            return null;
+        }
+
+        $id = \App\Models\Company::query()
+            ->where('name', 'Goodness Group')
+            ->value('id');
+
+        return $id ? (int) $id : null;
+    }
+
+    public function displayCompanyName(): string
+    {
+        if ($this->scope === 'company' && $this->companyId) {
+            $name = \App\Models\Company::query()->whereKey($this->companyId)->value('name');
+
+            if ($name === 'Goodness Group') {
+                return 'Goodness Group (Parent)';
+            }
+
+            return $name ?: 'Company';
+        }
+
+        return 'All Companies';
     }
 
     public function applyDate($query, string $dateColumn)

@@ -75,7 +75,7 @@
 
                 <td style="border:none; vertical-align:middle;">
                     <div style="font-weight:bold; font-size:14px;">
-                        Goodness Group
+                        {{ $reportCompanyName ?? 'All Companies' }}
                     </div>
                     <div style="font-size:12px; color:#666;">
                         Enterprise

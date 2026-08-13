@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Support\ReportFilters;
 
 class NetIncome
 {
@@ -86,6 +87,8 @@ class NetIncome
 
         if ($companyId) {
             $revenues->where('company_id', $companyId);
+        } else {
+            ReportFilters::current()->applyCompany($revenues);
         }
 
         if ($year) {
@@ -124,6 +127,8 @@ class NetIncome
 
         if ($companyId) {
             $expenses->where('company_id', $companyId);
+        } else {
+            ReportFilters::current()->applyCompany($expenses);
         }
 
         if ($year) {

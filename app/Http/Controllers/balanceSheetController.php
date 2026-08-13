@@ -38,13 +38,12 @@ class balanceSheetController extends Controller
 
         //get company id
         $companyId = $this->resolveCompanyId();
-        $year = ReportFilters::current()->year();
 
         //get the share capital
         $shareCapital = $this->getShareCapital($companyId, null);
 
-        //get retained earnings (all periods unless a single company scope is set — matches prior behaviour)
-        $retainedEarnings = $this->getRetainedEarnings($companyId, $companyId ? $year : null);
+        // Balance sheet RE is cumulative (assets/liabilities are point-in-time).
+        $retainedEarnings = $this->getRetainedEarnings($companyId, null);
 
         $otherEquity = $this->getOtherEquity($companyId);
 
@@ -93,6 +92,7 @@ class balanceSheetController extends Controller
             'nonCurrentAssets' => $nonCurrentAssets,
             'currentAssets' => $currentAssets,
             'otherAssets' => $otherAssets,
+            'reportCompanyName' => ReportFilters::current()->displayCompanyName(),
 
         ];
 
@@ -176,10 +176,20 @@ class balanceSheetController extends Controller
         $query = Dividends::query()->where('status', 'Declared');
         if ($companyId) {
             $query->where('company_id', $companyId);
+        } else {
+            ReportFilters::current()->applyCompany($query);
+        }
+
+        if ($year) {
+            $query->where(function ($sub) use ($year) {
+                $sub->whereYear('paid_at', $year)
+                    ->orWhere(function ($q) use ($year) {
+                        $q->whereNull('paid_at')->whereYear('declared_at', $year);
+                    });
+            });
         }
 
         return (float) $query->sum('amount');
-
     }
 
     protected function getOtherEquity(?int $companyId = null): float

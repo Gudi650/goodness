@@ -107,3 +107,88 @@ test('report filters scope all ignores company id from request', function () {
         ->and($filters->companyId)->toBeNull()
         ->and($filters->resolveCompanyId())->toBeNull();
 });
+
+test('topbar active company syncs to company scope when request has no filters', function () {
+    session(['active_company_id' => 15]);
+
+    $filters = ReportFilters::boot(request());
+
+    expect($filters->scope)->toBe('company')
+        ->and($filters->companyId)->toBe(15)
+        ->and($filters->resolveCompanyId())->toBe(15);
+});
+
+test('topbar all companies syncs to all scope when active company is empty', function () {
+    session()->forget('active_company_id');
+    session(['report_filters' => ['scope' => 'company', 'company_id' => 7]]);
+
+    $filters = ReportFilters::boot(request());
+
+    expect($filters->scope)->toBe('all')
+        ->and($filters->companyId)->toBeNull()
+        ->and($filters->resolveCompanyId())->toBeNull();
+});
+
+test('goodness group parent company is not remapped to all scope', function () {
+    Schema::create('companies', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->timestamps();
+    });
+
+    $parentId = DB::table('companies')->insertGetId([
+        'name' => 'Goodness Group',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $filters = ReportFilters::boot(request()->merge([
+        'scope' => 'company',
+        'company_id' => $parentId,
+        'date_filter' => 'this_year',
+    ]));
+
+    expect($filters->scope)->toBe('company')
+        ->and($filters->companyId)->toBe($parentId)
+        ->and($filters->displayCompanyName())->toBe('Goodness Group (Parent)');
+
+    Schema::dropIfExists('companies');
+});
+
+test('all companies scope includes parent and subsidiaries', function () {
+    DB::table('filter_items')->insert([
+        ['company_id' => 7, 'item_date' => '2026-08-05', 'amount' => 100],
+        ['company_id' => 15, 'item_date' => '2026-08-05', 'amount' => 400],
+        ['company_id' => 10, 'item_date' => '2026-08-05', 'amount' => 200],
+    ]);
+
+    $filters = ReportFilters::boot(request()->merge([
+        'scope' => 'all',
+        'date_filter' => 'this_month',
+    ]));
+
+    $query = DB::table('filter_items');
+    $filters->applyCompany($query);
+
+    expect((float) $query->sum('amount'))->toBe(700.0)
+        ->and($filters->displayCompanyName())->toBe('All Companies');
+});
+
+test('parent-only company filter excludes subsidiaries', function () {
+    DB::table('filter_items')->insert([
+        ['company_id' => 7, 'item_date' => '2026-08-05', 'amount' => 100],
+        ['company_id' => 15, 'item_date' => '2026-08-05', 'amount' => 400],
+        ['company_id' => 10, 'item_date' => '2026-08-05', 'amount' => 200],
+    ]);
+
+    $filters = ReportFilters::boot(request()->merge([
+        'scope' => 'company',
+        'company_id' => 15,
+        'date_filter' => 'this_month',
+    ]));
+
+    $query = DB::table('filter_items');
+    $filters->applyCompany($query);
+
+    expect((float) $query->sum('amount'))->toBe(400.0);
+});

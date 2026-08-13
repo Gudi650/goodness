@@ -20,11 +20,9 @@ class NonCurrentLiabilitiesService
     //function to display the non current liabilities all the non current liabilities from the liabilities table where the term is long term and the due date is greater than now and the current amount is greater than 0
     public function getNonCurrentLiabilities()
     {
-        //get the non current liabilities from the liabilities table
-        $getLongTermLoans = $this->getLongTermLoans();
-
-        //return the non current liabilities
-        return $getLongTermLoans;
+        return [
+            'long_term_loans' => $this->getLongTermLoans(),
+        ];
     }
 
 
