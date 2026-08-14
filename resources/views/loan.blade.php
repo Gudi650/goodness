@@ -1,3 +1,6 @@
+{{-- dd the datas --}}
+@dd($loans);
+
 <!DOCTYPE html>
 <html lang="en">
 
