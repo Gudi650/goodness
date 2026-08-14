@@ -71,7 +71,10 @@ class LoanController extends Controller
                     break;
                 } catch (\Illuminate\Database\QueryException $e) {
                     $attempts++;
-                    if ($attempts >= 3) {
+                    $isDuplicateCode = str_contains(strtolower($e->getMessage()), 'duplicate')
+                        || (string) $e->getCode() === '23000';
+
+                    if (! $isDuplicateCode || $attempts >= 5) {
                         throw $e;
                     }
                 }

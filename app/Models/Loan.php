@@ -86,15 +86,14 @@ class Loan extends Model
         $year = now()->year;
         $prefix = "LN-{$year}-";
 
-        // withTrashed so a deleted loan's code never gets reused.
-        $lastCode = static::withTrashed()
+        // Numeric max so LN-2026-010 is not sorted before LN-2026-009 as a string.
+        $max = static::withTrashed()
             ->where('code', 'like', "{$prefix}%")
-            ->orderByDesc('code')
-            ->value('code');
+            ->get(['code'])
+            ->map(fn ($loan) => (int) substr((string) $loan->code, strlen($prefix)))
+            ->max();
 
-        $nextNumber = $lastCode
-            ? ((int) substr($lastCode, strlen($prefix))) + 1
-            : 1;
+        $nextNumber = ((int) $max) + 1;
 
         return $prefix . str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
     }

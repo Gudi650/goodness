@@ -183,7 +183,7 @@
                                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Target Bank Account</p>
-                                                    <p class="mt-1 text-sm text-slate-700 font-medium">{{ $loan->bankAccount->bank_name ?? '-' }} ({{ $loan->bankAccount->account_number ?? 'No account assigned' }})</p>
+                                                    <p class="mt-1 text-sm text-slate-700 font-medium">{{ $loan->bankAccount?->bank_name ?? '-' }} ({{ $loan->bankAccount?->account_number ?? 'No account assigned' }})</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Purpose</p>
@@ -199,7 +199,7 @@
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved By</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->approvedBy->name ?? 'Not Approved' }}</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->approvedBy?->name ?? 'Not Approved' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Disbursement Date</p>
