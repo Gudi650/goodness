@@ -1,5 +1,11 @@
 {{-- dd the datas --}}
-@dd($loans);
+{{-- @dd($loans); --}}
+{{-- dd the companies --}}
+{{-- @dd($companies); --}}
+{{-- dd the approvers --}}
+{{-- @dd($approvers); --}}
+{{-- dd the virtual accounts --}}
+{{-- @dd($virtualAccounts); --}}
 
 <!DOCTYPE html>
 <html lang="en">
