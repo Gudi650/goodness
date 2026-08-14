@@ -4,6 +4,7 @@ namespace App\Services\Finance\BalanceSheet;
 
 use App\Models\CreateLiability;
 use App\Models\Expense;
+use App\Models\Loan;
 use App\Models\Salary;
 use App\Support\ReportFilters;
 
@@ -26,10 +27,8 @@ class NonCurrentLiabilitiesService
     }
 
 
-    //function to get the long tem loans from the liabilities table as well here
     protected function getLongTermLoans()
     {
-        //get the long term loans from the liabilities table
         $query = CreateLiability::where('term', 'Long-term')
             ->whereHas('category', function ($query) {
                 $query->where('category', 'Loans & Borrowings');
@@ -37,18 +36,30 @@ class NonCurrentLiabilitiesService
             ->where('due_date', '>', now())
             ->where('current_amount', '>', 0);
         ReportFilters::current()->applyCompany($query);
-        $longTermLoans = $query->get()
+        $fromLiabilities = $query->get()
             ->map(function ($loan) {
                 return [
                     'name' => $loan->name,
                     'amount' => $loan->current_amount,
-                    'type' => 'cr', // Assuming liabilities are credit entries
+                    'type' => 'cr',
                 ];
             });
 
-        return $longTermLoans;
+        $fromModule = Loan::query()
+            ->where('is_disbursed', true)
+            ->where('outstanding_balance', '>', 0)
+            ->whereDate('maturity_date', '>', now()->addYear());
+        ReportFilters::current()->applyCompany($fromModule);
 
-        
+        $moduleRows = $fromModule->get()->map(function (Loan $loan) {
+            return [
+                'name' => trim(($loan->code ? $loan->code.' — ' : '').$loan->lender),
+                'amount' => (float) $loan->outstanding_balance,
+                'type' => 'cr',
+            ];
+        });
+
+        return $fromLiabilities->concat($moduleRows)->values();
     }
 
 

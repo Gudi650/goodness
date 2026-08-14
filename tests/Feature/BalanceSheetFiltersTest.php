@@ -106,6 +106,38 @@ beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('loans', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('company_id');
+        $table->unsignedBigInteger('bank_id')->nullable();
+        $table->string('code')->unique();
+        $table->string('lender');
+        $table->decimal('principal', 15, 2)->default(0);
+        $table->decimal('interest_rate', 5, 2)->default(0);
+        $table->string('interest_type')->default('Flat');
+        $table->unsignedInteger('term_months')->default(1);
+        $table->date('disbursement_date')->nullable();
+        $table->boolean('is_disbursed')->default(false);
+        $table->date('start_date')->nullable();
+        $table->date('maturity_date')->nullable();
+        $table->decimal('outstanding_balance', 15, 2)->default(0);
+        $table->string('status')->default('Pending');
+        $table->timestamps();
+        $table->softDeletes();
+    });
+
+    Schema::create('loan_repayment_schedules', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('loan_id');
+        $table->unsignedInteger('installment_number')->default(1);
+        $table->date('due_date')->nullable();
+        $table->decimal('principal_portion', 15, 2)->default(0);
+        $table->decimal('interest_portion', 15, 2)->default(0);
+        $table->decimal('total_installment', 15, 2)->default(0);
+        $table->string('status')->default('Pending');
+        $table->timestamps();
+    });
+
     Schema::create('liability_categories', function (Blueprint $table) {
         $table->id();
         $table->string('category');
@@ -150,6 +182,7 @@ beforeEach(function () {
 afterEach(function () {
     foreach ([
         'dividends', 'expenses', 'invoices', 'create_liabilities', 'liability_categories',
+        'loan_repayment_schedules', 'loans',
         'create_assets', 'assets_categories', 'products', 'virtual_accounts',
         'equity_distributions', 'users', 'companies', 'roles',
     ] as $table) {

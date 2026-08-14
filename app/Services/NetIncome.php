@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\LoanRepaymentSchedule;
 use App\Support\ReportFilters;
 
 class NetIncome
@@ -67,14 +68,36 @@ class NetIncome
         // Profit before tax
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
 
+        // Loan interest paid (cash installments) reduces net income
+        $loanInterest = $this->getLoanInterestPaid($companyId, $year);
+
         // Tax Expense (18%)
         //$taxExpense = $preTaxIncome > 0 ? $preTaxIncome * 0.18 : 0;
         $taxExpense = 0;
 
         // Net Income
-        $netIncome = $preTaxIncome - $taxExpense;
+        $netIncome = $preTaxIncome - $loanInterest - $taxExpense;
 
         return (float) $netIncome;
+    }
+
+    protected function getLoanInterestPaid(?int $companyId = null, ?int $year = null): float
+    {
+        $query = LoanRepaymentSchedule::query()->where('status', 'Paid');
+
+        if ($companyId) {
+            $query->whereHas('loan', fn ($loanQuery) => $loanQuery->where('company_id', $companyId));
+        } else {
+            $query->whereHas('loan', function ($loanQuery) {
+                ReportFilters::current()->applyCompany($loanQuery);
+            });
+        }
+
+        if ($year) {
+            $query->whereYear('updated_at', $year);
+        }
+
+        return (float) $query->sum('interest_portion');
     }
 
     /**

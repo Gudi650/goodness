@@ -5,6 +5,7 @@ namespace App\Services\Finance\BalanceSheet;
 use App\Models\CreateLiability;
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\Loan;
 use App\Models\Salary;
 use App\Support\ReportFilters;
 
@@ -122,10 +123,8 @@ class CurrentLiabilitiesService
         
     }
 
-    //get the short Term Loans from the Liabilities table
     protected function getShortTermLoans()
     {
-        //get the short term loans from the liabilities table
         $query = CreateLiability::where('term', 'Short-term')
             ->whereHas('category', function ($query) {
                 $query->where('category', 'Loans & Borrowings');
@@ -133,16 +132,42 @@ class CurrentLiabilitiesService
             ->where('due_date', '<=', now())
             ->where('current_amount', '>', 0);
         ReportFilters::current()->applyCompany($query);
-        $shortTermLoans = $query->get()
+        $fromLiabilities = $query->get()
             ->map(function ($loan) {
                 return [
                     'name' => $loan->name,
                     'amount' => $loan->current_amount,
-                    'type' => 'cr', // Assuming liabilities are credit entries
+                    'type' => 'cr',
                 ];
             });
 
-        return $shortTermLoans;
+        return $fromLiabilities->concat($this->getModuleLoans(current: true))->values();
+    }
+
+    /**
+     * Disbursed loan-module balances due within 12 months.
+     */
+    protected function getModuleLoans(bool $current)
+    {
+        $query = Loan::query()
+            ->where('is_disbursed', true)
+            ->where('outstanding_balance', '>', 0);
+
+        ReportFilters::current()->applyCompany($query);
+
+        if ($current) {
+            $query->whereDate('maturity_date', '<=', now()->addYear());
+        } else {
+            $query->whereDate('maturity_date', '>', now()->addYear());
+        }
+
+        return $query->get()->map(function (Loan $loan) {
+            return [
+                'name' => trim(($loan->code ? $loan->code.' — ' : '').$loan->lender),
+                'amount' => (float) $loan->outstanding_balance,
+                'type' => 'cr',
+            ];
+        });
     }
 
     //get the accured expenses from the liabilities table

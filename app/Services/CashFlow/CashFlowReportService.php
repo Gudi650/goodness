@@ -194,7 +194,15 @@ class CashFlowReportService
 
     protected function loanDisbursements(?int $companyId, int $year): float
     {
-        $query = Loan::query()->whereNotNull('disbursement_date')->whereYear('disbursement_date', $year);
+        $query = Loan::query()
+            ->where('is_disbursed', true)
+            ->where(function ($builder) use ($year) {
+                $builder->whereYear('disbursement_date', $year)
+                    ->orWhere(function ($fallback) use ($year) {
+                        $fallback->whereNull('disbursement_date')
+                            ->whereYear('updated_at', $year);
+                    });
+            });
 
         if ($companyId) {
             $query->where('company_id', $companyId);
