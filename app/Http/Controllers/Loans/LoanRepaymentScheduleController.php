@@ -5,17 +5,12 @@ namespace App\Http\Controllers\Loans;
 use App\Http\Controllers\Controller;
 use App\Models\Loan;
 use App\Models\LoanRepaymentSchedule;
+use App\Models\VirtualAccounts;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LoanRepaymentScheduleController extends Controller
 {
-    /**
-     * Rebuilds a loan's entire schedule from its current terms. Useful if
-     * a loan was created before this endpoint existed, or if you want a
-     * manual "Regenerate Schedule" button rather than relying only on the
-     * automatic regeneration in LoanController::update().
-     */
     public function regenerate(Loan $loan): RedirectResponse
     {
         $loan->generateSchedule();
@@ -24,25 +19,44 @@ class LoanRepaymentScheduleController extends Controller
     }
 
     /**
-     * Marks a single installment as paid. This does not itself record a
-     * repayment transaction (that's the separate Repayments tab/table) —
-     * it only flips this installment's status once you know it was paid,
-     * and reduces the loan's outstanding balance accordingly.
+     * Marks installment paid, reduces outstanding principal, and deducts
+     * the full installment from the loan's receiving bank account.
      */
     public function markPaid(LoanRepaymentSchedule $schedule): RedirectResponse
     {
-        $schedule->update(['status' => 'Paid']);
+        if ($schedule->status === 'Paid') {
+            return back()->with('error', "Installment #{$schedule->installment_number} is already paid.");
+        }
 
-        $schedule->loan->decrement('outstanding_balance', $schedule->principal_portion);
+        $loan = $schedule->loan;
 
-        return back()->with('success', "Installment #{$schedule->installment_number} marked as paid.");
+        if (empty($loan->bank_id)) {
+            return back()->with('error', "Loan {$loan->code} has no bank account. Assign one before marking payments.");
+        }
+
+        $amount = (float) $schedule->total_installment;
+
+        try {
+            DB::transaction(function () use ($schedule, $loan, $amount) {
+                $bank = VirtualAccounts::query()->lockForUpdate()->findOrFail($loan->bank_id);
+
+                if ((float) $bank->balance < $amount) {
+                    throw new \RuntimeException(
+                        "Insufficient bank balance (TZS ".number_format((float) $bank->balance).") to pay installment #{$schedule->installment_number} (TZS ".number_format($amount).")."
+                    );
+                }
+
+                $bank->decrement('balance', $amount);
+                $schedule->update(['status' => 'Paid']);
+                $loan->decrement('outstanding_balance', $schedule->principal_portion);
+            });
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Installment #{$schedule->installment_number} marked as paid. TZS ".number_format($amount)." deducted from bank.");
     }
 
-    /**
-     * Sweeps all Pending installments past their due date to Overdue.
-     * Wire this into the console kernel schedule (php artisan schedule:run)
-     * to run daily rather than calling it from a route.
-     */
     public function markOverdueInstallments(): void
     {
         LoanRepaymentSchedule::where('status', 'Pending')
