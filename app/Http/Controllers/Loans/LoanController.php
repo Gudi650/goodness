@@ -97,38 +97,34 @@ class LoanController extends Controller
     }
 
     /**
-     * Confirms loan disbursement: adds principal to bank balance and marks active.
+     * Confirms loan disbursement: adds principal to bank balance and marks disbursed.
+     * Expected disbursement_date from the form is left unchanged.
      */
     public function disburse(Request $request, Loan $loan): RedirectResponse
     {
-        // 1. Verify that loan is approved first
         if (empty($loan->approved_by_id)) {
-            return back()->with('error', "Loan {$loan->code} must be approved by an authorized user before disbursement.");
+            return back()->with('error', "Loan {$loan->code} must be approved before disbursement can be confirmed.");
         }
 
-        // 2. Prevent duplicate disbursal
-        if ($loan->disbursement_date !== null && $loan->status === 'Active') {
-            return back()->with('error', "Loan {$loan->code} has already been disbursed on {$loan->disbursement_date->format('d M Y')}.");
+        if ($loan->is_disbursed) {
+            return back()->with('error', "Loan {$loan->code} has already been confirmed as disbursed.");
         }
 
-        // 3. Ensure a bank account is selected to receive funds
         if (empty($loan->bank_id)) {
             return back()->with('error', "Please assign a target Bank/Virtual Account to loan {$loan->code} before disbursing.");
         }
 
         DB::transaction(function () use ($loan) {
-            // Update bank balance on day of disbursement
             $bankAccount = VirtualAccounts::findOrFail($loan->bank_id);
             $bankAccount->increment('balance', $loan->principal);
 
-            // Update loan status and record actual disbursement date
             $loan->update([
+                'is_disbursed' => true,
                 'status' => 'Active',
-                'disbursement_date' => now(),
             ]);
         });
 
-        return back()->with('success', "Loan {$loan->code} successfully disbursed. Funds (TZS " . number_format($loan->principal) . ") deposited to bank account.");
+        return back()->with('success', "Loan {$loan->code} disbursement confirmed. Funds (TZS " . number_format((float) $loan->principal) . ") credited to the bank account.");
     }
 
     public function update(Request $request, Loan $loan): RedirectResponse

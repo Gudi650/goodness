@@ -141,9 +141,10 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            @if ($loan->disbursement_date)
-                                                <span class="text-xs text-slate-500 mono" title="Disbursed on {{ $loan->disbursement_date?->format('d M Y') }}">
-                                                     {{ $loan->disbursement_date?->format('d/m/Y') }}
+                                            @if ($loan->is_disbursed)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 border border-green-200"
+                                                    title="Expected {{ $loan->disbursement_date?->format('d M Y') ?? 'n/a' }}">
+                                                    ✓ Disbursed
                                                 </span>
                                             @elseif ($loan->approved_by_id)
                                                 <button type="button"
@@ -153,6 +154,7 @@
                                                         code: @js($loan->code),
                                                         principal: {{ (float) ($loan->principal ?? 0) }},
                                                         bank: @js(($loan->bankAccount?->bank_name ?? 'No bank').' · '.($loan->bankAccount?->account_number ?? 'N/A')),
+                                                        expectedDate: @js($loan->disbursement_date?->format('d M Y') ?? 'Not set'),
                                                         hasBank: {{ $loan->bank_id ? 'true' : 'false' }}
                                                     })">
                                                     Confirm Disbursement
@@ -215,8 +217,12 @@
                                                     <p class="mt-1 text-sm text-slate-700">{{ $loan->approvedBy?->name ?? 'Not Approved' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Disbursement Date</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->disbursement_date?->format('d M Y') ?? 'Not Disbursed' }}</p>
+                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Expected Disbursement</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->disbursement_date?->format('d M Y') ?? 'Not set' }}</p>
+                                                </div>
+                                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Disbursement Status</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->is_disbursed ? 'Confirmed' : 'Not confirmed' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Maturity Date</p>
@@ -478,7 +484,7 @@
             const amount = Number(loan.principal || 0).toLocaleString();
             openConfirm({
                 title: 'Confirm disbursement',
-                message: `Confirm that ${loan.code} has been disbursed? TZS ${amount} will be credited to ${loan.bank}.`,
+                message: `Confirm that ${loan.code} has been disbursed (expected ${loan.expectedDate})? TZS ${amount} will be credited to ${loan.bank}.`,
                 confirmText: 'Confirm & credit bank',
                 cancelText: 'Cancel',
                 variant: 'success',
