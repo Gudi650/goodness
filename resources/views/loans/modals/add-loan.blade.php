@@ -1,6 +1,6 @@
 <div id="modal-add-loan" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
     <div class="w-full max-w-2xl rounded-lg bg-white shadow-lg">
-        <form action="{{ route('loans.store') }}" method="POST">
+        <form action="{{ url('/loans') }}" method="POST">
             @csrf
             <div class="flex items-center justify-between border-b px-5 py-4">
                 <h3 class="text-lg font-semibold">Add Loan</h3>

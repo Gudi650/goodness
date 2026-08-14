@@ -62,29 +62,36 @@ class LoanController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        $loan = DB::transaction(function () use ($data) {
-            $attempts = 0;
-            do {
-                $data['code'] = Loan::generateNextCode();
-                try {
-                    $loan = Loan::create($data);
-                    break;
-                } catch (\Illuminate\Database\QueryException $e) {
-                    $attempts++;
-                    $isDuplicateCode = str_contains(strtolower($e->getMessage()), 'duplicate')
-                        || (string) $e->getCode() === '23000';
+        try {
+            $loan = DB::transaction(function () use ($data) {
+                $attempts = 0;
+                do {
+                    $data['code'] = Loan::generateNextCode();
+                    try {
+                        $loan = Loan::create($data);
+                        break;
+                    } catch (\Illuminate\Database\QueryException $e) {
+                        $attempts++;
+                        $isDuplicateCode = str_contains(strtolower($e->getMessage()), 'duplicate')
+                            || (string) $e->getCode() === '23000';
 
-                    if (! $isDuplicateCode || $attempts >= 5) {
-                        throw $e;
+                        if (! $isDuplicateCode || $attempts >= 5) {
+                            throw $e;
+                        }
                     }
-                }
-            } while (true);
+                } while (true);
 
-            // Auto-build the amortization schedule
-            $loan->generateSchedule();
+                $loan->generateSchedule();
 
-            return $loan;
-        });
+                return $loan;
+            });
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Could not save loan: '.$e->getMessage());
+        }
 
         return back()->with('success', "Loan {$loan->code} recorded and repayment schedule generated.");
     }
