@@ -414,6 +414,7 @@ Route::middleware('auth')->group(function () {
 | ->group() so these sit behind login like your other modules)
 */
 
+/*
     Route::prefix('loans')->name('loans.')->group(function () {
         Route::get('/', [LoanController::class, 'index'])->name('index');
 
@@ -429,6 +430,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/{loan}/disburse', [LoanController::class, 'disburse'])->name('disburse');
 
     });
+    */
+
+    //Routes for loans
+    Route::get('/loans', [LoanController::class, 'index'])->name('loans');
+    Route::post('/loans', [LoanController::class, 'store'])->name('loans.store');
+    Route::put('/loans/{loan}', [LoanController::class, 'update'])->name('loans.update');
+    Route::delete('/loans/{loan}', [LoanController::class, 'destroy'])->name('loans.destroy');
+    Route::post('/loans/{loan}/schedule/regenerate', [LoanRepaymentScheduleController::class, 'regenerate'])->name('loans.schedule.regenerate');
+    Route::patch('/loans/schedule/{schedule}/mark-paid', [LoanRepaymentScheduleController::class, 'markPaid'])->name('loans.schedule.mark-paid');
+    Route::post('/loans/{loan}/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
 
 
     //VAT Accounting
