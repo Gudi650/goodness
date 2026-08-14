@@ -143,16 +143,20 @@
                                         <td class="px-4 py-3 text-center">
                                             @if ($loan->disbursement_date)
                                                 <span class="text-xs text-slate-500 mono" title="Disbursed on {{ $loan->disbursement_date?->format('d M Y') }}">
-                                                    ✓ {{ $loan->disbursement_date?->format('d/m/Y') }}
+                                                     {{ $loan->disbursement_date?->format('d/m/Y') }}
                                                 </span>
                                             @elseif ($loan->approved_by_id)
-                                                <form action="{{ url('/loans/'.$loan->id.'/disburse') }}" method="POST"
-                                                    onsubmit="return confirm('Confirm disbursement of TZS {{ number_format((float) ($loan->principal ?? 0)) }} for loan {{ $loan->code }}? Funds will be added to the selected bank account balance.');">
-                                                    @csrf
-                                                    <button type="submit" class="px-2.5 py-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded text-xs font-medium transition-colors shadow-sm">
-                                                        Disburse Funds
-                                                    </button>
-                                                </form>
+                                                <button type="button"
+                                                    class="px-2.5 py-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded text-xs font-medium transition-colors shadow-sm"
+                                                    onclick="confirmLoanDisburse({
+                                                        id: {{ $loan->id }},
+                                                        code: @js($loan->code),
+                                                        principal: {{ (float) ($loan->principal ?? 0) }},
+                                                        bank: @js(($loan->bankAccount?->bank_name ?? 'No bank').' · '.($loan->bankAccount?->account_number ?? 'N/A')),
+                                                        hasBank: {{ $loan->bank_id ? 'true' : 'false' }}
+                                                    })">
+                                                    Confirm Disbursement
+                                                </button>
                                             @else
                                                 <span class="text-xs text-amber-600 font-medium" title="Approval required before disbursement">
                                                     Awaiting Approval
@@ -445,11 +449,46 @@
 
     @include('loans.modals.add-loan')
 
+    <form id="loanDisburseForm" method="POST" class="hidden">
+        @csrf
+    </form>
+
     @include('components.modal')
     @include('components.alert')
     @include('components.confirm')
 
     <script>
+        function confirmLoanDisburse(loan) {
+            if (!loan.hasBank) {
+                if (typeof openConfirm === 'function') {
+                    openConfirm({
+                        title: 'Bank account required',
+                        message: `Loan ${loan.code} has no receiving bank account. Assign one before disbursing.`,
+                        confirmText: 'OK',
+                        cancelText: 'Close',
+                        variant: 'warning',
+                        onConfirm: () => {},
+                    });
+                } else {
+                    alert(`Loan ${loan.code} has no receiving bank account.`);
+                }
+                return;
+            }
+
+            const amount = Number(loan.principal || 0).toLocaleString();
+            openConfirm({
+                title: 'Confirm disbursement',
+                message: `Confirm that ${loan.code} has been disbursed? TZS ${amount} will be credited to ${loan.bank}.`,
+                confirmText: 'Confirm & credit bank',
+                cancelText: 'Cancel',
+                variant: 'success',
+                onConfirm: () => {
+                    const form = document.getElementById('loanDisburseForm');
+                    form.action = `/loans/${loan.id}/disburse`;
+                    form.submit();
+                },
+            });
+        }
         const loanTabTitles = {
             register: 'Loan Register',
             schedule: 'Repayment Schedule',
