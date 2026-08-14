@@ -108,10 +108,10 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 @forelse($loans ?? [] as $loan)
-                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td class="px-4 py-3 mono text-xs text-slate-500">{{ $loan->code }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company->name ?? '-' }}</span>
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company?->name ?? '-' }}</span>
                                         </td>
                                         <td class="px-4 py-3 font-medium">{{ $loan->lender }}</td>
                                         <td class="px-4 py-3 text-right mono">TZS {{ number_format($loan->principal) }}</td>
@@ -178,7 +178,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr id="loan-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                    <tr id="loan-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td colspan="10" class="px-4 py-4">
                                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
@@ -253,15 +253,15 @@
                                         $overdueCount = $installments->where('status', 'Overdue')->count();
                                         $nextDue = $installments->where('status', '!=', 'Paid')->sortBy('due_date')->first();
                                     @endphp
-                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td class="px-4 py-3 mono text-xs text-slate-500">{{ $loan->code }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company->name ?? '-' }}</span>
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company?->name ?? '-' }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-right mono">{{ $installments->count() }}</td>
                                         <td class="px-4 py-3">
                                             @if ($nextDue)
-                                                {{ $nextDue->due_date->format('d M Y') }}
+                                                {{ $nextDue->due_date?->format('d M Y') ?? '-' }}
                                                 @if ($nextDue->status === 'Overdue')
                                                     <span class="ml-1 inline-flex px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 border border-red-200">Overdue</span>
                                                 @endif
@@ -289,7 +289,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr id="schedule-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                    <tr id="schedule-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td colspan="9" class="px-4 py-4">
                                             @if ($installments->isEmpty())
                                                 <p class="text-sm text-slate-500 px-2">No installments generated for this loan yet.</p>
@@ -310,7 +310,7 @@
                                                         @foreach ($installments as $installment)
                                                             <tr>
                                                                 <td class="px-3 py-2 text-right mono">{{ $installment->installment_number }}</td>
-                                                                <td class="px-3 py-2">{{ $installment->due_date->format('d M Y') }}</td>
+                                                                <td class="px-3 py-2">{{ $installment->due_date?->format('d M Y') ?? '-' }}</td>
                                                                 <td class="px-3 py-2 text-right mono">TZS {{ number_format($installment->principal_portion) }}</td>
                                                                 <td class="px-3 py-2 text-right mono">TZS {{ number_format($installment->interest_portion) }}</td>
                                                                 <td class="px-3 py-2 text-right mono font-medium">TZS {{ number_format($installment->total_installment) }}</td>
