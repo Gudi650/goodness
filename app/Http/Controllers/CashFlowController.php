@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
 use App\Models\AssetRevaluation;
 use App\Models\Dividends;
+use App\Models\EquityDistribution;
 use App\Models\SharePremuims;
-use App\Models\SharesDefinitions;
 use App\Services\NetIncome;
 use App\Support\ReportFilters;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class CashFlowController extends Controller
@@ -31,22 +28,13 @@ class CashFlowController extends Controller
 
     protected function resolveCompanyId(): ?int
     {
-        $filters = ReportFilters::current();
-        if ($filters->scope === 'company' && $filters->companyId) {
-            return $filters->companyId;
-        }
-
-        if ($filters->scope === 'all') {
-            return null;
-        }
-
-        return session('active_company_id') ?? Auth::user()?->company_id;
+        return ReportFilters::current()->resolveCompanyId();
     }
 
     protected function buildReportData(): array
     {
         $companyId = $this->resolveCompanyId();
-        $companyName = $this->resolveCompanyName($companyId);
+        $companyName = ReportFilters::current()->displayCompanyName();
         $currentYear = ReportFilters::current()->year();
         $previousYear = $currentYear - 1;
 
@@ -64,7 +52,6 @@ class CashFlowController extends Controller
         return [
             'company' => $companyName,
             'title' => 'Statement of Changes in Equity',
-            //'period' => Carbon::create($currentYear, 12, 31)->format('d F Y'),
             'period' => 'As at ' . now()->format('d M Y'),
             'scale' => '(in thousands Tshs)',
             'columns' => [
@@ -131,15 +118,6 @@ class CashFlowController extends Controller
         return $pdf;
     }
 
-    protected function resolveCompanyName(?int $companyId): string
-    {
-        if (! $companyId) {
-            return 'Goodness Group';
-        }
-
-        return Company::query()->whereKey($companyId)->value('name') ?: 'Company';
-    }
-
     protected function buildEquitySnapshot(?int $companyId, int $year): array
     {
         $shareCapital = $this->getShareCapital($companyId, $year);
@@ -156,40 +134,39 @@ class CashFlowController extends Controller
         ];
     }
 
-    protected function getShareCapital(?int $companyId, int $year): float
+    protected function applyCompanyScope($query, ?int $companyId)
     {
-        $definition = SharesDefinitions::query()
-            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
-            ->whereYear('created_at', '<=', $year)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->first();
-
-        if (! $definition) {
-            return 0.0;
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        } else {
+            ReportFilters::current()->applyCompany($query);
         }
 
-        $issuedShares = (float) ($definition->issued_shares ?? 0);
-        $shareValue = (float) ($definition->share_value ?? 0);
+        return $query;
+    }
 
-        return $issuedShares * $shareValue;
+    protected function getShareCapital(?int $companyId, int $year): float
+    {
+        $query = EquityDistribution::query();
+        $this->applyCompanyScope($query, $companyId);
+        $query->whereYear('created_at', '<=', $year);
+
+        return (float) $query->sum('value_held');
     }
 
     protected function getSharePremium(?int $companyId, int $year): float
     {
-        return (float) SharePremuims::query()
-            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
-            ->whereYear('created_at', '<=', $year)
-            ->sum('total_premium');
+        $query = SharePremuims::query();
+        $this->applyCompanyScope($query, $companyId);
+        $query->whereYear('created_at', '<=', $year);
+
+        return (float) $query->sum('total_premium');
     }
 
     protected function getDividendsPaid(?int $companyId = null, ?int $year = null): float
     {
         $query = Dividends::query()->where('status', 'Declared');
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $this->applyCompanyScope($query, $companyId);
 
         if ($year) {
             $query->where(function ($subQuery) use ($year) {
@@ -201,27 +178,21 @@ class CashFlowController extends Controller
             });
         }
 
-        $dividendsPaid = $query->sum('amount');
-
-        return (float) $dividendsPaid;
+        return (float) $query->sum('amount');
     }
 
     protected function getRetainedEarnings(?int $companyId = null, ?int $year = null)
     {
         $dividends = $this->getDividendsPaid($companyId, $year);
         $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
-        $retainedEarnings = $netIncome - $dividends;
 
-        return (float) $retainedEarnings;
+        return (float) ($netIncome - $dividends);
     }
 
     protected function getRevaluationSurplus(?int $companyId = null, ?int $year = null)
     {
         $query = AssetRevaluation::query();
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $this->applyCompanyScope($query, $companyId);
 
         if ($year) {
             $query->where(function ($subQuery) use ($year) {
@@ -230,14 +201,11 @@ class CashFlowController extends Controller
             });
         }
 
-        $revaluationSurplus = $query->sum('surplus');
-
-        return (float) $revaluationSurplus;
+        return (float) $query->sum('surplus');
     }
 
     protected function calculateNetIncomeForYear(?int $companyId = null, ?int $year = null): float
     {
         return app(NetIncome::class)->calculateNetIncome($companyId, $year);
     }
-    
 }
