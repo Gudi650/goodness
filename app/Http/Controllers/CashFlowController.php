@@ -64,8 +64,9 @@ class CashFlowController extends Controller
         return [
             'company' => $companyName,
             'title' => 'Statement of Changes in Equity',
-            'period' => Carbon::create($currentYear, 12, 31)->format('d F Y'),
-            'scale' => '(in thousands EUR)',
+            //'period' => Carbon::create($currentYear, 12, 31)->format('d F Y'),
+            'period' => 'As at ' . now()->format('d M Y'),
+            'scale' => '(in thousands Tshs)',
             'columns' => [
                 'Share capital',
                 'Share premium',
@@ -83,7 +84,7 @@ class CashFlowController extends Controller
                 ['label' => 'Dividends paid', 'values' => [0, 0, -1 * $previousDividends, 0, -1 * $previousDividends], 'indent' => 1],
                 ['label' => 'Profit or loss', 'values' => [0, 0, $previousNetIncome, 0, $previousNetIncome], 'indent' => 1, 'italic' => true],
                 ['label' => 'Other comprehensive income', 'values' => [0, 0, 0, 0, 0], 'indent' => 1, 'italic' => true],
-                ['label' => 'TCI for the year', 'values' => [0, 0, $previousNetIncome, 0, $previousNetIncome], 'underline' => true],
+                ['label' => 'TCI for the year', 'values' => [0, 0, 0, 0, 0], 'underline' => true],
 
                 ['label' => 'Balance at 31 Dec ' . $previousYear . ':', 'values' => [
                     $previousSnapshot['share_capital'],
@@ -238,4 +239,5 @@ class CashFlowController extends Controller
     {
         return app(NetIncome::class)->calculateNetIncome($companyId, $year);
     }
+    
 }
