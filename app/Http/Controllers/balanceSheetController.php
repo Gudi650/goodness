@@ -45,7 +45,7 @@ class balanceSheetController extends Controller
         // Balance sheet RE is cumulative (assets/liabilities are point-in-time).
         $retainedEarnings = $this->getRetainedEarnings($companyId, null);
 
-        $otherEquity = $this->getOtherEquity($companyId);
+        $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings);
 
         //get other assets
         $otherAssets = $this->getAssets();
@@ -75,11 +75,11 @@ class balanceSheetController extends Controller
             'equity' => [
                 ['name' => 'Share Capital', 'amount' => $shareCapital],
                 ['name' => 'Retained Earnings', 'amount' => $retainedEarnings],
-                ['name' => 'Other Equity', 'amount' => $otherEquity],
+                ['name' => 'Total Equity', 'amount' => $otherEquity],
             ]
         ];
 
-        $totalEquity = collect($equityLiabilities['equity'])->sum('amount');
+        $totalEquity = $otherEquity;
 
 
 
@@ -192,10 +192,9 @@ class balanceSheetController extends Controller
         return (float) $query->sum('amount');
     }
 
-    protected function getOtherEquity(?int $companyId = null): float
+    protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0): float
     {
-        //return (float) EquityDistribution::query()->sum('value_held');
-        return 0.0;
+        return (float) ($shareCapital + $retainedEarnings);
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database

@@ -210,7 +210,7 @@
             <td>Total Equity and Liabilities</td>
             <td class="amount">
                 {{ number_format(
-                    collect($equityLiabilities['equity'])->sum('amount')
+                    $totalEquity
                     + collect($nonCurrentLiabilities)->flatten(1)->sum('amount')
                     + collect($currentLiabilities)->flatten(1)->sum('amount'),
                     2)
