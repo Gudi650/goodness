@@ -94,7 +94,8 @@ class CashFlowController extends Controller
                 ['label' => 'Dividends paid', 'values' => [0, 0, -1 * $currentDividends, 0, -1 * $currentDividends], 'indent' => 1],
                 ['label' => 'Profit or loss', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'indent' => 1, 'italic' => true],
                 ['label' => 'Other comprehensive income', 'values' => [0, 0, 0, 0, 0], 'indent' => 1, 'italic' => true],
-                ['label' => 'TCI for the year', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'underline' => true],
+                //['label' => 'TCI for the year', 'values' => [0, 0, $currentNetIncome, 0, $currentNetIncome], 'underline' => true],
+                ['label' => 'TCI for the year', 'values' => [0, 0, 0, 0, 0], 'underline' => true],
 
                 ['label' => 'Balance at 31 Dec ' . $currentYear . ':', 'values' => [
                     $currentSnapshot['share_capital'],
