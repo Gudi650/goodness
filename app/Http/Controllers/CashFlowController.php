@@ -209,4 +209,5 @@ class CashFlowController extends Controller
     {
         return app(NetIncome::class)->calculateNetIncome($companyId, $year);
     }
+    
 }
