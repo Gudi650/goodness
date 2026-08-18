@@ -16,7 +16,7 @@ class CashFlowController extends Controller
     {
         ReportFilters::boot();
 
-        return $this->renderReportPdf()->stream('equity_statement.pdf');
+        return view('reports.cash_flow', ['data' => $this->buildReportData()]);
     }
 
     public function downloadPdf()
