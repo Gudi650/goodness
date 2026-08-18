@@ -16,14 +16,14 @@ class CashFlowController extends Controller
     {
         ReportFilters::boot();
 
-        return $this->renderReportPdf()->stream('cash_flow.pdf');
+        return $this->renderReportPdf()->stream('equity_statement.pdf');
     }
 
     public function downloadPdf()
     {
         ReportFilters::boot();
 
-        return $this->renderReportPdf()->download('cash_flow.pdf');
+        return $this->renderReportPdf()->download('equity_statement.pdf');
     }
 
     protected function resolveCompanyId(): ?int
