@@ -53,7 +53,7 @@ class NonCurrentAssetsService
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->original_value,
+                    'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
@@ -74,7 +74,7 @@ class NonCurrentAssetsService
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->original_value,
+                    'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
@@ -95,7 +95,7 @@ class NonCurrentAssetsService
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->original_value,
+                    'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
@@ -116,7 +116,7 @@ class NonCurrentAssetsService
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->original_value,
+                    'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
             });

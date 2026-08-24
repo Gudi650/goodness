@@ -4,12 +4,17 @@ namespace App\Services\Finance;
 
 use App\Models\CreateAssets;
 use App\Support\ReportFilters;
+use Illuminate\Support\Facades\Schema;
 
 class AssetDisposalService
 {
     /** Gain/(loss) = proceeds − carrying value at disposal. */
     public function gainOrLoss(?int $companyId = null, ?int $year = null): float
     {
+        if (! Schema::hasTable('create_assets')) {
+            return 0.0;
+        }
+
         $query = CreateAssets::query()
             ->whereIn('status', ['Sold', 'Disposed', 'Written Off'])
             ->whereNotNull('disposal_date');
@@ -34,6 +39,10 @@ class AssetDisposalService
     /** Cash proceeds from disposals (investing inflow). */
     public function cashProceeds(?int $companyId = null, ?int $year = null): float
     {
+        if (! Schema::hasTable('create_assets')) {
+            return 0.0;
+        }
+
         $query = CreateAssets::query()
             ->whereIn('status', ['Sold', 'Disposed', 'Written Off'])
             ->whereNotNull('disposal_date');

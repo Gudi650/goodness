@@ -43,12 +43,11 @@ class balanceSheetController extends Controller
         $shareCapital = $this->getShareCapital($companyId, null);
 
         // Balance sheet RE is cumulative (assets/liabilities are point-in-time).
-        $retainedEarnings = $this->getRetainedEarnings($companyId, null);
-
-        // Depreciation (expense) = original - NBV; reduces equity so BS balances with assets at NBV
+        // Fold depreciation (original - NBV) into RE once — assets are at NBV.
         $depreciation = $this->getAccumulatedDepreciation($companyId);
+        $retainedEarnings = $this->getRetainedEarnings($companyId, null) - $depreciation;
 
-        $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings - $depreciation);
+        $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings);
 
         //get other assets
         $otherAssets = $this->getAssets();
@@ -78,7 +77,6 @@ class balanceSheetController extends Controller
             'equity' => [
                 ['name' => 'Share Capital', 'amount' => $shareCapital],
                 ['name' => 'Retained Earnings', 'amount' => $retainedEarnings],
-                ['name' => 'Depreciation', 'amount' => -$depreciation],
                 ['name' => 'Total Equity', 'amount' => $otherEquity],
             ]
         ];
