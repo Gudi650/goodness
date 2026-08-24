@@ -55,6 +55,9 @@ class TrialBalanceController extends Controller
         //get other assets to display in the trial balance report
         $otherAssets = $this->getAssets();
 
+        // Depreciation expense (Dr) = original_value - current_value (NBV)
+        $depreciations = $this->getDepreciations();
+
 
         return [
             'costOfGoodsSold' => $costOfGoodsSold,
@@ -67,6 +70,7 @@ class TrialBalanceController extends Controller
             'otherExpenses' => $otherExpenses,
             'equities' => $equities,
             'otherAssets' => $otherAssets,
+            'depreciations' => $depreciations,
         ];
 
     }
@@ -271,11 +275,27 @@ class TrialBalanceController extends Controller
         return $totalEquities;
     }
 
-    //function to get the depreciations of assets to display in the trial balance report
+    // Depreciation expense (Dr) so TB balances with assets at NBV
     protected function getDepreciations()
     {
-        // Implementation for getting depreciations
+        $query = CreateAssets::query();
+        ReportFilters::current()->applyCompany($query);
 
+        $amount = $query->get()->sum(function (CreateAssets $asset) {
+            return max(0, (float) $asset->original_value - (float) $asset->current_value);
+        });
+
+        if ($amount <= 0) {
+            return collect();
+        }
+
+        return collect([
+            [
+                'name' => 'Depreciation',
+                'amount' => (float) $amount,
+                'type' => 'dr',
+            ],
+        ])->groupBy('name');
     }
 
     //function to get the total of all DEBIT entries in the trial balance report

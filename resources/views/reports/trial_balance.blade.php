@@ -291,6 +291,26 @@
                 </tr>
             @endforeach
 
+            {{-- Depreciation expense (Dr) = original - NBV --}}
+            @foreach (($depreciations ?? collect()) as $type => $items)
+                <tr>
+                    <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td class="text-center"></td>
+                    @php $debitItems = collect($items)->where('type', 'dr'); @endphp
+                    <td class="text-right">
+                        {{ $debitItems->isNotEmpty()
+                            ? number_format($debitItems->sum('amount'), 2)
+                            : '-' }}
+                    </td>
+                    @php $creditItems = collect($items)->where('type', 'cr'); @endphp
+                    <td class="text-right">
+                        {{ $creditItems->isNotEmpty()
+                            ? number_format($creditItems->sum('amount'), 2)
+                            : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+
             {{-- loop through operational costs --}}
 
 
