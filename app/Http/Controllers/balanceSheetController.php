@@ -42,8 +42,7 @@ class balanceSheetController extends Controller
         //get the share capital
         $shareCapital = $this->getShareCapital($companyId, null);
 
-        // Balance sheet RE is cumulative (assets/liabilities are point-in-time).
-        // Fold depreciation (original - NBV) into RE once — assets are at NBV.
+        // RE net of depreciation once (original - NBV); no separate Depreciation equity line
         $depreciation = $this->getAccumulatedDepreciation($companyId);
         $retainedEarnings = $this->getRetainedEarnings($companyId, null) - $depreciation;
 
