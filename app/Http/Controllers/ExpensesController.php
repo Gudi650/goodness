@@ -24,7 +24,19 @@ class ExpensesController extends Controller
             ->latest()
             ->firstOrFail();
 
-        return view('reports.expenses', compact('expense'));
+        if ($request->boolean('download')) {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.expenses', [
+                'expense' => $expense,
+                'showActions' => false,
+            ])->setPaper('a4', 'portrait');
+
+            return $pdf->download(($expense->expense_number ?: 'expense_report') . '.pdf');
+        }
+
+        return view('reports.expenses', [
+            'expense' => $expense,
+            'showActions' => true,
+        ]);
     }
 
 

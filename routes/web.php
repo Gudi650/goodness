@@ -445,10 +445,6 @@ Route::middleware('auth')->group(function () {
     //VAT Accounting
     Route::get('/vataccount', [VatAccount::class, 'index'])->name('vataccount');
 
-    //testing the expense report to view in the browser
-    Route::get('/expense-report', [ExpensesController::class, 'index'])->name('expense-report');
-
-
 
     // Reports & Analytics
     Route::post('/reports', [ReportController::class, 'expenses'])->name('reports');
