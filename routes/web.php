@@ -355,6 +355,8 @@ Route::middleware('auth')->group(function () {
 
     //FAR management
     Route::get('/far', [FAR::class, 'index'])->name('far');
+    Route::post('/far/assets/{asset}/dispose', [FAR::class, 'dispose'])->name('far.assets.dispose');
+    Route::post('/far/assets/{asset}/dispose', [FAR::class, 'dispose'])->name('far.assets.dispose');
 
     // Dedicated financial statement previews and exports
     Route::get('/balance-sheet', [BalanceSheetController::class, 'index'])->name('balance-sheet');

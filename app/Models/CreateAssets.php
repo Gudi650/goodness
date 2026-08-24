@@ -20,6 +20,15 @@ class CreateAssets extends Model
         'depreciation_value',
         'acquired',
         'status',
+        'disposal_date',
+        'disposal_proceeds',
+        'disposal_bank_id',
+        'disposal_notes',
+    ];
+
+    protected $casts = [
+        'acquired' => 'date',
+        'disposal_date' => 'date',
     ];
 
     //defining the relationship with the company model

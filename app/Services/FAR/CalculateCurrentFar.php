@@ -28,7 +28,8 @@ class CalculateCurrentFar
     public function getAssetsToDepreciate()
     {
         return CreateAssets::where('type', 'Fixed Asset')
-            ->whereDate('acquired', '<', now()->startOfMonth()) // Only assets acquired before the current month// Only assets that still have value
+            ->where('status', 'Active')
+            ->whereDate('acquired', '<', now()->startOfMonth())
             ->get();
     }
 

@@ -142,7 +142,7 @@
 
                                     <button type="button" onclick="toggleFarDetails('{{ $asset['id'] }}')"
                                         class="text-slate-600 hover:text-slate-800 transition-colors"
-                                        title="View invoice details" aria-label="View invoice details">
+                                        title="View details" aria-label="View details">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -151,6 +151,15 @@
                                                 d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                         </svg>
                                     </button>
+
+                                    @if ($asset['status'] === 'Active')
+                                        <button type="button"
+                                            onclick="openDisposeAssetModal({{ $asset['id'] }}, '{{ addslashes($asset['name']) }}', {{ (float) $asset['current_value'] }}, {{ (int) ($asset['company_id'] ?? 0) }})"
+                                            class="text-red-600 hover:text-red-800 transition-colors text-xs font-medium"
+                                            title="Dispose asset">
+                                            Dispose
+                                        </button>
+                                    @endif
 
                                     {{-- editing buttons as well 
 
@@ -332,40 +341,87 @@
     @include('components.alert')
     @include('components.confirm')
 
+    <div id="disposeAssetModal" class="hidden">
+        <form id="disposeAssetForm" method="POST" class="space-y-4">
+            @csrf
+            <p class="text-sm text-slate-600">Asset: <span id="disposeAssetName" class="font-semibold text-slate-800"></span></p>
+            <p class="text-sm text-slate-600">Net book value: <span id="disposeAssetNbv" class="font-semibold mono"></span></p>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Disposal date</label>
+                <input type="date" name="disposal_date" id="disposal_date" required
+                    class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm" value="{{ now()->toDateString() }}">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Method</label>
+                <select name="disposal_method" id="disposal_method" required
+                    class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm">
+                    <option value="Sold">Sold</option>
+                    <option value="Disposed">Disposed / Scrapped</option>
+                    <option value="Written Off">Written Off</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Proceeds (TZS)</label>
+                <input type="number" step="0.01" min="0" name="disposal_proceeds" id="disposal_proceeds" value="0"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Bank account (required if proceeds &gt; 0)</label>
+                <select name="disposal_bank_id" id="disposal_bank_id"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm">
+                    <option value="">— None —</option>
+                    @foreach (($banks ?? []) as $bank)
+                        <option value="{{ $bank->id }}" data-company="{{ $bank->company_id }}">
+                            {{ $bank->account_name }} (TZS {{ number_format((float) $bank->balance, 2) }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                <textarea name="disposal_notes" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 rounded-md text-sm">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Confirm disposal</button>
+            </div>
+        </form>
+    </div>
+
     <script>
         function toggleFarDetails(id) {
-            console.log('Toggling details for asset ID:', id);
-
             const detailsRow = document.getElementById(`fixedassets-details-${id}`);
-
-            if (detailsRow) {
-                detailsRow.classList.toggle('hidden');
-                console.log(
-                    `Details row for asset ID ${id} is now ${detailsRow.classList.contains('hidden') ? 'hidden' : 'visible'}.`
-                );
-            }
+            if (detailsRow) detailsRow.classList.toggle('hidden');
         }
 
-        /*
-        function toggleFarDetails(id) {
-            const targetRow = document.getElementById(`fixedassets-details-${invoiceId}`);
-            if (!targetRow) {
-                return;
-            }
+        function openDisposeAssetModal(assetId, assetName, nbv, companyId) {
+            const template = document.getElementById('disposeAssetModal');
+            const clone = template.cloneNode(true);
+            const form = clone.querySelector('#disposeAssetForm');
+            form.action = `/far/assets/${assetId}/dispose`;
+            clone.querySelector('#disposeAssetName').textContent = assetName;
+            clone.querySelector('#disposeAssetNbv').textContent = 'TZS ' + Number(nbv || 0).toLocaleString();
 
-            const shouldOpen = targetRow.classList.contains('hidden');
-
-            document.querySelectorAll('[id^="fixedassets-details-"]').forEach(row => {
-                row.classList.add('hidden');
+            const bankSelect = clone.querySelector('#disposal_bank_id');
+            Array.from(bankSelect.options).forEach(opt => {
+                if (!opt.value) return;
+                const sameCompany = !companyId || String(opt.dataset.company) === String(companyId);
+                opt.hidden = !sameCompany;
+                opt.disabled = !sameCompany;
             });
 
-            if (shouldOpen) {
-                targetRow.classList.remove('hidden');
-            }
+            window.openModal('Dispose Asset', clone.innerHTML, null, {
+                widthClass: 'max-w-lg',
+                hideFooter: true
+            });
         }
-        */
     </script>
-
 </body>
 
 </html>
