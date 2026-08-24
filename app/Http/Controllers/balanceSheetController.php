@@ -197,7 +197,7 @@ class balanceSheetController extends Controller
 
     protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0, float $depreciationValue = 0): float
     {
-        return (float) ($shareCapital + $retainedEarnings - $depreciationValue);
+        return (float) ($shareCapital + $retainedEarnings + $depreciationValue);
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database
@@ -245,6 +245,7 @@ class balanceSheetController extends Controller
         return $otherAssets;
     }
 
+    /*
     //get depreciation value except for vehicles, properties, investments, and intangible assets
     protected function getDepreciationValue(): float
     {
@@ -261,7 +262,18 @@ class balanceSheetController extends Controller
          
          return $depreciationValue;
 
-    }
+    } */
+
+         //get depreciation value of all assets
+         protected function getDepreciationValue(): float
+         {
+            $query = CreateAssets::where('current_value', '>', 0);
+            ReportFilters::current()->applyCompany($query);
+            $depreciationValue = $query->get()->sum(function ($asset) {
+                return (float) ($asset->original_value - $asset->current_value);
+            });
+            return $depreciationValue;
+         }
 
 
 
