@@ -197,7 +197,7 @@ class balanceSheetController extends Controller
 
     protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0, float $depreciationValue = 0): float
     {
-        return (float) ($shareCapital + $retainedEarnings + $depreciationValue);
+        return (float) ($shareCapital + $retainedEarnings - $depreciationValue);
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database
