@@ -13,6 +13,21 @@ use Illuminate\Support\Carbon;
 
 class ExpensesController extends Controller
 {
+
+
+    //testing the expense report to view in the browser
+    public function index(Request $request)
+    {
+        $expense = Expense::query()
+            ->with(['company', 'department', 'creator', 'checker', 'approver', 'issuer', 'bankAccount', 'financeItem'])
+            ->when($request->integer('expense_id'), fn ($q, $id) => $q->whereKey($id))
+            ->latest()
+            ->firstOrFail();
+
+        return view('reports.expenses', compact('expense'));
+    }
+
+
     //
 
     /**
