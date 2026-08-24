@@ -45,7 +45,9 @@ class balanceSheetController extends Controller
         // Balance sheet RE is cumulative (assets/liabilities are point-in-time).
         $retainedEarnings = $this->getRetainedEarnings($companyId, null);
 
-        $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings);
+        $depreciationValue = $this->getDepreciationValue();
+
+        $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings, $depreciationValue);
 
         //get other assets
         $otherAssets = $this->getAssets();
@@ -75,6 +77,7 @@ class balanceSheetController extends Controller
             'equity' => [
                 ['name' => 'Share Capital', 'amount' => $shareCapital],
                 ['name' => 'Retained Earnings', 'amount' => $retainedEarnings],
+                ['name' => 'Depreciation', 'amount' => $depreciationValue],
                 ['name' => 'Total Equity', 'amount' => $otherEquity],
             ]
         ];
@@ -192,9 +195,9 @@ class balanceSheetController extends Controller
         return (float) $query->sum('amount');
     }
 
-    protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0): float
+    protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0, float $depreciationValue = 0): float
     {
-        return (float) ($shareCapital + $retainedEarnings);
+        return (float) ($shareCapital + $retainedEarnings - $depreciationValue);
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database
@@ -240,6 +243,24 @@ class balanceSheetController extends Controller
             ->groupBy('name');
 
         return $otherAssets;
+    }
+
+    //get depreciation value except for vehicles, properties, investments, and intangible assets
+    protected function getDepreciationValue(): float
+    {
+        $query = CreateAssets::whereHas('category', function ($query) {
+            $query->where('category', '!=','Vehicle Assets')
+                ->where('category', '!=','Property Assets')
+                ->where('category', '!=','Investment Assets')
+                ->where('category', '!=','Intangible Assets');
+         })->where('current_value', '>', 0);
+         ReportFilters::current()->applyCompany($query);
+         $depreciationValue = $query->get()->sum(function ($asset) {
+            return (float) ($asset->original_value - $asset->current_value);
+         });
+         
+         return $depreciationValue;
+
     }
 
 
