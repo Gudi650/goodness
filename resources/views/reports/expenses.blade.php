@@ -65,7 +65,7 @@
 
 @if (!empty($showActions))
     <div style="text-align:right; margin: 0 0 18px 0;">
-        <a href="{{ route('expense-report', ['expense_id' => $expense->id, 'download' => 1]) }}"
+        <a href="{{ route('expense-report-export', ['expense_id' => $expense->id]) }}"
            style="display:inline-block; padding:10px 14px; background:#111827; color:#fff; text-decoration:none; border-radius:6px; font-size:14px;">
             Generate PDF
         </a>

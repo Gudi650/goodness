@@ -14,32 +14,6 @@ use Illuminate\Support\Carbon;
 class ExpensesController extends Controller
 {
 
-
-    //testing the expense report to view in the browser
-    public function index(Request $request)
-    {
-        $expense = Expense::query()
-            ->with(['company', 'department', 'creator', 'checker', 'approver', 'issuer', 'bankAccount', 'financeItem'])
-            ->when($request->integer('expense_id'), fn ($q, $id) => $q->whereKey($id))
-            ->latest()
-            ->firstOrFail();
-
-        if ($request->boolean('download')) {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.expenses', [
-                'expense' => $expense,
-                'showActions' => false,
-            ])->setPaper('a4', 'portrait');
-
-            return $pdf->download(($expense->expense_number ?: 'expense_report') . '.pdf');
-        }
-
-        return view('reports.expenses', [
-            'expense' => $expense,
-            'showActions' => true,
-        ]);
-    }
-
-
     //
 
     /**

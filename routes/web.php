@@ -16,6 +16,7 @@ use App\Http\Controllers\DividendsController;
 use App\Http\Controllers\EquityController;
 use App\Http\Controllers\EquityDistributionController;
 use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\ExpensesReport;
 use App\Http\Controllers\FAR;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FinanceItemsController;
@@ -366,6 +367,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/cash-flow-export', [TrueCashflowController::class, 'downloadPdf'])->name('cash-flow-export');
     Route::get('/equity-statement', [CashFlowController::class, 'previewPdf'])->name('equity-statement');
     Route::get('/equity-statement-export', [CashFlowController::class, 'downloadPdf'])->name('equity-statement-export');
+    Route::get('/expense-report', [ExpensesReport::class, 'previewPdf'])->name('expense-report');
+    Route::get('/expense-report-export', [ExpensesReport::class, 'downloadPdf'])->name('expense-report-export');
 
 
     //Routes for hatcheering an prouction processes

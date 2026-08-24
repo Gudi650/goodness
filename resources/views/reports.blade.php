@@ -136,7 +136,12 @@
       $reportFilterQuery = \App\Support\ReportFilters::current()->queryString();
       $reportFilterQs = $reportFilterQuery ? '?'.$reportFilterQuery : '';
     @endphp
-    @if (($reportType ?? 'expenses') === 'balance')
+    @if (($reportType ?? 'expenses') === 'expenses')
+      <div class="flex flex-wrap gap-3 mb-6">
+        <a href="/expense-report{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Expense Report</a>
+        <a href="/expense-report-export{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Expense Report PDF</a>
+      </div>
+    @elseif (($reportType ?? 'expenses') === 'balance')
       <div class="flex flex-wrap gap-3 mb-6">
         <a href="/balance-sheet{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Balance Sheet</a>
         <a href="/balance_sheet{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Balance Sheet PDF</a>
