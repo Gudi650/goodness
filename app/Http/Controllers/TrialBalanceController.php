@@ -49,6 +49,9 @@ class TrialBalanceController extends Controller
         //get other other expenses as well here
         $otherExpenses = $this->getOtherExpenses();
 
+        //get the depreciations from the service file
+        $depreciations = $this->getDepreciations();
+
         //get the equities to display in the trial balance report
         $equities = $this->getEquities();
 
@@ -67,6 +70,7 @@ class TrialBalanceController extends Controller
             'otherExpenses' => $otherExpenses,
             'equities' => $equities,
             'otherAssets' => $otherAssets,
+            'depreciations' => $depreciations,
         ];
 
     }
@@ -274,8 +278,32 @@ class TrialBalanceController extends Controller
     //function to get the depreciations of assets to display in the trial balance report
     protected function getDepreciations()
     {
-        // Implementation for getting depreciations
+        $query = CreateAssets::where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $depreciations = $query->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => 'Depreciation',
+                    'amount' => ($asset->original_value - $asset->current_value),
+                    'type' => 'dr',
+                ];
+            })
+            ->groupBy('name');
 
+        return $depreciations;
+
+    }
+
+    //get total of the depreciations
+    protected function getTotalDepreciations()
+    {
+        $depreciations = $this->getDepreciations();
+        $totalDepreciations = 0;
+        foreach ($depreciations as $depreciationGroup) {
+            $totalDepreciations += $depreciationGroup->sum('amount');
+        }
+        dd($totalDepreciations);
+        return $totalDepreciations;
     }
 
     //function to get the total of all DEBIT entries in the trial balance report
