@@ -42,9 +42,8 @@ class balanceSheetController extends Controller
         //get the share capital
         $shareCapital = $this->getShareCapital($companyId, null);
 
-        // RE net of depreciation once (original - NBV); no separate Depreciation equity line
-        $depreciation = $this->getAccumulatedDepreciation($companyId);
-        $retainedEarnings = $this->getRetainedEarnings($companyId, null) - $depreciation;
+        // Balance sheet RE is cumulative (assets/liabilities are point-in-time).
+        $retainedEarnings = $this->getRetainedEarnings($companyId, null);
 
         $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings);
 
@@ -196,21 +195,6 @@ class balanceSheetController extends Controller
     protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0): float
     {
         return (float) ($shareCapital + $retainedEarnings);
-    }
-
-    // Accumulated depreciation expense = original_value - current_value (NBV)
-    protected function getAccumulatedDepreciation(?int $companyId = null): float
-    {
-        $query = CreateAssets::query();
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        } else {
-            ReportFilters::current()->applyCompany($query);
-        }
-
-        return (float) $query->get()->sum(function (CreateAssets $asset) {
-            return max(0, (float) $asset->original_value - (float) $asset->current_value);
-        });
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database
