@@ -22,6 +22,7 @@ class CreateAssets extends Model
         'status',
         'disposal_date',
         'disposal_proceeds',
+        'disposal_carrying_value',
         'disposal_bank_id',
         'disposal_notes',
     ];

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Services\Finance\AssetDisposalService;
 use App\Support\ReportFilters;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -67,7 +68,7 @@ class IncomeStatement extends Controller
 
         $operatingIncome = $grossProfit - $totalOperatingExpenses;
 
-        $otherItemsTotal = 0;
+        $otherItemsTotal = app(AssetDisposalService::class)->gainOrLoss();
 
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
 

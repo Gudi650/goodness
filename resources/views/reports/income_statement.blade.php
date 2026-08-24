@@ -192,6 +192,16 @@
     </tr>
 
     <tr class="total">
+        <td>Operating Income</td>
+        <td class="amount">Tsh{{ number_format($operatingIncome, 2) }}</td>
+    </tr>
+
+    <tr>
+        <td class="desc">Gain/(Loss) on asset disposal</td>
+        <td class="amount">Tsh{{ number_format($otherItemsTotal ?? 0, 2) }}</td>
+    </tr>
+
+    <tr class="total">
         <td>Pre-Tax Income</td>
         <td class="amount">Tsh {{ number_format($preTaxIncome, 2) }}</td>
     </tr>

@@ -58,6 +58,8 @@ class FAR extends Controller
 
         try {
             DB::transaction(function () use ($asset, $validated, $proceeds) {
+                $carryingValue = (float) ($asset->current_value ?? 0);
+
                 if ($proceeds > 0) {
                     $bank = VirtualAccounts::query()
                         ->whereKey($validated['disposal_bank_id'])
@@ -85,6 +87,7 @@ class FAR extends Controller
                     'current_value' => 0,
                     'disposal_date' => $validated['disposal_date'],
                     'disposal_proceeds' => $proceeds,
+                    'disposal_carrying_value' => $carryingValue,
                     'disposal_bank_id' => $validated['disposal_bank_id'] ?? null,
                     'disposal_notes' => $validated['disposal_notes'] ?? null,
                 ]);

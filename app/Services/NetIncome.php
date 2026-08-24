@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\LoanRepaymentSchedule;
+use App\Services\Finance\AssetDisposalService;
 use App\Support\ReportFilters;
 
 class NetIncome
@@ -62,8 +63,8 @@ class NetIncome
         // Operating Income
         $operatingIncome = $grossProfit - $totalOperatingExpenses;
 
-        // Other income/expenses (future use)
-        $otherItemsTotal = 0;
+        // Gain/(loss) on asset disposal
+        $otherItemsTotal = app(AssetDisposalService::class)->gainOrLoss($companyId, $year);
 
         // Profit before tax
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
