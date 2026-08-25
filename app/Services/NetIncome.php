@@ -72,12 +72,15 @@ class NetIncome
         // Loan interest paid (cash installments) reduces net income
         $loanInterest = $this->getLoanInterestPaid($companyId, $year);
 
+        //get the depreciation value
+        $depreciationValue = app(DepreciationValue::class)->getDepreciationValue();
+
         // Tax Expense (18%)
         //$taxExpense = $preTaxIncome > 0 ? $preTaxIncome * 0.18 : 0;
         $taxExpense = 0;
 
         // Net Income
-        $netIncome = $preTaxIncome - $loanInterest - $taxExpense;
+        $netIncome = $preTaxIncome - $loanInterest - $taxExpense - $depreciationValue;
 
         return (float) $netIncome;
     }

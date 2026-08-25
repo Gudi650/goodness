@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AssetRevaluation;
+use App\Models\CreateAssets;
 use App\Models\Dividends;
 use App\Models\EquityDistribution;
 use App\Models\SharePremuims;
@@ -187,6 +188,7 @@ class CashFlowController extends Controller
         $dividends = $this->getDividendsPaid($companyId, $year);
         $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
 
+
         return (float) ($netIncome - $dividends);
     }
 
@@ -210,4 +212,5 @@ class CashFlowController extends Controller
         return app(NetIncome::class)->calculateNetIncome($companyId, $year);
     }
     
+
 }

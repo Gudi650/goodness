@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Services\DepreciationValue;
 use App\Services\Finance\AssetDisposalService;
 use App\Support\ReportFilters;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -59,8 +60,10 @@ class IncomeStatement extends Controller
         // get the total expenses of COGS category
         $totalCOGS = $cogsCategory ? ($totalExpensesByCategory->get($cogsCategory, collect())->sum() ?? 0) : 0;
 
+        $depreciationValue = $this->getDepreciationValue();
+
         // expenses shown in the statement
-        $totalOperatingExpenses = $totalExpenses;
+        $totalOperatingExpenses = $totalExpenses + $depreciationValue;
 
         //gross profit is the difference between total revenue and total COGS
         $grossProfit = $totalRevenue - $totalCOGS;
@@ -78,6 +81,8 @@ class IncomeStatement extends Controller
 
         $netIncome = $preTaxIncome - $taxExpense;
 
+        
+
 
         return [
             'data' => $data,
@@ -92,6 +97,7 @@ class IncomeStatement extends Controller
             'totalExpensesByCategory' => $totalExpensesByCategory,
             'totalExpenses' => $totalExpenses,
             'taxExpense' => $taxExpense,
+            'depreciationValue' => $depreciationValue,
         ];
     }
 
@@ -141,6 +147,12 @@ class IncomeStatement extends Controller
             return $group->sum('amount');
         });
         
+    }
+
+    //get depreciation value
+    protected function getDepreciationValue()
+    {
+        return app(DepreciationValue::class)->getDepreciationValue();
     }
 
     //function to get the expenses from expense table in the database
