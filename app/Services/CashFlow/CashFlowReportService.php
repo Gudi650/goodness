@@ -25,7 +25,7 @@ class CashFlowReportService
         ReportFilters::boot();
 
         $filters = ReportFilters::current();
-        $companyId = $filters->resolveCompanyId() ?? session('active_company_id') ?? Auth::user()?->company_id;
+        $companyId = $filters->resolveCompanyId();
         $years = $this->resolveReportYears($filters);
 
         return [
@@ -133,7 +133,7 @@ class CashFlowReportService
         $checkQueries = [
             ['query' => Invoice::query()->where('status', 'paid'), 'column' => 'invoice_date'],
             ['query' => Expense::query()->where('status', 'issued'), 'column' => 'expense_date'],
-            ['query' => LoanRepaymentSchedule::query()->where('status', 'Paid'), 'column' => 'updated_at'],
+            ['query' => LoanRepaymentSchedule::query()->where('status', 'Paid'), 'column' => 'updated_at', 'relation' => 'loan'],
             ['query' => Loan::query()->where('is_disbursed', true), 'column' => 'disbursement_date'],
             ['query' => Dividends::query()->where('status', 'Declared'), 'column' => 'paid_at'],
             ['query' => SharePremuims::query(), 'column' => 'created_at'],
@@ -144,7 +144,9 @@ class CashFlowReportService
         foreach ($checkQueries as $item) {
             $query = $item['query'];
 
-            if ($companyId) {
+            if ($companyId && isset($item['relation'])) {
+                $query->whereHas($item['relation'], fn ($relationQuery) => $relationQuery->where('company_id', $companyId));
+            } elseif ($companyId) {
                 $query->where('company_id', $companyId);
             } else {
                 ReportFilters::current()->applyCompany($query);
