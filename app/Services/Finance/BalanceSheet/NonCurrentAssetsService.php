@@ -3,6 +3,7 @@
 namespace App\Services\Finance\BalanceSheet;
 
 use App\Models\CreateAssets;
+use App\Models\Loan;
 use App\Models\Product;
 use App\Support\ReportFilters;
 
@@ -33,8 +34,7 @@ class NonCurrentAssetsService
             'property_assets' => $getPropertyAssets,
             'vehicle_assets' => $getVehicleAssets,
             'intangible_assets' => $getIntangibleAssets,
-            //'inventory_assets' => $getInventoryAssets,
-            //'other_assets' => $getOtherAssets,
+            'loan_receivables' => $this->getLoanReceivables(),
         ];
         
     }
@@ -171,7 +171,25 @@ class NonCurrentAssetsService
         return $otherAssets;
     }
 
-    
+    protected function getLoanReceivables()
+    {
+        $companyId = ReportFilters::current()->resolveCompanyId();
 
+        return Loan::query()
+            ->with(['counterpartyCompany', 'employee'])
+            ->asReceivable($companyId)
+            ->currentMaturity(false)
+            ->get()
+            ->map(function (Loan $loan) {
+                $counterparty = $loan->isIntercompany()
+                    ? ($loan->counterpartyCompany?->name ?? 'Inter-company')
+                    : ($loan->employee?->name ?? 'Employee');
 
+                return [
+                    'name' => trim(($loan->code ? $loan->code.' — ' : '').'Receivable: '.$counterparty),
+                    'amount' => (float) $loan->outstanding_balance,
+                    'type' => 'dr',
+                ];
+            });
+    }
 }

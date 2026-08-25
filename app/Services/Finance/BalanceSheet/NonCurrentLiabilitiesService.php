@@ -46,10 +46,8 @@ class NonCurrentLiabilitiesService
             });
 
         $fromModule = Loan::query()
-            ->where('is_disbursed', true)
-            ->where('outstanding_balance', '>', 0)
-            ->whereDate('maturity_date', '>', now()->addYear());
-        ReportFilters::current()->applyCompany($fromModule);
+            ->asLiability(ReportFilters::current()->resolveCompanyId())
+            ->currentMaturity(false);
 
         $moduleRows = $fromModule->get()->map(function (Loan $loan) {
             return [

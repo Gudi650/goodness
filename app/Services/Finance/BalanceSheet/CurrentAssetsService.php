@@ -2,74 +2,79 @@
 
 namespace App\Services\Finance\BalanceSheet;
 
+use App\Models\Loan;
 use App\Models\Product;
 use App\Models\VirtualAccounts;
 use App\Support\ReportFilters;
 
 class CurrentAssetsService
 {
-    /**
-     * Create a new class instance.
-     */
     public function __construct()
     {
         //
     }
 
-    //function to display the current assets all the current assets from the assets table where the category is either inventories or trade receivables or cash and cash equivalents or other current assets and the current amount is greater than 0
     public function getCurrentAssets()
     {
-        //get the current assets from the assets table
-        $getInventoryAssets = $this->getInventoryAssets();
-        //$getTradeReceivables = $this->getTradeReceivables();
-        $getCashAndBankBalances = $this->getCashAndBankBalances();
-        ////$getOtherCurrentAssets = $this->getOtherCurrentAssets();
-
-        //return the current assets
         return [
-            'inventory_assets' => $getInventoryAssets,
-            // 'trade_receivables' => $getTradeReceivables,
-            'cash_and_bank_balances' => $getCashAndBankBalances,
-            // 'other_current_assets' => $getOtherCurrentAssets,
+            'inventory_assets' => $this->getInventoryAssets(),
+            'cash_and_bank_balances' => $this->getCashAndBankBalances(),
+            'loan_receivables' => $this->getLoanReceivables(current: true),
         ];
     }
 
-    //function to get the current cash and bank balances from the assets table
     protected function getCashAndBankBalances()
     {
-        //get the cash and bank balances from the virtual bank table
         $cashQuery = VirtualAccounts::where('balance', '>', 0);
         ReportFilters::current()->applyCompany($cashQuery);
-        $cashAndBankBalances = $cashQuery->get()
+
+        return $cashQuery->get()
             ->map(function ($account) {
                 return [
                     'name' => $account->account_name,
                     'amount' => $account->balance,
-                    'type' => 'dr', // Assuming assets are debit entries
+                    'type' => 'dr',
                 ];
             });
-
-        //return in an array format
-        return $cashAndBankBalances;
     }
 
-    //get the inventory assets from the products table
     protected function getInventoryAssets()
     {
-        //get the inventory assets from the products table
         $inventoryQuery = Product::where('stock', '>', 0);
         ReportFilters::current()->applyCompany($inventoryQuery);
-        $inventoryAssets = $inventoryQuery->get()
+
+        return $inventoryQuery->get()
             ->map(function ($product) {
                 return [
                     'name' => $product->name,
                     'amount' => $product->stock * $product->cost_per_unit,
-                    'type' => 'dr', 
+                    'type' => 'dr',
                 ];
             });
-
-        return $inventoryAssets;
     }
- 
 
+    /**
+     * Inter-company / employee loans owed to this company (current portion).
+     */
+    protected function getLoanReceivables(bool $current)
+    {
+        $companyId = ReportFilters::current()->resolveCompanyId();
+
+        return Loan::query()
+            ->with(['counterpartyCompany', 'employee'])
+            ->asReceivable($companyId)
+            ->currentMaturity($current)
+            ->get()
+            ->map(function (Loan $loan) {
+                $counterparty = $loan->isIntercompany()
+                    ? ($loan->counterpartyCompany?->name ?? 'Inter-company')
+                    : ($loan->employee?->name ?? 'Employee');
+
+                return [
+                    'name' => trim(($loan->code ? $loan->code.' — ' : '').'Receivable: '.$counterparty),
+                    'amount' => (float) $loan->outstanding_balance,
+                    'type' => 'dr',
+                ];
+            });
+    }
 }

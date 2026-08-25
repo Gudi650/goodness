@@ -145,29 +145,23 @@ class CurrentLiabilitiesService
     }
 
     /**
-     * Disbursed loan-module balances due within 12 months.
+     * Disbursed loan-module balances due within 12 months (liabilities by loan_type).
      */
     protected function getModuleLoans(bool $current)
     {
-        $query = Loan::query()
-            ->where('is_disbursed', true)
-            ->where('outstanding_balance', '>', 0);
+        $companyId = ReportFilters::current()->resolveCompanyId();
 
-        ReportFilters::current()->applyCompany($query);
-
-        if ($current) {
-            $query->whereDate('maturity_date', '<=', now()->addYear());
-        } else {
-            $query->whereDate('maturity_date', '>', now()->addYear());
-        }
-
-        return $query->get()->map(function (Loan $loan) {
-            return [
-                'name' => trim(($loan->code ? $loan->code.' — ' : '').$loan->lender),
-                'amount' => (float) $loan->outstanding_balance,
-                'type' => 'cr',
-            ];
-        });
+        return Loan::query()
+            ->asLiability($companyId)
+            ->currentMaturity($current)
+            ->get()
+            ->map(function (Loan $loan) {
+                return [
+                    'name' => trim(($loan->code ? $loan->code.' — ' : '').$loan->lender),
+                    'amount' => (float) $loan->outstanding_balance,
+                    'type' => 'cr',
+                ];
+            });
     }
 
     //get the accured expenses from the liabilities table

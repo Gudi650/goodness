@@ -110,6 +110,61 @@ class Loan extends Model
         return $this->loan_type === self::TYPE_EMPLOYEE;
     }
 
+    /**
+     * Disbursed loans that should appear as liabilities on the balance sheet.
+     * External borrow → company_id. Inter-company → counterparty (borrower) only.
+     * Employee loans are receivables, not liabilities. Inter-company eliminated when consolidating.
+     */
+    public function scopeAsLiability($query, ?int $companyId = null)
+    {
+        return $query->where('is_disbursed', true)
+            ->where('outstanding_balance', '>', 0)
+            ->where(function ($q) use ($companyId) {
+                $q->where(function ($external) use ($companyId) {
+                    $external->where(function ($type) {
+                        $type->where('loan_type', self::TYPE_EXTERNAL_BORROW)
+                            ->orWhereNull('loan_type');
+                    });
+                    if ($companyId) {
+                        $external->where('company_id', $companyId);
+                    }
+                });
+
+                if ($companyId) {
+                    $q->orWhere(function ($intercompany) use ($companyId) {
+                        $intercompany->where('loan_type', self::TYPE_INTERCOMPANY)
+                            ->where('counterparty_company_id', $companyId);
+                    });
+                }
+            });
+    }
+
+    /**
+     * Disbursed loans that should appear as receivables (assets).
+     * Inter-company / employee → company_id is the lender. Inter-company eliminated when consolidating.
+     */
+    public function scopeAsReceivable($query, ?int $companyId = null)
+    {
+        $query->where('is_disbursed', true)
+            ->where('outstanding_balance', '>', 0);
+
+        if ($companyId) {
+            return $query->where('company_id', $companyId)
+                ->whereIn('loan_type', [self::TYPE_INTERCOMPANY, self::TYPE_EMPLOYEE]);
+        }
+
+        return $query->where('loan_type', self::TYPE_EMPLOYEE);
+    }
+
+    public function scopeCurrentMaturity($query, bool $current = true)
+    {
+        if ($current) {
+            return $query->whereDate('maturity_date', '<=', now()->addYear());
+        }
+
+        return $query->whereDate('maturity_date', '>', now()->addYear());
+    }
+
     public function repaymentSchedule(): HasMany
     {
         return $this->hasMany(LoanRepaymentSchedule::class);

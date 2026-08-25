@@ -4,8 +4,10 @@ use App\Models\BankTransactions;
 use App\Models\Company;
 use App\Models\Loan;
 use App\Models\LoanRepaymentSchedule;
+use App\Models\User;
 use App\Models\VirtualAccounts;
 use App\Services\CashFlow\CashFlowReportService;
+use App\Services\Finance\BalanceSheet\CurrentAssetsService;
 use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
 use App\Services\Finance\BalanceSheet\NonCurrentLiabilitiesService;
 use App\Services\NetIncome;
@@ -36,7 +38,11 @@ beforeEach(function () {
     Schema::create('loans', function (Blueprint $table) {
         $table->id();
         $table->unsignedBigInteger('company_id');
+        $table->string('loan_type')->default('external_borrow');
+        $table->unsignedBigInteger('counterparty_company_id')->nullable();
+        $table->unsignedBigInteger('employee_id')->nullable();
         $table->unsignedBigInteger('bank_id')->nullable();
+        $table->unsignedBigInteger('source_bank_id')->nullable();
         $table->string('code')->unique();
         $table->string('lender');
         $table->decimal('principal', 15, 2);
@@ -51,6 +57,21 @@ beforeEach(function () {
         $table->string('status')->default('Active');
         $table->timestamps();
         $table->softDeletes();
+    });
+    Schema::create('users', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->string('email')->nullable();
+        $table->unsignedBigInteger('company_id')->nullable();
+        $table->timestamps();
+    });
+    Schema::create('products', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('company_id')->nullable();
+        $table->string('name')->nullable();
+        $table->integer('stock')->default(0);
+        $table->decimal('cost_per_unit', 15, 2)->default(0);
+        $table->timestamps();
     });
     Schema::create('loan_repayment_schedules', function (Blueprint $table) {
         $table->id();
@@ -141,8 +162,8 @@ beforeEach(function () {
 
 afterEach(function () {
     foreach ([
-        'expenses', 'invoices', 'loan_repayment_schedules', 'loans', 'virtual_accounts',
-        'create_assets', 'create_liabilities', 'liability_categories', 'companies',
+        'expenses', 'invoices', 'loan_repayment_schedules', 'loans', 'virtual_accounts', 'products',
+        'create_assets', 'create_liabilities', 'liability_categories', 'companies', 'users',
         'dividends', 'share_premuims', 'asset_revaluations', 'bank_transactions',
     ] as $table) {
         Schema::dropIfExists($table);
@@ -199,6 +220,64 @@ test('balance sheet includes disbursed module loans as liabilities', function ()
 
     expect((float) $current->sum('amount'))->toBe(800.0)
         ->and((float) $nonCurrent->sum('amount'))->toBe(4500.0);
+});
+
+test('balance sheet maps intercompany and employee loans by type without double counting', function () {
+    $lender = Company::query()->create(['name' => 'Lender Co', 'country' => 'TZ', 'status' => 'Active']);
+    $borrower = Company::query()->create(['name' => 'Borrower Co', 'country' => 'TZ', 'status' => 'Active']);
+    $employee = User::query()->create(['name' => 'Worker', 'email' => 'w'.uniqid().'@ex.com', 'company_id' => $lender->id]);
+
+    Loan::query()->create([
+        'company_id' => $lender->id,
+        'loan_type' => 'intercompany',
+        'counterparty_company_id' => $borrower->id,
+        'code' => 'LN-IC-1',
+        'lender' => $lender->name,
+        'principal' => 1000,
+        'is_disbursed' => true,
+        'outstanding_balance' => 1000,
+        'start_date' => '2026-01-01',
+        'maturity_date' => '2026-12-01',
+        'status' => 'Active',
+    ]);
+    Loan::query()->create([
+        'company_id' => $lender->id,
+        'loan_type' => 'employee',
+        'employee_id' => $employee->id,
+        'code' => 'LN-EMP-1',
+        'lender' => 'Employee: Worker',
+        'principal' => 200,
+        'is_disbursed' => true,
+        'outstanding_balance' => 200,
+        'start_date' => '2026-01-01',
+        'maturity_date' => '2026-12-01',
+        'status' => 'Active',
+    ]);
+
+    ReportFilters::reset();
+    ReportFilters::boot(request()->merge(['scope' => 'company', 'company_id' => $lender->id]));
+    $lenderAssets = app(CurrentAssetsService::class)->getCurrentAssets()['loan_receivables'];
+    $lenderLiab = app(CurrentLiabilitiesService::class)->getCurrentLiabilities()['short_term_loans'];
+
+    expect((float) $lenderAssets->sum('amount'))->toBe(1200.0)
+        ->and((float) $lenderLiab->sum('amount'))->toBe(0.0);
+
+    ReportFilters::reset();
+    ReportFilters::boot(request()->merge(['scope' => 'company', 'company_id' => $borrower->id]));
+    $borrowerAssets = app(CurrentAssetsService::class)->getCurrentAssets()['loan_receivables'];
+    $borrowerLiab = app(CurrentLiabilitiesService::class)->getCurrentLiabilities()['short_term_loans'];
+
+    expect((float) $borrowerAssets->sum('amount'))->toBe(0.0)
+        ->and((float) $borrowerLiab->sum('amount'))->toBe(1000.0);
+
+    ReportFilters::reset();
+    ReportFilters::boot(request()->merge(['scope' => 'all']));
+    $allAssets = app(CurrentAssetsService::class)->getCurrentAssets()['loan_receivables'];
+    $allLiab = app(CurrentLiabilitiesService::class)->getCurrentLiabilities()['short_term_loans'];
+
+    // Inter-company eliminated on consolidate; employee receivable remains.
+    expect((float) $allAssets->sum('amount'))->toBe(200.0)
+        ->and((float) $allLiab->sum('amount'))->toBe(0.0);
 });
 
 test('cash flow disbursements count only confirmed is_disbursed loans', function () {
