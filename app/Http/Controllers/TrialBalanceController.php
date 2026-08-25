@@ -7,6 +7,7 @@ use App\Models\EquityDistribution;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\SharesDefinitions;
+use App\Services\DepreciationValue;
 use App\Services\Finance\BalanceSheet\CurrentAssetsService;
 use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
 use App\Services\Finance\BalanceSheet\NonCurrentAssetsService;
@@ -294,17 +295,6 @@ class TrialBalanceController extends Controller
 
     }
 
-    //get total of the depreciations
-    protected function getTotalDepreciations()
-    {
-        $depreciations = $this->getDepreciations();
-        $totalDepreciations = 0;
-        foreach ($depreciations as $depreciationGroup) {
-            $totalDepreciations += $depreciationGroup->sum('amount');
-        }
-        dd($totalDepreciations);
-        return $totalDepreciations;
-    }
 
     //function to get the total of all DEBIT entries in the trial balance report
     //use the collections liabiltites, assets, to sum the total of all debit entries
