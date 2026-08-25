@@ -50,7 +50,11 @@ beforeEach(function () {
     Schema::create('loans', function (Blueprint $table) {
         $table->id();
         $table->unsignedBigInteger('company_id');
+        $table->string('loan_type')->default('external_borrow');
+        $table->unsignedBigInteger('counterparty_company_id')->nullable();
+        $table->unsignedBigInteger('employee_id')->nullable();
         $table->unsignedBigInteger('bank_id')->nullable();
+        $table->unsignedBigInteger('source_bank_id')->nullable();
         $table->string('code')->unique();
         $table->string('lender');
         $table->decimal('principal', 15, 2);
@@ -131,6 +135,121 @@ test('confirm disbursement credits bank and sets is_disbursed without changing e
         ->and($loan->status)->toBe('Active')
         ->and($loan->disbursement_date->toDateString())->toBe($expectedDate)
         ->and((float) $bank->balance)->toBe(1500.0);
+});
+
+test('intercompany disbursement moves funds between both banks', function () {
+    $lender = Company::query()->create(['name' => 'Goodness Mining', 'country' => 'TZ', 'status' => 'Active']);
+    $borrower = Company::query()->create(['name' => 'Goodness Logistics', 'country' => 'TZ', 'status' => 'Active']);
+    $role = Role::query()->create(['name' => 'Admin']);
+    $user = User::query()->create([
+        'name' => 'Admin',
+        'email' => 'admin'.uniqid().'@example.com',
+        'password' => Hash::make('password'),
+        'role_id' => $role->id,
+        'company_id' => $lender->id,
+    ]);
+
+    $sourceBank = VirtualAccounts::query()->create([
+        'company_id' => $lender->id,
+        'bank_name' => 'CRDB',
+        'account_name' => 'Lender Ops',
+        'account_number' => '111',
+        'balance' => 5000,
+        'status' => 'active',
+    ]);
+    $destBank = VirtualAccounts::query()->create([
+        'company_id' => $borrower->id,
+        'bank_name' => 'NMB',
+        'account_name' => 'Borrower Ops',
+        'account_number' => '222',
+        'balance' => 100,
+        'status' => 'active',
+    ]);
+
+    $loan = Loan::query()->create([
+        'company_id' => $lender->id,
+        'loan_type' => 'intercompany',
+        'counterparty_company_id' => $borrower->id,
+        'bank_id' => $destBank->id,
+        'source_bank_id' => $sourceBank->id,
+        'code' => 'LN-2026-200',
+        'lender' => $lender->name,
+        'principal' => 1000,
+        'interest_rate' => 0,
+        'interest_type' => 'Flat',
+        'term_months' => 6,
+        'disbursement_date' => '2026-08-20',
+        'is_disbursed' => false,
+        'start_date' => '2026-08-01',
+        'maturity_date' => '2027-02-01',
+        'status' => 'Pending',
+        'approved_by_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)->post('/loans/'.$loan->id.'/disburse')->assertRedirect();
+
+    $loan->refresh();
+    $sourceBank->refresh();
+    $destBank->refresh();
+
+    expect($loan->is_disbursed)->toBeTrue()
+        ->and((float) $sourceBank->balance)->toBe(4000.0)
+        ->and((float) $destBank->balance)->toBe(1100.0);
+});
+
+test('employee loan disbursement deducts from source bank only', function () {
+    $company = Company::query()->create(['name' => 'Mining', 'country' => 'TZ', 'status' => 'Active']);
+    $role = Role::query()->create(['name' => 'Admin']);
+    $user = User::query()->create([
+        'name' => 'Admin',
+        'email' => 'admin'.uniqid().'@example.com',
+        'password' => Hash::make('password'),
+        'role_id' => $role->id,
+        'company_id' => $company->id,
+    ]);
+    $employee = User::query()->create([
+        'name' => 'Worker',
+        'email' => 'worker'.uniqid().'@example.com',
+        'password' => Hash::make('password'),
+        'role_id' => $role->id,
+        'company_id' => $company->id,
+    ]);
+
+    $sourceBank = VirtualAccounts::query()->create([
+        'company_id' => $company->id,
+        'bank_name' => 'CRDB',
+        'account_name' => 'Ops',
+        'account_number' => '111',
+        'balance' => 2000,
+        'status' => 'active',
+    ]);
+
+    $loan = Loan::query()->create([
+        'company_id' => $company->id,
+        'loan_type' => 'employee',
+        'employee_id' => $employee->id,
+        'source_bank_id' => $sourceBank->id,
+        'code' => 'LN-2026-201',
+        'lender' => 'Employee: Worker',
+        'principal' => 300,
+        'interest_rate' => 0,
+        'interest_type' => 'Flat',
+        'term_months' => 3,
+        'disbursement_date' => '2026-08-20',
+        'is_disbursed' => false,
+        'start_date' => '2026-08-01',
+        'maturity_date' => '2026-11-01',
+        'status' => 'Pending',
+        'approved_by_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)->post('/loans/'.$loan->id.'/disburse')->assertRedirect();
+
+    $loan->refresh();
+    $sourceBank->refresh();
+
+    expect($loan->is_disbursed)->toBeTrue()
+        ->and((float) $sourceBank->balance)->toBe(1700.0);
 });
 
 test('confirm disbursement is blocked when already disbursed', function () {

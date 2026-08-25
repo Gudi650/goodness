@@ -104,8 +104,9 @@
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Loan Code</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Type</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Company</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Lender</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Lender / Counterparty</th>
                                     <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Principal</th>
                                     <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Interest Rate</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase">Term</th>
@@ -119,10 +120,28 @@
                                 @forelse($loans ?? [] as $loan)
                                     <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td class="px-4 py-3 mono text-xs text-slate-500">{{ $loan->code }}</td>
+                                        <td class="px-4 py-3 text-xs">
+                                            @php
+                                                $typeLabel = match ($loan->loan_type ?? 'external_borrow') {
+                                                    'intercompany' => 'Inter-company',
+                                                    'employee' => 'Employee',
+                                                    default => 'External',
+                                                };
+                                            @endphp
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-700 border border-slate-200">{{ $typeLabel }}</span>
+                                        </td>
                                         <td class="px-4 py-3">
                                             <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company?->name ?? '-' }}</span>
                                         </td>
-                                        <td class="px-4 py-3 font-medium">{{ $loan->lender }}</td>
+                                        <td class="px-4 py-3 font-medium">
+                                            @if (($loan->loan_type ?? '') === 'intercompany')
+                                                {{ $loan->counterpartyCompany?->name ?? $loan->lender }}
+                                            @elseif (($loan->loan_type ?? '') === 'employee')
+                                                {{ $loan->employee?->name ?? $loan->lender }}
+                                            @else
+                                                {{ $loan->lender }}
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3 text-right mono">TZS {{ number_format((float) ($loan->principal ?? 0)) }}</td>
                                         <td class="px-4 py-3 text-right mono">{{ $loan->interest_rate }}% <span class="text-xs text-slate-400">({{ $loan->interest_type }})</span></td>
                                         <td class="px-4 py-3">{{ $loan->term_months }} months</td>
@@ -153,9 +172,14 @@
                                                         id: {{ $loan->id }},
                                                         code: @js($loan->code),
                                                         principal: {{ (float) ($loan->principal ?? 0) }},
-                                                        bank: @js(($loan->bankAccount?->bank_name ?? 'No bank').' · '.($loan->bankAccount?->account_number ?? 'N/A')),
+                                                        bank: @js(($loan->bankAccount?->bank_name ?? $loan->sourceBankAccount?->bank_name ?? 'No bank').' · '.($loan->bankAccount?->account_number ?? $loan->sourceBankAccount?->account_number ?? 'N/A')),
                                                         expectedDate: @js($loan->disbursement_date?->format('d M Y') ?? 'Not set'),
-                                                        hasBank: {{ $loan->bank_id ? 'true' : 'false' }}
+                                                        hasBank: {{ (
+                                                            (($loan->loan_type ?? 'external_borrow') === 'external_borrow' && $loan->bank_id)
+                                                            || (($loan->loan_type ?? '') === 'intercompany' && $loan->bank_id && $loan->source_bank_id)
+                                                            || (($loan->loan_type ?? '') === 'employee' && $loan->source_bank_id)
+                                                        ) ? 'true' : 'false' }},
+                                                        loanType: @js($loan->loan_type ?? 'external_borrow')
                                                     })">
                                                     Confirm Disbursement
                                                 </button>
@@ -194,7 +218,7 @@
                                         </td>
                                     </tr>
                                     <tr id="loan-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
-                                        <td colspan="10" class="px-4 py-4">
+                                        <td colspan="11" class="px-4 py-4">
                                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Target Bank Account</p>
@@ -482,10 +506,15 @@
             }
 
             const amount = Number(loan.principal || 0).toLocaleString();
+            const typeMsg = loan.loanType === 'intercompany'
+                ? `TZS ${amount} will move from the lending bank to the borrowing bank.`
+                : (loan.loanType === 'employee'
+                    ? `TZS ${amount} will be paid out from ${loan.bank}.`
+                    : `TZS ${amount} will be credited to ${loan.bank}.`);
             openConfirm({
                 title: 'Confirm disbursement',
-                message: `Confirm that ${loan.code} has been disbursed (expected ${loan.expectedDate})? TZS ${amount} will be credited to ${loan.bank}.`,
-                confirmText: 'Confirm & credit bank',
+                message: `Confirm that ${loan.code} has been disbursed (expected ${loan.expectedDate})? ${typeMsg}`,
+                confirmText: 'Confirm disbursement',
                 cancelText: 'Cancel',
                 variant: 'success',
                 onConfirm: () => {

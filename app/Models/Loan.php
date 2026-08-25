@@ -12,9 +12,19 @@ class Loan extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const TYPE_EXTERNAL_BORROW = 'external_borrow';
+
+    public const TYPE_INTERCOMPANY = 'intercompany';
+
+    public const TYPE_EMPLOYEE = 'employee';
+
     protected $fillable = [
         'company_id',
-        'bank_id', // Added foreign key for bank/virtual account
+        'loan_type',
+        'counterparty_company_id',
+        'employee_id',
+        'bank_id',
+        'source_bank_id',
         'code',
         'lender',
         'principal',
@@ -54,17 +64,50 @@ class Loan extends Model
         return $this->belongsTo(Company::class);
     }
 
+    public function counterpartyCompany(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'counterparty_company_id');
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'employee_id');
+    }
+
     /**
-     * Relationship to the virtual account/bank receiving the loan funds.
+     * Bank receiving the loan funds (borrower / destination).
      */
     public function bankAccount(): BelongsTo
     {
         return $this->belongsTo(VirtualAccounts::class, 'bank_id');
     }
 
+    /**
+     * Bank sending the loan funds (lender / source).
+     */
+    public function sourceBankAccount(): BelongsTo
+    {
+        return $this->belongsTo(VirtualAccounts::class, 'source_bank_id');
+    }
+
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by_id');
+    }
+
+    public function isExternalBorrow(): bool
+    {
+        return ($this->loan_type ?: self::TYPE_EXTERNAL_BORROW) === self::TYPE_EXTERNAL_BORROW;
+    }
+
+    public function isIntercompany(): bool
+    {
+        return $this->loan_type === self::TYPE_INTERCOMPANY;
+    }
+
+    public function isEmployeeLoan(): bool
+    {
+        return $this->loan_type === self::TYPE_EMPLOYEE;
     }
 
     public function repaymentSchedule(): HasMany
