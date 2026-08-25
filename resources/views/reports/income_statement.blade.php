@@ -187,9 +187,15 @@
     @endforeach
 
     <tr class="total">
+        <td>Depreciation</td>
+        <td class="amount">Tsh{{ number_format($depreciationValue, 2) }}</td>
+    </tr>
+
+    <tr class="total">
         <td>Total Expenses</td>
         <td class="amount">Tsh{{ number_format($otherExpensesTotal, 2) }}</td>
     </tr>
+
 
     <tr class="total">
         <td>Operating Income</td>
