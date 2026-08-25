@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\BankTransactions;
 use App\Models\Company;
 use App\Models\Loan;
 use App\Models\LoanRepaymentSchedule;
@@ -62,6 +63,18 @@ beforeEach(function () {
         $table->string('status')->default('Pending');
         $table->timestamps();
     });
+    Schema::create('create_assets', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('company_id')->nullable();
+        $table->string('name')->nullable();
+        $table->string('status')->nullable();
+        $table->date('acquired')->nullable();
+        $table->date('disposal_date')->nullable();
+        $table->decimal('current_value', 15, 2)->default(0);
+        $table->decimal('depreciation_value', 15, 2)->default(0);
+        $table->decimal('disposal_proceeds', 15, 2)->default(0);
+        $table->timestamps();
+    });
     Schema::create('create_liabilities', function (Blueprint $table) {
         $table->id();
         $table->unsignedBigInteger('company_id')->nullable();
@@ -94,12 +107,43 @@ beforeEach(function () {
         $table->unsignedBigInteger('finance_item_id')->nullable();
         $table->timestamps();
     });
+    Schema::create('dividends', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('company_id')->nullable();
+        $table->string('status')->default('Declared');
+        $table->decimal('amount', 15, 2)->default(0);
+        $table->date('paid_at')->nullable();
+        $table->date('declared_at')->nullable();
+        $table->timestamps();
+    });
+    Schema::create('share_premuims', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('company_id')->nullable();
+        $table->decimal('total_premium', 15, 2)->default(0);
+        $table->timestamps();
+    });
+    Schema::create('asset_revaluations', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('company_id')->nullable();
+        $table->decimal('surplus', 15, 2)->default(0);
+        $table->date('date_of_revaluation')->nullable();
+        $table->timestamps();
+    });
+    Schema::create('bank_transactions', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('company_id')->nullable();
+        $table->unsignedBigInteger('bank_id')->nullable();
+        $table->decimal('affecting_balance', 15, 2)->default(0);
+        $table->string('transaction_type')->nullable();
+        $table->timestamps();
+    });
 });
 
 afterEach(function () {
     foreach ([
         'expenses', 'invoices', 'loan_repayment_schedules', 'loans', 'virtual_accounts',
-        'create_liabilities', 'liability_categories', 'companies',
+        'create_assets', 'create_liabilities', 'liability_categories', 'companies',
+        'dividends', 'share_premuims', 'asset_revaluations', 'bank_transactions',
     ] as $table) {
         Schema::dropIfExists($table);
     }
@@ -222,4 +266,55 @@ test('net income subtracts paid loan interest', function () {
 
     $ni = app(NetIncome::class)->calculateNetIncome($company->id, 2026);
     expect($ni)->toBe(-100.0);
+});
+
+test('cash flow report years follow the selected report filter range', function () {
+    $company = Company::query()->create(['name' => 'Mining', 'country' => 'TZ', 'status' => 'Active']);
+    ReportFilters::boot(request()->merge([
+        'scope' => 'company',
+        'company_id' => $company->id,
+        'date_filter' => 'custom',
+        'start_date' => '2025-12-15',
+        'end_date' => '2026-03-31',
+    ]));
+
+    $data = app(CashFlowReportService::class)->build();
+
+    expect($data['years'])->toHaveCount(2)
+        ->and(array_map(fn ($year) => $year['date_label'], $data['years']))->toMatchArray([
+            'December 31, 2025',
+            'December 31, 2026',
+        ]);
+});
+
+test('cash flow custom range with no matching transactions returns zero values', function () {
+    $company = Company::query()->create(['name' => 'Mining', 'country' => 'TZ', 'status' => 'Active']);
+    VirtualAccounts::query()->create([
+        'company_id' => $company->id,
+        'bank_name' => 'CBE',
+        'balance' => 5000,
+        'status' => 'active',
+    ]);
+    BankTransactions::query()->create([
+        'company_id' => $company->id,
+        'bank_id' => 1,
+        'affecting_balance' => 500,
+        'transaction_type' => 'income',
+        'created_at' => '2025-11-01 10:00:00',
+        'updated_at' => '2025-11-01 10:00:00',
+    ]);
+
+    ReportFilters::boot(request()->merge([
+        'scope' => 'company',
+        'company_id' => $company->id,
+        'date_filter' => 'custom',
+        'start_date' => '2026-12-24',
+        'end_date' => '2026-12-29',
+    ]));
+
+    $data = app(CashFlowReportService::class)->build();
+
+    expect($data['operatingChanges']['Cash invoices received'][0])->toBe(0.0)
+        ->and($data['supplemental']['Bank transaction net movement'][0])->toBe(0.0)
+        ->and($data['years'][0]['net_change'])->toBe(0.0);
 });
