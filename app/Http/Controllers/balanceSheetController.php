@@ -9,6 +9,7 @@ use App\Models\Expense;
 use App\Models\EquityDistribution;
 use App\Models\Salary;
 use App\Models\SharesDefinitions;
+use App\Services\DepreciationValue;
 use App\Services\Finance\BalanceSheet\CurrentAssetsService;
 use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
 use App\Services\Finance\BalanceSheet\NonCurrentAssetsService;
@@ -248,34 +249,23 @@ class balanceSheetController extends Controller
         return $otherAssets;
     }
 
-    /*
-    //get depreciation value except for vehicles, properties, investments, and intangible assets
-    protected function getDepreciationValue(): float
-    {
-        $query = CreateAssets::whereHas('category', function ($query) {
-            $query->where('category', '!=','Vehicle Assets')
-                ->where('category', '!=','Property Assets')
-                ->where('category', '!=','Investment Assets')
-                ->where('category', '!=','Intangible Assets');
-         })->where('current_value', '>', 0);
-         ReportFilters::current()->applyCompany($query);
-         $depreciationValue = $query->get()->sum(function ($asset) {
-            return (float) ($asset->original_value - $asset->current_value);
-         });
-         
-         return $depreciationValue;
-
-    } */
-
          //get depreciation value of all assets
          protected function getDepreciationValue(): float
          {
+            /*
             $query = CreateAssets::where('current_value', '>', 0);
             ReportFilters::current()->applyCompany($query);
             $depreciationValue = $query->get()->sum(function ($asset) {
                 return (float) ($asset->original_value - $asset->current_value);
             });
             return $depreciationValue;
+            */
+
+            //get depreciation from service file
+            $depreciationValue = app(DepreciationValue::class)->getDepreciationValue();
+
+            return (float) $depreciationValue;
+
          }
 
 
