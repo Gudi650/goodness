@@ -35,7 +35,7 @@ class CashFlowReportService
             ],
             'operatingChanges' => [
                 'Cash invoices received' => $this->series(fn (int $year) => $this->invoiceCashInflows($companyId, $year), $years),
-                'Issued expenses paid' => $this->series(fn (int $year) => $this->expenseCashOutflows($companyId, $year), $years),
+                // 'Issued expenses paid' => $this->series(fn (int $year) => $this->expenseCashOutflows($companyId, $year), $years),
                 'Loan interest paid' => $this->series(fn (int $year) => $this->loanInterestOutflows($companyId, $year), $years),
             ],
             'investingActivities' => [
