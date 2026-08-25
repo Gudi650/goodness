@@ -7,7 +7,7 @@ use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Services\AccessControlService;
-use Illuminate\Support\Collection;
+use App\Support\ReportFilters;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +25,8 @@ class ReportController extends Controller
             return redirect()->route('dashboard')->with('error', 'You do not have access to the HRM page.');
         }
 
-        $canSeeAllCompanies = app(AccessControlService::class)->isCeoOrAdminOrAccountant($user);
+        $canSeeAllCompanies = app(AccessControlService::class)->isAlwaysAllowed($user)
+            || app(AccessControlService::class)->isCeoOrAdminOrAccountant($user);
 
         $companies = Company::query()
             ->orderBy('name', 'asc')
@@ -45,27 +46,66 @@ class ReportController extends Controller
         }
 
         if ($selectedScope === 'company' && ! $selectedCompanyId) {
-            $selectedCompanyId = (int) ($companies->first()->id ?? 0);
+            $selectedCompanyId = (int) (
+                session('active_company_id')
+                ?: $companies->first(fn ($company) => $company->name !== 'Goodness Group')?->id
+                ?: 0
+            );
         }
 
-        // --- REUSABLE DATE FILTER FUNCTION ---
-        // This applies the correct filters dynamically to any model query based on its specific date column
+        ReportFilters::boot($request->merge([
+            'scope' => $selectedScope,
+            'company_id' => $selectedCompanyId ?: null,
+            'date_filter' => $period,
+            'start_date' => $startDate ?: null,
+            'end_date' => $endDate ?: null,
+        ]));
+
+        $applyCompanyFilter = function ($query) use ($selectedScope, $selectedCompanyId, $canSeeAllCompanies, $user) {
+            if ($selectedScope === 'company' && $selectedCompanyId) {
+                $query->where('company_id', $selectedCompanyId);
+            } elseif (! $canSeeAllCompanies && $user?->company_id) {
+                $query->where('company_id', $user->company_id);
+            }
+        };
+
         $applyDateFilters = function ($query, $dateColumn) use ($period, $startDate, $endDate) {
-            if ($period == 'custom' || $period == 'custome') { // Handles both spellings just in case!
+            if ($period === 'custom' || $period === 'custome') {
                 if ($startDate) {
-                    $query->where($dateColumn, '>=', Carbon::parse($startDate)->startOfDay());
+                    $query->whereDate($dateColumn, '>=', Carbon::parse($startDate)->toDateString());
                 }
                 if ($endDate) {
-                    $query->where($dateColumn, '<=', Carbon::parse($endDate)->endOfDay());
+                    $query->whereDate($dateColumn, '<=', Carbon::parse($endDate)->toDateString());
                 }
-            } else if ($period == 'this_month') {
-                $query->whereBetween($dateColumn, [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
-            } else if ($period == 'last_month') {
-                $query->whereBetween($dateColumn, [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()]);
-            } else if ($period == 'this_year') {
-                $query->whereBetween($dateColumn, [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
-            } else if ($period == 'last_year') {
-                $query->whereBetween($dateColumn, [Carbon::now()->subYear()->startOfYear(), Carbon::now()->subYear()->endOfYear()]);
+
+                return;
+            }
+
+            if ($period === 'this_month') {
+                $query->whereBetween($dateColumn, [
+                    Carbon::now()->startOfMonth()->toDateString(),
+                    Carbon::now()->endOfMonth()->toDateString(),
+                ]);
+            } elseif ($period === 'last_month') {
+                $query->whereBetween($dateColumn, [
+                    Carbon::now()->subMonth()->startOfMonth()->toDateString(),
+                    Carbon::now()->subMonth()->endOfMonth()->toDateString(),
+                ]);
+            } elseif ($period === 'this_quarter') {
+                $query->whereBetween($dateColumn, [
+                    Carbon::now()->firstOfQuarter()->toDateString(),
+                    Carbon::now()->lastOfQuarter()->toDateString(),
+                ]);
+            } elseif ($period === 'this_year') {
+                $query->whereBetween($dateColumn, [
+                    Carbon::now()->startOfYear()->toDateString(),
+                    Carbon::now()->endOfYear()->toDateString(),
+                ]);
+            } elseif ($period === 'last_year') {
+                $query->whereBetween($dateColumn, [
+                    Carbon::now()->subYear()->startOfYear()->toDateString(),
+                    Carbon::now()->subYear()->endOfYear()->toDateString(),
+                ]);
             }
         };
 
@@ -75,14 +115,15 @@ class ReportController extends Controller
             ->orderByDesc('expense_date')
             ->orderByDesc('id');
 
-        if ($selectedScope === 'company' && $selectedCompanyId) {
-            $expensesQuery->where('company_id', $selectedCompanyId);
-        } elseif (! $canSeeAllCompanies && $user) {
-            $expensesQuery->where('company_id', $user->company_id);
-        }
-        
-        // Apply date filters to primary expenses list (switching to 'expense_date' matches your order priority)
+        $applyCompanyFilter($expensesQuery);
         $applyDateFilters($expensesQuery, 'expense_date');
+
+        $totals = [
+            'expense_count' => (clone $expensesQuery)->count(),
+            'gross_amount' => (float) (clone $expensesQuery)->sum('amount'),
+            'vat_amount' => (float) (clone $expensesQuery)->sum('vat_amount'),
+            'net_amount' => (float) (clone $expensesQuery)->sum('net_amount'),
+        ];
 
         $expenses = $expensesQuery->limit(250)->get();
 
@@ -101,25 +142,12 @@ class ReportController extends Controller
             ];
         });
 
-        $totals = [
-            'expense_count' => $expenses->count(),
-            'gross_amount' => (float) $expenses->sum('amount'),
-            'vat_amount' => (float) $expenses->sum('vat_amount'),
-            'net_amount' => (float) $expenses->sum('net_amount'),
-        ];
-
         // --- 2. COMPANY BREAKDOWN QUERY ---
         $companyBreakdownQuery = Expense::query()
             ->selectRaw('company_id, COUNT(*) as expense_count, COALESCE(SUM(amount), 0) as gross_amount, COALESCE(SUM(vat_amount), 0) as vat_amount, COALESCE(SUM(net_amount), 0) as net_amount')
             ->with('company:id,name');
 
-        if ($selectedScope === 'company' && $selectedCompanyId) {
-            $companyBreakdownQuery->where('company_id', $selectedCompanyId);
-        } elseif (! $canSeeAllCompanies && $user) {
-            $companyBreakdownQuery->where('company_id', $user->company_id);
-        }
-        
-        // BUG FIX: Added date filters here
+        $applyCompanyFilter($companyBreakdownQuery);
         $applyDateFilters($companyBreakdownQuery, 'expense_date');
 
         $companyBreakdown = $companyBreakdownQuery
@@ -147,14 +175,15 @@ class ReportController extends Controller
                 ->orderByDesc('invoice_date')
                 ->orderByDesc('id');
 
-            if ($selectedScope === 'company' && $selectedCompanyId) {
-                $invoicesQuery->where('company_id', $selectedCompanyId);
-            } elseif (! $canSeeAllCompanies && $user) {
-                $invoicesQuery->where('company_id', $user->company_id);
-            }
-            
-            // BUG FIX: Added date filters here
+            $applyCompanyFilter($invoicesQuery);
             $applyDateFilters($invoicesQuery, 'invoice_date');
+
+            $incomeTotals = [
+                'invoice_count' => (clone $invoicesQuery)->count(),
+                'subtotal' => (float) (clone $invoicesQuery)->sum('subtotal'),
+                'tax' => (float) (clone $invoicesQuery)->sum('tax_amount'),
+                'total' => (float) (clone $invoicesQuery)->sum('total_amount'),
+            ];
 
             $invoices = $invoicesQuery->limit(250)->get();
 
@@ -171,24 +200,11 @@ class ReportController extends Controller
                 ];
             });
 
-            $incomeTotals = [
-                'invoice_count' => $invoices->count(),
-                'subtotal' => (float) $invoices->sum('subtotal'),
-                'tax' => (float) $invoices->sum('tax_amount'),
-                'total' => (float) $invoices->sum('total_amount'),
-            ];
-
             $companyIncomeQuery = Invoice::query()
                 ->selectRaw('company_id, COUNT(*) as invoice_count, COALESCE(SUM(subtotal),0) as subtotal, COALESCE(SUM(tax_amount),0) as tax, COALESCE(SUM(total_amount),0) as total')
                 ->with('company:id,name');
 
-            if ($selectedScope === 'company' && $selectedCompanyId) {
-                $companyIncomeQuery->where('company_id', $selectedCompanyId);
-            } elseif (! $canSeeAllCompanies && $user) {
-                $companyIncomeQuery->where('company_id', $user->company_id);
-            }
-            
-            // BUG FIX: Added date filters here
+            $applyCompanyFilter($companyIncomeQuery);
             $applyDateFilters($companyIncomeQuery, 'invoice_date');
 
             $companyIncomeBreakdown = $companyIncomeQuery->groupBy('company_id')->get()->map(function ($item) {
@@ -204,40 +220,25 @@ class ReportController extends Controller
 
         // --- 4. BALANCE SHEET ---
         $paymentsQuery = Payment::query();
-        if ($selectedScope === 'company' && $selectedCompanyId) {
-            $paymentsQuery->where('company_id', $selectedCompanyId);
-        } elseif (! $canSeeAllCompanies && $user) {
-            $paymentsQuery->where('company_id', $user->company_id);
-        }
-        // BUG FIX: Date filter added (assumed column: 'created_at' or 'payment_date')
+        $applyCompanyFilter($paymentsQuery);
         $applyDateFilters($paymentsQuery, 'created_at');
 
         $payments = $paymentsQuery->get();
-        $cashIn = $payments->filter(fn($p) => strtolower($p->payment_direction ?? '') === 'in')->sum(fn($p) => (float) ($p->amount * ($p->exchange_rate ?? 1)));
-        $cashOut = $payments->filter(fn($p) => strtolower($p->payment_direction ?? '') === 'out')->sum(fn($p) => (float) ($p->amount * ($p->exchange_rate ?? 1)));
+        $cashIn = $payments->filter(fn ($p) => strtolower($p->payment_direction ?? '') === 'in')->sum(fn ($p) => (float) ($p->amount * ($p->exchange_rate ?? 1)));
+        $cashOut = $payments->filter(fn ($p) => strtolower($p->payment_direction ?? '') === 'out')->sum(fn ($p) => (float) ($p->amount * ($p->exchange_rate ?? 1)));
         $cash = $cashIn - $cashOut;
 
         $invoicesReceivableQuery = Invoice::query();
-        if ($selectedScope === 'company' && $selectedCompanyId) {
-            $invoicesReceivableQuery->where('company_id', $selectedCompanyId);
-        } elseif (! $canSeeAllCompanies && $user) {
-            $invoicesReceivableQuery->where('company_id', $user->company_id);
-        }
-        // BUG FIX: Date filter added
+        $applyCompanyFilter($invoicesReceivableQuery);
         $applyDateFilters($invoicesReceivableQuery, 'invoice_date');
         $receivables = $invoicesReceivableQuery->where('status', '!=', 'paid')->sum('total_amount');
 
         $expensesPayableQuery = Expense::query();
-        if ($selectedScope === 'company' && $selectedCompanyId) {
-            $expensesPayableQuery->where('company_id', $selectedCompanyId);
-        } elseif (! $canSeeAllCompanies && $user) {
-            $expensesPayableQuery->where('company_id', $user->company_id);
-        }
-        // BUG FIX: Date filter added
+        $applyCompanyFilter($expensesPayableQuery);
         $applyDateFilters($expensesPayableQuery, 'expense_date');
-        
+
         $expensesForPayables = $expensesPayableQuery->get();
-        $payables = $expensesForPayables->filter(fn($e) => !in_array(($e->status ?? ''), ['draft']))->sum(fn($e) => (float) ($e->net_amount ?? 0));
+        $payables = $expensesForPayables->filter(fn ($e) => ! in_array(($e->status ?? ''), ['draft'], true))->sum(fn ($e) => (float) ($e->net_amount ?? 0));
 
         $assets = (float) $cash + (float) $receivables;
         $liabilities = (float) $payables;
@@ -253,7 +254,6 @@ class ReportController extends Controller
         ];
 
         // --- 5. PROFIT & LOSS (Remains trailing 12 months intentionally) ---
-        $months = [];
         $labels = [];
         $revenueSeries = [];
         $expenseSeries = [];
@@ -262,28 +262,20 @@ class ReportController extends Controller
         $end = Carbon::now()->endOfMonth();
         $start = Carbon::now()->startOfMonth()->subMonths(11);
 
-        $invoicesRangeQuery = Invoice::query()->whereBetween('invoice_date', [$start->toDateString(), $end->toDateString()], 'and');
-        if ($selectedScope === 'company' && $selectedCompanyId) {
-            $invoicesRangeQuery->where('company_id', $selectedCompanyId);
-        } elseif (! $canSeeAllCompanies && $user) {
-            $invoicesRangeQuery->where('company_id', $user->company_id);
-        }
-        $invoicesRange = $invoicesRangeQuery->get()->groupBy(fn($inv) => Carbon::parse($inv->invoice_date)->format('Y-m'));
+        $invoicesRangeQuery = Invoice::query()->whereBetween('invoice_date', [$start->toDateString(), $end->toDateString()]);
+        $applyCompanyFilter($invoicesRangeQuery);
+        $invoicesRange = $invoicesRangeQuery->get()->groupBy(fn ($inv) => Carbon::parse($inv->invoice_date)->format('Y-m'));
 
-        $expensesRangeQuery = Expense::query()->whereBetween('expense_date', [$start->toDateString(), $end->toDateString()], 'and');
-        if ($selectedScope === 'company' && $selectedCompanyId) {
-            $expensesRangeQuery->where('company_id', $selectedCompanyId);
-        } elseif (! $canSeeAllCompanies && $user) {
-            $expensesRangeQuery->where('company_id', $user->company_id);
-        }
-        $expensesRange = $expensesRangeQuery->get()->groupBy(fn($e) => Carbon::parse($e->expense_date)->format('Y-m'));
+        $expensesRangeQuery = Expense::query()->whereBetween('expense_date', [$start->toDateString(), $end->toDateString()]);
+        $applyCompanyFilter($expensesRangeQuery);
+        $expensesRange = $expensesRangeQuery->get()->groupBy(fn ($e) => Carbon::parse($e->expense_date)->format('Y-m'));
 
         $cursor = $start->copy();
         while ($cursor->lte($end)) {
             $key = $cursor->format('Y-m');
             $labels[] = $cursor->format('M Y');
-            $monthRevenue = (float) ($invoicesRange[$key] ?? collect())->sum(fn($i) => (float) ($i->total_amount ?? 0));
-            $monthExpense = (float) ($expensesRange[$key] ?? collect())->sum(fn($e) => (float) ($e->net_amount ?? 0));
+            $monthRevenue = (float) ($invoicesRange[$key] ?? collect())->sum(fn ($i) => (float) ($i->total_amount ?? 0));
+            $monthExpense = (float) ($expensesRange[$key] ?? collect())->sum(fn ($e) => (float) ($e->net_amount ?? 0));
             $revenueSeries[] = $monthRevenue;
             $expenseSeries[] = $monthExpense;
             $profitSeries[] = $monthRevenue - $monthExpense;

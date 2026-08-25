@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 
 class ExpensesController extends Controller
 {
+
     //
 
     /**

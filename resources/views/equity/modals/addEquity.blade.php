@@ -9,7 +9,7 @@
                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                 <option value="">Select company...</option>
                 @forelse ($sharesDefinitions as $share)
-                    <option value="{{ $share->company->id }}">{{ $share->company->name }}</option> 
+                    <option value="{{ $share->company->id }}">{{ $share->company->name }} </option> 
                 @empty
                     <option class="text-sm text-red-500" disabled>Please add equity definitions of the companies first.</option>
                 @endforelse
@@ -68,7 +68,7 @@
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-400 focus:ring focus:ring-brand-200">
                     <option value="">Select bank...</option>
                     @forelse ($virtualAccounts as $account)
-                        <option value="{{ $account->id }}">{{ $account->account_name }}</option> 
+                        <option value="{{ $account->id }}">{{ $account->account_name }} - -  {{ $account->bank_name}}</option> 
                     @empty
                         <option class="text-sm text-red-500" disabled>Please add virtual accounts first.</option>
                     @endforelse

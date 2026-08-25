@@ -4,7 +4,9 @@ namespace App\Services\Finance\BalanceSheet;
 
 use App\Models\CreateLiability;
 use App\Models\Expense;
+use App\Models\Loan;
 use App\Models\Salary;
+use App\Support\ReportFilters;
 
 class NonCurrentLiabilitiesService
 {
@@ -19,36 +21,45 @@ class NonCurrentLiabilitiesService
     //function to display the non current liabilities all the non current liabilities from the liabilities table where the term is long term and the due date is greater than now and the current amount is greater than 0
     public function getNonCurrentLiabilities()
     {
-        //get the non current liabilities from the liabilities table
-        $getLongTermLoans = $this->getLongTermLoans();
-
-        //return the non current liabilities
-        return $getLongTermLoans;
+        return [
+            'long_term_loans' => $this->getLongTermLoans(),
+        ];
     }
 
 
-    //function to get the long tem loans from the liabilities table as well here
     protected function getLongTermLoans()
     {
-        //get the long term loans from the liabilities table
-        $longTermLoans = CreateLiability::where('term', 'Long-term')
+        $query = CreateLiability::where('term', 'Long-term')
             ->whereHas('category', function ($query) {
                 $query->where('category', 'Loans & Borrowings');
             })
             ->where('due_date', '>', now())
-            ->where('current_amount', '>', 0)
-            ->get()
+            ->where('current_amount', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $fromLiabilities = $query->get()
             ->map(function ($loan) {
                 return [
                     'name' => $loan->name,
                     'amount' => $loan->current_amount,
-                    'type' => 'cr', // Assuming liabilities are credit entries
+                    'type' => 'cr',
                 ];
             });
 
-        return $longTermLoans;
+        $fromModule = Loan::query()
+            ->where('is_disbursed', true)
+            ->where('outstanding_balance', '>', 0)
+            ->whereDate('maturity_date', '>', now()->addYear());
+        ReportFilters::current()->applyCompany($fromModule);
 
-        
+        $moduleRows = $fromModule->get()->map(function (Loan $loan) {
+            return [
+                'name' => trim(($loan->code ? $loan->code.' — ' : '').$loan->lender),
+                'amount' => (float) $loan->outstanding_balance,
+                'type' => 'cr',
+            ];
+        });
+
+        return $fromLiabilities->concat($moduleRows)->values();
     }
 
 

@@ -42,8 +42,12 @@ class CompanyController extends Controller
 
             if (empty($validated['company_id'])) {
                 $request->session()->forget('active_company_id');
+                $request->session()->put('report_filters.scope', 'all');
+                $request->session()->put('report_filters.company_id', null);
             } else {
                 $request->session()->put('active_company_id', (int) $validated['company_id']);
+                $request->session()->put('report_filters.scope', 'company');
+                $request->session()->put('report_filters.company_id', (int) $validated['company_id']);
             }
 
             return redirect()->back();

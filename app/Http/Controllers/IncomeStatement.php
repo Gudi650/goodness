@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Services\Finance\AssetDisposalService;
+use App\Support\ReportFilters;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class IncomeStatement extends Controller
 {
     private function reportData(): array
     {
+        ReportFilters::boot();
+
         /*
          * Replace these with values from your database
          */
@@ -64,7 +68,7 @@ class IncomeStatement extends Controller
 
         $operatingIncome = $grossProfit - $totalOperatingExpenses;
 
-        $otherItemsTotal = 0;
+        $otherItemsTotal = app(AssetDisposalService::class)->gainOrLoss();
 
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
 
@@ -113,9 +117,10 @@ class IncomeStatement extends Controller
     //use the invoices which are paid here
     protected function getRevenues()
     {
-        //invoices amount minus their VAT amount to get the revenue amount
-        return Invoice::where('status', 'paid')
-            ->get()
+        $query = Invoice::where('status', 'paid');
+        ReportFilters::current()->apply($query, 'invoice_date');
+
+        return $query->get()
             ->map(function ($invoice) {
                 return [
                     'name'     => $invoice->invoice_number,
@@ -142,10 +147,10 @@ class IncomeStatement extends Controller
     //use the expenses which are issued here
     protected function getExpenses()
     {
-        //fetch expenses from the database
-        $expenses = Expense::where('status', 'issued')->get();
+        $query = Expense::where('status', 'issued');
+        ReportFilters::current()->apply($query, 'expense_date');
+        $expenses = $query->get();
 
-        //if empty return an empty collection
         if ($expenses->isEmpty()) {
             return collect();
         }

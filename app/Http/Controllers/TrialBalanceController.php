@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CreateAssets;
+use App\Models\EquityDistribution;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\SharesDefinitions;
@@ -10,6 +11,7 @@ use App\Services\Finance\BalanceSheet\CurrentAssetsService;
 use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
 use App\Services\Finance\BalanceSheet\NonCurrentAssetsService;
 use App\Services\Finance\BalanceSheet\NonCurrentLiabilitiesService;
+use App\Support\ReportFilters;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class TrialBalanceController extends Controller
@@ -20,6 +22,7 @@ class TrialBalanceController extends Controller
     //changes
     private function reportData(): array
     {
+        ReportFilters::boot();
 
         // get the Non current liabilities data from service file
         $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
@@ -46,6 +49,9 @@ class TrialBalanceController extends Controller
         //get other other expenses as well here
         $otherExpenses = $this->getOtherExpenses();
 
+        //get the depreciations from the service file
+        $depreciations = $this->getDepreciations();
+
         //get the equities to display in the trial balance report
         $equities = $this->getEquities();
 
@@ -64,6 +70,7 @@ class TrialBalanceController extends Controller
             'otherExpenses' => $otherExpenses,
             'equities' => $equities,
             'otherAssets' => $otherAssets,
+            'depreciations' => $depreciations,
         ];
 
     }
@@ -110,32 +117,29 @@ class TrialBalanceController extends Controller
     // function to get cost of goods sold  going to use it in trial balance report
     protected function getCostOfGoodsSold()
     {
-        // get the cost of goods sold from the products table
-        $costOfGoodsSold = Expense::where('category', 'Cost of Goods Sold (COGS)')
-            ->where('status', 'issued')
-            ->get()
+        $query = Expense::where('category', 'Cost of Goods Sold (COGS)')
+            ->where('status', 'issued');
+        // Trial balance expense lines: company scope only (same as pre-filter behaviour).
+        ReportFilters::current()->applyCompany($query);
+        $costOfGoodsSold = $query->get()
             ->map(function ($expense) {
                 return [
                     'name' => 'Cost of Goods Sold (COGS)',
                     'amount' => $expense->amount,
-                    'type' => 'dr', // Assuming assets are debit entries
+                    'type' => 'dr',
                 ];
             })
-            ->groupBy('name'); // Group by name to aggregate amounts for the same account
+            ->groupBy('name');
 
-            //dump the asm of cost of goods sold
-            //dd($costOfGoodsSold);         
-
-        // return in an array format
         return $costOfGoodsSold;
     }
 
-    // function to get the revenues from invoices table in the database
-    // use the invoices which are paid here and exclude the VAT amount from the total amount to get the revenue amount
     protected function getRevenues()
     {
-        return Invoice::where('status', 'paid')
-            ->get()
+        $query = Invoice::where('status', 'paid');
+        ReportFilters::current()->applyCompany($query);
+
+        return $query->get()
             ->map(function ($invoice) {
                 return [
                     'name'   => 'Revenue',
@@ -146,53 +150,41 @@ class TrialBalanceController extends Controller
             ->groupBy('name');
     }
 
-    //function to get the operational costs from expenses table in the db 
     protected function getOperationalCosts()
     {
-        //fetch the operational costs from the database
-        $operationalCosts = Expense::where('category', 'Operating Expenses')
-            ->where('status', 'issued')
-            ->get()
+        $query = Expense::where('category', 'Operating Expenses')
+            ->where('status', 'issued');
+        ReportFilters::current()->applyCompany($query);
+        $operationalCosts = $query->get()
             ->map(function ($expense) {
                 return [
-                    //'name' => optional($expense->financeItem)->item_name ?? $expense->sub_category ?? 'Uncategorized',
                     'name' => $expense->financeItem->item_name ?? $expense->sub_category ?? 'Uncategorized',
                     'amount' => $expense->amount,
-                    'type' => 'dr', // Assuming expenses are debit entries
+                    'type' => 'dr',
                 ];
             })
-            ->groupBy('name'); // Group by name to aggregate amounts for the same account
+            ->groupBy('name');
 
-
-          //dd($operationalCosts);  
-        //return in an array format
         return $operationalCosts;
     }
 
-    //okay get other expenses with their categories
     protected function getOtherExpenses()
     {
-        //fetch the other expenses from the database
-        $otherExpenses = Expense::where('category', '!=', 'Cost of Goods Sold (COGS)')
+        $query = Expense::where('category', '!=', 'Cost of Goods Sold (COGS)')
             ->where('category', '!=', 'Operating Expenses')
-            ->whereHas('financeItem' ) // Ensure it queries except finance items of Salaries and Wages
-            ->where('status', 'issued')
-            ->get()
+            ->whereHas('financeItem')
+            ->where('status', 'issued');
+        ReportFilters::current()->applyCompany($query);
+        $otherExpenses = $query->get()
             ->map(function ($expense) {
                 return [
-                    //'name' => optional($expense->financeItem)->item_name ?? $expense->sub_category ?? 'Uncategorized',
                     'name' => $expense->financeItem->item_name ?? $expense->sub_category ?? 'Uncategorized',
                     'amount' => $expense->amount,
-                    'type' => 'dr', // Assuming expenses are debit entries
+                    'type' => 'dr',
                 ];
             })
-            ->groupBy('name'); // Group by name to aggregate amounts for the same account
-        
+            ->groupBy('name');
 
-
-
-        //return in an array format
-        //dd($otherExpenses);
         return $otherExpenses;
     }
 
@@ -213,20 +205,20 @@ class TrialBalanceController extends Controller
     //get all other assets
     protected function getAssets()
     {
-        //get the vehicles assets from the assets table
-        $otherAssets = CreateAssets::whereHas('category', function ($query) {
+        $query = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', '!=','Vehicle Assets')
                 ->where('category', '!=','Property Assets')
                 ->where('category', '!=','Investment Assets')
                 ->where('category', '!=','Intangible Assets');
         })
-            ->where('current_value', '>', 0)
-            ->get()
+            ->where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $otherAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->category->category ?? 'Uncategorized',
                     'amount' => $asset->current_value,
-                    'type' => 'dr', // Assuming assets are debit entries
+                    'type' => 'dr',
                 ];
             })
             ->groupBy('name');
@@ -234,37 +226,84 @@ class TrialBalanceController extends Controller
         return $otherAssets;
     }
 
-    //get the equities to display in the trial balance report
+    /*
     protected function getEquities()
     {
-        //get the equities from the database
-        $equities = SharesDefinitions::all()
+        $query = SharesDefinitions::query();
+        ReportFilters::current()->applyCompany($query);
+        $equities = $query->get()
             ->map(function ($share) {
                 return [
                     'name' => $share->company_id,
                     'amount' => $share->share_value * $share->issued_shares,
-                    'type' => 'cr', // Assuming equities are credit entries
+                    'type' => 'cr',
                 ];
             })
-            ->groupBy('name'); // Group by name to aggregate amounts for the same account
+            ->groupBy('name');
 
-        //get total of the equities
         $totalEquities = 0;
 
         foreach ($equities as $equityGroup) {
             $totalEquities += $equityGroup->sum('amount');
         }
 
-        //return in an array format
         return $totalEquities;
+    } */
 
+    //use equityDefinitions table to get the equities
+    protected function getEquities()
+    {
+        $query = EquityDistribution::query();
+        ReportFilters::current()->applyCompany($query);
+        $equities = $query->get()
+            ->map(function ($equity) {
+                return [
+                    'name' => $equity->company->name,
+                    'amount' => $equity->value_held,
+                    'type' => 'cr',
+                ];
+            })
+            ->groupBy('name');
+
+        $totalEquities = 0;
+
+        foreach ($equities as $equityGroup) {
+            $totalEquities += $equityGroup->sum('amount');
+        }
+
+
+        return $totalEquities;
     }
 
     //function to get the depreciations of assets to display in the trial balance report
     protected function getDepreciations()
     {
-        // Implementation for getting depreciations
+        $query = CreateAssets::where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $depreciations = $query->get()
+            ->map(function ($asset) {
+                return [
+                    'name' => 'Depreciation',
+                    'amount' => ($asset->original_value - $asset->current_value),
+                    'type' => 'dr',
+                ];
+            })
+            ->groupBy('name');
 
+        return $depreciations;
+
+    }
+
+    //get total of the depreciations
+    protected function getTotalDepreciations()
+    {
+        $depreciations = $this->getDepreciations();
+        $totalDepreciations = 0;
+        foreach ($depreciations as $depreciationGroup) {
+            $totalDepreciations += $depreciationGroup->sum('amount');
+        }
+        dd($totalDepreciations);
+        return $totalDepreciations;
     }
 
     //function to get the total of all DEBIT entries in the trial balance report

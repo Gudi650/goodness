@@ -14,6 +14,7 @@ use App\Services\Finance\BalanceSheet\CurrentLiabilitiesService;
 use App\Services\Finance\BalanceSheet\NonCurrentAssetsService;
 use App\Services\Finance\BalanceSheet\NonCurrentLiabilitiesService;
 use App\Services\NetIncome;
+use App\Support\ReportFilters;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,6 +22,8 @@ class balanceSheetController extends Controller
 {
     private function reportData(): array
     {
+        ReportFilters::boot();
+
         //get the Non current liabilities data from service file
         $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
 
@@ -35,15 +38,16 @@ class balanceSheetController extends Controller
 
         //get company id
         $companyId = $this->resolveCompanyId();
-        $year = now()->year;
 
         //get the share capital
-        $shareCapital = $this->getShareCapital($companyId,$year);
+        $shareCapital = $this->getShareCapital($companyId, null);
 
-        //get retained earnings 
-        $retainedEarnings = $this->getRetainedEarnings($companyId,$year);
+        // Balance sheet RE is cumulative (assets/liabilities are point-in-time).
+        $retainedEarnings = $this->getRetainedEarnings($companyId, null);
 
-        $otherEquity = $this->getOtherEquity($companyId);
+        $depreciationValue = $this->getDepreciationValue();
+
+        $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings, $depreciationValue);
 
         //get other assets
         $otherAssets = $this->getAssets();
@@ -73,11 +77,12 @@ class balanceSheetController extends Controller
             'equity' => [
                 ['name' => 'Share Capital', 'amount' => $shareCapital],
                 ['name' => 'Retained Earnings', 'amount' => $retainedEarnings],
-                ['name' => 'Other Equity', 'amount' => $otherEquity],
+                ['name' => 'Depreciation', 'amount' => $depreciationValue],
+                ['name' => 'Total Equity', 'amount' => $otherEquity],
             ]
         ];
 
-        $totalEquity = collect($equityLiabilities['equity'])->sum('amount');
+        $totalEquity = $otherEquity;
 
 
 
@@ -90,6 +95,7 @@ class balanceSheetController extends Controller
             'nonCurrentAssets' => $nonCurrentAssets,
             'currentAssets' => $currentAssets,
             'otherAssets' => $otherAssets,
+            'reportCompanyName' => ReportFilters::current()->displayCompanyName(),
 
         ];
 
@@ -113,9 +119,12 @@ class balanceSheetController extends Controller
         return $pdf->download('balance_sheet.pdf');
     }
 
+    /*
     protected function getShareCapital(?int $companyId = null, ?int $year = null): float
     {
-        $definitions = SharesDefinitions::query()->get();
+        $definitions = SharesDefinitions::query()
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
+            ->get();
 
         if ($definitions->isEmpty()) {
             return 0.0;
@@ -126,6 +135,22 @@ class balanceSheetController extends Controller
         });
 
         return (float) $total;
+    }*/
+
+    //get share capital from equity distribution table
+    protected function getShareCapital(?int $companyId = null, ?int $year = null): float
+    {
+        $query = EquityDistribution::query();
+        ReportFilters::current()->applyCompany($query);
+        $shareCapital = $query->get()
+            ->map(function ($equity) {
+                return [
+                    'name' => $equity->company->name,
+                    'amount' => $equity->value_held,
+                ];
+            })
+            ->sum('amount');
+        return $shareCapital;
     }
 
 
@@ -135,7 +160,7 @@ class balanceSheetController extends Controller
         $dividends = $this->getDividendsPaid($companyId, $year);
 
         //get the net income from the net income service
-        $netIncome = $this->calculateNetIncomeForYear(null, null);
+        $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
 
         //get the retained earnings by subtracting the dividends paid from the net income
         $retainedEarnings = $netIncome - $dividends;
@@ -152,20 +177,41 @@ class balanceSheetController extends Controller
     protected function getDividendsPaid(?int $companyId = null, ?int $year = null): float
     {
         $query = Dividends::query()->where('status', 'Declared');
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        } else {
+            ReportFilters::current()->applyCompany($query);
+        }
+
+        if ($year) {
+            $query->where(function ($sub) use ($year) {
+                $sub->whereYear('paid_at', $year)
+                    ->orWhere(function ($q) use ($year) {
+                        $q->whereNull('paid_at')->whereYear('declared_at', $year);
+                    });
+            });
+        }
 
         return (float) $query->sum('amount');
-
     }
 
-    protected function getOtherEquity(?int $companyId = null): float
+    protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0, float $depreciationValue = 0): float
     {
-        //return (float) EquityDistribution::query()->sum('value_held');
-        return 0.0;
+        return (float) ($shareCapital + $retainedEarnings - $depreciationValue);
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database
     protected function resolveCompanyId(): ?int
     {
+        $filters = ReportFilters::current();
+        if ($filters->scope === 'company' && $filters->companyId) {
+            return $filters->companyId;
+        }
+
+        if ($filters->scope === 'all') {
+            return null;
+        }
+
         $companyId = session('active_company_id') ?? Auth::user()?->company_id;
 
         if ($companyId) {
@@ -178,26 +224,56 @@ class balanceSheetController extends Controller
 
     protected function getAssets()
     {
-        //get the vehicles assets from the assets table
-        $otherAssets = CreateAssets::whereHas('category', function ($query) {
+        $query = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', '!=','Vehicle Assets')
                 ->where('category', '!=','Property Assets')
                 ->where('category', '!=','Investment Assets')
                 ->where('category', '!=','Intangible Assets');
         })
-            ->where('current_value', '>', 0)
-            ->get()
+            ->where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $otherAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->category->category ?? 'Uncategorized',
                     'amount' => $asset->current_value,
-                    'type' => 'dr', // Assuming assets are debit entries
+                    'type' => 'dr',
                 ];
             })
             ->groupBy('name');
 
         return $otherAssets;
     }
+
+    /*
+    //get depreciation value except for vehicles, properties, investments, and intangible assets
+    protected function getDepreciationValue(): float
+    {
+        $query = CreateAssets::whereHas('category', function ($query) {
+            $query->where('category', '!=','Vehicle Assets')
+                ->where('category', '!=','Property Assets')
+                ->where('category', '!=','Investment Assets')
+                ->where('category', '!=','Intangible Assets');
+         })->where('current_value', '>', 0);
+         ReportFilters::current()->applyCompany($query);
+         $depreciationValue = $query->get()->sum(function ($asset) {
+            return (float) ($asset->original_value - $asset->current_value);
+         });
+         
+         return $depreciationValue;
+
+    } */
+
+         //get depreciation value of all assets
+         protected function getDepreciationValue(): float
+         {
+            $query = CreateAssets::where('current_value', '>', 0);
+            ReportFilters::current()->applyCompany($query);
+            $depreciationValue = $query->get()->sum(function ($asset) {
+                return (float) ($asset->original_value - $asset->current_value);
+            });
+            return $depreciationValue;
+         }
 
 
 

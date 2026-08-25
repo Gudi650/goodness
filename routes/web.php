@@ -16,6 +16,7 @@ use App\Http\Controllers\DividendsController;
 use App\Http\Controllers\EquityController;
 use App\Http\Controllers\EquityDistributionController;
 use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\ExpensesReport;
 use App\Http\Controllers\FAR;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FinanceItemsController;
@@ -354,6 +355,8 @@ Route::middleware('auth')->group(function () {
 
     //FAR management
     Route::get('/far', [FAR::class, 'index'])->name('far');
+    Route::post('/far/assets/{asset}/dispose', [FAR::class, 'dispose'])->name('far.assets.dispose');
+    Route::post('/far/assets/{asset}/dispose', [FAR::class, 'dispose'])->name('far.assets.dispose');
 
     // Dedicated financial statement previews and exports
     Route::get('/balance-sheet', [BalanceSheetController::class, 'index'])->name('balance-sheet');
@@ -366,6 +369,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/cash-flow-export', [TrueCashflowController::class, 'downloadPdf'])->name('cash-flow-export');
     Route::get('/equity-statement', [CashFlowController::class, 'previewPdf'])->name('equity-statement');
     Route::get('/equity-statement-export', [CashFlowController::class, 'downloadPdf'])->name('equity-statement-export');
+    Route::get('/expense-report', [ExpensesReport::class, 'previewPdf'])->name('expense-report');
+    Route::get('/expense-report-export', [ExpensesReport::class, 'downloadPdf'])->name('expense-report-export');
 
 
     //Routes for hatcheering an prouction processes
@@ -414,6 +419,7 @@ Route::middleware('auth')->group(function () {
 | ->group() so these sit behind login like your other modules)
 */
 
+/*
     Route::prefix('loans')->name('loans.')->group(function () {
         Route::get('/', [LoanController::class, 'index'])->name('index');
 
@@ -426,14 +432,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/{loan}/schedule/regenerate', [LoanRepaymentScheduleController::class, 'regenerate'])->name('schedule.regenerate');
         Route::patch('/schedule/{schedule}/mark-paid', [LoanRepaymentScheduleController::class, 'markPaid'])->name('schedule.mark-paid');
 
-        Route::post('/loans/{loan}/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
+        Route::post('/{loan}/disburse', [LoanController::class, 'disburse'])->name('disburse');
 
     });
+    */
+
+    //Routes for loans
+    Route::get('/loans', [LoanController::class, 'index'])->name('loans');
+    Route::post('/loans', [LoanController::class, 'store'])->name('loans.store');
+    Route::put('/loans/{loan}', [LoanController::class, 'update'])->name('loans.update');
+    Route::delete('/loans/{loan}', [LoanController::class, 'destroy'])->name('loans.destroy');
+    Route::post('/loans/{loan}/schedule/regenerate', [LoanRepaymentScheduleController::class, 'regenerate'])->name('loans.schedule.regenerate');
+    Route::patch('/loans/schedule/{schedule}/mark-paid', [LoanRepaymentScheduleController::class, 'markPaid'])->name('loans.schedule.mark-paid');
+    Route::post('/loans/{loan}/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
 
 
     //VAT Accounting
     Route::get('/vataccount', [VatAccount::class, 'index'])->name('vataccount');
-
 
 
     // Reports & Analytics

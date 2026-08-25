@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Models\Expense;
 use App\Models\Invoice;
+use App\Models\LoanRepaymentSchedule;
+use App\Services\Finance\AssetDisposalService;
+use App\Support\ReportFilters;
 
 class NetIncome
 {
@@ -60,20 +63,42 @@ class NetIncome
         // Operating Income
         $operatingIncome = $grossProfit - $totalOperatingExpenses;
 
-        // Other income/expenses (future use)
-        $otherItemsTotal = 0;
+        // Gain/(loss) on asset disposal
+        $otherItemsTotal = app(AssetDisposalService::class)->gainOrLoss($companyId, $year);
 
         // Profit before tax
         $preTaxIncome = $operatingIncome + $otherItemsTotal;
+
+        // Loan interest paid (cash installments) reduces net income
+        $loanInterest = $this->getLoanInterestPaid($companyId, $year);
 
         // Tax Expense (18%)
         //$taxExpense = $preTaxIncome > 0 ? $preTaxIncome * 0.18 : 0;
         $taxExpense = 0;
 
         // Net Income
-        $netIncome = $preTaxIncome - $taxExpense;
+        $netIncome = $preTaxIncome - $loanInterest - $taxExpense;
 
         return (float) $netIncome;
+    }
+
+    protected function getLoanInterestPaid(?int $companyId = null, ?int $year = null): float
+    {
+        $query = LoanRepaymentSchedule::query()->where('status', 'Paid');
+
+        if ($companyId) {
+            $query->whereHas('loan', fn ($loanQuery) => $loanQuery->where('company_id', $companyId));
+        } else {
+            $query->whereHas('loan', function ($loanQuery) {
+                ReportFilters::current()->applyCompany($loanQuery);
+            });
+        }
+
+        if ($year) {
+            $query->whereYear('updated_at', $year);
+        }
+
+        return (float) $query->sum('interest_portion');
     }
 
     /**
@@ -86,6 +111,8 @@ class NetIncome
 
         if ($companyId) {
             $revenues->where('company_id', $companyId);
+        } else {
+            ReportFilters::current()->applyCompany($revenues);
         }
 
         if ($year) {
@@ -124,6 +151,8 @@ class NetIncome
 
         if ($companyId) {
             $expenses->where('company_id', $companyId);
+        } else {
+            ReportFilters::current()->applyCompany($expenses);
         }
 
         if ($year) {

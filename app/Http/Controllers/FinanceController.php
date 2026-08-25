@@ -78,7 +78,7 @@ class FinanceController extends Controller
             ->get();
 
         // function to get the expense details to be displayed from the expenses table
-        $expenses = $this->getExpenses($isQualifiedUser, $isAccountant, $user, $isCEO);
+        $expenses = $this->getExpenses($isQualifiedUser, $isAccountant, $user, $isCEO, $activeCompanyId);
 
         // Summary metrics for top cards
         $expensesCollection = collect($expenses);
@@ -90,7 +90,7 @@ class FinanceController extends Controller
         $issuedCount = $expensesCollection->filter(fn ($e) => ($e['status'] ?? '') === 'issued')->count();
 
         // get the payment details to be displayed from the payments table
-        $payments = $this->getPayments($isAdmin, $user, $isCEO, $isAccountant, $SuperManager);
+        $payments = $this->getPayments($isQualifiedUser, $user, $isCEO, $isAccountant, $activeCompanyId);
 
         // function to check if the approve button should be displayed for the expense based on the user role and expense status
         foreach ($expenses as &$expense) {
@@ -104,7 +104,7 @@ class FinanceController extends Controller
         $firstPendingReviewExpenseId = $reviewableExpenses->first()['id'] ?? null;
 
         // get the details of the virtual accounts to be displayed from the virtual_accounts table
-        $virtualAccounts = $this->getVirtualAccounts($user, $isQualifiedUser);
+        $virtualAccounts = $this->getVirtualAccounts($user, $isQualifiedUser, $activeCompanyId);
 
         // get the assets categories to be displayed from the assets_categories table
         $assetsCategories = $this->getAssetsCategories();
@@ -113,10 +113,10 @@ class FinanceController extends Controller
         $liabilityCategories = $this->getLiabilityCategories();
 
         // get the assets details to be displayed from the create_assets table
-        $assetsDetails = $this->getAssetsDetails();
+        $assetsDetails = $this->getAssetsDetails($isQualifiedUser, $user, $activeCompanyId);
 
         //get the liailities details to be displayed from the create_liabilities table
-        $liabilitiesDetails = $this->getLiabilitiesDetails();
+        $liabilitiesDetails = $this->getLiabilitiesDetails($isQualifiedUser, $user, $activeCompanyId);
 
         //get the finance items and its categores to be displayed in the items page
         $items = FinanceItems::with('category')->get();
@@ -213,10 +213,11 @@ class FinanceController extends Controller
      * fuction to get the expense details to be displayed from the expenses table
      * but check if the user is admin or CEO, if admin then get all expenses, if not admin then get only the expenses of his company
      */
-    protected function getExpenses($isQualifiedUser, $isAccountant, $user, $isCEO)
+    protected function getExpenses($isQualifiedUser, $isAccountant, $user, $isCEO, $activeCompanyId = null)
     {
         // get all when user is admin or CEO, otherwise get only the expenses of his company
         $expenses = Expense::with(['company','financeItem', 'department', 'creator', 'approver', 'issuer', 'checker'])
+            ->when($isQualifiedUser && ! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
             ->when(! $isQualifiedUser && ! $isCEO && ! $isAccountant, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
@@ -272,10 +273,11 @@ class FinanceController extends Controller
     }
 
     // function to get the payment details to be displayed from the payments table
-    protected function getPayments($isQualifiedUser, $user, $isCEO, $isAccountant)
+    protected function getPayments($isQualifiedUser, $user, $isCEO, $isAccountant, $activeCompanyId = null)
     {
         $payments = Payment::query()
             ->orderByDesc('created_at')
+            ->when($isQualifiedUser && ! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
             ->when(! $isQualifiedUser && ! $isCEO && ! $isAccountant && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->limit(100)
             ->get()
@@ -330,6 +332,7 @@ class FinanceController extends Controller
     {
         $invoices = Invoice::query()
             ->with('company', 'creator', 'items')
+            ->when($isQualifiedUser && ! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
             ->when(! $isQualifiedUser && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
@@ -397,12 +400,15 @@ class FinanceController extends Controller
 
         // Determine user permissions
         $isQualifiedUser = app(AccessControlService::class)
-            ->isCeoOrAdminOrAccountant($user);
+            ->isCeoOrAdminOrAccountant($user)
+            || ($user?->role?->name === 'Manager' && $user->company?->name === 'Goodness Group');
 
+        $activeCompanyId = session('active_company_id');
         $search = request('search');
 
         $query = Invoice::query()
             ->with('company', 'creator', 'items')
+            ->when($isQualifiedUser && ! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
             ->when(
                 ! $isQualifiedUser && $user,
                 fn ($query) => $query->where('company_id', $user->company_id)
@@ -509,10 +515,12 @@ class FinanceController extends Controller
 
         // Determine user permissions
         $isQualifiedUser = app(AccessControlService::class)
-            ->isCeoOrAdminOrAccountant($user);
+            ->isCeoOrAdminOrAccountant($user)
+            || ($user?->role?->name === 'Manager' && $user->company?->name === 'Goodness Group');
 
         $isCEO = $user && $user->role && $user->role->name === 'CEO';
         $isAccountant = $user && $user->role && $user->role->name === 'Accountant';
+        $activeCompanyId = session('active_company_id');
 
         $search = trim(request('search', ''));
 
@@ -526,8 +534,10 @@ class FinanceController extends Controller
             'checker'
         ]);
 
-        // Respect company access
-        if (! $isQualifiedUser && ! $isCEO && ! $isAccountant && $user) {
+        // Respect company access / topbar selection
+        if ($isQualifiedUser && ! empty($activeCompanyId)) {
+            $query->where('company_id', $activeCompanyId);
+        } elseif (! $isQualifiedUser && ! $isCEO && ! $isAccountant && $user) {
             $query->where('company_id', $user->company_id);
         }
 
@@ -711,7 +721,7 @@ class FinanceController extends Controller
     /**
      * Getting the details of the virtual accounts to be displayed from the virtual_accounts table
      */
-    protected function getVirtualAccounts($user, $isQualifiedUser)
+    protected function getVirtualAccounts($user, $isQualifiedUser, $activeCompanyId = null)
     {
 
         // check if the user can view the virtual accounts, if not then return empty array
@@ -721,6 +731,7 @@ class FinanceController extends Controller
 
         $virtualAccounts = VirtualAccounts::query()
             ->with('company')
+            ->when($isQualifiedUser && ! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
             ->when(! $isQualifiedUser && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->limit(100)
@@ -804,10 +815,12 @@ class FinanceController extends Controller
     /**
      * function to get the assets details to be displayed from the create_assets table
      */
-    public function getAssetsDetails()
+    public function getAssetsDetails($isQualifiedUser = false, $user = null, $activeCompanyId = null)
     {
         $assetsDetails = CreateAssets::query()
             ->with('company', 'category')
+            ->when($isQualifiedUser && ! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
+            ->when(! $isQualifiedUser && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->get()
             ->map(function (CreateAssets $asset) {
@@ -835,10 +848,12 @@ class FinanceController extends Controller
     /**
      * function to get the liabilities details to be displayed from the create_liabilities table
      */
-    public function getLiabilitiesDetails()
+    public function getLiabilitiesDetails($isQualifiedUser = false, $user = null, $activeCompanyId = null)
     {
         $liabilitiesDetails = CreateLiability::query()
             ->with('company', 'category')
+            ->when($isQualifiedUser && ! empty($activeCompanyId), fn ($query) => $query->where('company_id', $activeCompanyId))
+            ->when(! $isQualifiedUser && $user, fn ($query) => $query->where('company_id', $user->company_id))
             ->latest()
             ->get()
             ->map(function (CreateLiability $liability) {

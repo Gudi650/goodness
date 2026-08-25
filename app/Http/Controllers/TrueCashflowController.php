@@ -13,7 +13,7 @@ class TrueCashFlowController extends Controller
 
     public function previewPdf()
     {
-        return $this->renderPdf()->stream('cash_flow.pdf');
+        return view('reports.trueCashFlow', $this->cashFlowReportService->build());
     }
 
     public function downloadPdf()

@@ -13,6 +13,7 @@ use App\Models\Loan;
 use App\Models\LoanRepaymentSchedule;
 use App\Models\SharePremuims;
 use App\Models\VirtualAccounts;
+use App\Services\Finance\AssetDisposalService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -183,18 +184,20 @@ class CashFlowReportService
 
     protected function assetDisposals(?int $companyId, int $year): float
     {
-        $query = CreateAssets::query()->where('status', 'Sold')->whereYear('acquired', $year);
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
-
-        return (float) $query->sum('current_value');
+        return app(AssetDisposalService::class)->cashProceeds($companyId, $year);
     }
 
     protected function loanDisbursements(?int $companyId, int $year): float
     {
-        $query = Loan::query()->whereNotNull('disbursement_date')->whereYear('disbursement_date', $year);
+        $query = Loan::query()
+            ->where('is_disbursed', true)
+            ->where(function ($builder) use ($year) {
+                $builder->whereYear('disbursement_date', $year)
+                    ->orWhere(function ($fallback) use ($year) {
+                        $fallback->whereNull('disbursement_date')
+                            ->whereYear('updated_at', $year);
+                    });
+            });
 
         if ($companyId) {
             $query->where('company_id', $companyId);

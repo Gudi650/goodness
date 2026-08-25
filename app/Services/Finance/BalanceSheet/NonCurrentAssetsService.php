@@ -4,6 +4,7 @@ namespace App\Services\Finance\BalanceSheet;
 
 use App\Models\CreateAssets;
 use App\Models\Product;
+use App\Support\ReportFilters;
 
 class NonCurrentAssetsService
 {
@@ -43,15 +44,17 @@ class NonCurrentAssetsService
     protected function getInvestmentAssets()
     {
         //get the investment assets from the assets table
-        $investmentAssets = CreateAssets::whereHas('category', function ($query) {
+        $query = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', 'Investment Assets');
         })
-            ->where('current_value', '>', 0)
-            ->get()
+            ->where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $investmentAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->original_value,
+                    //'amount' => $asset->original_value,
+                    'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
@@ -63,15 +66,17 @@ class NonCurrentAssetsService
     protected function getPropertyAssets()
     {
         //get the property, plant and equipment assets from the assets table
-        $ppeAssets = CreateAssets::whereHas('category', function ($query) {
+        $query = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', 'Property Assets');
         })
-            ->where('current_value', '>', 0)
-            ->get()
+            ->where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $ppeAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->original_value,
+                    //'amount' => $asset->original_value,
+                    'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
@@ -83,15 +88,17 @@ class NonCurrentAssetsService
     protected function getVehicleAssets()
     {
         //get the vehicles assets from the assets table
-        $vehicleAssets = CreateAssets::whereHas('category', function ($query) {
+        $query = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', 'Vehicle Assets');
         })
-            ->where('current_value', '>', 0)
-            ->get()
+            ->where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $vehicleAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->original_value,
+                    //'amount' => $asset->original_value,
+                    'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
@@ -103,15 +110,17 @@ class NonCurrentAssetsService
     protected function getIntangibleAssets()
     {
         //get the intangible assets from the assets table
-        $intangibleAssets = CreateAssets::whereHas('category', function ($query) {
+        $query = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', 'Intangible Assets');
         })
-            ->where('current_value', '>', 0)
-            ->get()
+            ->where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $intangibleAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
-                    'amount' => $asset->original_value,
+                    //'amount' => $asset->original_value,
+                    'amount' => $asset->current_value,
                     'type' => 'dr', // Assuming assets are debit entries
                 ];
             });
@@ -123,8 +132,9 @@ class NonCurrentAssetsService
     protected function getInventoryAssets()
     {
         //get the inventory assets from the assets table wher stock is greater than 0
-        $inventoryAssets = Product::where('stock', '>', 0)
-            ->get()
+        $query = Product::where('stock', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $inventoryAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->name,
@@ -140,14 +150,15 @@ class NonCurrentAssetsService
         protected function getAssets()
     {
         //get the vehicles assets from the assets table
-        $otherAssets = CreateAssets::whereHas('category', function ($query) {
+        $query = CreateAssets::whereHas('category', function ($query) {
             $query->where('category', '!=','Vehicle Assets')
                 ->where('category', '!=','Property Assets')
                 ->where('category', '!=','Investment Assets')
                 ->where('category', '!=','Intangible Assets');
         })
-            ->where('current_value', '>', 0)
-            ->get()
+            ->where('current_value', '>', 0);
+        ReportFilters::current()->applyCompany($query);
+        $otherAssets = $query->get()
             ->map(function ($asset) {
                 return [
                     'name' => $asset->category->category ?? 'Uncategorized',

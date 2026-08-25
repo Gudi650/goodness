@@ -1,3 +1,12 @@
+{{-- dd the datas --}}
+{{-- @dd($loans); --}}
+{{-- dd the companies --}}
+{{-- @dd($companies); --}}
+{{-- dd the approvers --}}
+{{-- @dd($approvers); --}}
+{{-- dd the virtual accounts --}}
+{{-- @dd($virtualAccounts); --}}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -108,16 +117,16 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 @forelse($loans ?? [] as $loan)
-                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td class="px-4 py-3 mono text-xs text-slate-500">{{ $loan->code }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company->name ?? '-' }}</span>
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company?->name ?? '-' }}</span>
                                         </td>
                                         <td class="px-4 py-3 font-medium">{{ $loan->lender }}</td>
-                                        <td class="px-4 py-3 text-right mono">TZS {{ number_format($loan->principal) }}</td>
+                                        <td class="px-4 py-3 text-right mono">TZS {{ number_format((float) ($loan->principal ?? 0)) }}</td>
                                         <td class="px-4 py-3 text-right mono">{{ $loan->interest_rate }}% <span class="text-xs text-slate-400">({{ $loan->interest_type }})</span></td>
                                         <td class="px-4 py-3">{{ $loan->term_months }} months</td>
-                                        <td class="px-4 py-3 text-right mono font-medium">TZS {{ number_format($loan->outstanding_balance) }}</td>
+                                        <td class="px-4 py-3 text-right mono font-medium">TZS {{ number_format((float) ($loan->outstanding_balance ?? 0)) }}</td>
                                         <td class="px-4 py-3">
                                             @if ($loan->status === 'Active')
                                                 <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 border border-green-200">Active</span>
@@ -132,18 +141,24 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            @if ($loan->disbursement_date)
-                                                <span class="text-xs text-slate-500 mono" title="Disbursed on {{ $loan->disbursement_date->format('d M Y') }}">
-                                                    ✓ {{ $loan->disbursement_date->format('d/m/Y') }}
+                                            @if ($loan->is_disbursed)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 border border-green-200"
+                                                    title="Expected {{ $loan->disbursement_date?->format('d M Y') ?? 'n/a' }}">
+                                                    ✓ Disbursed
                                                 </span>
                                             @elseif ($loan->approved_by_id)
-                                                <form action="{{ route('loans.disburse', $loan->id) }}" method="POST"
-                                                    onsubmit="return confirm('Confirm disbursement of TZS {{ number_format($loan->principal) }} for loan {{ $loan->code }}? Funds will be added to the selected bank account balance.');">
-                                                    @csrf
-                                                    <button type="submit" class="px-2.5 py-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded text-xs font-medium transition-colors shadow-sm">
-                                                        Disburse Funds
-                                                    </button>
-                                                </form>
+                                                <button type="button"
+                                                    class="px-2.5 py-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded text-xs font-medium transition-colors shadow-sm"
+                                                    onclick="confirmLoanDisburse({
+                                                        id: {{ $loan->id }},
+                                                        code: @js($loan->code),
+                                                        principal: {{ (float) ($loan->principal ?? 0) }},
+                                                        bank: @js(($loan->bankAccount?->bank_name ?? 'No bank').' · '.($loan->bankAccount?->account_number ?? 'N/A')),
+                                                        expectedDate: @js($loan->disbursement_date?->format('d M Y') ?? 'Not set'),
+                                                        hasBank: {{ $loan->bank_id ? 'true' : 'false' }}
+                                                    })">
+                                                    Confirm Disbursement
+                                                </button>
                                             @else
                                                 <span class="text-xs text-amber-600 font-medium" title="Approval required before disbursement">
                                                     Awaiting Approval
@@ -163,7 +178,7 @@
                                                             d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                     </svg>
                                                 </button>
-                                                <form action="{{ route('loans.schedule.regenerate', $loan->id) }}" method="POST"
+                                                <form action="{{ url('/loans/'.$loan->id.'/schedule/regenerate') }}" method="POST"
                                                     onsubmit="return confirm('Regenerate the repayment schedule for {{ $loan->code }}? This replaces any existing installments.');">
                                                     @csrf
                                                     <button type="submit" class="text-brand-600 hover:text-brand-700 transition-colors"
@@ -178,12 +193,12 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr id="loan-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                    <tr id="loan-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td colspan="10" class="px-4 py-4">
                                             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Target Bank Account</p>
-                                                    <p class="mt-1 text-sm text-slate-700 font-medium">{{ $loan->bankAccount->bank_name ?? '-' }} ({{ $loan->bankAccount->account_number ?? 'No account assigned' }})</p>
+                                                    <p class="mt-1 text-sm text-slate-700 font-medium">{{ $loan->bankAccount?->bank_name ?? '-' }} ({{ $loan->bankAccount?->account_number ?? 'No account assigned' }})</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Purpose</p>
@@ -199,19 +214,23 @@
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved By</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->approvedBy->name ?? 'Not Approved' }}</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->approvedBy?->name ?? 'Not Approved' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Disbursement Date</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->disbursement_date?->format('d M Y') ?? 'Not Disbursed' }}</p>
+                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Expected Disbursement</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->disbursement_date?->format('d M Y') ?? 'Not set' }}</p>
+                                                </div>
+                                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Disbursement Status</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->is_disbursed ? 'Confirmed' : 'Not confirmed' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Maturity Date</p>
-                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->maturity_date->format('d M Y') }}</p>
+                                                    <p class="mt-1 text-sm text-slate-700">{{ $loan->maturity_date?->format('d M Y') ?? '-' }}</p>
                                                 </div>
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Interest Payable</p>
-                                                    <p class="mt-1 text-sm text-slate-700">TZS {{ number_format($loan->total_interest_payable) }}</p>
+                                                    <p class="mt-1 text-sm text-slate-700">TZS {{ number_format((float) ($loan->total_interest_payable ?? 0)) }}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -253,15 +272,15 @@
                                         $overdueCount = $installments->where('status', 'Overdue')->count();
                                         $nextDue = $installments->where('status', '!=', 'Paid')->sortBy('due_date')->first();
                                     @endphp
-                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                    <tr class="hover:bg-slate-50 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td class="px-4 py-3 mono text-xs text-slate-500">{{ $loan->code }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company->name ?? '-' }}</span>
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-700 border border-brand-100">{{ $loan->company?->name ?? '-' }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-right mono">{{ $installments->count() }}</td>
                                         <td class="px-4 py-3">
                                             @if ($nextDue)
-                                                {{ $nextDue->due_date->format('d M Y') }}
+                                                {{ $nextDue->due_date?->format('d M Y') ?? '-' }}
                                                 @if ($nextDue->status === 'Overdue')
                                                     <span class="ml-1 inline-flex px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 border border-red-200">Overdue</span>
                                                 @endif
@@ -272,7 +291,7 @@
                                         <td class="px-4 py-3 text-right mono text-green-700">{{ $paidCount }}</td>
                                         <td class="px-4 py-3 text-right mono text-yellow-700">{{ $pendingCount }}</td>
                                         <td class="px-4 py-3 text-right mono text-red-700">{{ $overdueCount }}</td>
-                                        <td class="px-4 py-3 text-right mono font-medium">TZS {{ number_format($loan->outstanding_balance) }}</td>
+                                        <td class="px-4 py-3 text-right mono font-medium">TZS {{ number_format((float) ($loan->outstanding_balance ?? 0)) }}</td>
                                         <td class="px-4 py-3">
                                             <div class="flex items-center justify-center">
                                                 <button type="button" onclick="toggleScheduleDetails('{{ $loan->id }}')"
@@ -289,7 +308,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr id="schedule-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company->name ?? '-' }}">
+                                    <tr id="schedule-details-{{ $loan->id }}" class="hidden bg-slate-50/70 loan-row" data-company="{{ $loan->company?->name ?? '-' }}">
                                         <td colspan="9" class="px-4 py-4">
                                             @if ($installments->isEmpty())
                                                 <p class="text-sm text-slate-500 px-2">No installments generated for this loan yet.</p>
@@ -310,10 +329,10 @@
                                                         @foreach ($installments as $installment)
                                                             <tr>
                                                                 <td class="px-3 py-2 text-right mono">{{ $installment->installment_number }}</td>
-                                                                <td class="px-3 py-2">{{ $installment->due_date->format('d M Y') }}</td>
-                                                                <td class="px-3 py-2 text-right mono">TZS {{ number_format($installment->principal_portion) }}</td>
-                                                                <td class="px-3 py-2 text-right mono">TZS {{ number_format($installment->interest_portion) }}</td>
-                                                                <td class="px-3 py-2 text-right mono font-medium">TZS {{ number_format($installment->total_installment) }}</td>
+                                                                <td class="px-3 py-2">{{ $installment->due_date?->format('d M Y') ?? '-' }}</td>
+                                                                <td class="px-3 py-2 text-right mono">TZS {{ number_format((float) ($installment->principal_portion ?? 0)) }}</td>
+                                                                <td class="px-3 py-2 text-right mono">TZS {{ number_format((float) ($installment->interest_portion ?? 0)) }}</td>
+                                                                <td class="px-3 py-2 text-right mono font-medium">TZS {{ number_format((float) ($installment->total_installment ?? 0)) }}</td>
                                                                 <td class="px-3 py-2">
                                                                     @if ($installment->status === 'Paid')
                                                                         <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 border border-green-200">Paid</span>
@@ -325,7 +344,7 @@
                                                                 </td>
                                                                 <td class="px-3 py-2">
                                                                     @if ($installment->status !== 'Paid')
-                                                                        <form action="{{ route('loans.schedule.mark-paid', $installment->id) }}" method="POST"
+                                                                        <form action="{{ url('/loans/schedule/'.$installment->id.'/mark-paid') }}" method="POST"
                                                                             onsubmit="return confirm('Mark installment #{{ $installment->installment_number }} as paid?');">
                                                                             @csrf
                                                                             @method('PATCH')
@@ -436,11 +455,46 @@
 
     @include('loans.modals.add-loan')
 
+    <form id="loanDisburseForm" method="POST" class="hidden">
+        @csrf
+    </form>
+
     @include('components.modal')
     @include('components.alert')
     @include('components.confirm')
 
     <script>
+        function confirmLoanDisburse(loan) {
+            if (!loan.hasBank) {
+                if (typeof openConfirm === 'function') {
+                    openConfirm({
+                        title: 'Bank account required',
+                        message: `Loan ${loan.code} has no receiving bank account. Assign one before disbursing.`,
+                        confirmText: 'OK',
+                        cancelText: 'Close',
+                        variant: 'warning',
+                        onConfirm: () => {},
+                    });
+                } else {
+                    alert(`Loan ${loan.code} has no receiving bank account.`);
+                }
+                return;
+            }
+
+            const amount = Number(loan.principal || 0).toLocaleString();
+            openConfirm({
+                title: 'Confirm disbursement',
+                message: `Confirm that ${loan.code} has been disbursed (expected ${loan.expectedDate})? TZS ${amount} will be credited to ${loan.bank}.`,
+                confirmText: 'Confirm & credit bank',
+                cancelText: 'Cancel',
+                variant: 'success',
+                onConfirm: () => {
+                    const form = document.getElementById('loanDisburseForm');
+                    form.action = `/loans/${loan.id}/disburse`;
+                    form.submit();
+                },
+            });
+        }
         const loanTabTitles = {
             register: 'Loan Register',
             schedule: 'Repayment Schedule',

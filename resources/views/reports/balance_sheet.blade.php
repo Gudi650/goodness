@@ -75,7 +75,7 @@
 
                 <td style="border:none; vertical-align:middle;">
                     <div style="font-weight:bold; font-size:14px;">
-                        Goodness Group
+                        {{ $reportCompanyName ?? 'All Companies' }}
                     </div>
                     <div style="font-size:12px; color:#666;">
                         Enterprise
@@ -210,7 +210,7 @@
             <td>Total Equity and Liabilities</td>
             <td class="amount">
                 {{ number_format(
-                    collect($equityLiabilities['equity'])->sum('amount')
+                    $totalEquity
                     + collect($nonCurrentLiabilities)->flatten(1)->sum('amount')
                     + collect($currentLiabilities)->flatten(1)->sum('amount'),
                     2)

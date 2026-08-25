@@ -44,7 +44,7 @@
         <div class="w-full lg:w-56">
           <label for="scope" class="block text-sm font-medium text-slate-700 mb-1">Report scope</label>
           <select id="scope" name="scope" class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm bg-white">
-            <option value="all" @selected($selectedScope === 'all')>Goodness Group {{-- all companies --}}</option>
+            <option value="all" @selected($selectedScope === 'all')>All Companies</option>
             <option value="company" @selected($selectedScope === 'company')>Single company</option>
           </select>
         </div>
@@ -52,15 +52,11 @@
         <div id="companyField" class="w-full lg:w-64 {{ $selectedScope === 'company' ? '' : 'hidden' }}">
           <label for="company_id" class="block text-sm font-medium text-slate-700 mb-1">Company</label>
           <select id="company_id" name="company_id" class="w-full px-3 py-2 border border-slate-200 rounded-md text-sm bg-white">
-
             @foreach ($companies as $company)
-              @if ($company->name !== 'Goodness Group' )
-
-                <option value="{{ $company->id }}" @selected((int) $selectedCompanyId === (int) $company->id)>{{ $company->name }}</option>
-
-              @endif
+              <option value="{{ $company->id }}" @selected((int) $selectedCompanyId === (int) $company->id)>
+                {{ $company->name === 'Goodness Group' ? 'Goodness Group (Parent)' : $company->name }}
+              </option>
             @endforeach
-
           </select>
         </div>
          {{-- Date Range --}}
@@ -136,26 +132,35 @@
       </div>
     </form>
 
-    @if (($reportType ?? 'expenses') === 'balance')
+    @php
+      $reportFilterQuery = \App\Support\ReportFilters::current()->queryString();
+      $reportFilterQs = $reportFilterQuery ? '?'.$reportFilterQuery : '';
+    @endphp
+    @if (($reportType ?? 'expenses') === 'expenses')
       <div class="flex flex-wrap gap-3 mb-6">
-        <a href="/balance-sheet" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Balance Sheet</a>
-        <a href="/balance_sheet" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Balance Sheet PDF</a>
+        <a href="/expense-report{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Expense Report</a>
+        <a href="/expense-report-export{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Expense Report PDF</a>
+      </div>
+    @elseif (($reportType ?? 'expenses') === 'balance')
+      <div class="flex flex-wrap gap-3 mb-6">
+        <a href="/balance-sheet{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Balance Sheet</a>
+        <a href="/balance_sheet{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Balance Sheet PDF</a>
       </div>
     @elseif (($reportType ?? 'expenses') === 'income')
       <div class="flex flex-wrap gap-3 mb-6">
-        <a href="/income-statement" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Income Statement</a>
-        <a href="/income-statement-export" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Income Statement PDF</a>
+        <a href="/income-statement{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Income Statement</a>
+        <a href="/income-statement-export{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Income Statement PDF</a>
       </div>
 
     @elseif (($reportType ?? '') === 'trial')
       <div class="flex flex-wrap gap-3 mb-6">
-        <a href="/trial-balance" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Trial Balance</a>
-        <a href="/trial-balance-export" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Trial Balance PDF</a>
+        <a href="/trial-balance{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Trial Balance</a>
+        <a href="/trial-balance-export{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Trial Balance PDF</a>
       </div>
     @elseif (($reportType ?? '') === 'cashflow')
       <div class="flex flex-wrap gap-3 mb-6">
-        <a href="/cash-flow" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Cash Flow Statement</a>
-        <a href="/cash-flow-export" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Cash Flow Statement PDF</a>
+        <a href="/cash-flow{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Cash Flow Statement</a>
+        <a href="/cash-flow-export{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Cash Flow Statement PDF</a>
       </div>
     @elseif (($reportType ?? '') === 'equity')
       <div class="flex flex-wrap gap-3 mb-6">

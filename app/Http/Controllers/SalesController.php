@@ -36,13 +36,14 @@ class SalesController extends Controller
         $activeCompanyId = session('active_company_id');
 
         //get teh authorised users for the company 
-        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser);
+        $isQualifiedUser = app(AccessControlService::class)->isCeoOrAdminOrAccountant($currentUser)
+            || ($currentUser?->role?->name === 'Manager' && $currentUser->company?->name === 'Goodness Group');
 
         $usersQuery = User::with('role', 'company', 'department');
 
-        if ($isQualifiedUser && !empty($activeCompanyId)) {
+        if (!empty($activeCompanyId)) {
             $usersQuery->where('company_id', $activeCompanyId);
-        } elseif ($currentUser) {
+        } elseif (!$isQualifiedUser && $currentUser) {
             $usersQuery->where('company_id', $currentUser->company_id);
         }
 
@@ -89,7 +90,7 @@ class SalesController extends Controller
         })->values()->toArray();
 
         //get the products
-        $products = Product::query()->orderByDesc('id')->get();
+        $products = $this->getProducts($isQualifiedUser, $activeCompanyId, $currentUser);
 
         return view('sales',[
             'companies' => $companes,
@@ -112,8 +113,8 @@ class SalesController extends Controller
         $customersQuery = Customer::query()
             ->with('company')
             ->with('assignedSalesRep')
-            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+            ->when(!empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(empty($activeCompanyId) && !$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
 
         $customers = $customersQuery->latest()->get();
 
@@ -126,13 +127,13 @@ class SalesController extends Controller
     {
         $productsQuery = Product::query()
             ->with('company')
-            ->when($isQualifiedUser && !empty($activeCompanyId), function ($query) use ($activeCompanyId) {
+            ->when(!empty($activeCompanyId), function ($query) use ($activeCompanyId) {
                 $query->where(function ($productQuery) use ($activeCompanyId) {
                     $productQuery->where('company_id', $activeCompanyId)
                         ->orWhereNull('company_id');
                 });
             })
-            ->when(!$isQualifiedUser && $currentUser, function ($query) use ($currentUser) {
+            ->when(empty($activeCompanyId) && !$isQualifiedUser && $currentUser, function ($query) use ($currentUser) {
                 $query->where(function ($productQuery) use ($currentUser) {
                     $productQuery->where('company_id', $currentUser->company_id)
                         ->orWhereNull('company_id');
@@ -147,8 +148,8 @@ class SalesController extends Controller
     public function getSuppliers($isQualifiedUser, $activeCompanyId, $currentUser)
     {
         $suppliersQuery = Supplier::query()
-            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+            ->when(!empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(empty($activeCompanyId) && !$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
 
         return $suppliersQuery->latest()->get();
     }
@@ -157,8 +158,8 @@ class SalesController extends Controller
     {
         $contractsQuery = Contract::query()
             ->with('company', 'manager')
-            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('contract_our_company', $activeCompanyId))
-            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('contract_our_company', $currentUser->company_id));
+            ->when(!empty($activeCompanyId), fn($query) => $query->where('contract_our_company', $activeCompanyId))
+            ->when(empty($activeCompanyId) && !$isQualifiedUser && $currentUser, fn($query) => $query->where('contract_our_company', $currentUser->company_id));
 
         return $contractsQuery->latest()->get();
     }
@@ -168,8 +169,8 @@ class SalesController extends Controller
     {
         $ordersQuery = Order::query()
             ->with('company', 'customer', 'salesRep', 'approvedBy', 'items')
-            ->when($isQualifiedUser && !empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
-            ->when(!$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
+            ->when(!empty($activeCompanyId), fn($query) => $query->where('company_id', $activeCompanyId))
+            ->when(empty($activeCompanyId) && !$isQualifiedUser && $currentUser, fn($query) => $query->where('company_id', $currentUser->company_id));
 
         $orders = $ordersQuery->latest()->get();
 

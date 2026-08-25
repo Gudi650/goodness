@@ -4,6 +4,7 @@ namespace App\Services\Finance\BalanceSheet;
 
 use App\Models\Product;
 use App\Models\VirtualAccounts;
+use App\Support\ReportFilters;
 
 class CurrentAssetsService
 {
@@ -37,8 +38,9 @@ class CurrentAssetsService
     protected function getCashAndBankBalances()
     {
         //get the cash and bank balances from the virtual bank table
-        $cashAndBankBalances = VirtualAccounts::where('balance', '>', 0)
-            ->get()
+        $cashQuery = VirtualAccounts::where('balance', '>', 0);
+        ReportFilters::current()->applyCompany($cashQuery);
+        $cashAndBankBalances = $cashQuery->get()
             ->map(function ($account) {
                 return [
                     'name' => $account->account_name,
@@ -55,8 +57,9 @@ class CurrentAssetsService
     protected function getInventoryAssets()
     {
         //get the inventory assets from the products table
-        $inventoryAssets = Product::where('stock', '>', 0)
-            ->get()
+        $inventoryQuery = Product::where('stock', '>', 0);
+        ReportFilters::current()->applyCompany($inventoryQuery);
+        $inventoryAssets = $inventoryQuery->get()
             ->map(function ($product) {
                 return [
                     'name' => $product->name,
