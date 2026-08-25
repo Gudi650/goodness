@@ -170,9 +170,16 @@ class ReportFilters
         $period = $this->dateFilter;
 
         if ($period === 'custom' || $period === 'custome') {
+            $start = $this->startDate ? Carbon::parse($this->startDate)->toDateString() : null;
+            $end = $this->endDate ? Carbon::parse($this->endDate)->toDateString() : null;
+
+            if ($start && $end && Carbon::parse($start)->greaterThan(Carbon::parse($end))) {
+                [$start, $end] = [$end, $start];
+            }
+
             return [
-                $this->startDate ? Carbon::parse($this->startDate)->toDateString() : null,
-                $this->endDate ? Carbon::parse($this->endDate)->toDateString() : null,
+                $start,
+                $end,
             ];
         }
 

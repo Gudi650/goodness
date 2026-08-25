@@ -318,3 +318,40 @@ test('cash flow custom range with no matching transactions returns zero values',
         ->and($data['supplemental']['Bank transaction net movement'][0])->toBe(0.0)
         ->and($data['years'][0]['net_change'])->toBe(0.0);
 });
+
+test('cash flow custom range with reversed dates is normalized safely', function () {
+    $company = Company::query()->create(['name' => 'Mining', 'country' => 'TZ', 'status' => 'Active']);
+
+    ReportFilters::boot(request()->merge([
+        'scope' => 'company',
+        'company_id' => $company->id,
+        'date_filter' => 'custom',
+        'start_date' => '2026-12-24',
+        'end_date' => '2026-12-23',
+    ]));
+
+    $data = app(CashFlowReportService::class)->build();
+
+    expect($data['years'])->toHaveCount(1)
+        ->and($data['years'][0]['date_label'])->toBe('December 31, 2026')
+        ->and($data['operatingChanges']['Cash invoices received'][0])->toBe(0.0)
+        ->and($data['supplemental']['Bank transaction net movement'][0])->toBe(0.0)
+        ->and($data['years'][0]['net_change'])->toBe(0.0);
+});
+
+test('cash flow all-company custom range ignores active company session scope', function () {
+    $company = Company::query()->create(['name' => 'Mining', 'country' => 'TZ', 'status' => 'Active']);
+    session(['active_company_id' => $company->id]);
+
+    ReportFilters::boot(request()->merge([
+        'scope' => 'all',
+        'date_filter' => 'custom',
+        'start_date' => '2026-12-01',
+        'end_date' => '2026-12-23',
+    ]));
+
+    $data = app(CashFlowReportService::class)->build();
+
+    expect($data['years'])->toHaveCount(1)
+        ->and($data['years'][0]['date_label'])->toBe('December 31, 2026');
+});
