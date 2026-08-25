@@ -47,7 +47,7 @@ class balanceSheetController extends Controller
 
         $depreciationValue = $this->getDepreciationValue();
 
-        $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings, $depreciationValue);
+        $otherEquity = $this->getOtherEquity($companyId, $shareCapital, $retainedEarnings);
 
         //get other assets
         $otherAssets = $this->getAssets();
@@ -77,7 +77,7 @@ class balanceSheetController extends Controller
             'equity' => [
                 ['name' => 'Share Capital', 'amount' => $shareCapital],
                 ['name' => 'Retained Earnings', 'amount' => $retainedEarnings],
-                ['name' => 'Depreciation', 'amount' => $depreciationValue],
+                //['name' => 'Depreciation', 'amount' => $depreciationValue],
                 ['name' => 'Total Equity', 'amount' => $otherEquity],
             ]
         ];
@@ -162,8 +162,11 @@ class balanceSheetController extends Controller
         //get the net income from the net income service
         $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
 
+        //get the depreciation value
+        $depreciationValue = $this->getDepreciationValue();
+
         //get the retained earnings by subtracting the dividends paid from the net income
-        $retainedEarnings = $netIncome - $dividends;
+        $retainedEarnings = $netIncome - $dividends - $depreciationValue;
 
         return (float) $retainedEarnings;
     }
@@ -195,9 +198,9 @@ class balanceSheetController extends Controller
         return (float) $query->sum('amount');
     }
 
-    protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0, float $depreciationValue = 0): float
+    protected function getOtherEquity(?int $companyId = null, float $shareCapital = 0, float $retainedEarnings = 0): float
     {
-        return (float) ($shareCapital + $retainedEarnings - $depreciationValue);
+        return (float) ($shareCapital + $retainedEarnings );
     }
 
         //function to get the dividends paid to shareholders from the dividends table in the database
