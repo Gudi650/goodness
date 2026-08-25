@@ -14,6 +14,7 @@ use App\Models\LoanRepaymentSchedule;
 use App\Models\SharePremuims;
 use App\Models\VirtualAccounts;
 use App\Services\Finance\AssetDisposalService;
+use App\Support\ReportFilters;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,8 +22,11 @@ class CashFlowReportService
 {
     public function build(): array
     {
-        $companyId = session('active_company_id') ?? Auth::user()?->company_id;
-        $years = [now()->year, now()->subYear()->year, now()->subYears(2)->year];
+        ReportFilters::boot();
+
+        $filters = ReportFilters::current();
+        $companyId = $filters->resolveCompanyId() ?? session('active_company_id') ?? Auth::user()?->company_id;
+        $years = $this->resolveReportYears($filters);
 
         return [
             'companyName' => $this->resolveCompanyName($companyId),
@@ -36,7 +40,6 @@ class CashFlowReportService
             ],
             'operatingChanges' => [
                 'Cash invoices received' => $this->series(fn (int $year) => $this->invoiceCashInflows($companyId, $year), $years),
-                // 'Issued expenses paid' => $this->series(fn (int $year) => $this->expenseCashOutflows($companyId, $year), $years),
                 'Loan interest paid' => $this->series(fn (int $year) => $this->loanInterestOutflows($companyId, $year), $years),
             ],
             'investingActivities' => [
@@ -54,6 +57,26 @@ class CashFlowReportService
                 'Closing cash by virtual accounts' => $this->series(fn (int $year) => $this->closingCash($companyId, $year), $years),
             ],
         ];
+    }
+
+    protected function resolveReportYears(ReportFilters $filters): array
+    {
+        [$start, $end] = $filters->dateBounds();
+
+        if (! $start || ! $end) {
+            return [now()->year, now()->subYear()->year, now()->subYears(2)->year];
+        }
+
+        $startYear = Carbon::parse($start)->year;
+        $endYear = Carbon::parse($end)->year;
+
+        if ($startYear !== $endYear) {
+            $years = range($startYear, $endYear);
+
+            return $years;
+        }
+
+        return [$endYear];
     }
 
     protected function buildYearRow(?int $companyId, int $year): array
@@ -90,13 +113,71 @@ class CashFlowReportService
         return Company::query()->whereKey($companyId)->value('name') ?: 'Company';
     }
 
+    protected function isCustomDateRange(): bool
+    {
+        $filters = ReportFilters::current();
+
+        return in_array($filters->dateFilter, ['custom', 'custome'], true)
+            && filled($filters->startDate)
+            && filled($filters->endDate);
+    }
+
+    protected function hasCustomRangeData(?int $companyId): bool
+    {
+        if (! $this->isCustomDateRange()) {
+            return true;
+        }
+
+        [$start, $end] = ReportFilters::current()->dateBounds();
+
+        $checkQueries = [
+            ['query' => Invoice::query()->where('status', 'paid'), 'column' => 'invoice_date'],
+            ['query' => Expense::query()->where('status', 'issued'), 'column' => 'expense_date'],
+            ['query' => LoanRepaymentSchedule::query()->where('status', 'Paid'), 'column' => 'updated_at'],
+            ['query' => Loan::query()->where('is_disbursed', true), 'column' => 'disbursement_date'],
+            ['query' => Dividends::query()->where('status', 'Declared'), 'column' => 'paid_at'],
+            ['query' => SharePremuims::query(), 'column' => 'created_at'],
+            ['query' => AssetRevaluation::query(), 'column' => 'date_of_revaluation'],
+            ['query' => BankTransactions::query(), 'column' => 'created_at'],
+        ];
+
+        foreach ($checkQueries as $item) {
+            $query = $item['query'];
+
+            if ($companyId) {
+                $query->where('company_id', $companyId);
+            } else {
+                ReportFilters::current()->applyCompany($query);
+            }
+
+            if ($item['column']) {
+                $query->whereDate($item['column'], '>=', $start)
+                    ->whereDate($item['column'], '<=', $end);
+            }
+
+            if ($query->exists()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     protected function openingCash(?int $companyId, int $year): float
     {
+        if ($this->isCustomDateRange() && ! $this->hasCustomRangeData($companyId)) {
+            return 0.0;
+        }
+
         return $this->closingCash($companyId, $year - 1);
     }
 
     protected function closingCash(?int $companyId, int $year): float
     {
+        if ($this->isCustomDateRange() && ! $this->hasCustomRangeData($companyId)) {
+            return 0.0;
+        }
+
         $query = VirtualAccounts::query()
             ->when($companyId, fn ($builder) => $builder->where('company_id', $companyId));
 
@@ -105,6 +186,10 @@ class CashFlowReportService
 
     protected function bankNetMovement(?int $companyId, int $year): float
     {
+        if ($this->isCustomDateRange() && ! $this->hasCustomRangeData($companyId)) {
+            return 0.0;
+        }
+
         $query = BankTransactions::query()
             ->when($companyId, fn ($builder) => $builder->where('company_id', $companyId))
             ->whereYear('created_at', $year)
@@ -115,18 +200,29 @@ class CashFlowReportService
 
     protected function operatingCashFlow(?int $companyId, int $year): float
     {
+        if ($this->isCustomDateRange() && ! $this->hasCustomRangeData($companyId)) {
+            return 0.0;
+        }
+
         return $this->invoiceCashInflows($companyId, $year)
-            - $this->expenseCashOutflows($companyId, $year)
             - $this->loanInterestOutflows($companyId, $year);
     }
 
     protected function investingCashFlow(?int $companyId, int $year): float
     {
+        if ($this->isCustomDateRange() && ! $this->hasCustomRangeData($companyId)) {
+            return 0.0;
+        }
+
         return $this->assetDisposals($companyId, $year) - $this->assetPurchases($companyId, $year);
     }
 
     protected function financingCashFlow(?int $companyId, int $year): float
     {
+        if ($this->isCustomDateRange() && ! $this->hasCustomRangeData($companyId)) {
+            return 0.0;
+        }
+
         return $this->loanDisbursements($companyId, $year)
             - $this->loanPrincipalRepayments($companyId, $year)
             - $this->dividendsPaid($companyId, $year)
@@ -135,37 +231,70 @@ class CashFlowReportService
 
     protected function netIncome(?int $companyId, int $year): float
     {
+        if ($this->isCustomDateRange() && ! $this->hasCustomRangeData($companyId)) {
+            return 0.0;
+        }
+
         return (float) app(\App\Services\NetIncome::class)->calculateNetIncome($companyId, $year);
+    }
+
+    protected function applyReportDateAndCompanyScope($query, ?int $companyId, string $dateColumn, ?int $year = null)
+    {
+        $filters = ReportFilters::current();
+
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        } else {
+            $filters->applyCompany($query);
+        }
+
+        [$start, $end] = $filters->dateBounds();
+
+        if (($filters->dateFilter === 'custom' || $filters->dateFilter === 'custome') && $start && $end) {
+            $query->whereDate($dateColumn, '>=', $start)
+                ->whereDate($dateColumn, '<=', $end);
+
+            return $query;
+        }
+
+        if ($year !== null) {
+            $query->whereYear($dateColumn, $year);
+        }
+
+        return $query;
     }
 
     protected function invoiceCashInflows(?int $companyId, int $year): float
     {
-        $query = Invoice::query()->where('status', 'paid')->whereYear('invoice_date', $year);
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $query = Invoice::query()->where('status', 'paid');
+        $this->applyReportDateAndCompanyScope($query, $companyId, 'invoice_date', $year);
 
         return (float) $query->get()->sum(fn (Invoice $invoice) => (float) ($invoice->total_amount ?? 0) - (float) ($invoice->tax_amount ?? 0));
     }
 
     protected function expenseCashOutflows(?int $companyId, int $year): float
     {
-        $query = Expense::query()->where('status', 'issued')->whereYear('expense_date', $year);
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $query = Expense::query()->where('status', 'issued');
+        $this->applyReportDateAndCompanyScope($query, $companyId, 'expense_date', $year);
 
         return (float) $query->sum('net_amount');
     }
 
     protected function loanInterestOutflows(?int $companyId, int $year): float
     {
-        $query = LoanRepaymentSchedule::query()->where('status', 'Paid')->whereYear('updated_at', $year);
+        $query = LoanRepaymentSchedule::query()->where('status', 'Paid');
 
         if ($companyId) {
             $query->whereHas('loan', fn ($loanQuery) => $loanQuery->where('company_id', $companyId));
+        } else {
+            ReportFilters::current()->applyCompany($query, 'loan_id');
+        }
+
+        [$start, $end] = ReportFilters::current()->dateBounds();
+        if ((ReportFilters::current()->dateFilter === 'custom' || ReportFilters::current()->dateFilter === 'custome') && $start && $end) {
+            $query->whereBetween('updated_at', [$start . ' 00:00:00', $end . ' 23:59:59']);
+        } else {
+            $query->whereYear('updated_at', $year);
         }
 
         return (float) $query->sum('interest_portion');
@@ -173,11 +302,8 @@ class CashFlowReportService
 
     protected function assetPurchases(?int $companyId, int $year): float
     {
-        $query = CreateAssets::query()->whereYear('acquired', $year);
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $query = CreateAssets::query();
+        $this->applyReportDateAndCompanyScope($query, $companyId, 'acquired', $year);
 
         return (float) $query->sum('current_value');
     }
@@ -189,18 +315,31 @@ class CashFlowReportService
 
     protected function loanDisbursements(?int $companyId, int $year): float
     {
-        $query = Loan::query()
-            ->where('is_disbursed', true)
-            ->where(function ($builder) use ($year) {
+        $query = Loan::query()->where('is_disbursed', true);
+
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        } else {
+            ReportFilters::current()->applyCompany($query);
+        }
+
+        [$start, $end] = ReportFilters::current()->dateBounds();
+        if ((ReportFilters::current()->dateFilter === 'custom' || ReportFilters::current()->dateFilter === 'custome') && $start && $end) {
+            $query->where(function ($builder) use ($start, $end) {
+                $builder->whereBetween('disbursement_date', [$start, $end])
+                    ->orWhere(function ($fallback) use ($start, $end) {
+                        $fallback->whereNull('disbursement_date')
+                            ->whereBetween('updated_at', [$start . ' 00:00:00', $end . ' 23:59:59']);
+                    });
+            });
+        } else {
+            $query->where(function ($builder) use ($year) {
                 $builder->whereYear('disbursement_date', $year)
                     ->orWhere(function ($fallback) use ($year) {
                         $fallback->whereNull('disbursement_date')
                             ->whereYear('updated_at', $year);
                     });
             });
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
         }
 
         return (float) $query->sum('principal');
@@ -208,10 +347,19 @@ class CashFlowReportService
 
     protected function loanPrincipalRepayments(?int $companyId, int $year): float
     {
-        $query = LoanRepaymentSchedule::query()->where('status', 'Paid')->whereYear('updated_at', $year);
+        $query = LoanRepaymentSchedule::query()->where('status', 'Paid');
 
         if ($companyId) {
             $query->whereHas('loan', fn ($loanQuery) => $loanQuery->where('company_id', $companyId));
+        } else {
+            ReportFilters::current()->applyCompany($query, 'loan_id');
+        }
+
+        [$start, $end] = ReportFilters::current()->dateBounds();
+        if ((ReportFilters::current()->dateFilter === 'custom' || ReportFilters::current()->dateFilter === 'custome') && $start && $end) {
+            $query->whereBetween('updated_at', [$start . ' 00:00:00', $end . ' 23:59:59']);
+        } else {
+            $query->whereYear('updated_at', $year);
         }
 
         return (float) $query->sum('principal_portion');
@@ -219,44 +367,32 @@ class CashFlowReportService
 
     protected function dividendsPaid(?int $companyId, int $year): float
     {
-        $query = Dividends::query()->where('status', 'Declared')->whereYear('paid_at', $year);
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $query = Dividends::query()->where('status', 'Declared');
+        $this->applyReportDateAndCompanyScope($query, $companyId, 'paid_at', $year);
 
         return (float) $query->sum('amount');
     }
 
     protected function sharePremiumInflows(?int $companyId, int $year): float
     {
-        $query = SharePremuims::query()->whereYear('created_at', $year);
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $query = SharePremuims::query();
+        $this->applyReportDateAndCompanyScope($query, $companyId, 'created_at', $year);
 
         return (float) $query->sum('total_premium');
     }
 
     protected function assetRevaluationSurplus(?int $companyId, int $year): float
     {
-        $query = AssetRevaluation::query()->whereYear('date_of_revaluation', $year);
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $query = AssetRevaluation::query();
+        $this->applyReportDateAndCompanyScope($query, $companyId, 'date_of_revaluation', $year);
 
         return (float) $query->sum('surplus');
     }
 
     protected function depreciationAndAmortization(?int $companyId, int $year): float
     {
-        $query = CreateAssets::query()->whereYear('acquired', '<=', $year);
-
-        if ($companyId) {
-            $query->where('company_id', $companyId);
-        }
+        $query = CreateAssets::query();
+        $this->applyReportDateAndCompanyScope($query, $companyId, 'acquired', $year);
 
         return (float) $query->sum('depreciation_value');
     }

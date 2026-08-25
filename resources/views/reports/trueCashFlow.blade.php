@@ -118,7 +118,7 @@
         <tr>
             <th width="40%" style="text-align:left;">Particulars</th>
             @foreach($years as $year)
-                <th width="20%">{{ $year['date_label'] }}</th>
+                <th width="20%">Amount</th>
             @endforeach
         </tr>
 
