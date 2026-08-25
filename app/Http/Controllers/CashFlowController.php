@@ -188,10 +188,8 @@ class CashFlowController extends Controller
         $dividends = $this->getDividendsPaid($companyId, $year);
         $netIncome = $this->calculateNetIncomeForYear($companyId, $year);
 
-        //get depreciation
-        $depreciationValue = $this->getDepreciationValue();
 
-        return (float) ($netIncome - $dividends - $depreciationValue);
+        return (float) ($netIncome - $dividends);
     }
 
     protected function getRevaluationSurplus(?int $companyId = null, ?int $year = null)
@@ -214,15 +212,5 @@ class CashFlowController extends Controller
         return app(NetIncome::class)->calculateNetIncome($companyId, $year);
     }
     
-            //get depreciation value of all assets
-            protected function getDepreciationValue(): float
-            {
-               $query = CreateAssets::where('current_value', '>', 0);
-               ReportFilters::current()->applyCompany($query);
-               $depreciationValue = $query->get()->sum(function ($asset) {
-                   return (float) ($asset->original_value - $asset->current_value);
-               });
-               return $depreciationValue;
-            }
 
 }
