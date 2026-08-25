@@ -25,16 +25,11 @@ class TrialBalanceController extends Controller
     {
         ReportFilters::boot();
 
-        // get the Non current liabilities data from service file
+        // Balance sheet services already apply loan_type rules (external liability,
+        // inter-company receivable/liability, employee receivable; IC eliminated on "all").
         $nonCurrentLiabilities = app(NonCurrentLiabilitiesService::class)->getNonCurrentLiabilities();
-
-        // get the current liabilities data from service file
         $currentLiabilities = app(CurrentLiabilitiesService::class)->getCurrentLiabilities();
-
-        // get the current assets data from service file
         $currentAssets = app(CurrentAssetsService::class)->getCurrentAssets();
-
-        // get the non current assets data from service file
         $nonCurrentAssets = app(NonCurrentAssetsService::class)->getNonCurrentAssets();
 
 

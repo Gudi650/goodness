@@ -59,6 +59,7 @@
 
             {{-- loop through non current assets --}}
             @foreach ($nonCurrentAssets as $type => $items)
+                @continue(collect($items)->isEmpty())
                 <tr>
                     <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>
@@ -84,6 +85,7 @@
 
             {{-- loop through other assets --}}
             @foreach ($otherAssets as $type => $items)
+                @continue(collect($items)->isEmpty())
                 <tr>
                     <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>
@@ -108,9 +110,9 @@
 
 
 
-            {{-- loop through current assets --}}
+            {{-- loop through current assets (includes loan receivables by loan_type) --}}
             @foreach ($currentAssets as $type => $items)
-
+                @continue(collect($items)->isEmpty())
                 <tr>
                     <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>
@@ -136,10 +138,11 @@
 
             
 
-            {{-- loop through current liabilities --}}
+            {{-- loop through current liabilities (external + intercompany borrower only) --}}
             @foreach ($currentLiabilities as $type => $items)
+                @continue(collect($items)->isEmpty())
                 <tr>
-                    <td>{{ $items->first()['name'] ?? ucfirst(str_replace('_', ' ', $type)) }}</td>
+                    <td>{{ collect($items)->first()['name'] ?? ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>
 
                     {{-- Debit column --}}
@@ -163,6 +166,7 @@
 
             {{-- loop through non current liabilities --}}
             @foreach ($nonCurrentLiabilities as $type => $items)
+                @continue(collect($items)->isEmpty())
                 <tr>
                     <td>{{ ucfirst(str_replace('_', ' ', $type)) }}</td>
                     <td class="text-center"></td>

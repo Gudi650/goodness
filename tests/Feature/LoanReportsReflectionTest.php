@@ -280,6 +280,53 @@ test('balance sheet maps intercompany and employee loans by type without double 
         ->and((float) $allLiab->sum('amount'))->toBe(0.0);
 });
 
+test('trial balance loan sections follow the same loan_type asset and liability rules', function () {
+    $lender = Company::query()->create(['name' => 'TB Lender', 'country' => 'TZ', 'status' => 'Active']);
+    $borrower = Company::query()->create(['name' => 'TB Borrower', 'country' => 'TZ', 'status' => 'Active']);
+
+    Loan::query()->create([
+        'company_id' => $lender->id,
+        'loan_type' => 'intercompany',
+        'counterparty_company_id' => $borrower->id,
+        'code' => 'LN-TB-IC',
+        'lender' => $lender->name,
+        'principal' => 700,
+        'is_disbursed' => true,
+        'outstanding_balance' => 700,
+        'start_date' => '2026-01-01',
+        'maturity_date' => '2026-12-01',
+        'status' => 'Active',
+    ]);
+    Loan::query()->create([
+        'company_id' => $borrower->id,
+        'loan_type' => 'external_borrow',
+        'code' => 'LN-TB-EXT',
+        'lender' => 'CRDB',
+        'principal' => 300,
+        'is_disbursed' => true,
+        'outstanding_balance' => 300,
+        'start_date' => '2026-01-01',
+        'maturity_date' => '2026-12-01',
+        'status' => 'Active',
+    ]);
+
+    // Same services TrialBalanceController::reportData() uses for BS lines.
+    ReportFilters::reset();
+    ReportFilters::boot(request()->merge(['scope' => 'company', 'company_id' => $lender->id]));
+    $tbLenderDr = (float) app(CurrentAssetsService::class)->getCurrentAssets()['loan_receivables']->sum('amount');
+    $tbLenderCr = (float) app(CurrentLiabilitiesService::class)->getCurrentLiabilities()['short_term_loans']->sum('amount');
+
+    ReportFilters::reset();
+    ReportFilters::boot(request()->merge(['scope' => 'company', 'company_id' => $borrower->id]));
+    $tbBorrowerDr = (float) app(CurrentAssetsService::class)->getCurrentAssets()['loan_receivables']->sum('amount');
+    $tbBorrowerCr = (float) app(CurrentLiabilitiesService::class)->getCurrentLiabilities()['short_term_loans']->sum('amount');
+
+    expect($tbLenderDr)->toBe(700.0)
+        ->and($tbLenderCr)->toBe(0.0)
+        ->and($tbBorrowerDr)->toBe(0.0)
+        ->and($tbBorrowerCr)->toBe(1000.0); // 700 IC liability + 300 external
+});
+
 test('cash flow disbursements count only confirmed is_disbursed loans', function () {
     $company = Company::query()->create(['name' => 'Mining', 'country' => 'TZ', 'status' => 'Active']);
 
