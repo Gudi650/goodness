@@ -164,8 +164,8 @@
       </div>
     @elseif (($reportType ?? '') === 'equity')
       <div class="flex flex-wrap gap-3 mb-6">
-        <a href="/equity-statement" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Equity Statement</a>
-        <a href="/equity-statement-export" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Equity Statement PDF</a>
+        <a href="/equity-statement{{ $reportFilterQs }}" class="px-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700">Preview Equity Statement</a>
+        <a href="/equity-statement-export{{ $reportFilterQs }}" class="px-4 py-2 bg-brand-600 text-white rounded-md text-sm">Export Equity Statement PDF</a>
       </div>
     @endif
 

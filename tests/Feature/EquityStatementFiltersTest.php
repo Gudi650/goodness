@@ -63,6 +63,18 @@ beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('create_assets', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('company_id')->nullable();
+        $table->string('status')->default('Active');
+        $table->decimal('original_value', 20, 2)->default(0);
+        $table->decimal('current_value', 20, 2)->default(0);
+        $table->date('disposal_date')->nullable();
+        $table->decimal('disposal_proceeds', 20, 2)->nullable();
+        $table->decimal('disposal_carrying_value', 20, 2)->nullable();
+        $table->timestamps();
+    });
+
     Schema::create('invoices', function (Blueprint $table) {
         $table->id();
         $table->unsignedBigInteger('company_id')->nullable();
@@ -118,7 +130,7 @@ beforeEach(function () {
 afterEach(function () {
     foreach ([
         'loan_repayment_schedules', 'loans', 'expenses', 'invoices',
-        'asset_revaluations', 'dividends', 'share_premuims',
+        'create_assets', 'asset_revaluations', 'dividends', 'share_premuims',
         'equity_distributions', 'companies',
     ] as $table) {
         Schema::dropIfExists($table);

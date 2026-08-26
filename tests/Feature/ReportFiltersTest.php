@@ -209,3 +209,21 @@ test('company and period filters combine', function () {
     $response->assertViewHas('totals', fn ($totals) => (int) $totals['expense_count'] === 1 && (float) $totals['gross_amount'] === 1000.0);
     $response->assertViewHas('expenseRows', fn ($rows) => $rows->count() === 1 && $rows->first()['expense_number'] === 'EXP-A-AUG');
 });
+
+test('equity preview and export links include company filter query string', function () {
+    $company = Company::query()->create(['name' => 'Goodness Mining', 'country' => 'TZ', 'revenue' => 0, 'status' => 'Active']);
+    $user = makeAdminUser($company);
+
+    $response = $this->actingAs($user)->post(route('reports'), [
+        'report_type' => 'equity',
+        'scope' => 'company',
+        'company_id' => $company->id,
+        'date_filter' => 'this_year',
+    ]);
+
+    $response->assertOk();
+    $response->assertSee('/equity-statement?', false);
+    $response->assertSee('company_id='.$company->id, false);
+    $response->assertSee('scope=company', false);
+    $response->assertSee('/equity-statement-export?', false);
+});
