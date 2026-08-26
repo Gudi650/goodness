@@ -141,8 +141,6 @@
                         <td class="amount">
                             @if(is_null($value))
                                 &nbsp;
-                            @elseif($value < 0)
-                                ({{ number_format(abs($value)) }})
                             @else
                                 {{ number_format($value) }}
                             @endif
