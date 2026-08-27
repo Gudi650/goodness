@@ -11,7 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class IncomeStatement extends Controller
 {
-    private function reportData(): array
+    public function reportData(): array
     {
         ReportFilters::boot();
 

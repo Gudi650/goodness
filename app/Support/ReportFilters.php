@@ -24,8 +24,31 @@ class ReportFilters
         return self::$instance ??= self::fromSession();
     }
 
+    /**
+     * Set filters without an HTTP request (used by the weekly CEO mailer).
+     */
+    public static function use(
+        string $scope = 'all',
+        ?int $companyId = null,
+        string $dateFilter = 'this_year',
+        ?string $startDate = null,
+        ?string $endDate = null,
+    ): self {
+        return self::$instance = new self(
+            scope: $scope,
+            companyId: $companyId,
+            dateFilter: $dateFilter,
+            startDate: $startDate,
+            endDate: $endDate,
+        );
+    }
+
     public static function boot(?Request $request = null): self
     {
+        if (app()->runningInConsole() && self::$instance !== null) {
+            return self::$instance;
+        }
+
         $request ??= request();
 
         $scopeFromRequest = $request->string('scope')->toString();
