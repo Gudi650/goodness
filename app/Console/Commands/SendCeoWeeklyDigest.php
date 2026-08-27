@@ -28,11 +28,11 @@ class SendCeoWeeklyDigest extends Command
 
         foreach ($ceos as $ceo) {
             //for testing purposes, send to myself
-            Mail::to('godluckmsangi3@gmail.com')->send(new CeoWeeklyDigest($digest, $pdfs));
-            $this->info("Sent to godluckmsangi3@gmail.com");
+           // Mail::to('godluckmsangi3@gmail.com')->send(new CeoWeeklyDigest($digest, $pdfs));
+            //$this->info("Sent to godluckmsangi3@gmail.com");
 
-            //Mail::to($ceo->email)->send(new CeoWeeklyDigest($digest, $pdfs));
-            //$this->info("Sent to {$ceo->email}");
+            Mail::to($ceo->email)->send(new CeoWeeklyDigest($digest, $pdfs));
+            $this->info("Sent to {$ceo->email}");
         }
 
         return self::SUCCESS;
