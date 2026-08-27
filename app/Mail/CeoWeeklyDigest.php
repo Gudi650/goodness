@@ -39,6 +39,7 @@ class CeoWeeklyDigest extends Mailable
             markdown: 'mail.ceo-weekly-digest',
             with: [
                 'digest' => $this->digest,
+                'pdfs' => $this->pdfs,
             ],
         );
     }
