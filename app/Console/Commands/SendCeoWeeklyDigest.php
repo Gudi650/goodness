@@ -27,8 +27,12 @@ class SendCeoWeeklyDigest extends Command
         $pdfs = $digestService->pdfs();
 
         foreach ($ceos as $ceo) {
-            Mail::to($ceo->email)->send(new CeoWeeklyDigest($digest, $pdfs));
-            $this->info("Sent to {$ceo->email}");
+            //for testing purposes, send to myself
+            Mail::to('godluckmsangi3@gmail.com')->send(new CeoWeeklyDigest($digest, $pdfs));
+            $this->info("Sent to godluckmsangi3@gmail.com");
+
+            //Mail::to($ceo->email)->send(new CeoWeeklyDigest($digest, $pdfs));
+            //$this->info("Sent to {$ceo->email}");
         }
 
         return self::SUCCESS;
