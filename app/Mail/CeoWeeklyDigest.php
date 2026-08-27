@@ -29,7 +29,7 @@ class CeoWeeklyDigest extends Mailable
         $end = $this->digest['week_end'] ?? '';
 
         return new Envelope(
-            subject: "Weekly briefing — {$start} to {$end}",
+            subject: "Goodness Group — Weekly Executive Briefing ({$start} – {$end})",
         );
     }
 
