@@ -33,7 +33,11 @@
     <table class="no-border" style="margin-bottom:0;">
         <tr>
             <td style="width:50px; vertical-align:middle;">
-                <img src="{{ public_path('favicon.png') }}" alt="Logo" style="width:40px; height:40px;">
+                @if (!empty($showActions))
+                    <img src="{{ asset('favicon.png') }}" alt="Logo" style="width:40px; height:40px;">
+                @elseif (function_exists('imagecreatefrompng') && is_file(public_path('favicon.png')))
+                    <img src="{{ public_path('favicon.png') }}" alt="Logo" style="width:40px; height:40px;">
+                @endif
             </td>
             <td style="vertical-align:middle;">
                 <div style="font-weight:bold; font-size:14px;">

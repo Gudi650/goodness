@@ -10,5 +10,5 @@ Artisan::command('inspire', function () {
 
 //schedule ceo weekly digest
 Schedule::command('ceo:send-weekly-digest')
-    ->weeklyOn(5, '07:00')
+    ->weeklyOn(1, '07:00')
     ->timezone('Africa/Dar_es_Salaam');

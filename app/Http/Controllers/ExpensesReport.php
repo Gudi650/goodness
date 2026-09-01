@@ -19,8 +19,11 @@ class ExpensesReport extends Controller
     {
         $data = $this->reportData($request) + ['showActions' => false];
 
+        ini_set('memory_limit', '256M');
+        set_time_limit(120);
+
         return Pdf::loadView('reports.expenses', $data)
-            ->setPaper('a4', 'portrait')
+            ->setPaper('a4', 'landscape')
             ->download('expense_report.pdf');
     }
 
